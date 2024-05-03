@@ -1,4 +1,4 @@
-import io.spine.internal.gradle.standardRepositories
+import io.spine.internal.gradle.standardToSpineSdk
 
 plugins {
     kotlin("jvm")
@@ -9,7 +9,7 @@ allprojects {
     version = extra["pinghVersion"]!!
     group = "io.spine.examples"
 
-    repositories.standardRepositories()
+    repositories.standardToSpineSdk()
 }
 
 subprojects {
