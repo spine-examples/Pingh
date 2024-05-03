@@ -1,4 +1,4 @@
-import io.spine.internal.gradle.standardToSpineSdk
+import io.spine.internal.standardToSpineSdk
 
 plugins {
     kotlin("jvm")

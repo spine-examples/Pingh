@@ -1,4 +1,4 @@
-package io.spine.internal.gradle
+package io.spine.internal
 
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository

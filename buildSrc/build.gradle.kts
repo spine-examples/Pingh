@@ -4,14 +4,14 @@ plugins {
 }
 
 repositories {
-    gradlePluginPortal()
     mavenCentral()
+    gradlePluginPortal()
 }
 
 /**
  * The version of the Kotlin Gradle plugin.
  */
-val kotlinVersion = "1.8.22"
+val kotlinVersion = "1.4.20"
 
 configurations.all {
     resolutionStrategy {
