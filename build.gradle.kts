@@ -1,4 +1,3 @@
-import io.spine.internal.dependency.Pingh
 import io.spine.internal.gradle.standardRepositories
 
 plugins {
@@ -8,7 +7,7 @@ plugins {
 allprojects {
     apply(from = "$rootDir/version.gradle.kts")
     version = extra["pinghVersion"]!!
-    group = Pingh.group
+    group = "io.spine.examples"
 
     repositories.standardRepositories()
 }
