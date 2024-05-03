@@ -5,6 +5,10 @@ buildscript {
     standardRepositories()
 }
 
+plugins {
+    kotlin("jvm")
+}
+
 allprojects {
     repositories.standardRepositories()
 }
