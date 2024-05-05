@@ -2,6 +2,10 @@ plugins {
     java
 }
 
+/**
+ * Configures repositories for access to dependencies, including
+ * Spine Event Engine.
+ */
 repositories {
     mavenLocal()
     gradlePluginPortal()
