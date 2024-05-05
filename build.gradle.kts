@@ -1,5 +1,4 @@
 allprojects {
-
     apply(from = "$rootDir/version.gradle.kts")
     version = extra["pinghVersion"]!!
     group = "io.spine.examples"
@@ -8,6 +7,7 @@ allprojects {
 }
 
 subprojects {
-
+    apply<JavaPlugin>()
+    
     apply<DependencyManagementPlugin>()
 }
