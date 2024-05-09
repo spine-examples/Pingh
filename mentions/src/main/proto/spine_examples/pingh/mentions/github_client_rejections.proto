@@ -33,7 +33,7 @@ option (type_url_prefix) = "type.pingh.spine.io";
 option java_package = "io.spine.examples.pingh.mentions.rejection";
 option java_multiple_files = false;
 
-import "spine_examples/pingh/identifiers.proto";
+import "spine_examples/pingh/mentions/identifiers.proto";
 
 // A update of mentions from GitHub cannot be requested.
 //

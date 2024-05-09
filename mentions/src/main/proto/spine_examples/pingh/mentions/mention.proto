@@ -34,7 +34,7 @@ option java_package = "io.spine.examples.pingh.mentions";
 option java_outer_classname = "MentionProto";
 option java_multiple_files = true;
 
-import "spine_examples/pingh/identifiers.proto";
+import "spine_examples/pingh/mentions/identifiers.proto";
 import "google/protobuf/timestamp.proto";
 
 // The process of notifications and reading mentions.

@@ -34,7 +34,7 @@ option java_package = "io.spine.examples.pingh.mentions.command";
 option java_outer_classname = "GitHubClientCommandsProto";
 option java_multiple_files = true;
 
-import "spine_examples/pingh/identifiers.proto";
+import "spine_examples/pingh/mentions/identifiers.proto";
 
 // Tells to update mentions from GitHub client.
 message UpdateMentions {

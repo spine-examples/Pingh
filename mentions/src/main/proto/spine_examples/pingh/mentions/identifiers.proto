@@ -25,12 +25,12 @@
  */
 syntax = "proto3";
 
-package spine_examples.pingh;
+package spine_examples.pingh.mentions;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.pingh.spine.io";
-option java_package = "io.spine.examples.pingh";
+option java_package = "io.spine.examples.pingh.mentions";
 option java_outer_classname = "IdentifiersProto";
 option java_multiple_files = true;
 

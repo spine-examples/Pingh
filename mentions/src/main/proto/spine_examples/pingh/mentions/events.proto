@@ -34,7 +34,7 @@ option java_package = "io.spine.examples.pingh.mentions.event";
 option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 
-import "spine_examples/pingh/identifiers.proto";
+import "spine_examples/pingh/mentions/identifiers.proto";
 import "google/protobuf/timestamp.proto";
 
 // The mention has been read.
@@ -51,5 +51,5 @@ message MentionSnoozed {
   MentionId id = 1;
 
   // The time for which the mention was snoozed.
-  google.protobuf.Timestamp forTime = 4 [(required) = true];
+  google.protobuf.Timestamp for_time = 2 [(required) = true];
 }

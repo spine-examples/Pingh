@@ -34,7 +34,7 @@ option java_package = "io.spine.examples.pingh.sessions";
 option java_outer_classname = "UserSessionProto";
 option java_multiple_files = true;
 
-import "spine_examples/pingh/identifiers.proto";
+import "spine_examples/pingh/sessions/identifiers.proto";
 import "google/protobuf/timestamp.proto";
 
 // The process of session existence.
@@ -50,7 +50,7 @@ message UserSession {
   string login = 2 [(required) = true];
 
   // Time when the user logged in.
-  google.protobuf.Timestamp loginTime = 3 [(required) = true];
+  google.protobuf.Timestamp login_time = 3 [(required) = true];
 }
 
 // The login and password are required to authenticate the user
