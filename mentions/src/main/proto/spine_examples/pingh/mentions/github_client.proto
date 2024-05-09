@@ -52,5 +52,5 @@ message GitHubClient {
   spine_examples.pingh.sessions.GitHubToken token = 3 [(required) = true];
 
   // Time when the update of mentions started.
-  google.protobuf.Timestamp time = 4 [(required) = true];
+  google.protobuf.Timestamp when_started = 4 [(required) = true];
 }

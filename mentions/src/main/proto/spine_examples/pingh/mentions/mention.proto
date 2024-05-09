@@ -70,7 +70,7 @@ message UserMentions {
   string title = 3 [(required) = true];
 
   // Time when the user was mentioned.
-  google.protobuf.Timestamp time = 4 [(required) = true];
+  google.protobuf.Timestamp when_mentioned = 4 [(required) = true];
 
   // The link to the GitHub page where the user was mentioned.
   string url = 5 [(required) = true];

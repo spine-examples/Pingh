@@ -50,7 +50,7 @@ message UserSession {
   Username username = 2 [(required) = true];
 
   // Time when the user logged in.
-  google.protobuf.Timestamp login_time = 3 [(required) = true];
+  google.protobuf.Timestamp when_logged_in = 3 [(required) = true];
 }
 
 // The username used in the GitHub account.
