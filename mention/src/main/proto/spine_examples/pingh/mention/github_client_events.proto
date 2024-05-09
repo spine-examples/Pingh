@@ -1,0 +1,91 @@
+/*
+ * Copyright 2024, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+syntax = "proto3";
+
+package spine_examples.pingh.mention;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.pingh.spine.io";
+option java_package = "io.spine.examples.pingh.mention.event";
+option java_outer_classname = "GitHubClientEventsProto";
+option java_multiple_files = true;
+
+import "spine_examples/pingh/identifiers.proto";
+import "spine_examples/pingh/mention/mention.proto";
+import "google/protobuf/timestamp.proto";
+
+// The GitHub token has been updated.
+message GitHubTokenUpdated {
+
+  // The ID of the GitHub client.
+  GitHubClientId id = 1;
+
+  // The login of the user whose token was updated.
+  string login = 2 [(required) = true];
+
+  // The new token.
+  string token = 3 [(required) = true];
+}
+
+// The update of mentions from GitHub requested.
+message MentionsUpdateRequested {
+
+  // The ID of the GitHub client.
+  GitHubClientId id = 1;
+
+  // The login for the user for whom the update is performed.
+  string login = 2 [(required) = true];
+
+  // The token for the user for whom the update is performed.
+  string token = 3 [(required) = true];
+}
+
+// The update of mentions from GitHub completed.
+message MentionsUpdateCompleted {
+
+  // The ID of the GitHub client.
+  GitHubClientId id = 1;
+}
+
+// The user has been mentioned.
+message UserMentioned {
+
+  // The ID of the mention.
+  MentionId id = 1;
+
+  // The user who created the mention.
+  AuthorOfMention author = 2 [(required) = true];
+
+  // The title of the topic in which the mention created.
+  string title = 3 [(required) = true];
+
+  // Time when the user was mentioned.
+  google.protobuf.Timestamp time = 4 [(required) = true];
+
+  // The link to the GitHub page where the user was mentioned.
+  string url = 5 [(required) = true];
+}
