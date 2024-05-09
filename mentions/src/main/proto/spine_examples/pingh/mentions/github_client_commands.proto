@@ -25,31 +25,26 @@
  */
 syntax = "proto3";
 
-package spine_examples.pingh.mention;
+package spine_examples.pingh.mentions;
 
 import "spine/options.proto";
 
-option (type_url_prefix) = "type.pingh.spine.io";
-option java_package = "io.spine.examples.pingh.mention.command";
-option java_outer_classname = "CommandProto";
+option (type_url_prefix) = "type.mention.spine.io";
+option java_package = "io.spine.examples.pingh.mentions.command";
+option java_outer_classname = "GitHubClientCommandsProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/identifiers.proto";
-import "google/protobuf/timestamp.proto";
 
-// Tells to mark as read the mention.
-message MarkMentionAsRead {
+// Tells to update mentions from GitHub client.
+message UpdateMentions {
 
-  // The ID of the mention.
-  MentionId id = 1;
-}
+  // The ID of the GitHub client.
+  GitHubClientId id = 1;
 
-// Tells to snooze the mention at a specified time.
-message SnoozeMention {
+  // The login of the user who tells to update the mentions.
+  string login = 2 [(required) = true];
 
-  // The ID of the mention.
-  MentionId id = 1;
-
-  // The time for which the mention was snoozed.
-  google.protobuf.Timestamp forTime = 4 [(required) = true];
+  // The token of the user who tells to update the mentions.
+  string token = 3 [(required) = true];
 }

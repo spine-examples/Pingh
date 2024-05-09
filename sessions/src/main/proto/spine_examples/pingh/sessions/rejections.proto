@@ -25,34 +25,24 @@
  */
 syntax = "proto3";
 
-package spine_examples.pingh.session;
+package spine_examples.pingh.sessions;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.pingh.spine.io";
-option java_package = "io.spine.examples.pingh.session.command";
-option java_outer_classname = "CommandsProto";
-option java_multiple_files = true;
+option java_package = "io.spine.examples.pingh.sessions.rejection";
+option java_multiple_files = false;
 
 import "spine_examples/pingh/identifiers.proto";
-import "spine_examples/pingh/session/user_session.proto";
 
-// Tells to log user in.
-message LogUserIn {
+// Cannot log in because authentication on the GitHub side failed.
+//
+// Emitted when a user enters an incorrect login or password.
+message UserEnteredIncorrectCredentials {
 
-  // The ID of user session.
-  SessionId id = 1;
+  // The ID of the session in which the login failed.
+  SessionId id = 1 [(required) = true];
 
-  // The login and password of the user who tells to log in.
-  Credentials credentials = 2 [(required) = true];
-}
-
-// Tells to log user out.
-message LogUserOut {
-
-  // The ID of user session.
-  SessionId id = 1;
-
-  // The login of the user who tells to log out.
+  // The login of the user who enter incorrect credentials.
   string login = 2 [(required) = true];
 }

@@ -25,41 +25,33 @@
  */
 syntax = "proto3";
 
-package spine_examples.pingh.session;
+package spine_examples.pingh.sessions;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.pingh.spine.io";
-option java_package = "io.spine.examples.pingh.session";
-option java_outer_classname = "UserSessionProto";
+option java_package = "io.spine.examples.pingh.sessions.event";
+option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/identifiers.proto";
-import "google/protobuf/timestamp.proto";
 
-// The process of session existence.
-//
-// It starts with the user's login and ends with the user's login out.
-message UserSession {
-  option (entity) = { kind: PROCESS_MANAGER };
+// The user logged in.
+message UserLoggedIn {
 
   // The ID of user session.
   SessionId id = 1;
 
-  // The login of the user.
+  // The login of the user who logged in.
   string login = 2 [(required) = true];
 
-  // Time when the user logged in.
-  google.protobuf.Timestamp loginTime = 3 [(required) = true];
+  // The GitHub token obtained as a result of logging in.
+  string token = 3 [(required) = true];
 }
 
-// The login and password are required to authenticate the user
-// on the GitHub side.
-message Credentials {
+// The user logged out.
+message UserLoggedOut {
 
-  // The login of the user.
-  string login = 2 [(required) = true];
-
-  // The password of the user.
-  string password = 3 [(required) = true];
+  // The ID of user session.
+  SessionId id = 1;
 }

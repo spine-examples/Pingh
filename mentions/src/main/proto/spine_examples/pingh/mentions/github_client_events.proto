@@ -25,17 +25,17 @@
  */
 syntax = "proto3";
 
-package spine_examples.pingh.mention;
+package spine_examples.pingh.mentions;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.pingh.spine.io";
-option java_package = "io.spine.examples.pingh.mention.event";
+option java_package = "io.spine.examples.pingh.mentions.event";
 option java_outer_classname = "GitHubClientEventsProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/identifiers.proto";
-import "spine_examples/pingh/mention/mention.proto";
+import "spine_examples/pingh/mentions/mention.proto";
 import "google/protobuf/timestamp.proto";
 
 // The GitHub token has been updated.
