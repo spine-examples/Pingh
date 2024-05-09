@@ -24,5 +24,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "Pingh"
-include("mention")
+import io.spine.internal.BuildSettings
+import io.spine.internal.Javax
+
+/*
+ * Add the Gradle plugin for bootstrapping projects built with Spine.
+ * See: https://github.com/SpineEventEngine/bootstrap
+ */
+plugins {
+    kotlin("jvm").version("1.9.20")
+    id("io.spine.tools.gradle.bootstrap").version("1.9.0")
+}
+
+/*
+* Indicate that the module contains context data (.proto files)
+* that must be compiled into Java classes.
+*/
+spine {
+    assembleModel()
+    enableJava()
+}
+
+kotlin {
+    jvmToolchain {
+        languageVersion.set(BuildSettings.javaVersion)
+    }
+    explicitApi()
+}
+
+dependencies {
+    implementation(Javax.lib)
+}
