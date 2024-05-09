@@ -31,62 +31,25 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.pingh.spine.io";
 option java_package = "io.spine.examples.pingh.mention";
-option java_outer_classname = "MentionProto";
+option java_outer_classname = "GitHubClientProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/identifiers.proto";
 import "google/protobuf/timestamp.proto";
 
-// The process of notifications and reading mentions.
-message Mention {
+// The process of update mentions from GitHub client.
+message GitHubClient {
   option (entity) = { kind: PROCESS_MANAGER };
 
-  // The ID of the mention.
-  MentionId id = 1;
-}
+  // The ID of the GitHub client.
+  GitHubClientId id = 1;
 
-// The user who created the mention.
-message AuthorOfMention {
+  // The login for the user for whom the update is performed.
+  string login = 2 [(required) = true];
 
-  // The author's login of the mention.
-  string login = 1 [(required) = true];
+  // The token for the user for whom the update is performed.
+  string token = 3 [(required) = true];
 
-  // The link to the avatar of the author of the mention.
-  string avatar_url = 2 [(required) = true];
-}
-
-// Information about all mentions of the user.
-message UserMentions {
-  option (entity) = { kind: PROJECTION };
-
-  // The ID of the mention.
-  MentionId id = 1;
-
-  // The user who created the mention.
-  AuthorOfMention author = 2 [(required) = true];
-
-  // The title of the topic in which the mention created.
-  string title = 3 [(required) = true];
-
-  // Time when the user was mentioned.
+  // Time when the update of mentions started.
   google.protobuf.Timestamp time = 4 [(required) = true];
-
-  // The link to the GitHub page where the user was mentioned.
-  string url = 5 [(required) = true];
-
-  // The read status of mention.
-  MentionStatus status = 6 [(required) = true];
-}
-
-// The read status of mention.
-enum MentionStatus {
-
-  // Mentions have not yet been read.
-  UNREAD = 0;
-
-  // The reading of the mention has been snoozed.
-  SNOOZED = 1;
-
-  // Mentions have already been read.
-  READ = 2;
 }
