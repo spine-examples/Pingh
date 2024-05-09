@@ -24,15 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal
+package io.spine.internal.dependency
 
-/**
- * Library that add
- * [JavaX annotation](https://github.com/eclipse-ee4j/common-annotations-api).
- */
-public object Javax {
+@Suppress("ConstPropertyName")
+public object JavaX {
 
-    private const val version = "1.3.2"
-    public const val lib: String =
-        "javax.annotation:javax.annotation-api:${version}"
+    // This artifact which used to be a part of J2EE moved under Eclipse EE4J project.
+    // https://github.com/eclipse-ee4j/common-annotations-api
+    public const val annotations: String = "javax.annotation:javax.annotation-api:1.3.2"
 }

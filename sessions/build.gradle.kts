@@ -25,20 +25,19 @@
  */
 
 import io.spine.internal.BuildSettings
-import io.spine.internal.Javax
+import io.spine.internal.dependency.JavaX
 
-/*
- * Add the Gradle plugin for bootstrapping projects built with Spine.
- * See: https://github.com/SpineEventEngine/bootstrap
- */
 plugins {
     kotlin("jvm").version("1.9.20")
+
+    // Add the Gradle plugin for bootstrapping projects built with Spine.
+    // See: https://github.com/SpineEventEngine/bootstrap
     id("io.spine.tools.gradle.bootstrap").version("1.9.0")
 }
 
 /*
-* Indicate that the module contains context data (.proto files)
-* that must be compiled into Java classes.
+* Enable the code generation for the elements of the ubiquitous language,
+* declared in Proto files.
 */
 spine {
     assembleModel()
@@ -53,5 +52,5 @@ kotlin {
 }
 
 dependencies {
-    implementation(Javax.lib)
+    implementation(JavaX.annotations)
 }
