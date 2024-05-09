@@ -38,7 +38,7 @@ import "spine_examples/pingh/mentions/identifiers.proto";
 import "spine_examples/pingh/sessions/user_session.proto";
 import "google/protobuf/timestamp.proto";
 
-// The process of update mentions from GitHub client.
+// The process of fetching mentions from the GitHub.
 message GitHubClient {
   option (entity) = { kind: PROCESS_MANAGER };
 

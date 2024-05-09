@@ -40,7 +40,7 @@ message MentionId {
   string uuid = 1 [(required) = true];
 }
 
-// Identifies a mentions load from GitHub client.
+// Identifies a process of fetching mentions from the GitHub.
 message GitHubClientId {
 
   string uuid = 1 [(required) = true];
