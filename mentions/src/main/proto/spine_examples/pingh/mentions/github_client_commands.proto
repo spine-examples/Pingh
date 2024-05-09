@@ -35,6 +35,7 @@ option java_outer_classname = "GitHubClientCommandsProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/mentions/identifiers.proto";
+import "spine_examples/pingh/sessions/user_session.proto";
 
 // Tells to update mentions from GitHub client.
 message UpdateMentions {
@@ -42,9 +43,9 @@ message UpdateMentions {
   // The ID of the GitHub client.
   GitHubClientId id = 1;
 
-  // The login of the user who tells to update the mentions.
-  string login = 2 [(required) = true];
+  // The name of the user who tells to update the mentions.
+  spine_examples.pingh.sessions.Username username = 2 [(required) = true];
 
   // The token of the user who tells to update the mentions.
-  string token = 3 [(required) = true];
+  spine_examples.pingh.sessions.GitHubToken token = 3 [(required) = true];
 }

@@ -46,20 +46,28 @@ message UserSession {
   // The ID of user session.
   SessionId id = 1;
 
-  // The login of the user.
-  string login = 2 [(required) = true];
+  // The name of the user.
+  Username username = 2 [(required) = true];
 
   // Time when the user logged in.
   google.protobuf.Timestamp login_time = 3 [(required) = true];
 }
 
-// The login and password are required to authenticate the user
-// on the GitHub side.
-message Credentials {
+// The username used in the GitHub account.
+message Username {
 
-  // The login of the user.
-  string login = 2 [(required) = true];
+  string value = 1 [(required) = true];
+}
 
-  // The password of the user.
-  string password = 3 [(required) = true];
+// The user password used in the GitHub account.
+message Password {
+
+  string value = 1 [(required) = true];
+}
+
+// A token issued by GitHub after authentication. Used to obtain
+// information on behalf of the user.
+message GitHubToken {
+
+  string value = 1 [(required) = true];
 }

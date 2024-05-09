@@ -34,6 +34,7 @@ option java_package = "io.spine.examples.pingh.mentions.rejection";
 option java_multiple_files = false;
 
 import "spine_examples/pingh/mentions/identifiers.proto";
+import "spine_examples/pingh/sessions/user_session.proto";
 
 // A update of mentions from GitHub cannot be requested.
 //
@@ -44,8 +45,8 @@ message UsersGitHubTokenInvalid {
   // The ID of the GitHub client for which the mention update process failed to start.
   GitHubClientId id = 1 [(required) = true];
 
-  // The login of the user who has an invalid token.
-  string login = 2 [(required) = true];
+  // The name of the user who has an invalid token.
+  spine_examples.pingh.sessions.Username username = 2 [(required) = true];
 }
 
 // A update of mentions from GitHub cannot be requested.

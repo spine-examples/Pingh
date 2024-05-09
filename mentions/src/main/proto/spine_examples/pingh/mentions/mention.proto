@@ -35,6 +35,7 @@ option java_outer_classname = "MentionProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/mentions/identifiers.proto";
+import "spine_examples/pingh/sessions/user_session.proto";
 import "google/protobuf/timestamp.proto";
 
 // The process of notifications and reading mentions.
@@ -48,8 +49,8 @@ message Mention {
 // The user who created the mention.
 message AuthorOfMention {
 
-  // The author's login of the mention.
-  string login = 1 [(required) = true];
+  // The author's username of the mention.
+  spine_examples.pingh.sessions.Username username = 1 [(required) = true];
 
   // The link to the avatar of the author of the mention.
   string avatar_url = 2 [(required) = true];

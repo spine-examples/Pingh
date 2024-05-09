@@ -35,6 +35,7 @@ option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/sessions/identifiers.proto";
+import "spine_examples/pingh/sessions/user_session.proto";
 
 // The user logged in.
 message UserLoggedIn {
@@ -42,11 +43,11 @@ message UserLoggedIn {
   // The ID of user session.
   SessionId id = 1;
 
-  // The login of the user who logged in.
-  string login = 2 [(required) = true];
+  // The name of the user who logged in.
+  Username username = 2 [(required) = true];
 
   // The GitHub token obtained as a result of logging in.
-  string token = 3 [(required) = true];
+  GitHubToken token = 3 [(required) = true];
 }
 
 // The user logged out.

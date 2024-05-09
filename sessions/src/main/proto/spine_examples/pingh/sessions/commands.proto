@@ -43,8 +43,11 @@ message LogUserIn {
   // The ID of user session.
   SessionId id = 1;
 
-  // The login and password of the user who tells to log in.
-  Credentials credentials = 2 [(required) = true];
+  // The name of the user who tells to log in.
+  Username username = 2 [(required) = true];
+
+  // The password of the user who tells to log in.
+  Password password = 3 [(required) = true];
 }
 
 // Tells to log user out.
@@ -53,6 +56,6 @@ message LogUserOut {
   // The ID of user session.
   SessionId id = 1;
 
-  // The login of the user who tells to log out.
-  string login = 2 [(required) = true];
+  // The name of the user who tells to log out.
+  Username username = 2 [(required) = true];
 }
