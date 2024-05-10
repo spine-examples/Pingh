@@ -37,6 +37,7 @@ option java_multiple_files = true;
 import "spine_examples/pingh/mentions/identifiers.proto";
 import "spine_examples/pingh/mentions/mention.proto";
 import "spine_examples/pingh/sessions/user_session.proto";
+import "spine/net/url.proto";
 import "google/protobuf/timestamp.proto";
 
 // The GitHub token has been fetched.
@@ -88,5 +89,5 @@ message UserMentioned {
   google.protobuf.Timestamp when_mentioned = 4 [(required) = true];
 
   // The link to the GitHub page where the user was mentioned.
-  string url = 5 [(required) = true];
+  spine.net.Url url = 5 [(required) = true];
 }

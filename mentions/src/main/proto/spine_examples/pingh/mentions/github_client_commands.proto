@@ -37,7 +37,7 @@ option java_multiple_files = true;
 import "spine_examples/pingh/mentions/identifiers.proto";
 import "spine_examples/pingh/sessions/user_session.proto";
 
-// Tells to fetch mentions from GitHub client.
+// Tells to fetch mentions from the GitHub client.
 message FetchMentions {
 
   // The ID of the GitHub client.

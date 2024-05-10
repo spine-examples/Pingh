@@ -36,6 +36,7 @@ option java_multiple_files = true;
 
 import "spine_examples/pingh/mentions/identifiers.proto";
 import "spine_examples/pingh/sessions/user_session.proto";
+import "spine/net/url.proto";
 import "google/protobuf/timestamp.proto";
 
 // The process of notifications and reading mentions.
@@ -57,7 +58,7 @@ message AuthorOfMention {
   spine_examples.pingh.sessions.Username username = 1 [(required) = true];
 
   // The link to the avatar of the author of the mention.
-  string avatar_url = 2 [(required) = true];
+  spine.net.Url avatar_url = 2 [(required) = true];
 }
 
 // Information about all mentions of the user.
@@ -77,7 +78,7 @@ message UserMentions {
   google.protobuf.Timestamp when_mentioned = 4 [(required) = true];
 
   // The link to the GitHub page where the user was mentioned.
-  string url = 5 [(required) = true];
+  spine.net.Url url = 5 [(required) = true];
 
   // The read status of mention.
   MentionStatus status = 6 [(required) = true];
