@@ -52,6 +52,7 @@ kotlin {
 }
 
 dependencies {
+    implementation(project(":github"))
     implementation(project(":sessions"))
 
     implementation(JavaX.annotations)
