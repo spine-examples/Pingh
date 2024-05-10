@@ -45,9 +45,6 @@ message UsersGitHubTokenInvalid {
 
     // The ID of the GitHub client for which the mention fetching process failed to start.
     GitHubClientId id = 1 [(required) = true];
-
-    // The name of the user who has an invalid token.
-    spine_examples.pingh.sessions.Username username = 2 [(required) = true];
 }
 
 // A fetching of mentions from GitHub cannot be requested.

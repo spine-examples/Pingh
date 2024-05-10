@@ -34,6 +34,8 @@ option java_package = "io.spine.examples.pingh.mentions";
 option java_outer_classname = "IdentifiersProto";
 option java_multiple_files = true;
 
+import "spine_examples/pingh/sessions/user_session.proto";
+
 // Identifies a mention.
 message MentionId {
 
@@ -43,5 +45,7 @@ message MentionId {
 // Identifies a process of fetching mentions from the GitHub.
 message GitHubClientId {
 
-    string uuid = 1 [(required) = true];
+    // There is a single `GitHubClient` for each GitHub user. GitHub usernames are unique.
+    // Therefore, usernames used as an identifier of `GitHubClient`.
+    spine_examples.pingh.sessions.Username username = 1 [(required) = true];
 }
