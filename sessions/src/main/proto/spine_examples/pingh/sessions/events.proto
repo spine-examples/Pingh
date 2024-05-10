@@ -40,19 +40,19 @@ import "spine_examples/pingh/sessions/user_session.proto";
 // The user logged in.
 message UserLoggedIn {
 
-  // The ID of user session.
-  SessionId id = 1;
+    // The ID of user session.
+    SessionId id = 1;
 
-  // The name of the user who logged in.
-  Username username = 2 [(required) = true];
+    // The name of the user who logged in.
+    Username username = 2 [(required) = true];
 
-  // The GitHub token obtained as a result of logging in.
-  GitHubToken token = 3 [(required) = true];
+    // The GitHub token obtained as a result of logging in.
+    GitHubToken token = 3 [(required) = true];
 }
 
 // The user logged out.
 message UserLoggedOut {
 
-  // The ID of user session.
-  SessionId id = 1;
+    // The ID of user session.
+    SessionId id = 1;
 }

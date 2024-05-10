@@ -51,29 +51,29 @@ import "spine_examples/pingh/sessions/user_session.proto";
 //
 // The state at initialization is set to COMPLETED.
 message GitHubClient {
-  option (entity) = { kind: PROCESS_MANAGER };
+    option (entity) = { kind: PROCESS_MANAGER };
 
-  // The ID of the GitHub client.
-  GitHubClientId id = 1;
+    // The ID of the GitHub client.
+    GitHubClientId id = 1;
 
-  // The name of the user for whom mentions are fetched.
-  spine_examples.pingh.sessions.Username username = 2 [(required) = true];
+    // The name of the user for whom mentions are fetched.
+    spine_examples.pingh.sessions.Username username = 2 [(required) = true];
 
-  // The token of the user for whom mentions are fetched.
-  spine_examples.pingh.sessions.GitHubToken token = 3 [(required) = true];
+    // The token of the user for whom mentions are fetched.
+    spine_examples.pingh.sessions.GitHubToken token = 3 [(required) = true];
 
-  // The stage of fetching mentions from the Github.
-  FetchingStage fetching_stage = 4 [(required) = true];
+    // The stage of fetching mentions from the Github.
+    FetchingStage fetching_stage = 4 [(required) = true];
 }
 
 // The stage of fetching mentions from the Github.
 enum FetchingStage {
 
-  // Mentions were requested from GitHub and are being processed.
-  // Cannot start a new fetch process at this stage.
-  REQUESTED = 0;
+    // Mentions were requested from GitHub and are being processed.
+    // Cannot start a new fetch process at this stage.
+    REQUESTED = 0;
 
-  // Processing of the mentions fetched is finished.
-  // At this stage can start a new fetching from the GitHub.
-  COMPLETED = 1;
+    // Processing of the mentions fetched is finished.
+    // At this stage can start a new fetching from the GitHub.
+    COMPLETED = 1;
 }

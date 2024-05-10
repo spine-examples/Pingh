@@ -45,54 +45,54 @@ import "google/protobuf/timestamp.proto";
 // unread, it reacts to the commands SnoozeMention and MarkMentionsAsRead.
 // After it is read, process rejects all commands.
 message Mention {
-  option (entity) = { kind: PROCESS_MANAGER };
+    option (entity) = { kind: PROCESS_MANAGER };
 
-  // The ID of the mention.
-  MentionId id = 1;
+    // The ID of the mention.
+    MentionId id = 1;
 }
 
 // The user who created the mention.
 message AuthorOfMention {
 
-  // The author's username of the mention.
-  spine_examples.pingh.sessions.Username username = 1 [(required) = true];
+    // The author's username of the mention.
+    spine_examples.pingh.sessions.Username username = 1 [(required) = true];
 
-  // The link to the avatar of the author of the mention.
-  spine.net.Url avatar_url = 2 [(required) = true];
+    // The link to the avatar of the author of the mention.
+    spine.net.Url avatar_url = 2 [(required) = true];
 }
 
 // Information about all mentions of the user.
 message UserMentions {
-  option (entity) = { kind: PROJECTION };
+    option (entity) = { kind: PROJECTION };
 
-  // The ID of the mention.
-  MentionId id = 1;
+    // The ID of the mention.
+    MentionId id = 1;
 
-  // The user who created the mention.
-  AuthorOfMention author = 2 [(required) = true];
+    // The user who created the mention.
+    AuthorOfMention author = 2 [(required) = true];
 
-  // The title of the topic in which the mention created.
-  string title = 3 [(required) = true];
+    // The title of the topic in which the mention created.
+    string title = 3 [(required) = true];
 
-  // Time when the user was mentioned.
-  google.protobuf.Timestamp when_mentioned = 4 [(required) = true];
+    // Time when the user was mentioned.
+    google.protobuf.Timestamp when_mentioned = 4 [(required) = true];
 
-  // The link to the GitHub page where the user was mentioned.
-  spine.net.Url url = 5 [(required) = true];
+    // The link to the GitHub page where the user was mentioned.
+    spine.net.Url url = 5 [(required) = true];
 
-  // The read status of mention.
-  MentionStatus status = 6 [(required) = true];
+    // The read status of mention.
+    MentionStatus status = 6 [(required) = true];
 }
 
 // The read status of mention.
 enum MentionStatus {
 
-  // Mentions have not yet been read.
-  UNREAD = 0;
+    // Mentions have not yet been read.
+    UNREAD = 0;
 
-  // The reading of the mention has been snoozed.
-  SNOOZED = 1;
+    // The reading of the mention has been snoozed.
+    SNOOZED = 1;
 
-  // Mentions have already been read.
-  READ = 2;
+    // Mentions have already been read.
+    READ = 2;
 }

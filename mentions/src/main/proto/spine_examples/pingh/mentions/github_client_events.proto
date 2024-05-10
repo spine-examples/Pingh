@@ -43,51 +43,51 @@ import "google/protobuf/timestamp.proto";
 // The GitHub token has been fetched.
 message GitHubTokenFetched {
 
-  // The ID of the GitHub client.
-  GitHubClientId id = 1;
+    // The ID of the GitHub client.
+    GitHubClientId id = 1;
 
-  // The name of the user whose token was fetched.
-  spine_examples.pingh.sessions.Username username = 2 [(required) = true];
+    // The name of the user whose token was fetched.
+    spine_examples.pingh.sessions.Username username = 2 [(required) = true];
 
-  // The new token.
-  spine_examples.pingh.sessions.GitHubToken token = 3 [(required) = true];
+    // The new token.
+    spine_examples.pingh.sessions.GitHubToken token = 3 [(required) = true];
 }
 
 // The fetching of mentions from GitHub requested.
 message MentionsFetchingRequested {
 
-  // The ID of the GitHub client.
-  GitHubClientId id = 1;
+    // The ID of the GitHub client.
+    GitHubClientId id = 1;
 
-  // The name of the user for whom the fetching is performed.
-  spine_examples.pingh.sessions.Username username = 2 [(required) = true];
+    // The name of the user for whom the fetching is performed.
+    spine_examples.pingh.sessions.Username username = 2 [(required) = true];
 
-  // The token of the user for whom the fetching is performed.
-  spine_examples.pingh.sessions.GitHubToken token = 3 [(required) = true];
+    // The token of the user for whom the fetching is performed.
+    spine_examples.pingh.sessions.GitHubToken token = 3 [(required) = true];
 }
 
 // The fetching of mentions from GitHub completed.
 message MentionsUpdateCompleted {
 
-  // The ID of the GitHub client.
-  GitHubClientId id = 1;
+    // The ID of the GitHub client.
+    GitHubClientId id = 1;
 }
 
 // The user has been mentioned.
 message UserMentioned {
 
-  // The ID of the mention.
-  MentionId id = 1;
+    // The ID of the mention.
+    MentionId id = 1;
 
-  // The user who created the mention.
-  AuthorOfMention author = 2 [(required) = true];
+    // The user who created the mention.
+    AuthorOfMention author = 2 [(required) = true];
 
-  // The title of the topic in which the mention created.
-  string title = 3 [(required) = true];
+    // The title of the topic in which the mention created.
+    string title = 3 [(required) = true];
 
-  // Time when the user was mentioned.
-  google.protobuf.Timestamp when_mentioned = 4 [(required) = true];
+    // Time when the user was mentioned.
+    google.protobuf.Timestamp when_mentioned = 4 [(required) = true];
 
-  // The link to the GitHub page where the user was mentioned.
-  spine.net.Url url = 5 [(required) = true];
+    // The link to the GitHub page where the user was mentioned.
+    spine.net.Url url = 5 [(required) = true];
 }

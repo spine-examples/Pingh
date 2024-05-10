@@ -40,12 +40,12 @@ import "spine_examples/pingh/sessions/user_session.proto";
 // Tells to fetch mentions from the GitHub client.
 message FetchMentions {
 
-  // The ID of the GitHub client.
-  GitHubClientId id = 1;
+    // The ID of the GitHub client.
+    GitHubClientId id = 1;
 
-  // The name of the user who tells to fetch the mentions.
-  spine_examples.pingh.sessions.Username username = 2 [(required) = true];
+    // The name of the user who tells to fetch the mentions.
+    spine_examples.pingh.sessions.Username username = 2 [(required) = true];
 
-  // The token of the user who tells to fetch the mentions.
-  spine_examples.pingh.sessions.GitHubToken token = 3 [(required) = true];
+    // The token of the user who tells to fetch the mentions.
+    spine_examples.pingh.sessions.GitHubToken token = 3 [(required) = true];
 }

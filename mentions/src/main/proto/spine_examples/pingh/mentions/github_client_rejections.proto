@@ -42,11 +42,11 @@ import "spine_examples/pingh/sessions/user_session.proto";
 // This means that the token needs to be updated.
 message UsersGitHubTokenInvalid {
 
-  // The ID of the GitHub client for which the mention fetching process failed to start.
-  GitHubClientId id = 1 [(required) = true];
+    // The ID of the GitHub client for which the mention fetching process failed to start.
+    GitHubClientId id = 1 [(required) = true];
 
-  // The name of the user who has an invalid token.
-  spine_examples.pingh.sessions.Username username = 2 [(required) = true];
+    // The name of the user who has an invalid token.
+    spine_examples.pingh.sessions.Username username = 2 [(required) = true];
 }
 
 // A fetching of mentions from GitHub cannot be requested.
@@ -55,8 +55,8 @@ message UsersGitHubTokenInvalid {
 // one came in less than a minute ago.
 message CannotStartDataFetchTooEarly {
 
-  // The ID of the GitHub client for which the mention fetching process failed to start.
-  GitHubClientId id = 1 [(required) = true];
+    // The ID of the GitHub client for which the mention fetching process failed to start.
+    GitHubClientId id = 1 [(required) = true];
 }
 
 // A fetching of mentions from GitHub cannot be requested.
@@ -65,6 +65,6 @@ message CannotStartDataFetchTooEarly {
 // fetching has not completed.
 message DataFetchingIsAlreadyInProgress {
 
-  // The ID of the GitHub client for which the mention fetching process failed to start.
-  GitHubClientId id = 1 [(required) = true];
+    // The ID of the GitHub client for which the mention fetching process failed to start.
+    GitHubClientId id = 1 [(required) = true];
 }

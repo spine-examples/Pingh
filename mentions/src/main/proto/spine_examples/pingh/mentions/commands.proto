@@ -40,16 +40,16 @@ import "google/protobuf/timestamp.proto";
 // Tells to mark the mention as read.
 message MarkMentionAsRead {
 
-  // The ID of the mention.
-  MentionId id = 1;
+    // The ID of the mention.
+    MentionId id = 1;
 }
 
 // Tells to snooze the mention until the specified time.
 message SnoozeMention {
 
-  // The ID of the mention.
-  MentionId id = 1;
+    // The ID of the mention.
+    MentionId id = 1;
 
-  // The time until which the mention was snoozed.
-  google.protobuf.Timestamp until_when = 2 [(required) = true];
+    // The time until which the mention was snoozed.
+    google.protobuf.Timestamp until_when = 2 [(required) = true];
 }

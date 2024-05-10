@@ -41,9 +41,9 @@ import "spine_examples/pingh/sessions/user_session.proto";
 // Emitted when a user enters an incorrect login or password.
 message UserEnteredIncorrectNameOrPassword {
 
-  // The ID of the session in which the login failed.
-  SessionId id = 1 [(required) = true];
+    // The ID of the session in which the login failed.
+    SessionId id = 1 [(required) = true];
 
-  // The name of the user who enter incorrect name or password.
-  Username username = 2 [(required) = true];
+    // The name of the user who enter incorrect name or password.
+    Username username = 2 [(required) = true];
 }
