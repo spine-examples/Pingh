@@ -87,13 +87,14 @@ message UserMentions {
 
 // The read status of mention.
 enum MentionStatus {
+    MS_UNSPECIFIED = 0;
 
     // Mentions have not yet been read.
-    UNREAD = 0;
+    UNREAD = 1;
 
     // The reading of the mention has been snoozed.
-    SNOOZED = 1;
+    SNOOZED = 2;
 
     // Mentions have already been read.
-    READ = 2;
+    READ = 3;
 }
