@@ -44,6 +44,6 @@ message UserEnteredIncorrectNameOrPassword {
   // The ID of the session in which the login failed.
   SessionId id = 1 [(required) = true];
 
-  // The login of the user who enter incorrect credentials.
+  // The name of the user who enter incorrect name or password.
   Username username = 2 [(required) = true];
 }

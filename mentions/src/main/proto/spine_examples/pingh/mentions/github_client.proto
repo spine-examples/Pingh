@@ -36,21 +36,44 @@ option java_multiple_files = true;
 
 import "spine_examples/pingh/mentions/identifiers.proto";
 import "spine_examples/pingh/sessions/user_session.proto";
-import "google/protobuf/timestamp.proto";
 
 // The process of fetching mentions from the GitHub.
+//
+// The process starts responding to the UserLoggedIn event. The process ID is
+// generated automatically.
+//
+// At regular intervals a FetchMentions command is generated. When receiving
+// the command, the process enters the REQUESTED fetching state and does not
+// accept any more FetchMentions commands. Further mentions is requested from
+// GitHub and processed, creating UserMentioned events. After the end of
+// processing, the process fetching state is set to COMPLETED and it can
+// accept FetchMentions commands again.
+//
+// The state at initialization is set to COMPLETED.
 message GitHubClient {
   option (entity) = { kind: PROCESS_MANAGER };
 
   // The ID of the GitHub client.
   GitHubClientId id = 1;
 
-  // The name of the user for whom the update is performed.
+  // The name of the user for whom mentions are fetched.
   spine_examples.pingh.sessions.Username username = 2 [(required) = true];
 
-  // The token of the user for whom the update is performed.
+  // The token of the user for whom mentions are fetched.
   spine_examples.pingh.sessions.GitHubToken token = 3 [(required) = true];
 
-  // Time when the update of mentions started.
-  google.protobuf.Timestamp when_started = 4 [(required) = true];
+  // The stage of fetching mentions from the Github.
+  FetchingStage fetching_stage = 4 [(required) = true];
+}
+
+// The stage of fetching mentions from the Github.
+enum FetchingStage {
+
+  // Mentions were requested from GitHub and are being processed.
+  // Cannot start a new fetch process at this stage.
+  REQUESTED = 0;
+
+  // Processing of the mentions fetched is finished.
+  // At this stage can start a new fetching from the GitHub.
+  COMPLETED = 1;
 }

@@ -36,35 +36,35 @@ option java_multiple_files = false;
 import "spine_examples/pingh/mentions/identifiers.proto";
 import "spine_examples/pingh/sessions/user_session.proto";
 
-// A update of mentions from GitHub cannot be requested.
+// A fetching of mentions from GitHub cannot be requested.
 //
 // Emitted when the token is revoked on the GitHub side.
 // This means that the token needs to be updated.
 message UsersGitHubTokenInvalid {
 
-  // The ID of the GitHub client for which the mention update process failed to start.
+  // The ID of the GitHub client for which the mention fetching process failed to start.
   GitHubClientId id = 1 [(required) = true];
 
   // The name of the user who has an invalid token.
   spine_examples.pingh.sessions.Username username = 2 [(required) = true];
 }
 
-// A update of mentions from GitHub cannot be requested.
+// A fetching of mentions from GitHub cannot be requested.
 //
-// Emitted when an update request comes in when the previous
+// Emitted when an fetch request comes in when the previous
 // one came in less than a minute ago.
-message CannotStartDataUpdateTooEarly {
+message CannotStartDataFetchTooEarly {
 
-  // The ID of the GitHub client for which the mention update process failed to start.
+  // The ID of the GitHub client for which the mention fetching process failed to start.
   GitHubClientId id = 1 [(required) = true];
 }
 
-// A update of mentions from GitHub cannot be requested.
+// A fetching of mentions from GitHub cannot be requested.
 //
-// Emitted out when an update request comes in and the previous
-// update has not completed.
-message DataUpdateIsAlreadyInProgress {
+// Emitted out when an fetch request comes in and the previous
+// fetching has not completed.
+message DataFetchingIsAlreadyInProgress {
 
-  // The ID of the GitHub client for which the mention update process failed to start.
+  // The ID of the GitHub client for which the mention fetching process failed to start.
   GitHubClientId id = 1 [(required) = true];
 }

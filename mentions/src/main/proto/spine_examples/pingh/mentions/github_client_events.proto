@@ -39,33 +39,33 @@ import "spine_examples/pingh/mentions/mention.proto";
 import "spine_examples/pingh/sessions/user_session.proto";
 import "google/protobuf/timestamp.proto";
 
-// The GitHub token has been updated.
-message GitHubTokenUpdated {
+// The GitHub token has been fetched.
+message GitHubTokenFetched {
 
   // The ID of the GitHub client.
   GitHubClientId id = 1;
 
-  // The name of the user whose token was updated.
+  // The name of the user whose token was fetched.
   spine_examples.pingh.sessions.Username username = 2 [(required) = true];
 
   // The new token.
   spine_examples.pingh.sessions.GitHubToken token = 3 [(required) = true];
 }
 
-// The update of mentions from GitHub requested.
-message MentionsUpdateRequested {
+// The fetching of mentions from GitHub requested.
+message MentionsFetchingRequested {
 
   // The ID of the GitHub client.
   GitHubClientId id = 1;
 
-  // The name of the user for whom the update is performed.
+  // The name of the user for whom the fetching is performed.
   spine_examples.pingh.sessions.Username username = 2 [(required) = true];
 
-  // The token of the user for whom the update is performed.
+  // The token of the user for whom the fetching is performed.
   spine_examples.pingh.sessions.GitHubToken token = 3 [(required) = true];
 }
 
-// The update of mentions from GitHub completed.
+// The fetching of mentions from GitHub completed.
 message MentionsUpdateCompleted {
 
   // The ID of the GitHub client.

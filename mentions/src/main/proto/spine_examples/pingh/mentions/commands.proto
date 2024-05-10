@@ -50,6 +50,6 @@ message SnoozeMention {
   // The ID of the mention.
   MentionId id = 1;
 
-  // The time for which the mention was snoozed.
+  // The time until which the mention was snoozed.
   google.protobuf.Timestamp when_unsnoozed = 2 [(required) = true];
 }
