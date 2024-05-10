@@ -34,7 +34,6 @@ option java_package = "io.spine.examples.pingh.mentions.rejection";
 option java_multiple_files = false;
 
 import "spine_examples/pingh/mentions/identifiers.proto";
-import "spine_examples/pingh/sessions/user_session.proto";
 
 // A fetching of mentions from GitHub cannot be requested.
 //
