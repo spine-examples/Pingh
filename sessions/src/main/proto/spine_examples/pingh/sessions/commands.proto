@@ -35,7 +35,7 @@ option java_outer_classname = "CommandsProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/sessions/identifiers.proto";
-import "spine_examples/pingh/sessions/user_session.proto";
+import "spine_examples/pingh/github/github.proto";
 
 // Tells to log user in.
 message LogUserIn {
@@ -44,10 +44,7 @@ message LogUserIn {
     SessionId id = 1;
 
     // The name of the user who tells to log in.
-    Username username = 2 [(required) = true];
-
-    // The password of the user who tells to log in.
-    Password password = 3 [(required) = true];
+    spine_examples.pingh.github.Username username = 2 [(required) = true];
 }
 
 // Tells to log user out.
@@ -57,5 +54,5 @@ message LogUserOut {
     SessionId id = 1;
 
     // The name of the user who tells to log out.
-    Username username = 2 [(required) = true];
+    spine_examples.pingh.github.Username username = 2 [(required) = true];
 }

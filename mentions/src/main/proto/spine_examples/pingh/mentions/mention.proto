@@ -35,7 +35,7 @@ option java_outer_classname = "MentionProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/mentions/identifiers.proto";
-import "spine_examples/pingh/sessions/user_session.proto";
+import "spine_examples/pingh/github/github.proto";
 import "spine/net/url.proto";
 import "google/protobuf/timestamp.proto";
 
@@ -56,7 +56,7 @@ message Mention {
 message AuthorOfMention {
 
     // The author's username of the mention.
-    spine_examples.pingh.sessions.Username username = 1 [(required) = true];
+    spine_examples.pingh.github.Username username = 1 [(required) = true];
 
     // The link to the avatar of the author of the mention.
     spine.net.Url avatar_url = 2 [(required) = true];

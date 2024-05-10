@@ -25,34 +25,26 @@
  */
 syntax = "proto3";
 
-package spine_examples.pingh.sessions;
+package spine_examples.pingh.github;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.pingh.spine.io";
-option java_package = "io.spine.examples.pingh.sessions.event";
-option java_outer_classname = "EventsProto";
+option java_package = "io.spine.examples.pingh.github";
+option java_outer_classname = "GitHubProto";
 option java_multiple_files = true;
 
-import "spine_examples/pingh/sessions/identifiers.proto";
-import "spine_examples/pingh/github/github.proto";
+import "google/protobuf/timestamp.proto";
 
-// The user logged in.
-message UserLoggedIn {
+// The username used in the GitHub account.
+message Username {
 
-    // The ID of user session.
-    SessionId id = 1;
-
-    // The name of the user who logged in.
-    spine_examples.pingh.github.Username username = 2 [(required) = true];
-
-    // The GitHub token obtained as a result of logging in.
-    spine_examples.pingh.github.GitHubToken token = 3 [(required) = true];
+    string value = 1 [(required) = true];
 }
 
-// The user logged out.
-message UserLoggedOut {
+// A token issued by GitHub after authentication. Used to obtain
+// information on behalf of the user.
+message GitHubToken {
 
-    // The ID of user session.
-    SessionId id = 1;
+    string value = 1 [(required) = true];
 }

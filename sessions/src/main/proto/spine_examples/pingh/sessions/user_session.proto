@@ -35,6 +35,7 @@ option java_outer_classname = "UserSessionProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/sessions/identifiers.proto";
+import "spine_examples/pingh/github/github.proto";
 import "google/protobuf/timestamp.proto";
 
 // The process of session existence.
@@ -48,27 +49,8 @@ message UserSession {
     SessionId id = 1;
 
     // The name of the user.
-    Username username = 2 [(required) = true];
+    spine_examples.pingh.github.Username username = 2 [(required) = true];
 
     // Time when the user logged in.
     google.protobuf.Timestamp when_logged_in = 3 [(required) = true];
-}
-
-// The username used in the GitHub account.
-message Username {
-
-    string value = 1 [(required) = true];
-}
-
-// The user password used in the GitHub account.
-message Password {
-
-    string value = 1 [(required) = true];
-}
-
-// A token issued by GitHub after authentication. Used to obtain
-// information on behalf of the user.
-message GitHubToken {
-
-    string value = 1 [(required) = true];
 }
