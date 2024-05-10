@@ -40,6 +40,7 @@ import "google/protobuf/timestamp.proto";
 // The process of session existence.
 //
 // It starts with the user's login and ends with the user's login out.
+//
 message UserSession {
     option (entity) = { kind: PROCESS_MANAGER };
 

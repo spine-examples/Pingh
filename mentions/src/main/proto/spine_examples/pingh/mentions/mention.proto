@@ -42,8 +42,9 @@ import "google/protobuf/timestamp.proto";
 // The process of notifications and reading mentions.
 //
 // The process handles the lifecycle of a mention. As long as it is
-// unread, it reacts to the commands SnoozeMention and MarkMentionsAsRead.
+// unread, it reacts to the commands `SnoozeMention` and `MarkMentionsAsRead`.
 // After it is read, process rejects all commands.
+//
 message Mention {
     option (entity) = { kind: PROCESS_MANAGER };
 

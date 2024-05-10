@@ -39,17 +39,18 @@ import "spine_examples/pingh/sessions/user_session.proto";
 
 // The process of fetching mentions from the GitHub.
 //
-// The process starts responding to the UserLoggedIn event. The process ID is
+// The process starts responding to the `UserLoggedIn` event. The process ID is
 // generated automatically.
 //
-// At regular intervals a FetchMentions command is generated. When receiving
+// At regular intervals a `FetchMentions` command is generated. When receiving
 // the command, the process enters the REQUESTED fetching state and does not
 // accept any more FetchMentions commands. Further mentions is requested from
-// GitHub and processed, creating UserMentioned events. After the end of
+// GitHub and processed, creating `UserMentioned` events. After the end of
 // processing, the process fetching state is set to COMPLETED and it can
-// accept FetchMentions commands again.
+// accept `FetchMentions` commands again.
 //
 // The state at initialization is set to COMPLETED.
+//
 message GitHubClient {
     option (entity) = { kind: PROCESS_MANAGER };
 
