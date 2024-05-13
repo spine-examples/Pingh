@@ -48,9 +48,6 @@ message UserSession {
     // The ID of user session.
     SessionId id = 1;
 
-    // The name of the user.
-    spine_examples.pingh.github.Username username = 2 [(required) = true];
-
     // Time when the user logged in.
     google.protobuf.Timestamp when_logged_in = 3 [(required) = true];
 }

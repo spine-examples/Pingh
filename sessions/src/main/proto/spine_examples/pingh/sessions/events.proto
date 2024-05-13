@@ -43,9 +43,6 @@ message UserLoggedIn {
     // The ID of user session.
     SessionId id = 1;
 
-    // The name of the user who logged in.
-    spine_examples.pingh.github.Username username = 2 [(required) = true];
-
     // The GitHub token obtained as a result of logging in.
     spine_examples.pingh.github.PersonalAccessToken token = 3 [(required) = true];
 }

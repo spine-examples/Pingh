@@ -45,8 +45,4 @@ message UserCannotLoggedIn {
 
     // The ID of the session in which the login failed.
     SessionId id = 1 [(required) = true];
-
-    // The name of the user who enter incorrect name
-    // or authentication code from GitHub.
-    spine_examples.pingh.github.Username username = 2 [(required) = true];
 }
