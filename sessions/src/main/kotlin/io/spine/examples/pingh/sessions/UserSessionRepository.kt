@@ -14,7 +14,6 @@ public class UserSessionRepository :
     ProcessManagerRepository<SessionId, UserSessionProcess, UserSession>() {
 
     @OverridingMethodsMustInvokeSuper
-    @Override
     override fun setupEventRouting(routing: EventRouting<SessionId>) {
         super.setupEventRouting(routing)
         routing

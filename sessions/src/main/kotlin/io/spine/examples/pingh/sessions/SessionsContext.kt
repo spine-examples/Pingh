@@ -7,9 +7,9 @@ public class SessionsContext {
 
     public companion object {
         public const val NAME: String = "sessions"
-    }
 
-    public fun newBuilder(): BoundedContextBuilder =
-        BoundedContext.singleTenant(NAME)
-            .add(UserSessionRepository())
+        public fun newBuilder(): BoundedContextBuilder =
+            BoundedContext.singleTenant(NAME)
+                .add(UserSessionRepository())
+    }
 }
