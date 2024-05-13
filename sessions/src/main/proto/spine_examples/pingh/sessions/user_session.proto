@@ -49,5 +49,5 @@ message UserSession {
     SessionId id = 1;
 
     // Time when the user logged in.
-    google.protobuf.Timestamp when_logged_in = 3 [(required) = true];
+    google.protobuf.Timestamp when_logged_in = 2 [(required) = true];
 }
