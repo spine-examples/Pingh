@@ -41,14 +41,14 @@ import "google/protobuf/timestamp.proto";
 // The process of fetching mentions from the GitHub.
 //
 // At regular intervals, a `FetchMentions` command is generated.  When a command
-// is received, the current time is set in the when_started field. The `FetchMentions`
-// command will be rejected as long as the when_started field is NOT empty.
+// is received, the current time is set in the `when_started` field. The `FetchMentions`
+// command will be rejected as long as the `when_started` field is NOT empty.
 //
 // Mentions fetched from GitHub and processed by firing `UserMentioned` events.
-// When completed, the when_started field is reset to empty and it can accept
+// When completed, the `when_started` field is reset to empty and it can accept
 // `FetchMentions` commands again.
 //
-// Initially, the when_started field is empty.
+// Initially, the `when_started` field is empty.
 //
 message GitHubClient {
     option (entity) = { kind: PROCESS_MANAGER };
@@ -57,7 +57,7 @@ message GitHubClient {
     GitHubClientId id = 1;
 
     // The token of the user for whom mentions are fetched.
-    spine_examples.pingh.github.GitHubToken token = 2 [(required) = true];
+    spine_examples.pingh.github.PersonalAccessToken token = 2 [(required) = true];
 
     // The time at which it started fetching mentions from GitHub.
     google.protobuf.Timestamp when_started = 3;

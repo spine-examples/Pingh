@@ -47,7 +47,7 @@ message UserLoggedIn {
     spine_examples.pingh.github.Username username = 2 [(required) = true];
 
     // The GitHub token obtained as a result of logging in.
-    spine_examples.pingh.github.GitHubToken token = 3 [(required) = true];
+    spine_examples.pingh.github.PersonalAccessToken token = 3 [(required) = true];
 }
 
 // The user logged out.

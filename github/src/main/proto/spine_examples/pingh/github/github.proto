@@ -44,7 +44,7 @@ message Username {
 
 // A token issued by GitHub after authentication. Used to obtain
 // information on behalf of the user.
-message GitHubToken {
+message PersonalAccessToken {
 
     string value = 1 [(required) = true];
 }
