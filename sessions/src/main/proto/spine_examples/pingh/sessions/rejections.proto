@@ -38,13 +38,15 @@ import "spine_examples/pingh/github/github.proto";
 
 // Cannot log in because authentication on the GitHub side failed.
 //
-// Emitted when a user enters an incorrect login or password.
+// Emitted when a user enters an incorrect login or
+// authentication code from GitHub.
 //
-message UserEnteredIncorrectNameOrPassword {
+message UserCannotLoggedIn {
 
     // The ID of the session in which the login failed.
     SessionId id = 1 [(required) = true];
 
-    // The name of the user who enter incorrect name or password.
+    // The name of the user who enter incorrect name
+    // or authentication code from GitHub.
     spine_examples.pingh.github.Username username = 2 [(required) = true];
 }

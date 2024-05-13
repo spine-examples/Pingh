@@ -38,15 +38,16 @@ import "spine_examples/pingh/mentions/identifiers.proto";
 import "spine_examples/pingh/github/github.proto";
 import "google/protobuf/timestamp.proto";
 
-// The process of fetching mentions from the GitHub.
+// The process of updating mentions from the GitHub.
 //
-// At regular intervals, a `FetchMentions` command is generated.  When a command
-// is received, the current time is set in the `when_started` field. The `FetchMentions`
-// command will be rejected as long as the `when_started` field is NOT empty.
+// At regular intervals, a `UpdateMentionsFromGitHub` command is generated.  When a command
+// is received, the current time is set in the `when_started` field. The
+// `UpdateMentionsFromGitHub` command will be rejected as long as the `when_started` field
+// is NOT empty.
 //
-// Mentions fetched from GitHub and processed by firing `UserMentioned` events.
+// Mentions updated from GitHub and processed by firing `UserMentioned` events.
 // When completed, the `when_started` field is reset to empty and it can accept
-// `FetchMentions` commands again.
+// `UpdateMentionsFromGitHub` commands again.
 //
 // Initially, the `when_started` field is empty.
 //
@@ -56,9 +57,9 @@ message GitHubClient {
     // The ID of the GitHub client.
     GitHubClientId id = 1;
 
-    // The token of the user for whom mentions are fetched.
+    // The token of the user for whom mentions are updated.
     spine_examples.pingh.github.PersonalAccessToken token = 2 [(required) = true];
 
-    // The time at which it started fetching mentions from GitHub.
+    // The time at which it started updating mentions from GitHub.
     google.protobuf.Timestamp when_started = 3;
 }

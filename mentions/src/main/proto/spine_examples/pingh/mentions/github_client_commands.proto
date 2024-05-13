@@ -37,12 +37,12 @@ option java_multiple_files = true;
 import "spine_examples/pingh/mentions/identifiers.proto";
 import "spine_examples/pingh/github/github.proto";
 
-// Tells to fetch mentions from the GitHub client.
-message FetchMentions {
+// Tells to update mentions from the GitHub client.
+message UpdateMentionsFromGitHub {
 
     // The ID of the GitHub client.
     GitHubClientId id = 1;
 
-    // The token of the user who tells to fetch the mentions.
+    // The token of the user who tells to update the mentions.
     spine_examples.pingh.github.PersonalAccessToken token = 2 [(required) = true];
 }
