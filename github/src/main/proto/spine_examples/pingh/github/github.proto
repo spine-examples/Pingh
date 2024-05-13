@@ -35,6 +35,7 @@ option java_outer_classname = "GitHubProto";
 option java_multiple_files = true;
 
 import "google/protobuf/timestamp.proto";
+import "spine/net/url.proto";
 
 // The username used in the GitHub account.
 message Username {
@@ -42,9 +43,21 @@ message Username {
     string value = 1 [(required) = true];
 }
 
-// A token issued by GitHub after authentication. Used to obtain
-// information on behalf of the user.
+// The token issued by GitHub after authentication.
+//
+// Used to obtain information on behalf of the user.
+//
 message PersonalAccessToken {
 
     string value = 1 [(required) = true];
+}
+
+// The GitHub user information.
+message User {
+
+    // The unique username that identifies the user.
+    Username username = 1 [(required) = true];
+
+    // The link to the user's avatar.
+    spine.net.Url avatar_url = 2 [(required) = true];
 }

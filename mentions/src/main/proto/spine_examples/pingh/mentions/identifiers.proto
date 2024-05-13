@@ -43,9 +43,11 @@ message MentionId {
 }
 
 // Identifies a process of updating mentions from the GitHub.
+//
+// There is a single `GitHubClient` for each GitHub user. GitHub usernames are unique.
+// Therefore, usernames used as an identifier of `GitHubClient`.
+//
 message GitHubClientId {
 
-    // There is a single `GitHubClient` for each GitHub user. GitHub usernames are unique.
-    // Therefore, usernames used as an identifier of `GitHubClient`.
     spine_examples.pingh.github.Username username = 1 [(required) = true];
 }
