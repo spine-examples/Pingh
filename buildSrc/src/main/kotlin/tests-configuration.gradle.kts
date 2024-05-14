@@ -25,6 +25,7 @@
  */
 
 import io.spine.internal.dependency.JUnit
+import io.spine.internal.dependency.Kotest
 
 plugins {
     java
@@ -37,6 +38,11 @@ dependencies {
     testImplementation(JUnit.api)
     testImplementation(JUnit.params)
     testRuntimeOnly(JUnit.runner)
+
+    testImplementation(Kotest.frameworkEngine)
+    testImplementation(Kotest.datatest)
+    testImplementation(Kotest.assertions)
+    testImplementation(Kotest.runnerJUnit5Jvm)
 }
 
 /**

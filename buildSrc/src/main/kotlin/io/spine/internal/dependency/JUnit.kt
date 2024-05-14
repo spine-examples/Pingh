@@ -29,7 +29,7 @@ package io.spine.internal.dependency
 // https://junit.org/junit5
 @Suppress("ConstPropertyName")
 public object JUnit {
-    private const val version = "5.8.2"
+    private const val version = "5.8.0"
 
     public const val api: String =
         "org.junit.jupiter:junit-jupiter-engine:${version}"
