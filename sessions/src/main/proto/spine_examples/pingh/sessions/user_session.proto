@@ -23,6 +23,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-rootProject.name = "Pingh"
-include("github", "sessions", "mentions")
+package spine_examples.pingh.sessions;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.pingh.spine.io";
+option java_package = "io.spine.examples.pingh.sessions";
+option java_outer_classname = "UserSessionProto";
+option java_multiple_files = true;
+
+import "spine_examples/pingh/sessions/identifiers.proto";
+import "spine_examples/pingh/github/github.proto";
+import "google/protobuf/timestamp.proto";
+
+// The process of session existence.
+//
+// It starts with the user's login and ends with the user's login out.
+//
+message UserSession {
+    option (entity) = { kind: PROCESS_MANAGER };
+
+    // The ID of user session.
+    SessionId id = 1;
+
+    // Time when the user logged in.
+    google.protobuf.Timestamp when_logged_in = 2 [(required) = true];
+}

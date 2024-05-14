@@ -1,0 +1,93 @@
+/*
+ * Copyright 2024, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+syntax = "proto3";
+
+package spine_examples.pingh.mentions;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.pingh.spine.io";
+option java_package = "io.spine.examples.pingh.mentions";
+option java_outer_classname = "MentionProto";
+option java_multiple_files = true;
+
+import "spine_examples/pingh/mentions/identifiers.proto";
+import "spine_examples/pingh/github/github.proto";
+import "spine/net/url.proto";
+import "google/protobuf/timestamp.proto";
+
+// The process of notifications and reading mentions.
+//
+// The process handles the lifecycle of a mention. As long as it is
+// unread, it reacts to the commands `SnoozeMention` and `MarkMentionsAsRead`.
+// After it is read, process rejects all commands.
+//
+message Mention {
+    option (entity) = { kind: PROCESS_MANAGER };
+
+    // The ID of the mention.
+    MentionId id = 1;
+
+    // The read status of mention.
+    MentionStatus status = 2 [(required) = true];
+}
+
+// Information about all mentions of the user.
+message UserMentions {
+    option (entity) = { kind: PROJECTION };
+
+    // The ID of the mention.
+    MentionId id = 1;
+
+    // The user who created the mention.
+    spine_examples.pingh.github.User who_mentioned = 2 [(required) = true];
+
+    // The title of the topic in which the mention created.
+    string title = 3 [(required) = true];
+
+    // Time when the user was mentioned.
+    google.protobuf.Timestamp when_mentioned = 4 [(required) = true];
+
+    // The link to the GitHub page where the user was mentioned.
+    spine.net.Url url = 5 [(required) = true];
+
+    // The read status of mention.
+    MentionStatus status = 6 [(required) = true];
+}
+
+// The read status of mention.
+enum MentionStatus {
+    MS_UNSPECIFIED = 0;
+
+    // Mentions have not yet been read.
+    UNREAD = 1;
+
+    // The reading of the mention has been snoozed.
+    SNOOZED = 2;
+
+    // Mentions have already been read.
+    READ = 3;
+}

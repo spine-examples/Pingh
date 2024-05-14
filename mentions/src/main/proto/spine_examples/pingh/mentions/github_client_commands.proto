@@ -23,6 +23,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-rootProject.name = "Pingh"
-include("github", "sessions", "mentions")
+package spine_examples.pingh.mentions;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.mention.spine.io";
+option java_package = "io.spine.examples.pingh.mentions.command";
+option java_outer_classname = "GitHubClientCommandsProto";
+option java_multiple_files = true;
+
+import "spine_examples/pingh/mentions/identifiers.proto";
+import "spine_examples/pingh/github/github.proto";
+
+// Tells to update mentions from the GitHub client.
+message UpdateMentionsFromGitHub {
+
+    // The ID of the GitHub client.
+    GitHubClientId id = 1;
+
+    // The token of the user who tells to update the mentions.
+    spine_examples.pingh.github.PersonalAccessToken token = 2 [(required) = true];
+}

@@ -24,5 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "Pingh"
-include("github", "sessions", "mentions")
+package io.spine.internal.dependency
+
+@Suppress("ConstPropertyName")
+public object JavaX {
+
+    // This artifact which used to be a part of J2EE moved under Eclipse EE4J project.
+    // https://github.com/eclipse-ee4j/common-annotations-api
+    public const val annotations: String = "javax.annotation:javax.annotation-api:1.3.2"
+}

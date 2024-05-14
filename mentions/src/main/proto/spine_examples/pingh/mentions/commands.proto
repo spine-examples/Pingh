@@ -23,6 +23,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-rootProject.name = "Pingh"
-include("github", "sessions", "mentions")
+package spine_examples.pingh.mentions;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.pingh.spine.io";
+option java_package = "io.spine.examples.pingh.mentions.command";
+option java_outer_classname = "CommandsProto";
+option java_multiple_files = true;
+
+import "spine_examples/pingh/mentions/identifiers.proto";
+import "google/protobuf/timestamp.proto";
+
+// Tells to mark the mention as read.
+message MarkMentionAsRead {
+
+    // The ID of the mention.
+    MentionId id = 1;
+}
+
+// Tells to snooze the mention until the specified time.
+message SnoozeMention {
+
+    // The ID of the mention.
+    MentionId id = 1;
+
+    // The time until which the mention was snoozed.
+    google.protobuf.Timestamp until_when = 2 [(required) = true];
+}
