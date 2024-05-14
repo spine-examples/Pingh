@@ -29,11 +29,25 @@ package io.spine.examples.pingh.sessions
 import io.spine.server.BoundedContext
 import io.spine.server.BoundedContextBuilder
 
-public class SessionsContext {
+/**
+ * Configurator that customizes the session bounded context
+ * using repositories.
+ *
+ * Class instance creation is prevented.
+ */
+public class SessionsContext private constructor(){
 
     public companion object {
+
+        /**
+         * Names for the Session [BoundedContext].
+         */
         public const val NAME: String = "sessions"
 
+        /**
+         * Creates [BoundedContextBuilder] for the Sessions context
+         * and fills it with repository.
+         */
         public fun newBuilder(): BoundedContextBuilder =
             BoundedContext.singleTenant(NAME)
                 .add(UserSessionRepository())

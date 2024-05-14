@@ -27,4 +27,10 @@
 /**
  * Provides API for creation test environment and signals for sessions testing.
  */
+@CheckReturnValue
+@ParametersAreNonnullByDefault
 package io.spine.examples.pingh.sessions.given;
+
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

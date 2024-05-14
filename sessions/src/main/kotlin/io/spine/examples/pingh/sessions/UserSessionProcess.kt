@@ -32,51 +32,60 @@ import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
-import io.spine.examples.pingh.sessions.rejection.UserCannotLoggedIn
 import io.spine.server.command.Assign
 import io.spine.server.procman.ProcessManager
 import java.time.Instant
 
+/**
+ * Entity that coordinates the process of a user logging in and out of the system
+ * using sessions.
+ */
 public class UserSessionProcess :
     ProcessManager<SessionId, UserSession, UserSession.Builder>() {
 
+    /**
+     * Emits event when a user logs in.
+     */
     @Assign
-    @Throws(UserCannotLoggedIn::class)
-    public fun handle(command: LogUserIn): UserLoggedIn {
+    internal fun handle(command: LogUserIn): UserLoggedIn {
 
         initState(command)
 
-        val token = ""
+        val tokenValue = "token"
 
-        return UserLoggedIn.newBuilder()
-            .setId(command.id)
-            .setToken(
-                PersonalAccessToken.newBuilder()
-                    .setValue(token)
-                    .vBuild()
-            )
-            .vBuild()
+        return with(UserLoggedIn.newBuilder()) {
+            id = command.id
+            token = with(PersonalAccessToken.newBuilder()) {
+                value = tokenValue
+                vBuild()
+            }
+            vBuild()
+        }
     }
 
     private fun initState(command: LogUserIn) {
 
         val now = Instant.now()
 
-        builder()
-            .setId(command.id)
-            .setWhenLoggedIn(
-                Timestamp.newBuilder()
-                    .setSeconds(now.epochSecond)
-                    .setNanos(now.nano)
-                    .build()
-            )
+        with(builder()) {
+            id = command.id
+            whenLoggedIn = with(Timestamp.newBuilder()) {
+                seconds = now.epochSecond
+                nanos = now.nano
+                build()
+            }
+            vBuild()
+        }
     }
 
+    /**
+     * Emits event when a user logs out.
+     */
     @Assign
-    public fun handle(command: LogUserOut): UserLoggedOut {
+    internal fun handle(command: LogUserOut): UserLoggedOut =
+        with(UserLoggedOut.newBuilder()) {
+            id = command.id
+            vBuild()
+        }
 
-        return UserLoggedOut.newBuilder()
-            .setId(command.id)
-            .vBuild()
-    }
 }

@@ -43,10 +43,10 @@ public class UserSessionRepository :
     override fun setupEventRouting(routing: EventRouting<SessionId>) {
         super.setupEventRouting(routing)
         routing
-            .route(UserLoggedIn::class.java) { event, context ->
+            .route(UserLoggedIn::class.java) { event, _ ->
                 withId(event.id)
             }
-            .route(UserLoggedOut::class.java) { event, context ->
+            .route(UserLoggedOut::class.java) { event, _ ->
                 withId(event.id)
             }
     }
