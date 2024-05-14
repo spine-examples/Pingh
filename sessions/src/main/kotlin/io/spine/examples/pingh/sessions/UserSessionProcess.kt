@@ -74,7 +74,6 @@ public class UserSessionProcess :
                 nanos = now.nano
                 build()
             }
-            vBuild()
         }
     }
 
