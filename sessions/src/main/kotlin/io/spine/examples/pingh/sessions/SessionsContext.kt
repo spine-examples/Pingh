@@ -29,6 +29,7 @@ package io.spine.examples.pingh.sessions
 import io.spine.server.BoundedContext
 import io.spine.server.BoundedContextBuilder
 
+// TODO:2024.05.14:MykytaPimonovTD: Rename field and method.
 /**
  * Name of the Sessions [BoundedContext].
  */

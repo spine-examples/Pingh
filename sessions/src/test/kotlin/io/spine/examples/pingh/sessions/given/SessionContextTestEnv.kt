@@ -32,38 +32,30 @@ import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 
-/**
- * Provides API for creation test environment and signals for sessions testing.
- */
-class SessionContextTestEnv private constructor() {
-
-    companion object {
-
-        fun sessionId(usernameValue: String): SessionId =
-            with(SessionId.newBuilder()) {
-                username = with(Username.newBuilder()) {
-                    value = usernameValue
-                    vBuild()
-                }
-                vBuild()
-            }
-
-        fun token(tokenValue: String): PersonalAccessToken =
-            with(PersonalAccessToken.newBuilder()) {
-                value = tokenValue
-                vBuild()
-            }
-
-        fun logUserInBy(sessionId: SessionId): LogUserIn =
-            with(LogUserIn.newBuilder()) {
-                id = sessionId
-                vBuild()
-            }
-
-        fun logUserOutBy(sessionId: SessionId): LogUserOut =
-            with(LogUserOut.newBuilder()) {
-                id = sessionId
-                vBuild()
-            }
+// TODO:2024.05.14:MykytaPimonovTD: Write docs
+fun sessionId(usernameValue: String): SessionId =
+    with(SessionId.newBuilder()) {
+        username = with(Username.newBuilder()) {
+            value = usernameValue
+            vBuild()
+        }
+        vBuild()
     }
-}
+
+fun token(tokenValue: String): PersonalAccessToken =
+    with(PersonalAccessToken.newBuilder()) {
+        value = tokenValue
+        vBuild()
+    }
+
+fun logUserInBy(sessionId: SessionId): LogUserIn =
+    with(LogUserIn.newBuilder()) {
+        id = sessionId
+        vBuild()
+    }
+
+fun logUserOutBy(sessionId: SessionId): LogUserOut =
+    with(LogUserOut.newBuilder()) {
+        id = sessionId
+        vBuild()
+    }

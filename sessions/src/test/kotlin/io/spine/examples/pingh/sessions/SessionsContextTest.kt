@@ -30,10 +30,10 @@ import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
-import io.spine.examples.pingh.sessions.given.SessionContextTestEnv.Companion.logUserInBy
-import io.spine.examples.pingh.sessions.given.SessionContextTestEnv.Companion.logUserOutBy
-import io.spine.examples.pingh.sessions.given.SessionContextTestEnv.Companion.sessionId
-import io.spine.examples.pingh.sessions.given.SessionContextTestEnv.Companion.token
+import io.spine.examples.pingh.sessions.given.logUserInBy
+import io.spine.examples.pingh.sessions.given.logUserOutBy
+import io.spine.examples.pingh.sessions.given.sessionId
+import io.spine.examples.pingh.sessions.given.token
 import io.spine.server.BoundedContextBuilder
 import io.spine.testing.server.blackbox.ContextAwareTest
 import org.junit.jupiter.api.BeforeEach
@@ -46,29 +46,27 @@ import io.spine.testing.TestValues.randomString
 @DisplayName("Sessions Context should")
 class SessionsContextTest : ContextAwareTest() {
 
+    // TODO:2024.05.14:MykytaPimonovTD: User Kotest matchers.
     override fun contextBuilder(): BoundedContextBuilder =
         newBuilder()
 
     @Nested
-    @DisplayName("handle the `LogUserIn` command")
-    inner class LogUserInCommand {
+    inner class `handle the 'LogUserIn' command` {
 
-        private var command: LogUserIn? = null
+        private lateinit var command: LogUserIn
 
         @BeforeEach
         fun sendCommand() {
 
             command = logUserInBy(sessionId(randomString()))
-
-            context().receivesCommand(command!!)
+            context().receivesCommand(command)
         }
 
         @Test
-        @DisplayName("emitting 'UserLoggedIn` event")
-        fun event() {
+        fun `emitting 'UserLoggedIn' event`() {
 
             val expected = with(UserLoggedIn.newBuilder()) {
-                id = command!!.id
+                id = command.id
                 token = token("token")
                 vBuild()
             }
@@ -76,22 +74,20 @@ class SessionsContextTest : ContextAwareTest() {
         }
 
         @Test
-        @DisplayName("updating the `Session` entity")
-        fun entity() {
+        fun `updating the 'Session' entity`() {
 
             val expected = with(UserSession.newBuilder()) {
-                id = command!!.id
+                id = command.id
                 build()
             }
-            context().assertState(command!!.id, expected)
+            context().assertState(command.id, expected)
         }
     }
 
     @Nested
-    @DisplayName("handle the `LogUserOut` command")
-    inner class LogUserOutCommand {
+    inner class `handle the 'LogUserOut' command` {
 
-        private var command: LogUserOut? = null
+        private lateinit var command: LogUserOut
 
         @BeforeEach
         fun sendCommand() {
@@ -102,15 +98,14 @@ class SessionsContextTest : ContextAwareTest() {
             command = logUserOutBy(sessionId(usernameValue))
 
             context().receivesCommand(logUserInCommand)
-            context().receivesCommand(command!!)
+            context().receivesCommand(command)
         }
 
         @Test
-        @DisplayName("emitting 'UserLoggedOut` event")
-        fun event() {
+        fun `emitting 'UserLoggedOut' event`() {
 
             val expected = with(UserLoggedOut.newBuilder()) {
-                id = command!!.id
+                id = command.id
                 vBuild()
             }
             context().assertEvent(expected)
