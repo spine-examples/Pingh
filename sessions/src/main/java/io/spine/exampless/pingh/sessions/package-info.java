@@ -25,12 +25,13 @@
  */
 
 /**
- * Provides API for creation test environment and signals for sessions testing.
+ * Provides server-side classes for working with user sessions.
  */
+@BoundedContext(NAME)
 @CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.examples.pingh.sessions.given;
+package io.spine.exampless.pingh.sessions;
 
 import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.core.BoundedContext;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import static io.spine.examples.pingh.sessions.SessionsContextKt.NAME;
