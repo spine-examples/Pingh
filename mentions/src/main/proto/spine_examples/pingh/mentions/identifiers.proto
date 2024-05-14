@@ -45,7 +45,7 @@ message MentionId {
 // Identifies a process of updating mentions from the GitHub.
 //
 // There is a single `GitHubClient` for each GitHub user. GitHub usernames are unique.
-// Therefore, usernames used as an identifier of `GitHubClient`.
+// Therefore, usernames are used as an identifier of `GitHubClient`.
 //
 message GitHubClientId {
 

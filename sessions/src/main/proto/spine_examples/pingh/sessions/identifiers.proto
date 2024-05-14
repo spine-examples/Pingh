@@ -38,8 +38,8 @@ import "spine_examples/pingh/github/github.proto";
 
 // Identifies a user session.
 //
-// There is a single `UserSession` for each GitHub user. GitHub usernames are unique.
-// Therefore, usernames used as an identifier of `UserSession`.
+// There is a single user session for each GitHub user. GitHub usernames are unique.
+// Therefore, usernames are used as an identifier of user session.
 //
 message SessionId {
 
