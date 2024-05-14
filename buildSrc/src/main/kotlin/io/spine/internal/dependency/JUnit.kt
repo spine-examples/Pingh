@@ -24,34 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Gradle configuration for the whole project.
- */
-allprojects {
-    /*
-    * Import the `version.gradle.kts` file and set the version and group for each module.
-    */
-    apply(from = "$rootDir/version.gradle.kts")
-    version = extra["pinghVersion"]!!
-    group = "io.spine.examples"
+package io.spine.internal.dependency
 
-    apply<IdeaPlugin>()
-}
+// https://junit.org/junit5
+@Suppress("ConstPropertyName")
+public object JUnit {
+    private const val version = "5.8.2"
 
-/**
- * The configuration is divided in multiple script plugins located in `buildSrc/src/main/kotlin`.
- * Each of these plugins contains a more detailed description in their source file.
- */
-subprojects {
-    apply<JavaPlugin>()
+    public const val api: String =
+        "org.junit.jupiter:junit-jupiter-engine:${version}"
 
-    /*
-     * Configure repositories.
-     */
-    apply<RepositoriesConfigurationPlugin>()
+    public const val runner: String =
+        "org.junit.jupiter:junit-jupiter-engine:${version}"
 
-    /*
-     * Adds dependencies for testing and configure test-running tasks.
-     */
-    apply<TestsConfigurationPlugin>()
+    public const val params: String =
+        "org.junit.jupiter:junit-jupiter-params:${version}"
 }

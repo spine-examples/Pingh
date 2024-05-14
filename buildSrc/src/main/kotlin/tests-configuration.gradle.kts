@@ -24,34 +24,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Gradle configuration for the whole project.
- */
-allprojects {
-    /*
-    * Import the `version.gradle.kts` file and set the version and group for each module.
-    */
-    apply(from = "$rootDir/version.gradle.kts")
-    version = extra["pinghVersion"]!!
-    group = "io.spine.examples"
+import io.spine.internal.dependency.JUnit
 
-    apply<IdeaPlugin>()
+plugins {
+    java
+}
+
+repositories {
+    mavenLocal()
 }
 
 /**
- * The configuration is divided in multiple script plugins located in `buildSrc/src/main/kotlin`.
- * Each of these plugins contains a more detailed description in their source file.
+ * Add dependencies for testing.
  */
-subprojects {
-    apply<JavaPlugin>()
+dependencies {
+    testImplementation(JUnit.api)
+    testImplementation(JUnit.params)
+    testRuntimeOnly(JUnit.runner)
+}
 
-    /*
-     * Configure repositories.
-     */
-    apply<RepositoriesConfigurationPlugin>()
-
-    /*
-     * Adds dependencies for testing and configure test-running tasks.
-     */
-    apply<TestsConfigurationPlugin>()
+/**
+ * Explicitly instructs to discover and execute JUnit tests.
+ */
+tasks.withType<Test> {
+    useJUnitPlatform {
+        includeEngines("junit-jupiter")
+    }
 }
