@@ -30,26 +30,14 @@ import io.spine.server.BoundedContext
 import io.spine.server.BoundedContextBuilder
 
 /**
- * Configurator that customizes the session bounded context
- * using repositories.
- *
- * Class instance creation is prevented.
+ * Name of the Sessions [BoundedContext].
  */
-public class SessionsContext private constructor(){
+public const val NAME: String = "Sessions"
 
-    public companion object {
-
-        /**
-         * Names for the Session [BoundedContext].
-         */
-        public const val NAME: String = "sessions"
-
-        /**
-         * Creates [BoundedContextBuilder] for the Sessions context
-         * and fills it with repository.
-         */
-        public fun newBuilder(): BoundedContextBuilder =
-            BoundedContext.singleTenant(NAME)
-                .add(UserSessionRepository())
-    }
-}
+/**
+ * Creates [BoundedContextBuilder] for the Sessions context
+ * and fills it with repository.
+ */
+public fun newBuilder(): BoundedContextBuilder =
+    BoundedContext.singleTenant(NAME)
+        .add(UserSessionRepository())

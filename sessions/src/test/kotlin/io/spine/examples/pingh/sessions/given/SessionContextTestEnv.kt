@@ -33,9 +33,7 @@ import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 
 /**
- * Util for creation test environment and signals for sessions testing.
- *
- * Class instance creation is prevented.
+ * Provides API for creation test environment and signals for sessions testing.
  */
 class SessionContextTestEnv private constructor() {
 

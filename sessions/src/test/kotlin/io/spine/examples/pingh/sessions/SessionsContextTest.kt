@@ -47,7 +47,7 @@ import io.spine.testing.TestValues.randomString
 class SessionsContextTest : ContextAwareTest() {
 
     override fun contextBuilder(): BoundedContextBuilder =
-        SessionsContext.newBuilder()
+        newBuilder()
 
     @Nested
     @DisplayName("handle the `LogUserIn` command")

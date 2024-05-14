@@ -26,7 +26,7 @@
 
 package io.spine.examples.pingh.sessions
 
-import com.google.protobuf.Timestamp
+import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
@@ -34,7 +34,6 @@ import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.server.command.Assign
 import io.spine.server.procman.ProcessManager
-import java.time.Instant
 
 /**
  * Entity that coordinates the process of a user logging in and out of the system
@@ -48,15 +47,11 @@ public class UserSessionProcess :
      */
     @Assign
     internal fun handle(command: LogUserIn): UserLoggedIn {
-
         initState(command)
-
-        val tokenValue = "token"
-
         return with(UserLoggedIn.newBuilder()) {
             id = command.id
             token = with(PersonalAccessToken.newBuilder()) {
-                value = tokenValue
+                value = "token"
                 vBuild()
             }
             vBuild()
@@ -64,16 +59,9 @@ public class UserSessionProcess :
     }
 
     private fun initState(command: LogUserIn) {
-
-        val now = Instant.now()
-
         with(builder()) {
             id = command.id
-            whenLoggedIn = with(Timestamp.newBuilder()) {
-                seconds = now.epochSecond
-                nanos = now.nano
-                build()
-            }
+            whenLoggedIn = currentTime()
         }
     }
 
@@ -86,5 +74,4 @@ public class UserSessionProcess :
             id = command.id
             vBuild()
         }
-
 }
