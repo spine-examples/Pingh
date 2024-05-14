@@ -26,7 +26,6 @@
 
 import io.spine.internal.BuildSettings
 import io.spine.internal.dependency.JavaX
-import io.spine.internal.dependency.Spine
 
 plugins {
     kotlin("jvm").version("1.9.20")
@@ -59,5 +58,4 @@ dependencies {
     implementation(project(":github"))
 
     implementation(JavaX.annotations)
-    implementation(Spine.CoreJava.server)
 }
