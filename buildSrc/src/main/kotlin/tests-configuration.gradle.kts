@@ -30,10 +30,6 @@ plugins {
     java
 }
 
-repositories {
-    mavenLocal()
-}
-
 /**
  * Add dependencies for testing.
  */
