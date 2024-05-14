@@ -41,7 +41,7 @@ import "spine_examples/pingh/github/github.proto";
 // Emitted when a user enters an incorrect login or
 // authentication code from GitHub.
 //
-message UserCannotLoggedIn {
+message CannotLogUserIn {
 
     // The ID of the session in which the login failed.
     SessionId id = 1 [(required) = true];
