@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.sessions
 
-import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
@@ -60,19 +59,18 @@ public class UserSessionProcess :
     }
 
     private fun initState(command: LogUserIn) {
-        with(builder()) {
-            id = command.id
-            whenLoggedIn = currentTime()
-        }
+        builder().setId(command.id)
     }
 
     /**
      * Emits event when a user logs out.
      */
     @Assign
-    internal fun handle(command: LogUserOut): UserLoggedOut =
-        with(UserLoggedOut.newBuilder()) {
+    internal fun handle(command: LogUserOut): UserLoggedOut {
+        deleted = true
+        return with(UserLoggedOut.newBuilder()) {
             id = command.id
             vBuild()
         }
+    }
 }

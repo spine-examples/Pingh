@@ -26,25 +26,23 @@
 
 package io.spine.examples.pingh.sessions
 
-import io.spine.examples.pingh.sessions.command.LogUserIn
+import io.kotest.matchers.shouldBe
+import io.spine.base.CommandMessage
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
-import io.spine.examples.pingh.sessions.given.logUserInBy
-import io.spine.examples.pingh.sessions.given.logUserOutBy
-import io.spine.examples.pingh.sessions.given.sessionId
+import io.spine.examples.pingh.sessions.given.logUserIn
+import io.spine.examples.pingh.sessions.given.logUserOut
 import io.spine.examples.pingh.sessions.given.token
+import io.spine.protobuf.AnyPacker
 import io.spine.server.BoundedContextBuilder
-import io.spine.testing.server.blackbox.ContextAwareTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-import io.spine.testing.TestValues.randomString
-
 @DisplayName("Sessions Context should")
-class SessionsContextTest : ContextAwareTest() {
+class SessionsContextSpec : SessionSpec() {
 
     // TODO:2024.05.14:MykytaPimonovTD: User Kotest matchers.
     override fun contextBuilder(): BoundedContextBuilder =
@@ -53,34 +51,41 @@ class SessionsContextTest : ContextAwareTest() {
     @Nested
     inner class `handle the 'LogUserIn' command` {
 
-        private lateinit var command: LogUserIn
-
-        @BeforeEach
-        fun sendCommand() {
-
-            command = logUserInBy(sessionId(randomString()))
-            context().receivesCommand(command)
-        }
-
         @Test
-        fun `emitting 'UserLoggedIn' event`() {
-
+        fun `emit 'UserLoggedIn' event`() {
+            val command = logUserIn(session())
             val expected = with(UserLoggedIn.newBuilder()) {
                 id = command.id
                 token = token("token")
                 vBuild()
             }
-            context().assertEvent(expected)
+            context().receivesCommand(command)
+            val events = assertEvents(UserLoggedIn::class.java)
+            events.hasSize(1)
+            val event = AnyPacker.unpack(events.actual()[0].message, UserLoggedIn::class.java)
+            event shouldBe expected
         }
 
         @Test
-        fun `updating the 'Session' entity`() {
-
+        fun `update the 'Session' entity`() {
+            val command = logUserIn(session())
+            context().receivesCommand(command)
             val expected = with(UserSession.newBuilder()) {
                 id = command.id
                 build()
             }
             context().assertState(command.id, expected)
+        }
+
+        @Test
+        fun `update the 'Session' entity1`() {
+            listOf(
+                logUserIn(session()),
+                logUserIn(session())
+            ).forEach { context().receivesCommand(it) }
+            val eventSubject = context().assertEvents()
+            eventSubject.withType(UserLoggedIn::class.java)
+                .hasSize(2)
         }
     }
 
@@ -91,24 +96,29 @@ class SessionsContextTest : ContextAwareTest() {
 
         @BeforeEach
         fun sendCommand() {
+            val logUserInCommand = logUserIn(session())
+            command = logUserOut(session())
 
-            val usernameValue = randomString()
-
-            val logUserInCommand = logUserInBy(sessionId(usernameValue))
-            command = logUserOutBy(sessionId(usernameValue))
-
-            context().receivesCommand(logUserInCommand)
-            context().receivesCommand(command)
+            buildList<CommandMessage> {
+                add(logUserInCommand)
+                add(command)
+            }.forEach { context().receivesCommand(it) }
         }
 
         @Test
-        fun `emitting 'UserLoggedOut' event`() {
+        fun `emit 'UserLoggedOut' event`() {
 
             val expected = with(UserLoggedOut.newBuilder()) {
                 id = command.id
                 vBuild()
             }
             context().assertEvent(expected)
+
+            val eventSubject = context().assertEvents()
+            eventSubject.withType(UserLoggedIn::class.java)
+                .hasSize(1)
+            eventSubject.withType(UserLoggedOut::class.java)
+                .hasSize(1)
         }
     }
 }
