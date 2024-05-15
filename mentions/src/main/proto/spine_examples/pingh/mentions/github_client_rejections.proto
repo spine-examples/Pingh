@@ -62,7 +62,7 @@ message CannotStartDataUpdateTooEarly {
 // Emitted out when an update request comes in and the previous
 // updating has not completed.
 //
-message DataUpdateIsAlreadyInProgress {
+message MentionsUpdateIsAlreadyInProgress {
 
     // The ID of the GitHub client for which the mention updating process failed to start.
     GitHubClientId id = 1 [(required) = true];

@@ -41,13 +41,13 @@ import "google/protobuf/timestamp.proto";
 // The process of updating mentions from the GitHub.
 //
 // At regular intervals, a `UpdateMentionsFromGitHub` command is generated.  When a command
-// is received, the current time is set in the `when_started` field. The
-// `UpdateMentionsFromGitHub` command will be rejected as long as the `when_started` field
-// is NOT empty.
+// is received, the current time is set in the `when_started` field.
+// The `UpdateMentionsFromGitHub` command will be rejected as long as
+// the `when_started` field is NOT empty.
 //
 // Mentions updated from GitHub and processed by firing `UserMentioned` events.
-// When completed, the `when_started` field is reset to empty and it can accept
-// `UpdateMentionsFromGitHub` commands again.
+// When completed, the `when_started` field is reset to empty,
+// and it can handle successfully `UpdateMentionsFromGitHub` commands again.
 //
 // Initially, the `when_started` field is empty.
 //

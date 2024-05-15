@@ -40,11 +40,11 @@ import "spine_examples/pingh/github/github.proto";
 import "spine/net/url.proto";
 import "google/protobuf/timestamp.proto";
 
-// In react to a `UserLoggedIn` event, the `PersonalAccessToken` obtained from
-// `UserLoggedIn` is updated in the GitHub client.
+// In react to a `UserLoggedIn` event, the `PersonalAccessToken` obtained
+// from `UserLoggedIn` is updated in the GitHub client.
 //
-// When the `UserLoggedIn` event occurs again for a particular user, the
-// `PersonalAccessToken` is overwritten.
+// When the `UserLoggedIn` event occurs again for a particular user,
+// the `PersonalAccessToken` is overwritten.
 //
 message GitHubTokenUpdated {
 
@@ -79,9 +79,9 @@ message UserMentioned {
     MentionId id = 1;
 
     // The user who created the mention.
-    AuthorOfMention author = 2 [(required) = true];
+    spine_examples.pingh.github.User who_mentioned = 2 [(required) = true];
 
-    // The title of the topic in which the mention created.
+    // The title of the GitHub page in which the mention created.
     string title = 3 [(required) = true];
 
     // Time when the user was mentioned.
