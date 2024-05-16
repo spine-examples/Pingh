@@ -34,33 +34,33 @@ import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.testing.TestValues.randomString
 
-fun createSession(): SessionId =
+public fun createSession(): SessionId =
     createSessionBy(
         with(Username.newBuilder()) {
             value = randomString()
             vBuild()
         })
 
-fun createSessionBy(name: Username): SessionId =
+public fun createSessionBy(name: Username): SessionId =
     with(SessionId.newBuilder()) {
         username = name
         whenCreated = currentTime()
         vBuild()
     }
 
-fun userSession(session: SessionId): UserSession =
+public fun userSession(session: SessionId): UserSession =
     with(UserSession.newBuilder()) {
         id = session
         vBuild()
     }
 
-fun logUserIn(sessionId: SessionId): LogUserIn =
+public fun logUserIn(sessionId: SessionId): LogUserIn =
     with(LogUserIn.newBuilder()) {
         id = sessionId
         vBuild()
     }
 
-fun logUserOut(sessionId: SessionId): LogUserOut =
+public fun logUserOut(sessionId: SessionId): LogUserOut =
     with(LogUserOut.newBuilder()) {
         id = sessionId
         vBuild()

@@ -26,12 +26,14 @@
 
 package io.spine.examples.pingh.sessions
 
-import io.kotest.matchers.shouldBe
 import io.spine.base.EventMessage
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
-import io.spine.examples.pingh.sessions.given.*
-import io.spine.protobuf.AnyPacker
+import io.spine.examples.pingh.sessions.given.userSession
+import io.spine.examples.pingh.sessions.given.logUserOut
+import io.spine.examples.pingh.sessions.given.logUserIn
+import io.spine.examples.pingh.sessions.given.createSession
+import io.spine.examples.pingh.sessions.given.createSessionBy
 import io.spine.server.BoundedContextBuilder
 import io.spine.testing.server.EventSubject
 import io.spine.testing.server.blackbox.ContextAwareTest
@@ -41,25 +43,25 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 @DisplayName("Sessions Context should")
-class SessionsContextSpec : ContextAwareTest() {
+public class SessionsContextSpec : ContextAwareTest() {
 
-    override fun contextBuilder(): BoundedContextBuilder =
+    protected override fun contextBuilder(): BoundedContextBuilder =
         newBuilder()
 
     @Nested
-    inner class `handle the 'LogUserIn' command` {
+    public inner class `handle 'LogUserIn' command` {
 
         private lateinit var session: SessionId
 
         @BeforeEach
-        fun sendCommand() {
+        public fun sendCommand() {
             session = createSession()
             val command = logUserIn(session)
             context().receivesCommand(command)
         }
 
         @Test
-        fun `emit 'UserLoggedIn' event`() {
+        public fun `emit 'UserLoggedIn' event`() {
             val expected = with(UserLoggedIn.newBuilder()) {
                 id = session
                 build()
@@ -72,39 +74,36 @@ class SessionsContextSpec : ContextAwareTest() {
         }
 
         @Test
-        fun `update the 'UserSession' entity`() {
+        public fun `update 'UserSession' entity`() {
             val expected = userSession(session)
             context().assertState(session, expected)
         }
     }
 
     @Nested
-    inner class `handle the 'LogUserOut' command` {
+    public inner class `handle 'LogUserOut' command` {
 
         private lateinit var session: SessionId
 
         @BeforeEach
-        fun sendCommand() {
+        public fun sendCommand() {
             session = createSession()
-            context().receivesCommand(logUserIn(session))
-            context().receivesCommand(logUserOut(session))
+            context()
+                .receivesCommand(logUserIn(session))
+                .receivesCommand(logUserOut(session))
         }
 
         @Test
-        fun `emit 'UserLoggedOut' event`() {
+        public fun `emit 'UserLoggedOut' event`() {
             val expected = with(UserLoggedOut.newBuilder()) {
                 id = session
                 vBuild()
             }
-            val eventSubject = assertEvents(UserLoggedOut::class.java)
-            eventSubject.hasSize(1)
-            val event = eventSubject.actual()[0]
-            val message = AnyPacker.unpack(event.message, UserLoggedOut::class.java)
-            message shouldBe expected
+            context().assertEvent(expected)
         }
 
         @Test
-        fun `delete 'UserSession' entity`() {
+        public fun `delete 'UserSession' entity`() {
             context().assertEntity(session, UserSessionProcess::class.java)
                 .deletedFlag()
                 .isTrue()
@@ -112,11 +111,12 @@ class SessionsContextSpec : ContextAwareTest() {
     }
 
     @Test
-    fun `support multi-session`() {
+    public fun `support simultaneous sessions`() {
         val firstSession = createSession()
         val secondSession = createSessionBy(firstSession.username)
-        context().receivesCommand(logUserIn(firstSession))
-        context().receivesCommand(logUserIn(secondSession))
+        context()
+            .receivesCommand(logUserIn(firstSession))
+            .receivesCommand(logUserIn(secondSession))
 
         val firstExpected = userSession(firstSession)
         val secondExpected = userSession(secondSession)
@@ -125,12 +125,13 @@ class SessionsContextSpec : ContextAwareTest() {
     }
 
     @Test
-    fun `create new session when user logs in again`() {
+    public fun `create new session when user logs in again`() {
         val firstSession = createSession()
         val secondSession = createSessionBy(firstSession.username)
-        context().receivesCommand(logUserIn(firstSession))
-        context().receivesCommand(logUserOut(firstSession))
-        context().receivesCommand(logUserIn(secondSession))
+        context()
+            .receivesCommand(logUserIn(firstSession))
+            .receivesCommand(logUserOut(firstSession))
+            .receivesCommand(logUserIn(secondSession))
 
         val secondExpected = userSession(secondSession)
         context().assertEntity(firstSession, UserSessionProcess::class.java)
