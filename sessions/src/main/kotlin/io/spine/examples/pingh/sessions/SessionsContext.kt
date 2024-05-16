@@ -35,7 +35,7 @@ import io.spine.server.BoundedContextBuilder
 public const val NAME: String = "Sessions"
 
 /**
- * Configures Sessions bounded context with repositories.
+ * Configures Sessions [BoundedContext] with repositories.
  */
 public fun newBuilder(): BoundedContextBuilder =
     BoundedContext.singleTenant(NAME)
