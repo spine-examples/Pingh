@@ -24,38 +24,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.BuildSettings
-import io.spine.internal.dependency.JavaX
+import io.spine.internal.dependency.JUnit
+import io.spine.internal.dependency.Kotest
 
 plugins {
-    kotlin("jvm").version("1.9.20")
-
-    // Add the Gradle plugin for bootstrapping projects built with Spine.
-    // See: https://github.com/SpineEventEngine/bootstrap
-    id("io.spine.tools.gradle.bootstrap").version("1.9.0")
+    java
 }
 
-spine {
-    // Enable the code generation for the elements of the ubiquitous language,
-    // declared in Proto files.
-    assembleModel()
-    enableJava()
-
-    // Add and configure required dependencies for developing a Spine-based Java server.
-    // See: https://github.com/SpineEventEngine/bootstrap#java-projects
-    enableJava().server()
-    forceDependencies = true
-}
-
-kotlin {
-    jvmToolchain {
-        languageVersion.set(BuildSettings.javaVersion)
-    }
-    explicitApi()
-}
-
+/**
+ * Add dependencies for testing.
+ */
 dependencies {
-    implementation(project(":github"))
+    testImplementation(JUnit.api)
+    testImplementation(JUnit.params)
+    testRuntimeOnly(JUnit.runner)
 
-    implementation(JavaX.annotations)
+    testImplementation(Kotest.assertions)
+}
+
+/**
+ * Explicitly instructs to discover and execute JUnit tests.
+ */
+tasks.withType<Test> {
+    useJUnitPlatform {
+        includeEngines("junit-jupiter")
+    }
 }

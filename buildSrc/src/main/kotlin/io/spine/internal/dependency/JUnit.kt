@@ -24,38 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.BuildSettings
-import io.spine.internal.dependency.JavaX
+package io.spine.internal.dependency
 
-plugins {
-    kotlin("jvm").version("1.9.20")
+// https://junit.org/junit5
+@Suppress("ConstPropertyName")
+public object JUnit {
+    private const val version = "5.8.0"
 
-    // Add the Gradle plugin for bootstrapping projects built with Spine.
-    // See: https://github.com/SpineEventEngine/bootstrap
-    id("io.spine.tools.gradle.bootstrap").version("1.9.0")
-}
+    public const val api: String =
+        "org.junit.jupiter:junit-jupiter-engine:${version}"
 
-spine {
-    // Enable the code generation for the elements of the ubiquitous language,
-    // declared in Proto files.
-    assembleModel()
-    enableJava()
+    public const val runner: String =
+        "org.junit.jupiter:junit-jupiter-engine:${version}"
 
-    // Add and configure required dependencies for developing a Spine-based Java server.
-    // See: https://github.com/SpineEventEngine/bootstrap#java-projects
-    enableJava().server()
-    forceDependencies = true
-}
-
-kotlin {
-    jvmToolchain {
-        languageVersion.set(BuildSettings.javaVersion)
-    }
-    explicitApi()
-}
-
-dependencies {
-    implementation(project(":github"))
-
-    implementation(JavaX.annotations)
+    public const val params: String =
+        "org.junit.jupiter:junit-jupiter-params:${version}"
 }

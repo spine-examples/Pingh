@@ -35,13 +35,17 @@ option java_outer_classname = "IdentifiersProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/github/github.proto";
+import "google/protobuf/timestamp.proto";
 
 // Identifies a user session.
 //
-// There is a single user session for each GitHub user. GitHub usernames are unique.
-// Therefore, usernames are used as an identifier of user session.
+// A single user can have multiple sessions created at different times.
 //
 message SessionId {
 
+    // The name of GitHub user that created session.
     spine_examples.pingh.github.Username username = 1 [(required) = true];
+
+    // The time when the session was created.
+    google.protobuf.Timestamp when_created = 2 [(required) = true];
 }

@@ -36,7 +36,6 @@ option java_multiple_files = true;
 
 import "spine_examples/pingh/sessions/identifiers.proto";
 import "spine_examples/pingh/github/github.proto";
-import "google/protobuf/timestamp.proto";
 
 // The process of session existence.
 //
@@ -47,7 +46,4 @@ message UserSession {
 
     // The ID of user session.
     SessionId id = 1;
-
-    // Time when the user logged in.
-    google.protobuf.Timestamp when_logged_in = 2 [(required) = true];
 }

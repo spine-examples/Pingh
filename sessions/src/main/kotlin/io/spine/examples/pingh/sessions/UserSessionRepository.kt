@@ -24,38 +24,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.BuildSettings
-import io.spine.internal.dependency.JavaX
+package io.spine.examples.pingh.sessions
 
-plugins {
-    kotlin("jvm").version("1.9.20")
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
+import io.spine.examples.pingh.sessions.event.UserLoggedIn
+import io.spine.examples.pingh.sessions.event.UserLoggedOut
+import io.spine.server.procman.ProcessManagerRepository
+import io.spine.server.route.EventRoute.withId
+import io.spine.server.route.EventRouting
 
-    // Add the Gradle plugin for bootstrapping projects built with Spine.
-    // See: https://github.com/SpineEventEngine/bootstrap
-    id("io.spine.tools.gradle.bootstrap").version("1.9.0")
-}
+/**
+ * Manages instances of [UserSessionProcess].
+ */
+public class UserSessionRepository :
+    ProcessManagerRepository<SessionId, UserSessionProcess, UserSession>() {
 
-spine {
-    // Enable the code generation for the elements of the ubiquitous language,
-    // declared in Proto files.
-    assembleModel()
-    enableJava()
-
-    // Add and configure required dependencies for developing a Spine-based Java server.
-    // See: https://github.com/SpineEventEngine/bootstrap#java-projects
-    enableJava().server()
-    forceDependencies = true
-}
-
-kotlin {
-    jvmToolchain {
-        languageVersion.set(BuildSettings.javaVersion)
+    @OverridingMethodsMustInvokeSuper
+    override fun setupEventRouting(routing: EventRouting<SessionId>) {
+        super.setupEventRouting(routing)
+        routing
+            .route(UserLoggedIn::class.java) { event, _ ->
+                withId(event.id)
+            }
+            .route(UserLoggedOut::class.java) { event, _ ->
+                withId(event.id)
+            }
     }
-    explicitApi()
-}
-
-dependencies {
-    implementation(project(":github"))
-
-    implementation(JavaX.annotations)
 }

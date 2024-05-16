@@ -49,4 +49,9 @@ subprojects {
      * Configure repositories.
      */
     apply<RepositoriesConfigurationPlugin>()
+
+    /*
+     * Adds dependencies for testing and configure test-running tasks.
+     */
+    apply<TestsConfigurationPlugin>()
 }
