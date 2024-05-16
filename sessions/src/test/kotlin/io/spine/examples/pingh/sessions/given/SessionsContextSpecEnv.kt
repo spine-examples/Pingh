@@ -34,32 +34,52 @@ import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.testing.TestValues.randomString
 
-public fun createSession(): SessionId =
-    createSessionBy(
+/**
+ * Returns the identifier for the session.
+ *
+ * The creator's [Username] is selected randomly,
+ * and the creation time is set at the current moment.
+ */
+public fun sessionId(): SessionId =
+    sessionIdBy(
         with(Username.newBuilder()) {
             value = randomString()
             vBuild()
         })
 
-public fun createSessionBy(name: Username): SessionId =
+/**
+ * Returns the identifier for the session based on the passed [Username].
+ *
+ * The creation time is indicated at the current moment.
+ */
+public fun sessionIdBy(name: Username): SessionId =
     with(SessionId.newBuilder()) {
         username = name
         whenCreated = currentTime()
         vBuild()
     }
 
+/**
+ * Returns the [UserSession] process manager, created using the passed [SessionId].
+ */
 public fun userSession(session: SessionId): UserSession =
     with(UserSession.newBuilder()) {
         id = session
         vBuild()
     }
 
+/**
+ * Returns the [LogUserIn] command, created using the passed [SessionId].
+ */
 public fun logUserIn(sessionId: SessionId): LogUserIn =
     with(LogUserIn.newBuilder()) {
         id = sessionId
         vBuild()
     }
 
+/**
+ * Returns the [LogUserOut] command, created using the passed [SessionId].
+ */
 public fun logUserOut(sessionId: SessionId): LogUserOut =
     with(LogUserOut.newBuilder()) {
         id = sessionId

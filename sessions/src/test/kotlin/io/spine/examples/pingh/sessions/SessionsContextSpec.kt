@@ -32,8 +32,8 @@ import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.examples.pingh.sessions.given.userSession
 import io.spine.examples.pingh.sessions.given.logUserOut
 import io.spine.examples.pingh.sessions.given.logUserIn
-import io.spine.examples.pingh.sessions.given.createSession
-import io.spine.examples.pingh.sessions.given.createSessionBy
+import io.spine.examples.pingh.sessions.given.sessionId
+import io.spine.examples.pingh.sessions.given.sessionIdBy
 import io.spine.server.BoundedContextBuilder
 import io.spine.testing.server.EventSubject
 import io.spine.testing.server.blackbox.ContextAwareTest
@@ -55,7 +55,7 @@ public class SessionsContextSpec : ContextAwareTest() {
 
         @BeforeEach
         public fun sendCommand() {
-            session = createSession()
+            session = sessionId()
             val command = logUserIn(session)
             context().receivesCommand(command)
         }
@@ -87,7 +87,7 @@ public class SessionsContextSpec : ContextAwareTest() {
 
         @BeforeEach
         public fun sendCommand() {
-            session = createSession()
+            session = sessionId()
             context()
                 .receivesCommand(logUserIn(session))
                 .receivesCommand(logUserOut(session))
@@ -112,8 +112,8 @@ public class SessionsContextSpec : ContextAwareTest() {
 
     @Test
     public fun `support simultaneous sessions`() {
-        val firstSession = createSession()
-        val secondSession = createSessionBy(firstSession.username)
+        val firstSession = sessionId()
+        val secondSession = sessionIdBy(firstSession.username)
         context()
             .receivesCommand(logUserIn(firstSession))
             .receivesCommand(logUserIn(secondSession))
@@ -126,8 +126,8 @@ public class SessionsContextSpec : ContextAwareTest() {
 
     @Test
     public fun `create new session when user logs in again`() {
-        val firstSession = createSession()
-        val secondSession = createSessionBy(firstSession.username)
+        val firstSession = sessionId()
+        val secondSession = sessionIdBy(firstSession.username)
         context()
             .receivesCommand(logUserIn(firstSession))
             .receivesCommand(logUserOut(firstSession))
