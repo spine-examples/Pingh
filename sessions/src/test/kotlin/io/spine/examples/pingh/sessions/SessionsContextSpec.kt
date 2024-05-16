@@ -49,7 +49,7 @@ public class SessionsContextSpec : ContextAwareTest() {
         newBuilder()
 
     @Nested
-    public inner class `handle 'LogUserIn' command` {
+    public inner class `handle 'LogUserIn' command, and` {
 
         private lateinit var session: SessionId
 
@@ -64,7 +64,7 @@ public class SessionsContextSpec : ContextAwareTest() {
         public fun `emit 'UserLoggedIn' event`() {
             val expected = with(UserLoggedIn.newBuilder()) {
                 id = session
-                build()
+                vBuild()
             }
             val events = assertEvents(UserLoggedIn::class.java)
             events.hasSize(1)
@@ -81,7 +81,7 @@ public class SessionsContextSpec : ContextAwareTest() {
     }
 
     @Nested
-    public inner class `handle 'LogUserOut' command` {
+    public inner class `handle 'LogUserOut' command, and` {
 
         private lateinit var session: SessionId
 
