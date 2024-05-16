@@ -26,16 +26,31 @@
 
 package io.spine.examples.pingh.sessions.given
 
-import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.base.Time.currentTime
+import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.SessionId
+import io.spine.examples.pingh.sessions.UserSession
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
+import io.spine.testing.TestValues.randomString
 
+fun createSession(): SessionId =
+    createSessionBy(
+        with(Username.newBuilder()) {
+            value = randomString()
+            vBuild()
+        })
 
-// TODO:2024.05.14:MykytaPimonovTD: Write docs
-fun token(tokenValue: String): PersonalAccessToken =
-    with(PersonalAccessToken.newBuilder()) {
-        value = tokenValue
+fun createSessionBy(name: Username): SessionId =
+    with(SessionId.newBuilder()) {
+        username = name
+        whenCreated = currentTime()
+        vBuild()
+    }
+
+fun userSession(session: SessionId): UserSession =
+    with(UserSession.newBuilder()) {
+        id = session
         vBuild()
     }
 
@@ -50,5 +65,3 @@ fun logUserOut(sessionId: SessionId): LogUserOut =
         id = sessionId
         vBuild()
     }
-
-
