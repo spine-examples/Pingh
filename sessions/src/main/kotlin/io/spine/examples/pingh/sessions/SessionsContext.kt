@@ -29,16 +29,14 @@ package io.spine.examples.pingh.sessions
 import io.spine.server.BoundedContext
 import io.spine.server.BoundedContextBuilder
 
-// TODO:2024.05.14:MykytaPimonovTD: Rename field and method.
 /**
  * Name of the Sessions [BoundedContext].
  */
 public const val NAME: String = "Sessions"
 
 /**
- * Creates [BoundedContextBuilder] for the Sessions context
- * and fills it with repository.
+ * Configures Sessions bounded context with repositories.
  */
-public fun newBuilder(): BoundedContextBuilder =
+public fun newSessionContextBuilder(): BoundedContextBuilder =
     BoundedContext.singleTenant(NAME)
         .add(UserSessionRepository())

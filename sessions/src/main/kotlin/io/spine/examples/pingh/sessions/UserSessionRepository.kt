@@ -33,9 +33,8 @@ import io.spine.server.procman.ProcessManagerRepository
 import io.spine.server.route.EventRoute.withId
 import io.spine.server.route.EventRouting
 
-// TODO:2024.05.14:MykytaPimonovTD: Edit documentation.
 /**
- * The repository for managing [UserSessionProcess] instances.
+ * Manages instances of [UserSessionProcess].
  */
 public class UserSessionRepository :
     ProcessManagerRepository<SessionId, UserSessionProcess, UserSession>() {

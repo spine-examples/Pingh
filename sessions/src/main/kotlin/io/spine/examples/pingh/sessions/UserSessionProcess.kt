@@ -34,10 +34,8 @@ import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.server.command.Assign
 import io.spine.server.procman.ProcessManager
 
-// TODO:2024.05.14:MykytaPimonovTD: Edit documentation.
 /**
- * Entity that coordinates the process of a user logging in and out of the system
- * using sessions.
+ * Coordinates session management, that is, user login and logout.
  */
 public class UserSessionProcess :
     ProcessManager<SessionId, UserSession, UserSession.Builder>() {

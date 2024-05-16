@@ -25,13 +25,11 @@
  */
 
 /**
- * Provides server-side classes for working with user sessions.
+ * Provides server-side code of the Session bounded context.
  */
 @BoundedContext(NAME)
-@CheckReturnValue
 package io.spine.exampless.pingh.sessions;
 
-import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.core.BoundedContext;
 
 import static io.spine.examples.pingh.sessions.SessionsContextKt.NAME;
