@@ -64,7 +64,8 @@ public class SessionsContextSpec : ContextAwareTest() {
         public fun `emit 'UserLoggedIn' event`() {
             val expected = with(UserLoggedIn.newBuilder()) {
                 id = session
-                vBuild()
+                buildPartial() /* The `PersonalAccessToken` value is omitted because
+                it has no effect on the entity's behavior. */
             }
             val events = assertEvents(UserLoggedIn::class.java)
             events.hasSize(1)
