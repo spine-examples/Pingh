@@ -18,5 +18,8 @@ jobs:
           java-version: 17
           distribution: zulu
 
+      - name: Configure Gradle options
+        run: export GRADLE_OPTS="$GRADLE_OPTS --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED"
+
       - name: Build and run tests
         run: ./gradlew build --stacktrace
