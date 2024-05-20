@@ -14,7 +14,7 @@ Currently, this is a work-in-progress example.
 
 ## Tech
 
-* JDK 17.
+* JDK 11.
 * Spine Event Engine.
 * Kotlin, TypeScript.
 * Google Cloud.
