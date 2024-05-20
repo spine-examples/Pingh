@@ -35,7 +35,7 @@ option java_outer_classname = "GitHubClientCommandsProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/mentions/identifiers.proto";
-import "spine_examples/pingh/github/github.proto";
+import "google/protobuf/timestamp.proto";
 
 // Tells to update mentions from the GitHub client.
 message UpdateMentionsFromGitHub {
@@ -43,6 +43,6 @@ message UpdateMentionsFromGitHub {
     // The ID of the GitHub client.
     GitHubClientId id = 1;
 
-    // The token of the user who tells to update the mentions.
-    spine_examples.pingh.github.PersonalAccessToken token = 2 [(required) = true];
+    // The time when the update of mentions for the specific user is requested.
+    google.protobuf.Timestamp when_requested = 2;
 }
