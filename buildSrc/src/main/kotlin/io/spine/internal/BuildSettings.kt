@@ -36,6 +36,6 @@ import org.gradle.jvm.toolchain.JavaLanguageVersion
  */
 public object BuildSettings {
 
-    private const val JVM_VERSION = 17
+    private const val JVM_VERSION = 11
     public val javaVersion: JavaLanguageVersion = JavaLanguageVersion.of(JVM_VERSION)
 }
