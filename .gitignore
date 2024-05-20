@@ -24,13 +24,9 @@
 .idea/**/*.xml
 .idea/**/*.iml
 .idea/shelf/**
-!.idea/codeStyles
-!.idea/inspectionProfiles
-!.idea/copyright
-
-# Ingore IDEA configuration files in the sub-directories too.
-**/.idea/*.xml
-**/.idea/**/*.xml
-**/.idea/**/*.iml
+!.idea/codeStyles/**
+!.idea/inspectionProfiles/**
+!.idea/copyright/**
+!.idea/misc.xml
 
 **/generated
