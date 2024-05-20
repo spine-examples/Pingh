@@ -45,6 +45,8 @@ import kotlin.jvm.Throws
 public class GitHubClientProcess :
     ProcessManager<GitHubClientId, GitHubClient, GitHubClient.Builder>() {
 
+    private lateinit var gitHubClientService: GitHubClientService
+
     @React
     internal fun on(@External event: UserLoggedIn): GitHubTokenUpdated {
         archived = true
@@ -95,5 +97,9 @@ public class GitHubClientProcess :
         return MentionsUpdateFromGitHubCompleted.newBuilder()
             .setId(event.id)
             .vBuild()
+    }
+
+    internal fun inject(gitHubClientService: GitHubClientService) {
+        this.gitHubClientService = gitHubClientService
     }
 }
