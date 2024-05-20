@@ -35,13 +35,16 @@ plugins {
     id("io.spine.tools.gradle.bootstrap").version("1.9.0")
 }
 
-/*
-* Enable the code generation for the elements of the ubiquitous language,
-* declared in Proto files.
-*/
 spine {
+    // Enable the code generation for the elements of the ubiquitous language,
+    // declared in Proto files.
     assembleModel()
     enableJava()
+
+    // Add and configure required dependencies for developing a Spine-based Java server.
+    // See: https://github.com/SpineEventEngine/bootstrap#java-projects
+    enableJava().server()
+    forceDependencies = true
 }
 
 kotlin {
