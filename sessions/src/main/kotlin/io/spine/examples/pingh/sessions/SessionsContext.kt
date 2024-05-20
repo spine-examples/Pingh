@@ -28,6 +28,7 @@ package io.spine.examples.pingh.sessions
 
 import io.spine.server.BoundedContext
 import io.spine.server.BoundedContextBuilder
+import io.spine.server.procman.DefaultProcessManagerRepository
 
 /**
  * Name of the Sessions [BoundedContext].
@@ -39,4 +40,4 @@ public const val NAME: String = "Sessions"
  */
 public fun newBuilder(): BoundedContextBuilder =
     BoundedContext.singleTenant(NAME)
-        .add(UserSessionRepository())
+        .add(DefaultProcessManagerRepository(UserSessionProcess::class.java))
