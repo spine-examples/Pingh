@@ -39,4 +39,4 @@ public const val NAME: String = "Sessions"
  */
 public fun newBuilder(): BoundedContextBuilder =
     BoundedContext.singleTenant(NAME)
-        .add(UserSessionRepository())
+        .add(UserSessionProcess::class.java)

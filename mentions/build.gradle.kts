@@ -54,6 +54,17 @@ kotlin {
     explicitApi()
 }
 
+/**
+ * Kotlin code compilation task waits until
+ * Protobuf files are fully generated and rejections are created.
+ */
+// TODO:2024-05-20:mykyta.pimonov: Rewrite the way of organizing tasks,
+//  using task inputs and outputs.
+//  See: https://github.com/spine-examples/Pingh/pull/7#discussion_r1607043747.
+tasks.named("compileKotlin") {
+    dependsOn("generateRejections")
+}
+
 dependencies {
     implementation(project(":github"))
     implementation(project(":sessions"))
