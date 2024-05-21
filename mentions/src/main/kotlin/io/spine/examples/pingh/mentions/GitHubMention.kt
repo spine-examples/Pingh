@@ -26,14 +26,42 @@
 
 package io.spine.examples.pingh.mentions
 
-import com.google.protobuf.Timestamp
-import io.spine.examples.pingh.github.User
-import io.spine.net.Url
+import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
+import java.time.Instant
 
-public data class GitHubMention(
-    val id: MentionId,
-    val whoMentioned: User,
-    val title: String,
-    val whenCreated: Timestamp,
-    val url: Url
+/**
+ * GitHub user data.
+ */
+public data class GitHubUser(
+    @SerializedName("login") val username: String,
+    val avatarUrl: String
 )
+
+/**
+ * GitHub mention data.
+ */
+public data class GitHubMention(
+    val id: Long,
+    @SerializedName("user") val whoMentioned: GitHubUser,
+    val title: String,
+    @SerializedName("created_at") val whenCreated: Instant,
+    @SerializedName("html_url") val url: String
+)
+
+/**
+ * Data from GitHub's response to a request to search for mentions in issues and pull requests.
+ */
+private data class GitHubResponse(
+    @SerializedName("items") val mentions: List<GitHubMention>
+)
+
+private val gson = Gson()
+
+/**
+ * Converts JSON to a list of [GitHubMention].
+ */
+public fun fromJson(json: String): List<GitHubMention> {
+    val response = gson.fromJson(json, GitHubResponse::class.java)
+    return response.mentions
+}
