@@ -44,5 +44,5 @@ message UpdateMentionsFromGitHub {
     GitHubClientId id = 1;
 
     // The time when the update of mentions for the specific user is requested.
-    google.protobuf.Timestamp when_requested = 2;
+    google.protobuf.Timestamp when_requested = 2 [(required) = true];
 }
