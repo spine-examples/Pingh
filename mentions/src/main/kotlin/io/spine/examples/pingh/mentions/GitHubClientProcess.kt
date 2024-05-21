@@ -28,10 +28,12 @@ package io.spine.examples.pingh.mentions
 
 import io.spine.base.Time.currentTime
 import io.spine.core.External
+import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
+import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.CannotStartDataUpdateTooEarly
 import io.spine.examples.pingh.mentions.rejection.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.mentions.rejection.UsersGitHubTokenInvalid
@@ -41,22 +43,39 @@ import io.spine.server.event.React
 import io.spine.server.procman.ProcessManager
 import kotlin.jvm.Throws
 
+/**
+ * Coordinates the updating of the specific user's mentions from GitHub.
+ */
 public class GitHubClientProcess :
     ProcessManager<GitHubClientId, GitHubClient, GitHubClient.Builder>() {
 
+    /**
+     * Service that fetches mentions from GitHub.
+     */
     private lateinit var gitHubClientService: GitHubClientService
 
+    /**
+     * Updates the user's [PersonalAccessToken] each time the user logs in.
+     */
     @React
     internal fun on(@External event: UserLoggedIn): GitHubTokenUpdated {
         archived = true
         builder().setToken(event.token)
-
         return GitHubTokenUpdated.newBuilder()
             .setId(builder().id)
             .setToken(event.token)
             .vBuild()
     }
 
+    /**
+     * Starts the process of updating mentions for the user.
+     *
+     * When a mention update is requested for a user, checks whether a minute has passed
+     * since the previous successfully accepted [UpdateMentionsFromGitHub] command,
+     * whether the previous update has ended, and whether the [PersonalAccessToken] is not expired.
+     * If all the conditions are met, the event of the received request to update mentions
+     * is emitted.
+     */
     @Assign
     @Throws(
         CannotStartDataUpdateTooEarly::class,
@@ -71,16 +90,26 @@ public class GitHubClientProcess :
                 .build()
         }
 
+        // TODO:2024-05-21:mykyta.pimonov: Check that a minute has passed since
+        //  the previous successfully accepted request.
+
+        // TODO:2024-05-20:mykyta.pimonov: Check that the token is not expired.
+
         builder().setWhenStarted(currentTime())
         return MentionsUpdateFromGitHubRequested.newBuilder()
             .setId(command.id)
-            .setToken(builder().token)
             .vBuild()
     }
 
+    /**
+     * Updates user mentions by emitting [UserMentioned] events
+     * and terminates the mention update process.
+     */
     @React
     internal fun on(event: MentionsUpdateFromGitHubRequested): MentionsUpdateFromGitHubCompleted {
         archived = true
+
+        // TODO:2024-05-21:mykyta.pimonov: Update the user's mentions.
 
         builder().clearWhenStarted()
         return MentionsUpdateFromGitHubCompleted.newBuilder()
@@ -88,6 +117,9 @@ public class GitHubClientProcess :
             .vBuild()
     }
 
+    /**
+     * Sets the implementation of [GitHubClientService].
+     */
     internal fun inject(gitHubClientService: GitHubClientService) {
         this.gitHubClientService = gitHubClientService
     }

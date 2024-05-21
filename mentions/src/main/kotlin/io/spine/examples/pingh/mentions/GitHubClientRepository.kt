@@ -44,19 +44,21 @@ public class GitHubClientRepository :
         super.setupEventRouting(routing)
         routing
             .route(UserLoggedIn::class.java) { event, _ ->
-                toGitHubClient(event.id)
+                toGitHubClientId(event.id)
             }
     }
 
     @OverridingMethodsMustInvokeSuper
     protected override fun configure(processManager: GitHubClientProcess) {
         super.configure(processManager)
+        // TODO:2024-05-21:mykyta.pimonov: Inject production `GitHubClientService` implementation
+        //  to `GitHubClientProcess`.
     }
 
     /**
      * Returns id of [GitHubClient] of provided id of [UserSession] the same user.
      */
-    private fun toGitHubClient(session: SessionId): Set<GitHubClientId> {
+    private fun toGitHubClientId(session: SessionId): Set<GitHubClientId> {
         return setOf(
             with(GitHubClientId.newBuilder()) {
                 username = session.username
