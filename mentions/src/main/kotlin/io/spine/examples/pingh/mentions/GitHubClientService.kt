@@ -29,6 +29,7 @@ package io.spine.examples.pingh.mentions
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
 
+// TODO:2024-05-21:mykyta.pimonov: Document it.
 public interface GitHubClientService {
     public fun fetchMentions(username: Username, token: PersonalAccessToken):
             List<GitHubMention>

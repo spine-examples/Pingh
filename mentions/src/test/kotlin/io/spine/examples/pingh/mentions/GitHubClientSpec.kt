@@ -124,4 +124,13 @@ public class GitHubClientSpec : ContextAwareTest() {
         }
     }
 
+    @Nested
+    public inner class `handle 'UpdateMentionsFromGitHub' command, and` {
+        // TODO:2024-05-21:mykyta.pimonov: Test it.
+    }
+
+    @Nested
+    public inner class `react on 'MentionsUpdateFromGitHubRequested' event, and` {
+        // TODO:2024-05-21:mykyta.pimonov: Test it.
+    }
 }

@@ -26,9 +26,13 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.protobuf.Timestamp
+import io.spine.base.EventMessage
 import io.spine.base.Time.currentTime
 import io.spine.core.External
 import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.User
+import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
@@ -38,9 +42,11 @@ import io.spine.examples.pingh.mentions.rejection.CannotStartDataUpdateTooEarly
 import io.spine.examples.pingh.mentions.rejection.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.mentions.rejection.UsersGitHubTokenInvalid
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
+import io.spine.net.Url
 import io.spine.server.command.Assign
 import io.spine.server.event.React
 import io.spine.server.procman.ProcessManager
+import java.time.Instant
 import kotlin.jvm.Throws
 
 /**
@@ -104,18 +110,75 @@ public class GitHubClientProcess :
     /**
      * Updates user mentions by emitting [UserMentioned] events
      * and terminates the mention update process.
+     *
+     * @return List of events, where the [UserMentioned] event for each mention comes first,
+     * followed by a single [MentionsUpdateFromGitHubCompleted] event.
      */
     @React
-    internal fun on(event: MentionsUpdateFromGitHubRequested): MentionsUpdateFromGitHubCompleted {
+    internal fun on(event: MentionsUpdateFromGitHubRequested): List<EventMessage> {
         archived = true
-
-        // TODO:2024-05-21:mykyta.pimonov: Update the user's mentions.
-
+        val username = event.id.username
+        val token = builder().token
+        val mentions = gitHubClientService.fetchMentions(username, token)
+        val emittingEvents = createUserMentionedEvents(mentions)
+        emittingEvents.add(
+            MentionsUpdateFromGitHubCompleted.newBuilder()
+                .setId(event.id)
+                .vBuild()
+        )
         builder().clearWhenStarted()
-        return MentionsUpdateFromGitHubCompleted.newBuilder()
-            .setId(event.id)
-            .vBuild()
+        return emittingEvents.toList()
     }
+
+    private fun createUserMentionedEvents(gitHubMentions: List<GitHubMention>):
+            MutableList<EventMessage> =
+        gitHubMentions
+            .map { mention ->
+                with(UserMentioned.newBuilder()) {
+                    id = mentionIdBy(mention.id)
+                    whoMentioned = userBy(
+                        mention.whoMentioned.username,
+                        mention.whoMentioned.avatarUrl
+                    )
+                    title = mention.title
+                    whenMentioned = timestampBy(mention.whenCreated)
+                    url = urlBy(mention.whoMentioned.avatarUrl)
+                    vBuild()
+                }
+            }
+            .toMutableList()
+
+    private fun mentionIdBy(idValue: Long) =
+        with(MentionId.newBuilder()) {
+            uuid = "$idValue"
+            vBuild()
+        }
+
+    private fun urlBy(specValue: String): Url =
+        with(Url.newBuilder()) {
+            spec = specValue
+            vBuild()
+        }
+
+    private fun usernameBy(usernameValue: String): Username =
+        with(Username.newBuilder()) {
+            value = usernameValue
+            vBuild()
+        }
+
+    private fun userBy(usernameValue: String, avatarUrlValue: String): User =
+        with(User.newBuilder()) {
+            username = usernameBy(usernameValue)
+            avatarUrl = urlBy(avatarUrlValue)
+            vBuild()
+        }
+
+    private fun timestampBy(instant: Instant): Timestamp =
+        with(Timestamp.newBuilder()) {
+            seconds = instant.epochSecond
+            nanos = instant.nano
+            build()
+        }
 
     /**
      * Sets the implementation of [GitHubClientService].
