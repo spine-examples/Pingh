@@ -28,7 +28,6 @@ package io.spine.examples.pingh.mentions
 
 import io.spine.base.Time.currentTime
 import io.spine.core.External
-import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
@@ -50,22 +49,12 @@ public class GitHubClientProcess :
     @React
     internal fun on(@External event: UserLoggedIn): GitHubTokenUpdated {
         archived = true
-        val id = with(GitHubClientId.newBuilder()) {
-            username = event.id.username
-            vBuild()
-        }
-        initState(id, event.token)
+        builder().setToken(event.token)
 
         return GitHubTokenUpdated.newBuilder()
-            .setId(id)
+            .setId(builder().id)
             .setToken(event.token)
             .vBuild()
-    }
-
-    private fun initState(id: GitHubClientId, token: PersonalAccessToken) {
-        builder()
-            .setId(id)
-            .setToken(token)
     }
 
     @Assign
@@ -85,7 +74,7 @@ public class GitHubClientProcess :
         builder().setWhenStarted(currentTime())
         return MentionsUpdateFromGitHubRequested.newBuilder()
             .setId(command.id)
-            .setToken(command.token)
+            .setToken(builder().token)
             .vBuild()
     }
 
