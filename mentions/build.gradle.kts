@@ -58,8 +58,9 @@ kotlin {
  * Kotlin code compilation task waits until
  * Protobuf files are fully generated and rejections are created.
  */
-// TODO:2024-05-20:MykytaPimonovTD: Rewrite the way of organizing tasks,
+// TODO:2024-05-20:mykyta.pimonov: Rewrite the way of organizing tasks,
 //  using task inputs and outputs.
+//  See: https://github.com/spine-examples/Pingh/pull/7#discussion_r1607043747.
 tasks.named("compileKotlin") {
     dependsOn("generateRejections")
 }
