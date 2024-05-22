@@ -48,7 +48,7 @@ import org.junit.jupiter.api.Test
 public class GitHubClientSpec : ContextAwareTest() {
 
     protected override fun contextBuilder(): BoundedContextBuilder =
-        newBuilder()
+        io.spine.examples.pingh.mentions.given.newBuilder()
 
     @Nested
     public inner class `react on 'UserLoggedIn' event in Sessions bounded context, and` {
