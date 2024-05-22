@@ -173,12 +173,14 @@ public class GitHubClientProcess :
             vBuild()
         }
 
-    private fun timestampBy(instant: Instant): Timestamp =
-        with(Timestamp.newBuilder()) {
+    private fun timestampBy(timeValue: String): Timestamp {
+        val instant = Instant.parse(timeValue)
+        return with(Timestamp.newBuilder()) {
             seconds = instant.epochSecond
             nanos = instant.nano
             build()
         }
+    }
 
     /**
      * Sets the implementation of [GitHubClientService].

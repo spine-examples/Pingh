@@ -28,14 +28,13 @@ package io.spine.examples.pingh.mentions
 
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
-import java.time.Instant
 
 /**
  * GitHub user data.
  */
 public data class GitHubUser(
     @SerializedName("login") val username: String,
-    val avatarUrl: String
+    @SerializedName("avatar_url") val avatarUrl: String
 )
 
 /**
@@ -45,7 +44,7 @@ public data class GitHubMention(
     val id: Long,
     @SerializedName("user") val whoMentioned: GitHubUser,
     val title: String,
-    @SerializedName("created_at") val whenCreated: Instant,
+    @SerializedName("created_at") val whenCreated: String,
     @SerializedName("html_url") val url: String
 )
 
