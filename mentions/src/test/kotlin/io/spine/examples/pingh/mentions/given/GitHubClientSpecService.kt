@@ -32,6 +32,7 @@ import io.spine.examples.pingh.mentions.GitHubClient
 import io.spine.examples.pingh.mentions.GitHubClientService
 import io.spine.examples.pingh.mentions.GitHubMention
 import io.spine.examples.pingh.mentions.fromJson
+import java.lang.Thread.sleep
 
 /**
  * Implementation of [GitHubClientService] that fetches mentions
@@ -51,6 +52,7 @@ public class GitHubClientSpecService : GitHubClientService {
         val jsonFile = this::class.java.getResource("github_response.json")
         checkNotNull(jsonFile)
         val json = jsonFile.readText(Charsets.UTF_8)
+        sleep(1000) // Emulates a delay in fetching data from the GitHub API.
         return fromJson(json)
     }
 }
