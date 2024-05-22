@@ -36,8 +36,9 @@ import io.spine.server.route.EventRouting
 /**
  * Manages instances of [GitHubClientProcess].
  */
-public class GitHubClientRepository :
-    ProcessManagerRepository<GitHubClientId, GitHubClientProcess, GitHubClient>() {
+public class GitHubClientRepository(
+    private val gitHubClientService: GitHubClientService,
+) : ProcessManagerRepository<GitHubClientId, GitHubClientProcess, GitHubClient>() {
 
     @OverridingMethodsMustInvokeSuper
     protected override fun setupEventRouting(routing: EventRouting<GitHubClientId>) {
@@ -51,8 +52,7 @@ public class GitHubClientRepository :
     @OverridingMethodsMustInvokeSuper
     protected override fun configure(processManager: GitHubClientProcess) {
         super.configure(processManager)
-        // TODO:2024-05-21:mykyta.pimonov: Inject production `GitHubClientService` implementation
-        //  to `GitHubClientProcess`.
+        processManager.inject(gitHubClientService)
     }
 
     /**

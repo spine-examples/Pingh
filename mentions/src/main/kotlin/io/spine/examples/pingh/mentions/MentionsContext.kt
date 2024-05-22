@@ -37,6 +37,6 @@ public const val NAME: String = "Mentions"
 /**
  * Configures Mentions [BoundedContext] with repositories.
  */
-public fun newBuilder(): BoundedContextBuilder =
+public fun newBuilder(gitHubClientService: GitHubClientService): BoundedContextBuilder =
     BoundedContext.singleTenant(NAME)
-        .add(GitHubClientRepository())
+        .add(GitHubClientRepository(gitHubClientService))
