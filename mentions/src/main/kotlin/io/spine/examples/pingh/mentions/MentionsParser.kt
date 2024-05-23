@@ -32,10 +32,8 @@ import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.ResponseOnSearchingIssuesRequest
 import io.spine.examples.pingh.github.ResponseOnSearchingIssuesRequestItem
 import io.spine.examples.pingh.github.User
-import io.spine.examples.pingh.github.UserValue
-import io.spine.examples.pingh.github.Username
+import io.spine.examples.pingh.github.buildBy
 import io.spine.net.Url
-import java.time.Instant
 
 /**
  * Converts a JSON containing a list of GitHub items
@@ -62,41 +60,20 @@ public class MentionsParser {
             List<Mention> =
         gitHubItems
             .map { item ->
-                Mention.newBuilder()
-                    .setId(item.id)
-                    .setWhoMentioned(userBy(item.whoCreated))
-                    .setTitle(item.title)
-                    .setWhenMentioned(timestampBy(item.whenCreated))
-                    .setUrl(urlBy(item.htmlUrl))
-                    .vBuild()
+                with(Mention.newBuilder()) {
+                    id = item.id
+                    whoMentioned = User.newBuilder()
+                        .buildBy(
+                            item.whoCreated.username,
+                            item.whoCreated.avatarUrl
+                        )
+                    title = item.title
+                    whenMentioned = Timestamp.newBuilder()
+                        .buildBy(item.whenCreated)
+                    url = Url.newBuilder()
+                        .buildBy(item.htmlUrl)
+                    vBuild()
+                }
             }
             .toList()
-
-    private fun urlBy(specValue: String): Url =
-        with(Url.newBuilder()) {
-            spec = specValue
-            vBuild()
-        }
-
-    private fun usernameBy(usernameValue: String): Username =
-        with(Username.newBuilder()) {
-            value = usernameValue
-            vBuild()
-        }
-
-    private fun userBy(userValue: UserValue): User =
-        with(User.newBuilder()) {
-            username = usernameBy(userValue.username)
-            avatarUrl = urlBy(userValue.avatarUrl)
-            vBuild()
-        }
-
-    private fun timestampBy(timeValue: String): Timestamp {
-        val instant = Instant.parse(timeValue)
-        return with(Timestamp.newBuilder()) {
-            seconds = instant.epochSecond
-            nanos = instant.nano
-            build()
-        }
-    }
 }
