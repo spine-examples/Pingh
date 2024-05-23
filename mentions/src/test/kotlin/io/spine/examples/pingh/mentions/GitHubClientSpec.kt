@@ -57,7 +57,7 @@ public class GitHubClientSpec : ContextAwareTest() {
     private lateinit var token: PersonalAccessToken
 
     protected override fun contextBuilder(): BoundedContextBuilder =
-       newBuilder(GitHubClientSpecService())
+        newBuilder(GitHubClientSpecService())
 
     /**
      * Creates the [BlackBoxContext] of the Sessions bounded context,
@@ -130,8 +130,7 @@ public class GitHubClientSpec : ContextAwareTest() {
     @Nested
     public inner class `handle 'UpdateMentionsFromGitHub' command, and` {
 
-        @BeforeEach
-        public fun sendUpdateMentionsFromGitHubCommand() {
+        private fun sendUpdateMentionsFromGitHubCommand() {
             val command = UpdateMentionsFromGitHub.newBuilder()
                 .setId(gitHubClientId)
                 .setWhenRequested(currentTime())
@@ -141,6 +140,7 @@ public class GitHubClientSpec : ContextAwareTest() {
 
         @Test
         public fun `emits 'MentionsUpdateFromGitHubRequested' event if there is no active update process at this time`() {
+            sendUpdateMentionsFromGitHubCommand()
             val expected = MentionsUpdateFromGitHubRequested.newBuilder()
                 .setId(gitHubClientId)
                 .vBuild()
@@ -150,42 +150,65 @@ public class GitHubClientSpec : ContextAwareTest() {
         /**
          * Checks that the value of the `when_started` field is different from the default,
          * i.e. has been set to some value.
+         *
+         * [MentionsUpdateFromGitHubRequested] command is sent from another thread,
+         * and the main thread checks the state of the entity while performing the update.
          */
         @Test
         public fun `set the start time of the updating operation in 'GitHubClient' entity`() {
+            val otherClientTread = Thread {
+                sendUpdateMentionsFromGitHubCommand()
+            }
             val gitHubClientWithDefaultWhenStartedField = with(GitHubClient.newBuilder()) {
                 whenStarted = Timestamp.getDefaultInstance()
                 // Building the message partially to include
                 // only the tested fields.
                 buildPartial()
             }
+            otherClientTread.start()
             context().assertState(gitHubClientId, GitHubClient::class.java)
-                .comparingExpectedFieldsOnly()
                 .isNotEqualTo(gitHubClientWithDefaultWhenStartedField)
+            otherClientTread.join()
         }
 
         /**
          * The update request is sent from another thread.
          *
-         * This request is expected to be rejected because the previous request
-         * has not finished its processing.
+         * [MentionsUpdateFromGitHubRequested] command that is sent from another thread
+         * is successfully accepted, after which the command from the main thread is received.
+         * The command from the main thread must be rejected, because
+         * the process started in another thread is not yet complete.
          */
         @Test
         public fun `reject if the update process is already in progress at this time`() {
-            val thread = Thread {
+            val otherClientTread = Thread {
                 sendUpdateMentionsFromGitHubCommand()
-                val expectedRejection = MentionsUpdateIsAlreadyInProgress.newBuilder()
-                    .setId(gitHubClientId)
-                    .vBuild()
-                context().assertEvent(expectedRejection)
             }
-            thread.start()
-            thread.join()
+            val expectedRejection = MentionsUpdateIsAlreadyInProgress.newBuilder()
+                .setId(gitHubClientId)
+                .vBuild()
+
+            otherClientTread.start()
+            sendUpdateMentionsFromGitHubCommand()
+            context().assertEvent(expectedRejection)
+            otherClientTread.join()
         }
     }
 
     @Nested
     public inner class `react on 'MentionsUpdateFromGitHubRequested' event, and` {
-        // TODO:2024-05-21:mykyta.pimonov: Test it.
+
+        private fun sendMentionsUpdateFromGitHubRequestedEvent() {
+            val event = MentionsUpdateFromGitHubRequested.newBuilder()
+                .setId(gitHubClientId)
+                .vBuild()
+            context().receivesEvent(event)
+        }
+
+        @Test
+        public fun `emit 'UserMentioned' event for each mentions fetched from 'GitHubClientService'`() {
+
+
+        }
     }
 }
