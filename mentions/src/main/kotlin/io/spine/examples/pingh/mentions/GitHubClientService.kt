@@ -30,8 +30,14 @@ import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
 
-// TODO:2024-05-21:mykyta.pimonov: Document it.
+/**
+ * The external system that requests mentions using the GitHub API.
+ */
 public interface GitHubClientService {
+
+    /**
+     * Requests and returns user [Mention]s by [Username] and [PersonalAccessToken].
+     */
     public fun fetchMentions(username: Username, token: PersonalAccessToken):
             List<Mention>
 }
