@@ -134,7 +134,7 @@ public class GitHubClientProcess :
             .toList()
 
     /**
-     * Sets the method for retrieving mentions from GitHub.
+     * Sets the method for fetching mentions from GitHub.
      *
      * [GitHubClientService] implementation can be directed to testing or
      * interacting with the GitHub API.

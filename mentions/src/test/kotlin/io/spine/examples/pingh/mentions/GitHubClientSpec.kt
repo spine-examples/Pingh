@@ -162,10 +162,14 @@ public class GitHubClientSpec : ContextAwareTest() {
                 // only the tested fields.
                 buildPartial()
             }
-            otherClientTread.start()
-            context().assertState(gitHubClientId, GitHubClient::class.java)
-                .isNotEqualTo(gitHubClientWithDefaultWhenStartedField)
-            otherClientTread.join()
+            try {
+                otherClientTread.start()
+                context().assertState(gitHubClientId, GitHubClient::class.java)
+                    .ignoringFields(listOf(1, 2))
+                    .isNotEqualTo(gitHubClientWithDefaultWhenStartedField)
+            } finally {
+                otherClientTread.join()
+            }
         }
 
         /**
@@ -184,11 +188,13 @@ public class GitHubClientSpec : ContextAwareTest() {
             val expectedRejection = MentionsUpdateIsAlreadyInProgress.newBuilder()
                 .setId(gitHubClientId)
                 .vBuild()
-
-            otherClientTread.start()
-            sendUpdateMentionsFromGitHubCommand()
-            context().assertEvent(expectedRejection)
-            otherClientTread.join()
+            try {
+                otherClientTread.start()
+                sendUpdateMentionsFromGitHubCommand()
+                context().assertEvent(expectedRejection)
+            } finally {
+                otherClientTread.join()
+            }
         }
     }
 }
