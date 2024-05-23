@@ -61,3 +61,70 @@ message User {
     // The link to the user's avatar.
     spine.net.Url avatar_url = 2 [(required) = true];
 }
+
+// GitHub user information.
+//
+// The data is stored in primitive types. Uses to retrieve user data
+// from JSON responses from the GitHub API.
+//
+message UserValue {
+
+    // The unique username that identifies the user.
+    string username = 1 [(required) = true, json_name = "login"];
+
+    // The link to the user's avatar.
+    string avatar_url = 2 [(required) = true, json_name = "avatar_url"];
+}
+
+// Information about the GitHub item obtained by requesting to search for mentions
+// in issues and pull requests.
+//
+// Uses to retrieve item data from JSON responses from the GitHub API.
+//
+message ResponseOnSearchingIssuesRequestItem {
+
+    // The item's ID in GitHub.
+    int64 id = 1 [(required) = true];
+
+    // The item's author.
+    UserValue who_created = 2 [(required) = true, json_name = "user"];
+
+    // The item's title.
+    string title = 3 [(required) = true];
+
+    // Time when this item was created.
+    string when_created = 4 [(required) = true, json_name = "created_at"];
+
+    // The link to this GitHub item.
+    string html_url = 5 [(required) = true, json_name = "html_url"];
+}
+
+// GitHub API response received when requesting to search for mentions
+// in issues and pull requests.
+//
+// Uses to retrieve data from JSON responses from the GitHub API.
+//
+message ResponseOnSearchingIssuesRequest {
+
+    // GitHub items on which the mention occurred.
+    repeated ResponseOnSearchingIssuesRequestItem item = 1 [(required) = true, json_name = "items"];
+}
+
+// The mention of a user on the GitHub.
+message Mention {
+
+    // The ID of the mention on the GitHub.
+    int64 id = 1;
+
+    // The user who created the mention.
+    User who_mentioned = 2 [(required) = true];
+
+    // The title of the GitHub item in which the mention created.
+    string title = 3 [(required) = true];
+
+    // Time when the user was mentioned.
+    google.protobuf.Timestamp when_mentioned = 4 [(required) = true];
+
+    // The link to the GitHub item where the user was mentioned.
+    spine.net.Url url = 5 [(required) = true];
+}
