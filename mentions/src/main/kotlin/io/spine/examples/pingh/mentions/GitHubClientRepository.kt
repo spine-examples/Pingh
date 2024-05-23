@@ -56,7 +56,7 @@ public class GitHubClientRepository(
     }
 
     /**
-     * Returns id of [GitHubClient] of provided id of [UserSession] the same user.
+     * Returns ID of [GitHubClient] of provided ID of [UserSession] the same user.
      */
     private fun toGitHubClientId(session: SessionId): Set<GitHubClientId> {
         return setOf(

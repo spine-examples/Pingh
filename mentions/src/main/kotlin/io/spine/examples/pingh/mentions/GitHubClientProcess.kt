@@ -72,10 +72,8 @@ public class GitHubClientProcess :
     /**
      * Starts the process of updating mentions for the user.
      *
-     * When a mention update is requested for a user, checks whether a minute has passed
-     * since the previous successfully accepted [UpdateMentionsFromGitHub] command,
-     * whether the previous update has ended, and whether the [PersonalAccessToken] is not expired.
-     * If all the conditions are met, the event of the received request to update mentions
+     * When a mention update is requested for a user, checks whether the previous update
+     * has ended. If this condition is met, the event of the received request to update mentions
      * is emitted.
      */
     @Assign
@@ -85,21 +83,14 @@ public class GitHubClientProcess :
         UsersGitHubTokenInvalid::class
     )
     internal fun handle(command: UpdateMentionsFromGitHub): MentionsUpdateFromGitHubRequested {
-
         if (builder().hasWhenStarted()) {
             throw MentionsUpdateIsAlreadyInProgress.newBuilder()
                 .setId(command.id)
                 .build()
         }
-
-        // TODO:2024-05-21:mykyta.pimonov: Check that a minute has passed since
-        //  the previous successfully accepted request.
-
-        // TODO:2024-05-20:mykyta.pimonov: Check that the token is not expired.
-
         builder().setWhenStarted(currentTime())
         return MentionsUpdateFromGitHubRequested.newBuilder()
-            .setId(command.id)
+            .setId(state().id)
             .vBuild()
     }
 
@@ -113,21 +104,21 @@ public class GitHubClientProcess :
     @React
     internal fun on(event: MentionsUpdateFromGitHubRequested): List<EventMessage> {
         archived = true
-        val username = event.id.username
-        val token = builder().token
+        val username = state().id.username
+        val token = state().token
         val mentions = gitHubClientService.fetchMentions(username, token)
-        val emittingEvents = createUserMentionedEvents(mentions)
-        emittingEvents.add(
-            MentionsUpdateFromGitHubCompleted.newBuilder()
-                .setId(event.id)
-                .vBuild()
-        )
+        val userMentionedEvents = createUserMentionedEvents(mentions)
+        val mentionsUpdateFromGitHubCompleted = MentionsUpdateFromGitHubCompleted.newBuilder()
+            .setId(state().id)
+            .vBuild()
         builder().clearWhenStarted()
-        return emittingEvents.toList()
+        return listOf(
+            *userMentionedEvents.toTypedArray(),
+            mentionsUpdateFromGitHubCompleted
+        )
     }
 
-    private fun createUserMentionedEvents(gitHubMentions: List<Mention>):
-            MutableList<EventMessage> =
+    private fun createUserMentionedEvents(gitHubMentions: List<Mention>): List<EventMessage> =
         gitHubMentions
             .map { mention ->
                 with(UserMentioned.newBuilder()) {
@@ -139,7 +130,7 @@ public class GitHubClientProcess :
                     vBuild()
                 }
             }
-            .toMutableList()
+            .toList()
 
     private fun mentionIdBy(idValue: Long) =
         with(MentionId.newBuilder()) {
@@ -148,7 +139,10 @@ public class GitHubClientProcess :
         }
 
     /**
-     * Sets the implementation of [GitHubClientService].
+     * Sets the method for retrieving mentions from GitHub.
+     *
+     * [GitHubClientService] implementation can be directed to testing or
+     * interacting with the GitHub API.
      */
     internal fun inject(gitHubClientService: GitHubClientService) {
         this.gitHubClientService = gitHubClientService
