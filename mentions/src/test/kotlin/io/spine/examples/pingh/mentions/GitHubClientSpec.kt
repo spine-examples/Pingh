@@ -30,6 +30,7 @@ import com.google.protobuf.Timestamp
 import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
+import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
@@ -67,10 +68,8 @@ public class GitHubClientSpec : ContextAwareTest() {
     public fun prepareSessionsContextAndEmitEvent() {
         sessionContext = BlackBoxContext
             .from(io.spine.examples.pingh.sessions.newBuilder())
-        val username = with(Username.newBuilder()) {
-            value = randomString()
-            vBuild()
-        }
+        val username = Username.newBuilder()
+            .buildBy(randomString())
         gitHubClientId = gitHubClientIdBy(username)
         emitUserLoggedInEventInSessionsContext()
     }
@@ -80,10 +79,8 @@ public class GitHubClientSpec : ContextAwareTest() {
      * in the Sessions bounded context.
      */
     private fun emitUserLoggedInEventInSessionsContext() {
-        token = with(PersonalAccessToken.newBuilder()) {
-            value = randomString()
-            vBuild()
-        }
+        token = PersonalAccessToken.newBuilder()
+            .buildBy(randomString())
         val userLoggedIn = UserLoggedIn.newBuilder()
             .setId(
                 SessionId.newBuilder()
@@ -192,23 +189,6 @@ public class GitHubClientSpec : ContextAwareTest() {
             sendUpdateMentionsFromGitHubCommand()
             context().assertEvent(expectedRejection)
             otherClientTread.join()
-        }
-    }
-
-    @Nested
-    public inner class `react on 'MentionsUpdateFromGitHubRequested' event, and` {
-
-        private fun sendMentionsUpdateFromGitHubRequestedEvent() {
-            val event = MentionsUpdateFromGitHubRequested.newBuilder()
-                .setId(gitHubClientId)
-                .vBuild()
-            context().receivesEvent(event)
-        }
-
-        @Test
-        public fun `emit 'UserMentioned' event for each mentions fetched from 'GitHubClientService'`() {
-
-
         }
     }
 }

@@ -122,7 +122,8 @@ public class GitHubClientProcess :
         gitHubMentions
             .map { mention ->
                 with(UserMentioned.newBuilder()) {
-                    id = mentionIdBy(mention.id)
+                    id = MentionId.newBuilder()
+                        .buildBy(mention.id)
                     whoMentioned = mention.whoMentioned
                     title = mention.title
                     whenMentioned = mention.whenMentioned
@@ -131,12 +132,6 @@ public class GitHubClientProcess :
                 }
             }
             .toList()
-
-    private fun mentionIdBy(idValue: Long) =
-        with(MentionId.newBuilder()) {
-            uuid = "$idValue"
-            vBuild()
-        }
 
     /**
      * Sets the method for retrieving mentions from GitHub.
