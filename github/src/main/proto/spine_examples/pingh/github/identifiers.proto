@@ -31,53 +31,11 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.pingh.spine.io";
 option java_package = "io.spine.examples.pingh.github";
-option java_outer_classname = "GitHubProto";
+option java_outer_classname = "IdentifiersProto";
 option java_multiple_files = true;
 
-import "google/protobuf/timestamp.proto";
-import "spine/net/url.proto";
-import "spine_examples/pingh/github/identifiers.proto";
-
-// The username used in the GitHub account.
-message Username {
+// The global identifier for any item in the GitHub.
+message NodeId {
 
     string value = 1 [(required) = true];
-}
-
-// The token issued by GitHub after authentication.
-//
-// Used to obtain information on behalf of the user.
-//
-message PersonalAccessToken {
-
-    string value = 1 [(required) = true];
-}
-
-// The GitHub user information.
-message User {
-
-    // The unique username that identifies the user.
-    Username username = 1 [(required) = true];
-
-    // The URL to the user's avatar.
-    spine.net.Url avatar_url = 2 [(required) = true];
-}
-
-// The mention of a user on the GitHub.
-message Mention {
-
-    // The ID of the mention on the GitHub.
-    NodeId id = 1;
-
-    // The user who created the mention.
-    User who_mentioned = 2 [(required) = true];
-
-    // The title of the GitHub item in which the mention created.
-    string title = 3 [(required) = true];
-
-    // Time when the user was mentioned.
-    google.protobuf.Timestamp when_mentioned = 4 [(required) = true];
-
-    // The URL to the GitHub item where the user was mentioned.
-    spine.net.Url url = 5 [(required) = true];
 }

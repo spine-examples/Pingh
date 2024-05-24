@@ -28,11 +28,12 @@ package io.spine.examples.pingh.mentions
 
 import com.google.protobuf.util.JsonFormat
 import com.google.protobuf.util.Timestamps
-import io.spine.examples.pingh.github.IssuesSearchResult
-import io.spine.examples.pingh.github.IssuesSearchResultItem
 import io.spine.examples.pingh.github.Mention
+import io.spine.examples.pingh.github.NodeId
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.buildBy
+import io.spine.examples.pingh.github.rest.IssueOrPullRequestFragment
+import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResult
 import io.spine.net.Url
 
 /**
@@ -45,7 +46,7 @@ public class MentionsParser {
      * Converts JSON to a list of [Mention]s.
      */
     public fun parseJson(json: String): List<Mention> {
-        val responseBuilder = IssuesSearchResult.newBuilder()
+        val responseBuilder = IssuesAndPullRequestsSearchResult.newBuilder()
         JsonFormat.parser()
             .ignoringUnknownFields()
             .merge(json, responseBuilder)
@@ -54,21 +55,21 @@ public class MentionsParser {
     }
 
     /**
-     * Converts list of [IssuesSearchResultItem]s to list of [Mention]s.
+     * Converts list of [IssueOrPullRequestFragment]s to list of [Mention]s.
      */
-    private fun mapToMention(gitHubItems: List<IssuesSearchResultItem>):
+    private fun mapToMention(gitHubItems: List<IssueOrPullRequestFragment>):
             List<Mention> =
         gitHubItems
-            .map { item ->
+            .map { fragment ->
                 with(Mention.newBuilder()) {
-                    id = item.id
+                    id = NodeId::class.buildBy(fragment.nodeId)
                     whoMentioned = User::class.buildBy(
-                        item.whoCreated.username,
-                        item.whoCreated.avatarUrl
+                        fragment.whoCreated.username,
+                        fragment.whoCreated.avatarUrl
                     )
-                    title = item.title
-                    whenMentioned = Timestamps.parse(item.whenCreated)
-                    url = Url::class.buildBy(item.htmlUrl)
+                    title = fragment.title
+                    whenMentioned = Timestamps.parse(fragment.whenCreated)
+                    url = Url::class.buildBy(fragment.htmlUrl)
                     vBuild()
                 }
             }

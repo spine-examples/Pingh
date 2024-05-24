@@ -26,15 +26,17 @@
 
 package io.spine.examples.pingh.mentions
 
+import io.spine.examples.pingh.github.NodeId
 import io.spine.examples.pingh.github.Username
 import kotlin.reflect.KClass
 
 /**
- * Creates a new [MentionId] with the specified long value.
+ * Creates a new [MentionId] with the specified [NodeId] and [Username].
  */
-internal fun KClass<MentionId>.buildBy(value: Long): MentionId =
+internal fun KClass<MentionId>.buildBy(nodeId: NodeId, whomMentioned: Username): MentionId =
     MentionId.newBuilder()
-        .setUuid("$value")
+        .setWhere(nodeId)
+        .setUser(whomMentioned)
         .vBuild()
 
 /**
