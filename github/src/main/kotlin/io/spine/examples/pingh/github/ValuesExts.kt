@@ -24,11 +24,49 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.mentions
+package io.spine.examples.pingh.github
+
+import io.spine.net.Url
+import kotlin.reflect.KClass
 
 /**
- * Returns the [MentionId] created by its long value.
+ * Creates a new [Username] with the specified string value.
  */
-public fun MentionId.Builder.buildBy(idValue: Long): MentionId =
-    this.setUuid("$idValue")
+public fun KClass<Username>.buildBy(value: String): Username =
+    Username.newBuilder()
+        .setValue(value)
         .vBuild()
+
+/**
+ * Creates a new [PersonalAccessToken] with the specified string value.
+ */
+public fun KClass<PersonalAccessToken>.buildBy(value: String): PersonalAccessToken =
+    PersonalAccessToken.newBuilder()
+        .setValue(value)
+        .vBuild()
+
+/**
+ * Creates a new [Url] with the specified string value.
+ */
+public fun KClass<Url>.buildBy(spec: String): Url =
+    Url.newBuilder()
+        .setSpec(spec)
+        .vBuild()
+
+/**
+ * Creates a new [User] with the specified [Username] and avatar [Url].
+ */
+public fun KClass<User>.buildBy(username: Username, avatarUrl: Url): User =
+    User.newBuilder()
+        .setUsername(username)
+        .setAvatarUrl(avatarUrl)
+        .vBuild()
+
+/**
+ * Creates a new [User] with the specified username and avatar URL.
+ */
+public fun KClass<User>.buildBy(username: String, avatarUrl: String): User =
+    this.buildBy(
+        Username::class.buildBy(username),
+        Url::class.buildBy(avatarUrl)
+    )

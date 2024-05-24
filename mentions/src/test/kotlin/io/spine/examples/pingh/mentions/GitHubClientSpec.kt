@@ -35,8 +35,7 @@ import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
 import io.spine.examples.pingh.mentions.given.GitHubClientSpecService
-import io.spine.examples.pingh.mentions.given.gitHubClientBy
-import io.spine.examples.pingh.mentions.given.gitHubClientIdBy
+import io.spine.examples.pingh.mentions.given.buildBy
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
@@ -68,9 +67,8 @@ public class GitHubClientSpec : ContextAwareTest() {
     public fun prepareSessionsContextAndEmitEvent() {
         sessionContext = BlackBoxContext
             .from(io.spine.examples.pingh.sessions.newBuilder())
-        val username = Username.newBuilder()
-            .buildBy(randomString())
-        gitHubClientId = gitHubClientIdBy(username)
+        val username = Username::class.buildBy(randomString())
+        gitHubClientId = GitHubClientId::class.buildBy(username)
         emitUserLoggedInEventInSessionsContext()
     }
 
@@ -79,8 +77,7 @@ public class GitHubClientSpec : ContextAwareTest() {
      * in the Sessions bounded context.
      */
     private fun emitUserLoggedInEventInSessionsContext() {
-        token = PersonalAccessToken.newBuilder()
-            .buildBy(randomString())
+        token = PersonalAccessToken::class.buildBy(randomString())
         val userLoggedIn = UserLoggedIn.newBuilder()
             .setId(
                 SessionId.newBuilder()
@@ -112,14 +109,14 @@ public class GitHubClientSpec : ContextAwareTest() {
 
         @Test
         public fun `create 'GitHubClient' state`() {
-            val expected = gitHubClientBy(gitHubClientId, token)
+            val expected = GitHubClient::class.buildBy(gitHubClientId, token)
             context().assertState(gitHubClientId, expected)
         }
 
         @Test
         public fun `update token in existing 'GitHubClient' entity`() {
             emitUserLoggedInEventInSessionsContext()
-            val expected = gitHubClientBy(gitHubClientId, token)
+            val expected = GitHubClient::class.buildBy(gitHubClientId, token)
             context().assertState(gitHubClientId, expected)
         }
     }

@@ -59,11 +59,6 @@ public class GitHubClientRepository(
      * Returns ID of [GitHubClient] of provided ID of [UserSession] the same user.
      */
     private fun toGitHubClientId(session: SessionId): Set<GitHubClientId> {
-        return setOf(
-            with(GitHubClientId.newBuilder()) {
-                username = session.username
-                vBuild()
-            }
-        )
+        return setOf(GitHubClientId::class.buildBy(session.username))
     }
 }

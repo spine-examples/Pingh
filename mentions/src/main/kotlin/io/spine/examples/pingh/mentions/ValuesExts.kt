@@ -24,25 +24,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.github
+package io.spine.examples.pingh.mentions
 
-import io.spine.net.Url
+import io.spine.examples.pingh.github.Username
+import kotlin.reflect.KClass
 
 /**
- * Returns the [User] created by its specified [Username] and avatar [Url].
+ * Creates a new [MentionId] with the specified long value.
  */
-public fun User.Builder.buildBy(username: Username, avatarUrl: Url): User =
-    this.setUsername(username)
-        .setAvatarUrl(avatarUrl)
+public fun KClass<MentionId>.buildBy(value: Long): MentionId =
+    MentionId.newBuilder()
+        .setUuid("$value")
         .vBuild()
 
 /**
- * Returns the [User] created by its specified string values of [Username] and avatar [Url].
+ * Creates a new [GitHubClientId] with the specified [Username].
  */
-public fun User.Builder.buildBy(usernameValue: String, avatarUrlValue: String): User =
-    this.buildBy(
-        Username.newBuilder()
-            .buildBy(usernameValue),
-        Url.newBuilder()
-            .buildBy(avatarUrlValue)
-    )
+public fun KClass<GitHubClientId>.buildBy(username: Username): GitHubClientId =
+    GitHubClientId.newBuilder()
+        .setUsername(username)
+        .vBuild()

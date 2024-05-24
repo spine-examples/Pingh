@@ -122,8 +122,7 @@ public class GitHubClientProcess :
         gitHubMentions
             .map { mention ->
                 with(UserMentioned.newBuilder()) {
-                    id = MentionId.newBuilder()
-                        .buildBy(mention.id)
+                    id = MentionId::class.buildBy(mention.id)
                     whoMentioned = mention.whoMentioned
                     title = mention.title
                     whenMentioned = mention.whenMentioned

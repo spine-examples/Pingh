@@ -26,8 +26,8 @@
 
 package io.spine.examples.pingh.mentions
 
-import com.google.protobuf.Timestamp
 import com.google.protobuf.util.JsonFormat
+import com.google.protobuf.util.Timestamps
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.ResponseOnSearchingIssuesRequest
 import io.spine.examples.pingh.github.ResponseOnSearchingIssuesRequestItem
@@ -62,16 +62,13 @@ public class MentionsParser {
             .map { item ->
                 with(Mention.newBuilder()) {
                     id = item.id
-                    whoMentioned = User.newBuilder()
-                        .buildBy(
-                            item.whoCreated.username,
-                            item.whoCreated.avatarUrl
-                        )
+                    whoMentioned = User::class.buildBy(
+                        item.whoCreated.username,
+                        item.whoCreated.avatarUrl
+                    )
                     title = item.title
-                    whenMentioned = Timestamp.newBuilder()
-                        .buildBy(item.whenCreated)
-                    url = Url.newBuilder()
-                        .buildBy(item.htmlUrl)
+                    whenMentioned = Timestamps.parse(item.whenCreated)
+                    url = Url::class.buildBy(item.htmlUrl)
                     vBuild()
                 }
             }

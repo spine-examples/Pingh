@@ -27,22 +27,15 @@
 package io.spine.examples.pingh.mentions.given
 
 import io.spine.examples.pingh.github.PersonalAccessToken
-import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.GitHubClient
 import io.spine.examples.pingh.mentions.GitHubClientId
-
-/**
- * Returns the [GitHubClientId], created using the passed [Username].
- */
-public fun gitHubClientIdBy(username: Username): GitHubClientId =
-    GitHubClientId.newBuilder()
-        .setUsername(username)
-        .vBuild()
+import kotlin.reflect.KClass
 
 /**
  * Returns the [GitHubClient], created using the passed [GitHubClientId] and [PersonalAccessToken].
  */
-public fun gitHubClientBy(id: GitHubClientId, token: PersonalAccessToken): GitHubClient =
+internal fun KClass<GitHubClient>.buildBy(id: GitHubClientId, token: PersonalAccessToken):
+        GitHubClient =
     GitHubClient.newBuilder()
         .setId(id)
         .setToken(token)
