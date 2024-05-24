@@ -32,7 +32,7 @@ import kotlin.reflect.KClass
 /**
  * Creates a new [MentionId] with the specified long value.
  */
-public fun KClass<MentionId>.buildBy(value: Long): MentionId =
+internal fun KClass<MentionId>.buildBy(value: Long): MentionId =
     MentionId.newBuilder()
         .setUuid("$value")
         .vBuild()
@@ -40,7 +40,7 @@ public fun KClass<MentionId>.buildBy(value: Long): MentionId =
 /**
  * Creates a new [GitHubClientId] with the specified [Username].
  */
-public fun KClass<GitHubClientId>.buildBy(username: Username): GitHubClientId =
+internal fun KClass<GitHubClientId>.buildBy(username: Username): GitHubClientId =
     GitHubClientId.newBuilder()
         .setUsername(username)
         .vBuild()

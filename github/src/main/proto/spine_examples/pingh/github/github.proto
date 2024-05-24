@@ -58,7 +58,7 @@ message User {
     // The unique username that identifies the user.
     Username username = 1 [(required) = true];
 
-    // The link to the user's avatar.
+    // The URL to the user's avatar.
     spine.net.Url avatar_url = 2 [(required) = true];
 }
 
