@@ -83,7 +83,7 @@ public class GitHubClientProcess :
         UsersGitHubTokenInvalid::class
     )
     internal fun handle(command: UpdateMentionsFromGitHub): MentionsUpdateFromGitHubRequested {
-        if (builder().hasWhenStarted()) {
+        if (state().hasWhenStarted()) {
             throw MentionsUpdateIsAlreadyInProgress.newBuilder()
                 .setId(command.id)
                 .build()
