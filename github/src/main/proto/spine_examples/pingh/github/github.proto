@@ -64,30 +64,30 @@ message User {
 
 // GitHub user information.
 //
-// The data is stored in primitive types. Uses to retrieve user data
+// The data is stored in primitive types. It is used to retrieve user data
 // from JSON responses from the GitHub API.
 //
-message UserValue {
+message GitHubUser {
 
     // The unique username that identifies the user.
     string username = 1 [(required) = true, json_name = "login"];
 
-    // The link to the user's avatar.
+    // The URL to the user's avatar.
     string avatar_url = 2 [(required) = true, json_name = "avatar_url"];
 }
 
 // Information about the GitHub item obtained by requesting to search for mentions
 // in issues and pull requests.
 //
-// Uses to retrieve item data from JSON responses from the GitHub API.
+// It is used to retrieve item data from JSON responses from the GitHub API.
 //
-message ResponseOnSearchingIssuesRequestItem {
+message IssuesSearchResultItem {
 
     // The item's ID in GitHub.
     int64 id = 1 [(required) = true];
 
     // The item's author.
-    UserValue who_created = 2 [(required) = true, json_name = "user"];
+    GitHubUser who_created = 2 [(required) = true, json_name = "user"];
 
     // The item's title.
     string title = 3 [(required) = true];
@@ -95,19 +95,19 @@ message ResponseOnSearchingIssuesRequestItem {
     // Time when this item was created.
     string when_created = 4 [(required) = true, json_name = "created_at"];
 
-    // The link to this GitHub item.
+    // The URL to this GitHub item.
     string html_url = 5 [(required) = true, json_name = "html_url"];
 }
 
 // GitHub API response received when requesting to search for mentions
 // in issues and pull requests.
 //
-// Uses to retrieve data from JSON responses from the GitHub API.
+// It is used to retrieve data from JSON responses from the GitHub API.
 //
-message ResponseOnSearchingIssuesRequest {
+message IssuesSearchResult {
 
     // GitHub items on which the mention occurred.
-    repeated ResponseOnSearchingIssuesRequestItem item = 1 [(required) = true, json_name = "items"];
+    repeated IssuesSearchResultItem item = 1 [(required) = true, json_name = "items"];
 }
 
 // The mention of a user on the GitHub.
@@ -125,6 +125,6 @@ message Mention {
     // Time when the user was mentioned.
     google.protobuf.Timestamp when_mentioned = 4 [(required) = true];
 
-    // The link to the GitHub item where the user was mentioned.
+    // The URL to the GitHub item where the user was mentioned.
     spine.net.Url url = 5 [(required) = true];
 }

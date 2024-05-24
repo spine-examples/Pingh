@@ -28,9 +28,9 @@ package io.spine.examples.pingh.mentions
 
 import com.google.protobuf.util.JsonFormat
 import com.google.protobuf.util.Timestamps
+import io.spine.examples.pingh.github.IssuesSearchResult
+import io.spine.examples.pingh.github.IssuesSearchResultItem
 import io.spine.examples.pingh.github.Mention
-import io.spine.examples.pingh.github.ResponseOnSearchingIssuesRequest
-import io.spine.examples.pingh.github.ResponseOnSearchingIssuesRequestItem
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.buildBy
 import io.spine.net.Url
@@ -45,7 +45,7 @@ public class MentionsParser {
      * Converts JSON to a list of [Mention].
      */
     public fun parseJson(json: String): List<Mention> {
-        val responseBuilder = ResponseOnSearchingIssuesRequest.newBuilder()
+        val responseBuilder = IssuesSearchResult.newBuilder()
         JsonFormat.parser()
             .ignoringUnknownFields()
             .merge(json, responseBuilder)
@@ -54,9 +54,9 @@ public class MentionsParser {
     }
 
     /**
-     * Converts list of [ResponseOnSearchingIssuesRequestItem]s to list of [Mention]s.
+     * Converts list of [IssuesSearchResultItem]s to list of [Mention]s.
      */
-    private fun mapToMention(gitHubItems: List<ResponseOnSearchingIssuesRequestItem>):
+    private fun mapToMention(gitHubItems: List<IssuesSearchResultItem>):
             List<Mention> =
         gitHubItems
             .map { item ->
