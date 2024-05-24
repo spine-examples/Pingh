@@ -30,12 +30,19 @@ import io.spine.server.BoundedContext
 import io.spine.server.BoundedContextBuilder
 
 /**
- * Name of the Mentions [BoundedContext].
+ * Name of the Mentions bounded context.
  */
 public const val NAME: String = "Mentions"
 
 /**
- * Configures Mentions [BoundedContext] with repositories.
+ * Configures Mentions bounded context with repositories.
+ *
+ * Mentions bounded context is responsible for working with mentions,
+ * searching for them on the GitHub, storing them, and changing their state.
+ *
+ * The context consists of the [GitHubClientProcess], for work with which the repository is used.
+ * It is also necessary to specify [GitHubClientService] to search for user mentions
+ * using the GitHub API.
  */
 public fun newBuilder(gitHubClientService: GitHubClientService): BoundedContextBuilder =
     BoundedContext.singleTenant(NAME)

@@ -64,7 +64,7 @@ public class GitHubClientProcess :
         archived = true
         builder().setToken(event.token)
         return GitHubTokenUpdated.newBuilder()
-            .setId(builder().id)
+            .setId(GitHubClientId::class.buildBy(event.id.username))
             .setToken(event.token)
             .vBuild()
     }
@@ -118,7 +118,7 @@ public class GitHubClientProcess :
         )
     }
 
-    private fun createUserMentionedEvents(gitHubMentions: List<Mention>): List<EventMessage> =
+    private fun createUserMentionedEvents(gitHubMentions: Set<Mention>): Set<EventMessage> =
         gitHubMentions
             .map { mention ->
                 with(UserMentioned.newBuilder()) {
@@ -133,7 +133,7 @@ public class GitHubClientProcess :
                     vBuild()
                 }
             }
-            .toList()
+            .toSet()
 
     /**
      * Sets the method for fetching mentions from GitHub.

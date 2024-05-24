@@ -43,17 +43,17 @@ import java.lang.Thread.sleep
 public class GitHubClientSpecService : GitHubClientService {
 
     /**
-     * Parses JSON from the GitHub API response to a list of [Mention]s.
+     * Parses JSON from the GitHub API response to a set of [Mention]s.
      */
     private val mentionsParser = MentionsParser()
 
     /**
-     * Returns list of [Mention]s retrieved from a JSON file in the resource folder.
+     * Returns set of [Mention]s retrieved from a JSON file in the resource folder.
      */
     public override fun fetchMentions(
         username: Username,
         token: PersonalAccessToken
-    ): List<Mention> {
+    ): Set<Mention> {
         val jsonFile = this::class.java.getResource("github_response.json")
         checkNotNull(jsonFile)
         val json = jsonFile.readText(Charsets.UTF_8)

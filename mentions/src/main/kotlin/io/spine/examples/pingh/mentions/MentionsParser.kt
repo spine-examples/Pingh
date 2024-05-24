@@ -38,26 +38,26 @@ import io.spine.net.Url
 
 /**
  * Converts a JSON containing a list of GitHub items
- * where a user is mentioned to a list of [Mention]s.
+ * where a user is mentioned to a set of [Mention]s.
  */
 public class MentionsParser {
 
     /**
-     * Converts JSON to a list of [Mention]s.
+     * Converts JSON to a set of [Mention]s.
      */
-    public fun parseJson(json: String): List<Mention> {
+    public fun parseJson(json: String): Set<Mention> {
         val responseBuilder = IssuesAndPullRequestsSearchResult.newBuilder()
         JsonFormat.parser()
             .ignoringUnknownFields()
             .merge(json, responseBuilder)
         val response = responseBuilder.vBuild()
-        return mapToMention(response.itemList)
+        return mapToMentions(response.itemList).toSet()
     }
 
     /**
      * Converts list of [IssueOrPullRequestFragment]s to list of [Mention]s.
      */
-    private fun mapToMention(gitHubItems: List<IssueOrPullRequestFragment>):
+    private fun mapToMentions(gitHubItems: List<IssueOrPullRequestFragment>):
             List<Mention> =
         gitHubItems
             .map { fragment ->
@@ -73,5 +73,4 @@ public class MentionsParser {
                     vBuild()
                 }
             }
-            .toList()
 }

@@ -31,13 +31,13 @@ import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
 
 /**
- * The external system that requests mentions using the GitHub API.
+ * The service that searches mentions using the GitHub API.
  */
 public interface GitHubClientService {
 
     /**
-     * Requests and returns user [Mention]s by [Username] and [PersonalAccessToken].
+     * Searches and returns user [Mention]s by [Username] and [PersonalAccessToken].
      */
     public fun fetchMentions(username: Username, token: PersonalAccessToken):
-            List<Mention>
+            Set<Mention>
 }

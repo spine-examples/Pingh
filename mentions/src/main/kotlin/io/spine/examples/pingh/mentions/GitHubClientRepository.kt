@@ -28,7 +28,6 @@ package io.spine.examples.pingh.mentions
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
 import io.spine.examples.pingh.sessions.SessionId
-import io.spine.examples.pingh.sessions.UserSession
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.server.procman.ProcessManagerRepository
 import io.spine.server.route.EventRouting
@@ -56,7 +55,7 @@ public class GitHubClientRepository(
     }
 
     /**
-     * Returns ID of [GitHubClient] of provided ID of [UserSession] the same user.
+     * Returns a set with a single GitHub client ID, that corresponds to the passed user session.
      */
     private fun toGitHubClientId(session: SessionId): Set<GitHubClientId> {
         return setOf(GitHubClientId::class.buildBy(session.username))
