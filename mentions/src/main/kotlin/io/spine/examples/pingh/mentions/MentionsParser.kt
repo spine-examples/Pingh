@@ -37,12 +37,12 @@ import io.spine.net.Url
 
 /**
  * Converts a JSON containing a list of GitHub items
- * where a user is mentioned to a list of [Mention].
+ * where a user is mentioned to a list of [Mention]s.
  */
 public class MentionsParser {
 
     /**
-     * Converts JSON to a list of [Mention].
+     * Converts JSON to a list of [Mention]s.
      */
     public fun parseJson(json: String): List<Mention> {
         val responseBuilder = IssuesSearchResult.newBuilder()

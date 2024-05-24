@@ -32,7 +32,7 @@ import io.spine.examples.pingh.mentions.GitHubClientId
 import kotlin.reflect.KClass
 
 /**
- * Returns the [GitHubClient], created using the passed [GitHubClientId] and [PersonalAccessToken].
+ * Creates a new [GitHubClient] with the specified [GitHubClientId] and [PersonalAccessToken].
  */
 internal fun KClass<GitHubClient>.buildBy(id: GitHubClientId, token: PersonalAccessToken):
         GitHubClient =

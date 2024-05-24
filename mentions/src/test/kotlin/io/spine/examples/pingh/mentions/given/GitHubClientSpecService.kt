@@ -43,12 +43,12 @@ import java.lang.Thread.sleep
 public class GitHubClientSpecService : GitHubClientService {
 
     /**
-     * Parses JSON from the GitHub API response to a list of [Mention].
+     * Parses JSON from the GitHub API response to a list of [Mention]s.
      */
     private val mentionsParser = MentionsParser()
 
     /**
-     * Returns list of [Mention] retrieved from a JSON file in the resource folder.
+     * Returns list of [Mention]s retrieved from a JSON file in the resource folder.
      */
     public override fun fetchMentions(
         username: Username,
