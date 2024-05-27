@@ -34,7 +34,10 @@ option java_package = "io.spine.examples.pingh.github";
 option java_outer_classname = "IdentifiersProto";
 option java_multiple_files = true;
 
-// The global identifier for any item in the GitHub.
+// The global identifier of any item in the GitHub.
+//
+// See: https://docs.github.com/en/graphql/guides/using-global-node-ids.
+//
 message NodeId {
 
     string value = 1 [(required) = true];

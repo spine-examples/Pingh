@@ -59,14 +59,14 @@ message User {
     // The unique username that identifies the user.
     Username username = 1 [(required) = true];
 
-    // The URL to the user's avatar.
+    // The URL of the user's avatar.
     spine.net.Url avatar_url = 2 [(required) = true];
 }
 
-// The mention of a user on the GitHub.
+// The mention of a user on GitHub.
 message Mention {
 
-    // The ID of the mention on the GitHub.
+    // The global ID of the GitHub item in which this mention is created.
     NodeId id = 1;
 
     // The user who created the mention.
@@ -78,6 +78,6 @@ message Mention {
     // Time when the user was mentioned.
     google.protobuf.Timestamp when_mentioned = 4 [(required) = true];
 
-    // The URL to the GitHub item where the user was mentioned.
+    // The URL of the GitHub item where the user was mentioned.
     spine.net.Url url = 5 [(required) = true];
 }
