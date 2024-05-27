@@ -54,7 +54,8 @@ public class GitHubClientProcess :
     /**
      * Service that fetches mentions from GitHub.
      *
-     * Must necessarily be set in the [inject] method.
+     * It is expected this field is set by calling [inject]
+     * right after the instance creation.
      */
     private lateinit var gitHubClientService: GitHubClientService
 
@@ -75,8 +76,7 @@ public class GitHubClientProcess :
      * Starts the process of updating mentions for the user.
      *
      * When a mention update is requested for a user, checks whether the previous update
-     * has ended. If this condition is met, the event of the received request to update mentions
-     * is emitted.
+     * has ended. If this condition is met, the process of updating the mentions is started.
      */
     @Assign
     @Throws(
@@ -97,8 +97,7 @@ public class GitHubClientProcess :
     }
 
     /**
-     * Updates user mentions by emitting [UserMentioned] events
-     * and terminates the mention update process.
+     * Fetches new mentions of the user from GitHub and terminates the mention update process.
      *
      * @return List of events, where the [UserMentioned] event for each mention comes first,
      * followed by a single [MentionsUpdateFromGitHubCompleted] event.

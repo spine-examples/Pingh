@@ -37,7 +37,7 @@ public interface GitHubClientService {
 
     /**
      * Searches and returns user [Mention]s by [Username] that was mentioned
-     * and its [PersonalAccessToken].
+     * and their [PersonalAccessToken].
      */
     public fun fetchMentions(username: Username, token: PersonalAccessToken):
             Set<Mention>
