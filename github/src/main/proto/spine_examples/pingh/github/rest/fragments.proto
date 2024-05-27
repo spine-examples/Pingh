@@ -52,13 +52,17 @@ message UserFragment {
     string avatar_url = 2 [(required) = true, json_name = "avatar_url"];
 }
 
-// Contains data about the issue or pull request received from the GitHub API.
+// Issue or pull request data received via GitHub API.
 //
 // In the GitHub context, issues and pull requests have the same data structure.
 //
 message IssueOrPullRequestFragment {
 
     // The item's ID in GitHub.
+    //
+    // To avoid conflicts with the `id` field in the JSON response received from GitHub,
+    // the name `node_id` is used.
+    //
     string node_id = 1 [(required) = true, json_name = "node_id"];
 
     // The item's author.
@@ -71,6 +75,10 @@ message IssueOrPullRequestFragment {
     string when_created = 4 [(required) = true, json_name = "created_at"];
 
     // The URL of this GitHub item.
+    //
+    // To avoid conflicts with the `url` field in the JSON response received from GitHub,
+    // the name `html_url` is used.
+    //
     string html_url = 5 [(required) = true, json_name = "html_url"];
 }
 

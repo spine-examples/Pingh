@@ -63,7 +63,7 @@ public class MentionsParser {
             .map { fragment ->
                 with(Mention.newBuilder()) {
                     id = NodeId::class.buildBy(fragment.nodeId)
-                    whoMentioned = User::class.buildBy(
+                    author = User::class.buildBy(
                         fragment.whoCreated.username,
                         fragment.whoCreated.avatarUrl
                     )

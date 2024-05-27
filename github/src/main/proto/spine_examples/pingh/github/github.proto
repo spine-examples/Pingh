@@ -70,7 +70,7 @@ message Mention {
     NodeId id = 1;
 
     // The user who created the mention.
-    User who_mentioned = 2 [(required) = true];
+    User author = 2 [(required) = true];
 
     // The title of the GitHub item in which the mention created.
     string title = 3 [(required) = true];

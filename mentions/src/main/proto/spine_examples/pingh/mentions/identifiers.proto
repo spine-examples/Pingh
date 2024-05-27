@@ -38,9 +38,6 @@ import "spine_examples/pingh/github/github.proto";
 import "spine_examples/pingh/github/identifiers.proto";
 
 // Identifies a mention.
-//
-// The unique username is used because multiple users can be mentioned in one GitHub item.
-//
 message MentionId {
 
     // The ID of the GitHub item where the user was mentioned.

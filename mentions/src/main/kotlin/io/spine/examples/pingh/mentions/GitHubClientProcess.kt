@@ -128,7 +128,7 @@ public class GitHubClientProcess :
                         mention.id,
                         state().id.username
                     )
-                    whoMentioned = mention.whoMentioned
+                    whoMentioned = mention.author
                     title = mention.title
                     whenMentioned = mention.whenMentioned
                     url = mention.url
