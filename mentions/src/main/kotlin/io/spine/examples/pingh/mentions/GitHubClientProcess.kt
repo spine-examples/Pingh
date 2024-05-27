@@ -46,13 +46,15 @@ import io.spine.server.procman.ProcessManager
 import kotlin.jvm.Throws
 
 /**
- * Coordinates the updating of the specific user's mentions from GitHub.
+ * A process of reading user's mentions from GitHub.
  */
 public class GitHubClientProcess :
     ProcessManager<GitHubClientId, GitHubClient, GitHubClient.Builder>() {
 
     /**
      * Service that fetches mentions from GitHub.
+     *
+     * Must necessarily be set in the [inject] method.
      */
     private lateinit var gitHubClientService: GitHubClientService
 
@@ -136,10 +138,10 @@ public class GitHubClientProcess :
             .toSet()
 
     /**
-     * Sets the method for fetching mentions from GitHub.
+     * Supplies this instance of the process with a service allowing to access GitHub.
      *
-     * [GitHubClientService] implementation can be directed to testing or
-     * interacting with the GitHub API.
+     * It is expected this method is called right after the creation of the process instance.
+     * Otherwise, the process will not be able to function properly.
      */
     internal fun inject(gitHubClientService: GitHubClientService) {
         this.gitHubClientService = gitHubClientService
