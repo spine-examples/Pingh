@@ -95,7 +95,7 @@ public class GitHubClientSpec : ContextAwareTest() {
         }
 
         @Test
-        public fun `init the 'GitHubClient' state and set the received token`() {
+        public fun `init 'GitHubClient' state and set the received token`() {
             val expected = GitHubClient::class.buildBy(gitHubClientId, token)
             context().assertState(gitHubClientId, expected)
         }
