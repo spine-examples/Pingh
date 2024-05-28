@@ -36,9 +36,7 @@ import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
 import io.spine.examples.pingh.mentions.event.UserMentioned
-import io.spine.examples.pingh.mentions.rejection.CannotStartDataUpdateTooEarly
 import io.spine.examples.pingh.mentions.rejection.MentionsUpdateIsAlreadyInProgress
-import io.spine.examples.pingh.mentions.rejection.UsersGitHubTokenInvalid
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.server.command.Assign
 import io.spine.server.event.React
@@ -80,11 +78,7 @@ public class GitHubClientProcess :
      * is started.
      */
     @Assign
-    @Throws(
-        CannotStartDataUpdateTooEarly::class,
-        MentionsUpdateIsAlreadyInProgress::class,
-        UsersGitHubTokenInvalid::class
-    )
+    @Throws(MentionsUpdateIsAlreadyInProgress::class)
     internal fun handle(command: UpdateMentionsFromGitHub): MentionsUpdateFromGitHubRequested {
         if (state().hasWhenStarted()) {
             throw MentionsUpdateIsAlreadyInProgress.newBuilder()
