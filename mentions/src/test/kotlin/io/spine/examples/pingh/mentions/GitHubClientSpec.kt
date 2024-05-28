@@ -160,10 +160,10 @@ public class GitHubClientSpec : ContextAwareTest() {
                 val firstCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
                 context().receivesCommand(firstCommand)
             }
-            val secondCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
             val expectedRejection = MentionsUpdateIsAlreadyInProgress::class.buildBy(gitHubClientId)
             try {
                 otherClientTread.start()
+                val secondCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
                 context().receivesCommand(secondCommand)
                 context().assertEvent(expectedRejection)
             } finally {
