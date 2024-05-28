@@ -26,17 +26,22 @@
 
 package io.spine.examples.pingh.mentions
 
+import io.kotest.matchers.shouldBe
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
+import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
+import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.given.buildBy
 import io.spine.examples.pingh.mentions.given.buildWithDefaultWhenStartedField
+import io.spine.examples.pingh.mentions.given.expectedUserMentionedSet
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
+import io.spine.protobuf.AnyPacker
 import io.spine.server.BoundedContextBuilder
 import io.spine.testing.TestValues.randomString
 import io.spine.testing.server.blackbox.BlackBoxContext
@@ -170,5 +175,42 @@ public class GitHubClientSpec : ContextAwareTest() {
                 otherClientTread.join()
             }
         }
+    }
+
+    @Nested
+    public inner class `react on 'MentionsUpdateFromGitHubRequested' event, and` {
+
+        @BeforeEach
+        public fun emitMentionsUpdateFromGitHubRequestedEvent() {
+            val event = MentionsUpdateFromGitHubRequested::class.buildBy(gitHubClientId)
+            context().receivesEvent(event)
+        }
+
+        @Test
+        public fun `emit 'UserMentioned' events for each mentions fetched from GitHub`() {
+            val expectedUserMentionedSet = expectedUserMentionedSet(gitHubClientId.username)
+            val eventSubject = context().assertEvents()
+                .withType(UserMentioned::class.java)
+            eventSubject.hasSize(3)
+            val actualUserMentionedSet = eventSubject
+                .actual()
+                .map { AnyPacker.unpack(it.message, UserMentioned::class.java) }
+                .toSet()
+            actualUserMentionedSet shouldBe expectedUserMentionedSet
+        }
+
+        @Test
+        public fun `emit 'MentionsUpdateFromGitHubCompleted' event`() {
+            val expected = MentionsUpdateFromGitHubCompleted::class.buildBy(gitHubClientId)
+            context().assertEvent(expected)
+        }
+    }
+
+    @Test
+    public fun `clear 'when_started' field after completed updating process`() {
+        val command = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
+        context().receivesCommand(command)
+        val expected = GitHubClient::class.buildBy(gitHubClientId, token)
+        context().assertState(gitHubClientId, expected)
     }
 }

@@ -27,17 +27,26 @@
 package io.spine.examples.pingh.mentions.given
 
 import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Timestamps
 import io.spine.base.Time.currentTime
+import io.spine.examples.pingh.github.NodeId
 import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
+import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.mentions.GitHubClient
 import io.spine.examples.pingh.mentions.GitHubClientId
+import io.spine.examples.pingh.mentions.MentionId
+import io.spine.examples.pingh.mentions.buildBy
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
+import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
+import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
+import io.spine.net.Url
 import kotlin.reflect.KClass
 
 /**
@@ -106,10 +115,72 @@ internal fun KClass<MentionsUpdateFromGitHubRequested>.buildBy(id: GitHubClientI
         .vBuild()
 
 /**
+ * Creates a new [MentionsUpdateFromGitHubCompleted] event with the specified [GitHubClientId].
+ */
+internal fun KClass<MentionsUpdateFromGitHubCompleted>.buildBy(id: GitHubClientId):
+        MentionsUpdateFromGitHubCompleted =
+    MentionsUpdateFromGitHubCompleted.newBuilder()
+        .setId(id)
+        .vBuild()
+
+/**
  * Creates a new [MentionsUpdateIsAlreadyInProgress] rejection with the specified [GitHubClientId].
  */
 internal fun KClass<MentionsUpdateIsAlreadyInProgress>.buildBy(id: GitHubClientId):
         MentionsUpdateIsAlreadyInProgress =
     MentionsUpdateIsAlreadyInProgress.newBuilder()
         .setId(id)
+        .vBuild()
+
+internal fun expectedUserMentionedSet(whomMentioned: Username): Set<UserMentioned> =
+    setOf(
+        UserMentioned::class.buildBy(
+            "PR_kwDOL2L5hc5vY_JP",
+            whomMentioned,
+            "MykytaPimonovTD",
+            "https://avatars.githubusercontent.com/u/160486193?v=4",
+            "Implement user session flow",
+            "2024-05-14T12:12:02Z",
+            "https://github.com/spine-examples/Pingh/pull/3"
+        ),
+        UserMentioned::class.buildBy(
+            "PR_kwDOL2L5hc5u-Jya",
+            whomMentioned,
+            "MykytaPimonovTD",
+            "https://avatars.githubusercontent.com/u/160486193?v=4",
+            "Define the ubiquitous language for Sessions and Mentions contexts",
+            "2024-05-09T09:49:43Z",
+            "https://github.com/spine-examples/Pingh/pull/2"
+        ),
+        UserMentioned::class.buildBy(
+            "PR_kwDOL2L5hc5udnm6",
+            whomMentioned,
+            "MykytaPimonovTD",
+            "https://avatars.githubusercontent.com/u/160486193?v=4",
+            "Set up Gradle configuration",
+            "2024-05-03T11:21:32Z",
+            "https://github.com/spine-examples/Pingh/pull/1"
+        )
+    )
+
+private fun KClass<UserMentioned>.buildBy(
+    nodeId: String,
+    whomMentioned: Username,
+    username: String,
+    avatarUr: String,
+    title: String,
+    timeInStringRepresentation: String,
+    urlValue: String
+): UserMentioned =
+    UserMentioned.newBuilder()
+        .setId(
+            MentionId::class.buildBy(
+                NodeId::class.buildBy(nodeId),
+                whomMentioned
+            )
+        )
+        .setWhoMentioned(User::class.buildBy(username, avatarUr))
+        .setTitle(title)
+        .setWhenMentioned(Timestamps.parse(timeInStringRepresentation))
+        .setUrl(Url::class.buildBy(urlValue))
         .vBuild()
