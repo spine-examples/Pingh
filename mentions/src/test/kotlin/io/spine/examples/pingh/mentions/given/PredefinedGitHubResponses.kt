@@ -40,7 +40,7 @@ import java.lang.Thread.sleep
  *
  * Uses exclusively for testing [GitHubClient] behavior.
  */
-public class GitHubClientSpecService : GitHubClientService {
+public class PredefinedGitHubResponses : GitHubClientService {
 
     /**
      * Parses JSON from the GitHub API response to a set of [Mention]s.

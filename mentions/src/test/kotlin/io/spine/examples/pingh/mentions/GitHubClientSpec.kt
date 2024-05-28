@@ -26,18 +26,16 @@
 
 package io.spine.examples.pingh.mentions
 
-import com.google.protobuf.Timestamp
-import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
-import io.spine.examples.pingh.mentions.given.GitHubClientSpecService
+import io.spine.examples.pingh.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.given.buildBy
+import io.spine.examples.pingh.mentions.given.buildWithDefaultWhenStartedField
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
-import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.server.BoundedContextBuilder
 import io.spine.testing.TestValues.randomString
@@ -57,7 +55,7 @@ public class GitHubClientSpec : ContextAwareTest() {
     private lateinit var token: PersonalAccessToken
 
     protected override fun contextBuilder(): BoundedContextBuilder =
-        newBuilder(GitHubClientSpecService())
+        newBuilder(PredefinedGitHubResponses())
 
     /**
      * Creates the [BlackBoxContext] of the Sessions bounded context,
@@ -78,15 +76,7 @@ public class GitHubClientSpec : ContextAwareTest() {
      */
     private fun emitUserLoggedInEventInSessionsContext() {
         token = PersonalAccessToken::class.buildBy(randomString())
-        val userLoggedIn = UserLoggedIn.newBuilder()
-            .setId(
-                SessionId.newBuilder()
-                    .setUsername(gitHubClientId.username)
-                    .setWhenCreated(currentTime())
-                    .vBuild()
-            )
-            .setToken(token)
-            .vBuild()
+        val userLoggedIn = UserLoggedIn::class.buildBy(gitHubClientId.username, token)
         sessionContext.receivesEvent(userLoggedIn)
     }
 
@@ -100,15 +90,12 @@ public class GitHubClientSpec : ContextAwareTest() {
 
         @Test
         public fun `emit 'GitHubTokenUpdated' event`() {
-            val expected = GitHubTokenUpdated.newBuilder()
-                .setId(gitHubClientId)
-                .setToken(token)
-                .vBuild()
+            val expected = GitHubTokenUpdated::class.buildBy(gitHubClientId, token)
             context().assertEvent(expected)
         }
 
         @Test
-        public fun `create 'GitHubClient' state`() {
+        public fun `set token for newly created 'GitHubClient' state `() {
             val expected = GitHubClient::class.buildBy(gitHubClientId, token)
             context().assertState(gitHubClientId, expected)
         }
@@ -124,20 +111,11 @@ public class GitHubClientSpec : ContextAwareTest() {
     @Nested
     public inner class `handle 'UpdateMentionsFromGitHub' command, and` {
 
-        private fun sendUpdateMentionsFromGitHubCommand() {
-            val command = UpdateMentionsFromGitHub.newBuilder()
-                .setId(gitHubClientId)
-                .setWhenRequested(currentTime())
-                .vBuild()
-            context().receivesCommand(command)
-        }
-
         @Test
         public fun `emits 'MentionsUpdateFromGitHubRequested' event if there is no active update process at this time`() {
-            sendUpdateMentionsFromGitHubCommand()
-            val expected = MentionsUpdateFromGitHubRequested.newBuilder()
-                .setId(gitHubClientId)
-                .vBuild()
+            val command = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
+            context().receivesCommand(command)
+            val expected = MentionsUpdateFromGitHubRequested::class.buildBy(gitHubClientId)
             context().assertEvent(expected)
         }
 
@@ -149,16 +127,13 @@ public class GitHubClientSpec : ContextAwareTest() {
          * and the main thread checks the state of the entity while performing the update.
          */
         @Test
-        public fun `set the start time of the updating operation in 'GitHubClient' entity`() {
+        public fun `set the start time of the updating operation`() {
             val otherClientTread = Thread {
-                sendUpdateMentionsFromGitHubCommand()
+                val command = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
+                context().receivesCommand(command)
             }
-            val gitHubClientWithDefaultWhenStartedField = with(GitHubClient.newBuilder()) {
-                whenStarted = Timestamp.getDefaultInstance()
-                // Building the message partially to include
-                // only the tested fields.
-                buildPartial()
-            }
+            val gitHubClientWithDefaultWhenStartedField =
+                GitHubClient::class.buildWithDefaultWhenStartedField()
             try {
                 otherClientTread.start()
                 context().assertState(gitHubClientId, GitHubClient::class.java)
@@ -170,24 +145,26 @@ public class GitHubClientSpec : ContextAwareTest() {
         }
 
         /**
-         * The update request is sent from another thread.
+         * Checks if the [UpdateMentionsFromGitHub] command is rejected
+         * if the previous process is not completed.
          *
-         * [MentionsUpdateFromGitHubRequested] command that is sent from another thread
-         * is successfully accepted, after which the command from the main thread is received.
-         * The command from the main thread must be rejected, because
-         * the process started in another thread is not yet complete.
+         * Creates a second thread from which the [UpdateMentionsFromGitHub] command is sent.
+         * It should be successfully accepted, which will start the update process.
+         * After that, another [UpdateMentionsFromGitHub] command is sent from the main thread,
+         * but it should be rejected because the update process started from
+         * the other thread has not completed.
          */
         @Test
         public fun `reject if the update process is already in progress at this time`() {
             val otherClientTread = Thread {
-                sendUpdateMentionsFromGitHubCommand()
+                val firstCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
+                context().receivesCommand(firstCommand)
             }
-            val expectedRejection = MentionsUpdateIsAlreadyInProgress.newBuilder()
-                .setId(gitHubClientId)
-                .vBuild()
+            val secondCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
+            val expectedRejection = MentionsUpdateIsAlreadyInProgress::class.buildBy(gitHubClientId)
             try {
                 otherClientTread.start()
-                sendUpdateMentionsFromGitHubCommand()
+                context().receivesCommand(secondCommand)
                 context().assertEvent(expectedRejection)
             } finally {
                 otherClientTread.join()

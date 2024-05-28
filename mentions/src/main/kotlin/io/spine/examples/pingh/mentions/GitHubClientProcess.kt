@@ -76,7 +76,8 @@ public class GitHubClientProcess :
      * Starts the process of updating mentions for the user.
      *
      * When a mention update is requested for a user, checks whether the previous update
-     * has ended. If this condition is met, the process of updating the mentions is started.
+     * has ended. If this condition is met, the process of updating the mentions from GitHub
+     * is started.
      */
     @Assign
     @Throws(
@@ -97,7 +98,7 @@ public class GitHubClientProcess :
     }
 
     /**
-     * Fetches new mentions of the user from GitHub and terminates the mention update process.
+     * Fetches user's mentions from GitHub and terminates the mention update process.
      *
      * @return List of events, where the [UserMentioned] event for each mention comes first,
      * followed by a single [MentionsUpdateFromGitHubCompleted] event.
