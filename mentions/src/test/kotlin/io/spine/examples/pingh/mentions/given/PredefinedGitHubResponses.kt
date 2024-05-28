@@ -27,11 +27,11 @@
 package io.spine.examples.pingh.mentions.given
 
 import io.spine.examples.pingh.github.Mention
-import io.spine.examples.pingh.mentions.MentionsParser
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.GitHubClient
 import io.spine.examples.pingh.mentions.GitHubClientService
+import io.spine.examples.pingh.mentions.parseJson
 import java.lang.Thread.sleep
 
 /**
@@ -43,11 +43,6 @@ import java.lang.Thread.sleep
 public class PredefinedGitHubResponses : GitHubClientService {
 
     /**
-     * Parses JSON from the GitHub API response to a set of [Mention]s.
-     */
-    private val mentionsParser = MentionsParser()
-
-    /**
      * Returns set of [Mention]s retrieved from a JSON file in the resource folder.
      */
     public override fun fetchMentions(
@@ -57,7 +52,7 @@ public class PredefinedGitHubResponses : GitHubClientService {
         val jsonFile = this::class.java.getResource("github_response.json")
         checkNotNull(jsonFile)
         val json = jsonFile.readText(Charsets.UTF_8)
-        val mentions = mentionsParser.parseJson(json)
+        val mentions = parseJson(json)
         sleep(1000) // Emulates a delay in fetching data from the GitHub API.
         return mentions
     }

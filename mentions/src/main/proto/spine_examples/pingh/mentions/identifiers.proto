@@ -43,7 +43,7 @@ message MentionId {
     // The ID of the GitHub item where the user was mentioned.
     spine_examples.pingh.github.NodeId where = 1 [(required) = true];
 
-    // The username of the GitHub user whom mentioned.
+    // The name of the GitHub user who was mentioned.
     spine_examples.pingh.github.Username user = 2 [(required) = true];
 }
 

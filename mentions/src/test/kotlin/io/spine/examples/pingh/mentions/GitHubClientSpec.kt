@@ -117,7 +117,7 @@ public class GitHubClientSpec : ContextAwareTest() {
     public inner class `handle 'UpdateMentionsFromGitHub' command, and` {
 
         @Test
-        public fun `emits 'MentionsUpdateFromGitHubRequested' event if there is no active update process at this time`() {
+        public fun `emit 'MentionsUpdateFromGitHubRequested' event if update process started`() {
             val command = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
             context().receivesCommand(command)
             val expected = MentionsUpdateFromGitHubRequested::class.buildBy(gitHubClientId)
@@ -165,7 +165,8 @@ public class GitHubClientSpec : ContextAwareTest() {
                 val firstCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
                 context().receivesCommand(firstCommand)
             }
-            val expectedRejection = MentionsUpdateIsAlreadyInProgress::class.buildBy(gitHubClientId)
+            val expectedRejection =
+                MentionsUpdateIsAlreadyInProgress::class.buildBy(gitHubClientId)
             try {
                 otherClientTread.start()
                 val secondCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
@@ -194,7 +195,7 @@ public class GitHubClientSpec : ContextAwareTest() {
             eventSubject.hasSize(3)
             val actualUserMentionedSet = eventSubject
                 .actual()
-                .map { AnyPacker.unpack(it.message, UserMentioned::class.java) }
+                .map { event -> AnyPacker.unpack(event.message, UserMentioned::class.java) }
                 .toSet()
             actualUserMentionedSet shouldBe expectedUserMentionedSet
         }
@@ -207,7 +208,7 @@ public class GitHubClientSpec : ContextAwareTest() {
     }
 
     @Test
-    public fun `clear 'when_started' field after completed updating process`() {
+    public fun `clear 'when_started' field after completing the updating process`() {
         val command = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
         context().receivesCommand(command)
         val expected = GitHubClient::class.buildBy(gitHubClientId, token)

@@ -132,11 +132,11 @@ internal fun KClass<MentionsUpdateIsAlreadyInProgress>.buildBy(id: GitHubClientI
         .setId(id)
         .vBuild()
 
-internal fun expectedUserMentionedSet(whomMentioned: Username): Set<UserMentioned> =
+internal fun expectedUserMentionedSet(whoWasMentioned: Username): Set<UserMentioned> =
     setOf(
         UserMentioned::class.buildBy(
             "PR_kwDOL2L5hc5vY_JP",
-            whomMentioned,
+            whoWasMentioned,
             "MykytaPimonovTD",
             "https://avatars.githubusercontent.com/u/160486193?v=4",
             "Implement user session flow",
@@ -145,7 +145,7 @@ internal fun expectedUserMentionedSet(whomMentioned: Username): Set<UserMentione
         ),
         UserMentioned::class.buildBy(
             "PR_kwDOL2L5hc5u-Jya",
-            whomMentioned,
+            whoWasMentioned,
             "MykytaPimonovTD",
             "https://avatars.githubusercontent.com/u/160486193?v=4",
             "Define the ubiquitous language for Sessions and Mentions contexts",
@@ -154,7 +154,7 @@ internal fun expectedUserMentionedSet(whomMentioned: Username): Set<UserMentione
         ),
         UserMentioned::class.buildBy(
             "PR_kwDOL2L5hc5udnm6",
-            whomMentioned,
+            whoWasMentioned,
             "MykytaPimonovTD",
             "https://avatars.githubusercontent.com/u/160486193?v=4",
             "Set up Gradle configuration",
@@ -163,24 +163,27 @@ internal fun expectedUserMentionedSet(whomMentioned: Username): Set<UserMentione
         )
     )
 
+/**
+ * Creates a new [UserMentioned] event with the specified [GitHubClientId].
+ */
 private fun KClass<UserMentioned>.buildBy(
     nodeId: String,
-    whomMentioned: Username,
+    whoWasMentioned: Username,
     username: String,
     avatarUr: String,
     title: String,
     timeInStringRepresentation: String,
-    urlValue: String
+    url: String
 ): UserMentioned =
     UserMentioned.newBuilder()
         .setId(
             MentionId::class.buildBy(
                 NodeId::class.buildBy(nodeId),
-                whomMentioned
+                whoWasMentioned
             )
         )
         .setWhoMentioned(User::class.buildBy(username, avatarUr))
         .setTitle(title)
         .setWhenMentioned(Timestamps.parse(timeInStringRepresentation))
-        .setUrl(Url::class.buildBy(urlValue))
+        .setUrl(Url::class.buildBy(url))
         .vBuild()
