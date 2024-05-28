@@ -67,7 +67,7 @@ message User {
 message Mention {
 
     // The global ID of the GitHub item in which this mention is created.
-    NodeId id = 1;
+    NodeId id = 1 [(required) = true];
 
     // The user who created the mention.
     User author = 2 [(required) = true];
