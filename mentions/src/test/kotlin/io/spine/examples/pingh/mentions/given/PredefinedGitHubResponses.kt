@@ -42,6 +42,8 @@ import java.lang.Thread.sleep
  */
 public class PredefinedGitHubResponses : GitHubClientService {
 
+    private var isBlocked = false
+
     /**
      * Returns set of [Mention]s retrieved from a JSON file in the resource folder.
      */
@@ -53,7 +55,22 @@ public class PredefinedGitHubResponses : GitHubClientService {
         checkNotNull(jsonFile)
         val json = jsonFile.readText(Charsets.UTF_8)
         val mentions = parseJson(json)
-        sleep(1000) // Emulates a delay in fetching data from the GitHub API.
+        delay() // Emulates a delay in fetching data from the GitHub API.
+        println(12345)
         return mentions
+    }
+
+    private fun delay() {
+        while (isBlocked) {
+            sleep(100)
+        }
+    }
+
+    public fun block() {
+        isBlocked = true
+    }
+
+    public fun unblock() {
+        isBlocked = false
     }
 }

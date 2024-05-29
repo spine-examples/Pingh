@@ -55,12 +55,13 @@ import org.junit.jupiter.api.Test
 @DisplayName("GitHub Client should")
 public class GitHubClientSpec : ContextAwareTest() {
 
+    private val gitHubClientService = PredefinedGitHubResponses()
     private lateinit var sessionContext: BlackBoxContext
     private lateinit var gitHubClientId: GitHubClientId
     private lateinit var token: PersonalAccessToken
 
     protected override fun contextBuilder(): BoundedContextBuilder =
-        newBuilder(PredefinedGitHubResponses())
+        newBuilder(gitHubClientService)
 
     /**
      * Creates the [BlackBoxContext] of the Sessions bounded context,
@@ -161,20 +162,26 @@ public class GitHubClientSpec : ContextAwareTest() {
          */
         @Test
         public fun `reject if the update process is already in progress at this time`() {
-            val otherClientTread = Thread {
+            gitHubClientService.block()
+            val firstClientTread = Thread {
                 val firstCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
                 context().receivesCommand(firstCommand)
+                gitHubClientService.unblock()
+            }
+            val secondClientThread = Thread {
+                val secondCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
+                context().receivesCommand(secondCommand)
+                gitHubClientService.unblock()
             }
             val expectedRejection =
                 MentionsUpdateIsAlreadyInProgress::class.buildBy(gitHubClientId)
-            try {
-                otherClientTread.start()
-                val secondCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
-                context().receivesCommand(secondCommand)
-                context().assertEvent(expectedRejection)
-            } finally {
-                otherClientTread.join()
-            }
+
+            firstClientTread.start()
+            secondClientThread.start()
+            firstClientTread.join()
+            secondClientThread.join()
+
+            context().assertEvent(expectedRejection)
         }
     }
 
@@ -213,5 +220,16 @@ public class GitHubClientSpec : ContextAwareTest() {
         context().receivesCommand(command)
         val expected = GitHubClient::class.buildBy(gitHubClientId, token)
         context().assertState(gitHubClientId, expected)
+    }
+
+    @Test
+    public fun `allow new update process after the previous one is completed`() {
+        val firstCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
+        context().receivesCommand(firstCommand)
+        val secondCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
+        context().receivesCommand(secondCommand)
+        context().assertEvents()
+            .withType(MentionsUpdateFromGitHubRequested::class.java)
+            .hasSize(2)
     }
 }
