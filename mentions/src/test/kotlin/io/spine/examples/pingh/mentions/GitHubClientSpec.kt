@@ -154,25 +154,25 @@ public class GitHubClientSpec : ContextAwareTest() {
          * Checks if the [UpdateMentionsFromGitHub] command is rejected
          * if the previous process is not completed.
          *
-         * The execution of fetching mentions from [GitHubClientService] is blocked,
-         * so the process of updating mentions is blocked. Two threads are created that
-         * send the [UpdateMentionsFromGitHub] command. One of the threads successfully starts
-         * the update process, and another thread gets a rejection because the process has started.
-         * The thread whose command is rejected unblocks the [GitHubClientService],
+         * The execution of fetching mentions from [GitHubClientService] is frozen.
+         * Two threads are created that send the [UpdateMentionsFromGitHub] command.
+         * One of the threads successfully starts the update process,
+         * and another thread gets a rejection because the process has started.
+         * The thread whose command is rejected unfreezes the [GitHubClientService],
          * which allows the update process to complete.
          */
         @Test
         public fun `reject if the update process is already in progress at this time`() {
-            gitHubClientService.block()
+            gitHubClientService.freeze()
             val firstClientTread = Thread {
                 val firstCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
                 context().receivesCommand(firstCommand)
-                gitHubClientService.unblock()
+                gitHubClientService.unfreeze()
             }
             val secondClientThread = Thread {
                 val secondCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
                 context().receivesCommand(secondCommand)
-                gitHubClientService.unblock()
+                gitHubClientService.unfreeze()
             }
             val expectedRejection =
                 MentionsUpdateIsAlreadyInProgress::class.buildBy(gitHubClientId)

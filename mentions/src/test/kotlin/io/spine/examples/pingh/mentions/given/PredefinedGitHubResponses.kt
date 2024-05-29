@@ -43,12 +43,12 @@ import java.lang.Thread.sleep
 public class PredefinedGitHubResponses : GitHubClientService {
 
     /**
-     * Indicates whether to block the execution of the [fetchMentions] method.
+     * Indicates whether to freeze the execution of the [fetchMentions] method.
      *
      * If `true`, the method will be executed indefinitely, if `false`,
      * it will terminate without problems. The value can be changed during execution.
      */
-    private var isBlocked = false
+    private var isFrozen = false
 
     /**
      * Returns set of [Mention]s retrieved from a JSON file in the resource folder.
@@ -61,34 +61,34 @@ public class PredefinedGitHubResponses : GitHubClientService {
         checkNotNull(jsonFile)
         val json = jsonFile.readText(Charsets.UTF_8)
         val mentions = parseJson(json)
-        delay()
+        waitWhileServiceIsFrozen()
         return mentions
     }
 
     /**
-     * Waits for the service to be unblocked.
+     * Waits for the service to be unfrozen.
      */
-    private fun delay() {
-        while (isBlocked) {
+    private fun waitWhileServiceIsFrozen() {
+        while (isFrozen) {
             sleep(100)
         }
     }
 
     /**
-     * Marks the service as blocked.
+     * Marks the service as frozen.
      *
-     * The process of fetching mentions from GitHub will not complete until the service
-     * is unblocked by calling the [unblock] method.
+     * The process of fetching mentions from GitHub will not be completed until the service
+     * is unfrozen by calling the [unfreeze] method.
      */
-    public fun block() {
-        isBlocked = true
+    public fun freeze() {
+        isFrozen = true
     }
 
     /**
-     * Marks the service as unblocked, i.e. the process of fetching mentions
-     * from GitHub can complete.
+     * Marks the service as unfrozen, i.e. the process of fetching mentions
+     * from GitHub can be completed.
      */
-    public fun unblock() {
-        isBlocked = false
+    public fun unfreeze() {
+        isFrozen = false
     }
 }
