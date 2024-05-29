@@ -45,6 +45,6 @@ public const val NAME: String = "Mentions"
  * Therefore, an instance of GitHub client is required
  * as a parameter.
  */
-public fun newBuilder(gitHubClientService: GitHubClientService): BoundedContextBuilder =
+public fun newMentionsContext(gitHubClientService: GitHubClientService): BoundedContextBuilder =
     BoundedContext.singleTenant(NAME)
         .add(GitHubClientRepository(gitHubClientService))

@@ -41,6 +41,7 @@ import io.spine.examples.pingh.mentions.given.buildWithDefaultWhenStartedField
 import io.spine.examples.pingh.mentions.given.expectedUserMentionedSet
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
+import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.protobuf.AnyPacker
 import io.spine.server.BoundedContextBuilder
 import io.spine.testing.TestValues.randomString
@@ -61,25 +62,16 @@ public class GitHubClientSpec : ContextAwareTest() {
     private lateinit var token: PersonalAccessToken
 
     protected override fun contextBuilder(): BoundedContextBuilder =
-        newBuilder(gitHubClientService)
+        newMentionsContext(gitHubClientService)
 
-    /**
-     * Creates the [BlackBoxContext] of the Sessions bounded context,
-     * and further emits of the [UserLoggedIn] event in the Sessions context.
-     */
     @BeforeEach
     public fun prepareSessionsContextAndEmitEvent() {
-        sessionContext = BlackBoxContext
-            .from(io.spine.examples.pingh.sessions.newBuilder())
+        sessionContext = BlackBoxContext.from(newSessionsContext())
         val username = Username::class.buildBy(randomString())
         gitHubClientId = GitHubClientId::class.buildBy(username)
         emitUserLoggedInEventInSessionsContext()
     }
 
-    /**
-     * Creates a new token and emits the [UserLoggedIn] event
-     * in the Sessions bounded context.
-     */
     private fun emitUserLoggedInEventInSessionsContext() {
         token = PersonalAccessToken::class.buildBy(randomString())
         val userLoggedIn = UserLoggedIn::class.buildBy(gitHubClientId.username, token)
@@ -125,46 +117,28 @@ public class GitHubClientSpec : ContextAwareTest() {
             context().assertEvent(expected)
         }
 
-        /**
-         * Checks that the value of the `when_started` field is different from the default,
-         * i.e. has been set to some value.
-         *
-         * [MentionsUpdateFromGitHubRequested] command is sent from another thread,
-         * and the main thread checks the state of the entity while performing the update.
-         */
         @Test
-        public fun `set the start time of the updating operation`() {
-            val otherClientTread = Thread {
+        public fun `set the start time of the update operation`() {
+            val otherClientThread = Thread {
                 val command = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
                 context().receivesCommand(command)
             }
             val gitHubClientWithDefaultWhenStartedField =
                 GitHubClient::class.buildWithDefaultWhenStartedField()
             try {
-                otherClientTread.start()
+                otherClientThread.start()
                 context().assertState(gitHubClientId, GitHubClient::class.java)
                     .ignoringFields(listOf(1, 2))
                     .isNotEqualTo(gitHubClientWithDefaultWhenStartedField)
             } finally {
-                otherClientTread.join()
+                otherClientThread.join()
             }
         }
 
-        /**
-         * Checks if the [UpdateMentionsFromGitHub] command is rejected
-         * if the previous process is not completed.
-         *
-         * The execution of fetching mentions from [GitHubClientService] is frozen.
-         * Two threads are created that send the [UpdateMentionsFromGitHub] command.
-         * One of the threads successfully starts the update process,
-         * and another thread gets a rejection because the process has started.
-         * The thread whose command is rejected unfreezes the [GitHubClientService],
-         * which allows the update process to complete.
-         */
         @Test
         public fun `reject if the update process is already in progress at this time`() {
             gitHubClientService.freeze()
-            val firstClientTread = Thread {
+            val firstClientThread = Thread {
                 val firstCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
                 context().receivesCommand(firstCommand)
                 gitHubClientService.unfreeze()
@@ -177,9 +151,9 @@ public class GitHubClientSpec : ContextAwareTest() {
             val expectedRejection =
                 MentionsUpdateIsAlreadyInProgress::class.buildBy(gitHubClientId)
 
-            firstClientTread.start()
+            firstClientThread.start()
             secondClientThread.start()
-            firstClientTread.join()
+            firstClientThread.join()
             secondClientThread.join()
 
             context().assertEvent(expectedRejection)
@@ -216,7 +190,7 @@ public class GitHubClientSpec : ContextAwareTest() {
     }
 
     @Test
-    public fun `clear 'when_started' field after completing the updating process`() {
+    public fun `clear 'when_started' field after completing the update process`() {
         val command = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
         context().receivesCommand(command)
         val expected = GitHubClient::class.buildBy(gitHubClientId, token)

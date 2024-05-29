@@ -62,7 +62,6 @@ public class GitHubClientProcess :
      */
     @React
     internal fun on(@External event: UserLoggedIn): GitHubTokenUpdated {
-        archived = true
         builder().setToken(event.token)
         return GitHubTokenUpdated.newBuilder()
             .setId(GitHubClientId::class.buildBy(event.id.username))
@@ -99,7 +98,6 @@ public class GitHubClientProcess :
      */
     @React
     internal fun on(event: MentionsUpdateFromGitHubRequested): List<EventMessage> {
-        archived = true
         val username = state().id.username
         val token = state().token
         val mentions = gitHubClientService.fetchMentions(username, token)

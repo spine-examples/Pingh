@@ -46,7 +46,7 @@ import org.junit.jupiter.api.Test
 public class SessionsContextSpec : ContextAwareTest() {
 
     protected override fun contextBuilder(): BoundedContextBuilder =
-        newBuilder()
+        newSessionsContext()
 
     @Nested
     public inner class `handle 'LogUserIn' command, and` {
