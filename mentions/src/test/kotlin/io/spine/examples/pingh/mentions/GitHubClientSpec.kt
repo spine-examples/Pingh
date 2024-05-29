@@ -154,11 +154,12 @@ public class GitHubClientSpec : ContextAwareTest() {
          * Checks if the [UpdateMentionsFromGitHub] command is rejected
          * if the previous process is not completed.
          *
-         * Creates a second thread from which the [UpdateMentionsFromGitHub] command is sent.
-         * It should be successfully accepted, which will start the update process.
-         * After that, another [UpdateMentionsFromGitHub] command is sent from the main thread,
-         * but it should be rejected because the update process started from
-         * the other thread has not completed.
+         * The execution of fetching mentions from [GitHubClientService] is blocked,
+         * so the process of updating mentions is blocked. Two threads are created that
+         * send the [UpdateMentionsFromGitHub] command. One of the threads successfully starts
+         * the update process, and another thread gets a rejection because the process has started.
+         * The thread whose command is rejected unblocks the [GitHubClientService],
+         * which allows the update process to complete.
          */
         @Test
         public fun `reject if the update process is already in progress at this time`() {

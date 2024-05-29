@@ -42,6 +42,12 @@ import java.lang.Thread.sleep
  */
 public class PredefinedGitHubResponses : GitHubClientService {
 
+    /**
+     * Indicates whether to block the execution of the [fetchMentions] method.
+     *
+     * If `true`, the method will be executed indefinitely, if `false`,
+     * it will terminate without problems. The value can be changed during execution.
+     */
     private var isBlocked = false
 
     /**
@@ -55,21 +61,33 @@ public class PredefinedGitHubResponses : GitHubClientService {
         checkNotNull(jsonFile)
         val json = jsonFile.readText(Charsets.UTF_8)
         val mentions = parseJson(json)
-        delay() // Emulates a delay in fetching data from the GitHub API.
-        println(12345)
+        delay()
         return mentions
     }
 
+    /**
+     * Waits for the service to be unblocked.
+     */
     private fun delay() {
         while (isBlocked) {
             sleep(100)
         }
     }
 
+    /**
+     * Marks the service as blocked.
+     *
+     * The process of fetching mentions from GitHub will not complete until the service
+     * is unblocked by calling the [unblock] method.
+     */
     public fun block() {
         isBlocked = true
     }
 
+    /**
+     * Marks the service as unblocked, i.e. the process of fetching mentions
+     * from GitHub can complete.
+     */
     public fun unblock() {
         isBlocked = false
     }
