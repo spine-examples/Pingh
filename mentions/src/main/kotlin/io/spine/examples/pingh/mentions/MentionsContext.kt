@@ -23,26 +23,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine_examples.pingh.mentions;
+package io.spine.examples.pingh.mentions
 
-import "spine/options.proto";
+import io.spine.server.BoundedContext
+import io.spine.server.BoundedContextBuilder
 
-option (type_url_prefix) = "type.mention.spine.io";
-option java_package = "io.spine.examples.pingh.mentions.command";
-option java_outer_classname = "GitHubClientCommandsProto";
-option java_multiple_files = true;
+/**
+ * Name of the Mentions bounded context.
+ */
+public const val NAME: String = "Mentions"
 
-import "spine_examples/pingh/mentions/identifiers.proto";
-import "google/protobuf/timestamp.proto";
-
-// Tells to update mentions from the GitHub client.
-message UpdateMentionsFromGitHub {
-
-    // The ID of the GitHub client.
-    GitHubClientId id = 1;
-
-    // The time when the update of mentions for the specific user is requested.
-    google.protobuf.Timestamp when_requested = 2 [(required) = true];
-}
+/**
+ * Creates a new builder for the Mentions bounded context.
+ *
+ * The returned builder instance is already configured
+ * to serve the entities which belong to this context.
+ *
+ * It is expected that the business scenarios
+ * of the created context require access to the GitHub API.
+ * Therefore, an instance of GitHub client is required
+ * as a parameter.
+ */
+public fun newBuilder(gitHubClientService: GitHubClientService): BoundedContextBuilder =
+    BoundedContext.singleTenant(NAME)
+        .add(GitHubClientRepository(gitHubClientService))

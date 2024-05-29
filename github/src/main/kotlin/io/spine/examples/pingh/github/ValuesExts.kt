@@ -23,26 +23,50 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine_examples.pingh.mentions;
+package io.spine.examples.pingh.github
 
-import "spine/options.proto";
+import io.spine.net.Url
+import kotlin.reflect.KClass
 
-option (type_url_prefix) = "type.mention.spine.io";
-option java_package = "io.spine.examples.pingh.mentions.command";
-option java_outer_classname = "GitHubClientCommandsProto";
-option java_multiple_files = true;
+/**
+ * Creates a new [Username] with the specified string value.
+ */
+public fun KClass<Username>.buildBy(value: String): Username =
+    Username.newBuilder()
+        .setValue(value)
+        .vBuild()
 
-import "spine_examples/pingh/mentions/identifiers.proto";
-import "google/protobuf/timestamp.proto";
+/**
+ * Creates a new [PersonalAccessToken] with the specified string value.
+ */
+public fun KClass<PersonalAccessToken>.buildBy(value: String): PersonalAccessToken =
+    PersonalAccessToken.newBuilder()
+        .setValue(value)
+        .vBuild()
 
-// Tells to update mentions from the GitHub client.
-message UpdateMentionsFromGitHub {
+/**
+ * Creates a new [Url] with the specified string value.
+ */
+public fun KClass<Url>.buildBy(spec: String): Url =
+    Url.newBuilder()
+        .setSpec(spec)
+        .vBuild()
 
-    // The ID of the GitHub client.
-    GitHubClientId id = 1;
+/**
+ * Creates a new [User] with the specified [Username] and avatar [Url].
+ */
+public fun KClass<User>.buildBy(username: Username, avatarUrl: Url): User =
+    User.newBuilder()
+        .setUsername(username)
+        .setAvatarUrl(avatarUrl)
+        .vBuild()
 
-    // The time when the update of mentions for the specific user is requested.
-    google.protobuf.Timestamp when_requested = 2 [(required) = true];
-}
+/**
+ * Creates a new [User] with the specified username and avatar URL.
+ */
+public fun KClass<User>.buildBy(username: String, avatarUrl: String): User =
+    this.buildBy(
+        Username::class.buildBy(username),
+        Url::class.buildBy(avatarUrl)
+    )

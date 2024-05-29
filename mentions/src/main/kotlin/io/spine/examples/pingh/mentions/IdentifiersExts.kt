@@ -23,26 +23,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine_examples.pingh.mentions;
+package io.spine.examples.pingh.mentions
 
-import "spine/options.proto";
+import io.spine.examples.pingh.github.NodeId
+import io.spine.examples.pingh.github.Username
+import kotlin.reflect.KClass
 
-option (type_url_prefix) = "type.mention.spine.io";
-option java_package = "io.spine.examples.pingh.mentions.command";
-option java_outer_classname = "GitHubClientCommandsProto";
-option java_multiple_files = true;
+/**
+ * Creates a new [MentionId] with the specified [NodeId] and [Username].
+ */
+internal fun KClass<MentionId>.buildBy(nodeId: NodeId, whomMentioned: Username): MentionId =
+    MentionId.newBuilder()
+        .setWhere(nodeId)
+        .setUser(whomMentioned)
+        .vBuild()
 
-import "spine_examples/pingh/mentions/identifiers.proto";
-import "google/protobuf/timestamp.proto";
-
-// Tells to update mentions from the GitHub client.
-message UpdateMentionsFromGitHub {
-
-    // The ID of the GitHub client.
-    GitHubClientId id = 1;
-
-    // The time when the update of mentions for the specific user is requested.
-    google.protobuf.Timestamp when_requested = 2 [(required) = true];
-}
+/**
+ * Creates a new [GitHubClientId] with the specified [Username].
+ */
+internal fun KClass<GitHubClientId>.buildBy(username: Username): GitHubClientId =
+    GitHubClientId.newBuilder()
+        .setUsername(username)
+        .vBuild()

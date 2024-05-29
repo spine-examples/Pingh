@@ -1,0 +1,96 @@
+/*
+ * Copyright 2024, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+syntax = "proto3";
+
+package spine_examples.pingh.github.rest;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.pingh.spine.io";
+option java_package = "io.spine.examples.pingh.github.rest";
+option java_outer_classname = "FragmentsProto";
+option java_multiple_files = true;
+
+import "google/protobuf/timestamp.proto";
+import "spine/net/url.proto";
+
+// These are fragments of GitHub bounded context types
+// that are used to retrieve data from JSON responses
+// from the GitHub API, so primitive types are used as fields.
+
+
+// GitHub user information.
+message UserFragment {
+
+    // The unique username that identifies the user.
+    string username = 1 [(required) = true, json_name = "login"];
+
+    // The URL of the user's avatar.
+    string avatar_url = 2 [(required) = true, json_name = "avatar_url"];
+}
+
+// Issue or pull request data received via GitHub API.
+//
+// In the GitHub context, issues and pull requests have the same data structure.
+//
+message IssueOrPullRequestFragment {
+
+    // The item's ID in GitHub.
+    //
+    // To avoid conflicts with the `id` field in the JSON response received from GitHub,
+    // the name `node_id` is used.
+    //
+    string node_id = 1 [(required) = true, json_name = "node_id"];
+
+    // The item's author.
+    UserFragment who_created = 2 [(required) = true, json_name = "user"];
+
+    // The item's title.
+    string title = 3 [(required) = true];
+
+    // Time when this item was created.
+    string when_created = 4 [(required) = true, json_name = "created_at"];
+
+    // The URL of this GitHub item.
+    //
+    // To avoid conflicts with the `url` field in the JSON response received from GitHub,
+    // the name `html_url` is used.
+    //
+    string html_url = 5 [(required) = true, json_name = "html_url"];
+}
+
+// The GitHub API response received when searching for mentions
+// of a certain GitHub user among all issues and pull requests.
+//
+// In the GitHub context, issues and pull requests have the same data structure.
+// Request to the GitHub API to retrieve them is the same and returns a list containing
+// both issues and pull requests.
+//
+message IssuesAndPullRequestsSearchResult {
+
+    // GitHub items on which the mention occurred.
+    repeated IssueOrPullRequestFragment item = 1 [(required) = true, json_name = "items"];
+}

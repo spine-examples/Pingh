@@ -23,26 +23,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine_examples.pingh.mentions;
+package io.spine.examples.pingh.github
 
-import "spine/options.proto";
+import kotlin.reflect.KClass
 
-option (type_url_prefix) = "type.mention.spine.io";
-option java_package = "io.spine.examples.pingh.mentions.command";
-option java_outer_classname = "GitHubClientCommandsProto";
-option java_multiple_files = true;
-
-import "spine_examples/pingh/mentions/identifiers.proto";
-import "google/protobuf/timestamp.proto";
-
-// Tells to update mentions from the GitHub client.
-message UpdateMentionsFromGitHub {
-
-    // The ID of the GitHub client.
-    GitHubClientId id = 1;
-
-    // The time when the update of mentions for the specific user is requested.
-    google.protobuf.Timestamp when_requested = 2 [(required) = true];
-}
+/**
+ * Creates a new [NodeId] with the specified string value.
+ */
+public fun KClass<NodeId>.buildBy(value: String): NodeId =
+    NodeId.newBuilder()
+        .setValue(value)
+        .vBuild()

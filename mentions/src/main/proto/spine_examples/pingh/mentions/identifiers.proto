@@ -35,11 +35,16 @@ option java_outer_classname = "IdentifiersProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/github/github.proto";
+import "spine_examples/pingh/github/identifiers.proto";
 
 // Identifies a mention.
 message MentionId {
 
-    string uuid = 1 [(required) = true];
+    // The ID of the GitHub item where the user was mentioned.
+    spine_examples.pingh.github.NodeId where = 1 [(required) = true];
+
+    // The name of the GitHub user who was mentioned.
+    spine_examples.pingh.github.Username user = 2 [(required) = true];
 }
 
 // Identifies a process of updating mentions from the GitHub.

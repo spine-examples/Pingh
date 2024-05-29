@@ -60,9 +60,6 @@ message MentionsUpdateFromGitHubRequested {
 
     // The ID of the GitHub client.
     GitHubClientId id = 1;
-
-    // The token of the user for whom the updating is performed.
-    spine_examples.pingh.github.PersonalAccessToken token = 2 [(required) = true];
 }
 
 // The updating of mentions from GitHub completed.

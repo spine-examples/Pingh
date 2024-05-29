@@ -26,74 +26,118 @@
 
 package io.spine.examples.pingh.mentions
 
+import io.spine.base.EventMessage
 import io.spine.base.Time.currentTime
 import io.spine.core.External
+import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
-import io.spine.examples.pingh.mentions.rejection.CannotStartDataUpdateTooEarly
+import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.MentionsUpdateIsAlreadyInProgress
-import io.spine.examples.pingh.mentions.rejection.UsersGitHubTokenInvalid
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.server.command.Assign
 import io.spine.server.event.React
 import io.spine.server.procman.ProcessManager
 import kotlin.jvm.Throws
 
+/**
+ * A process of reading user's mentions from GitHub.
+ */
 public class GitHubClientProcess :
     ProcessManager<GitHubClientId, GitHubClient, GitHubClient.Builder>() {
 
+    /**
+     * Service that fetches mentions from GitHub.
+     *
+     * It is expected this field is set by calling [inject]
+     * right after the instance creation.
+     */
+    private lateinit var gitHubClientService: GitHubClientService
+
+    /**
+     * Updates the user's [PersonalAccessToken] each time the user logs in.
+     */
     @React
     internal fun on(@External event: UserLoggedIn): GitHubTokenUpdated {
         archived = true
-        val id = with(GitHubClientId.newBuilder()) {
-            username = event.id.username
-            vBuild()
-        }
-        initState(id, event.token)
-
+        builder().setToken(event.token)
         return GitHubTokenUpdated.newBuilder()
-            .setId(id)
+            .setId(GitHubClientId::class.buildBy(event.id.username))
             .setToken(event.token)
             .vBuild()
     }
 
-    private fun initState(id: GitHubClientId, token: PersonalAccessToken) {
-        builder()
-            .setId(id)
-            .setToken(token)
-    }
-
+    /**
+     * Starts the process of updating mentions for the user.
+     *
+     * When a mention update is requested for a user, checks whether the previous update
+     * has ended. If this condition is met, the process of updating the mentions from GitHub
+     * is started.
+     */
     @Assign
-    @Throws(
-        CannotStartDataUpdateTooEarly::class,
-        MentionsUpdateIsAlreadyInProgress::class,
-        UsersGitHubTokenInvalid::class
-    )
+    @Throws(MentionsUpdateIsAlreadyInProgress::class)
     internal fun handle(command: UpdateMentionsFromGitHub): MentionsUpdateFromGitHubRequested {
-
-        if (builder().hasWhenStarted()) {
+        if (state().hasWhenStarted()) {
             throw MentionsUpdateIsAlreadyInProgress.newBuilder()
                 .setId(command.id)
                 .build()
         }
-
         builder().setWhenStarted(currentTime())
         return MentionsUpdateFromGitHubRequested.newBuilder()
-            .setId(command.id)
-            .setToken(command.token)
+            .setId(state().id)
             .vBuild()
     }
 
+    /**
+     * Fetches user's mentions from GitHub and terminates the mention update process.
+     *
+     * @return List of events, where the [UserMentioned] event for each mention comes first,
+     * followed by a single [MentionsUpdateFromGitHubCompleted] event.
+     */
     @React
-    internal fun on(event: MentionsUpdateFromGitHubRequested): MentionsUpdateFromGitHubCompleted {
+    internal fun on(event: MentionsUpdateFromGitHubRequested): List<EventMessage> {
         archived = true
-
-        builder().clearWhenStarted()
-        return MentionsUpdateFromGitHubCompleted.newBuilder()
-            .setId(event.id)
+        val username = state().id.username
+        val token = state().token
+        val mentions = gitHubClientService.fetchMentions(username, token)
+        val userMentionedEvents = createUserMentionedEvents(mentions)
+        val mentionsUpdateFromGitHubCompleted = MentionsUpdateFromGitHubCompleted.newBuilder()
+            .setId(state().id)
             .vBuild()
+        builder().clearWhenStarted()
+        return listOf(
+            *userMentionedEvents.toTypedArray(),
+            mentionsUpdateFromGitHubCompleted
+        )
+    }
+
+    private fun createUserMentionedEvents(gitHubMentions: Set<Mention>): Set<EventMessage> =
+        gitHubMentions
+            .map { mention ->
+                with(UserMentioned.newBuilder()) {
+                    id = MentionId::class.buildBy(
+                        mention.id,
+                        state().id.username
+                    )
+                    whoMentioned = mention.author
+                    title = mention.title
+                    whenMentioned = mention.whenMentioned
+                    url = mention.url
+                    vBuild()
+                }
+            }
+            .toSet()
+
+    /**
+     * Supplies this instance of the process with a service allowing to access GitHub.
+     *
+     * It is expected this method is called right after the creation of the process instance.
+     * Otherwise, the process will not be able to function properly.
+     */
+    internal fun inject(gitHubClientService: GitHubClientService) {
+        this.gitHubClientService = gitHubClientService
     }
 }
