@@ -41,6 +41,7 @@ import io.spine.examples.pingh.mentions.given.buildWithDefaultWhenStartedField
 import io.spine.examples.pingh.mentions.given.expectedUserMentionedSet
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
+import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.protobuf.AnyPacker
 import io.spine.server.BoundedContextBuilder
 import io.spine.testing.TestValues.randomString
@@ -61,12 +62,11 @@ public class GitHubClientSpec : ContextAwareTest() {
     private lateinit var token: PersonalAccessToken
 
     protected override fun contextBuilder(): BoundedContextBuilder =
-        newBuilder(gitHubClientService)
+        newMentionsContext(gitHubClientService)
 
     @BeforeEach
     public fun prepareSessionsContextAndEmitEvent() {
-        sessionContext = BlackBoxContext
-            .from(io.spine.examples.pingh.sessions.newBuilder())
+        sessionContext = BlackBoxContext.from(newSessionsContext())
         val username = Username::class.buildBy(randomString())
         gitHubClientId = GitHubClientId::class.buildBy(username)
         emitUserLoggedInEventInSessionsContext()

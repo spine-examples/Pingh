@@ -37,6 +37,6 @@ public const val NAME: String = "Sessions"
 /**
  * Configures Sessions [BoundedContext] with repositories.
  */
-public fun newBuilder(): BoundedContextBuilder =
+public fun newSessionsContext(): BoundedContextBuilder =
     BoundedContext.singleTenant(NAME)
         .add(UserSessionProcess::class.java)
