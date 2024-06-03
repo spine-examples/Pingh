@@ -24,23 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.jetbrains.dokka.gradle.DokkaTask
+
 plugins {
-    `kotlin-dsl`
+    id("org.jetbrains.dokka")
 }
-
-repositories {
-    mavenCentral()
-    gradlePluginPortal()
-    mavenLocal()
-}
-
-kotlin {
-    explicitApiWarning()
-}
-
-val dokkaVersion = "1.8.10"
 
 dependencies {
-    implementation("org.jetbrains.dokka:dokka-base:${dokkaVersion}")
-    implementation("org.jetbrains.dokka:dokka-gradle-plugin:${dokkaVersion}")
+    useDokkaWithSpineExtensions()
+}
+
+tasks.withType<DokkaTask>().configureEach {
+    configureForKotlin()
 }
