@@ -25,7 +25,9 @@
  */
 
 plugins {
+    java
     `kotlin-dsl`
+    kotlin("jvm").version("1.4.20").apply(false)
 }
 
 repositories {
@@ -38,9 +40,35 @@ kotlin {
     explicitApiWarning()
 }
 
-val dokkaVersion = "1.8.10"
+val kotlinVersion = "1.4.20"
+
+val dokkaVersion = "1.9.20"
+
+configurations.all {
+    resolutionStrategy {
+        force(
+            // Force Kotlin lib versions avoiding using those bundled with Gradle.
+            "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
+            "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
+            "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+        )
+    }
+}
+
+val jvmVersion = JavaLanguageVersion.of(11)
+
+java {
+    toolchain.languageVersion.set(jvmVersion)
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = jvmVersion.toString()
+    }
+}
 
 dependencies {
-    implementation("org.jetbrains.dokka:dokka-base:${dokkaVersion}")
-    implementation("org.jetbrains.dokka:dokka-gradle-plugin:${dokkaVersion}")
+    implementation("org.jetbrains.dokka:dokka-base:$dokkaVersion")
+    implementation("org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.20")
 }
