@@ -28,7 +28,7 @@ import io.spine.internal.BuildSettings
 import io.spine.internal.dependency.JavaX
 
 plugins {
-    kotlin("jvm").version("1.9.20")
+    kotlin("jvm")
 
     // Add the Gradle plugin for bootstrapping projects built with Spine.
     // See: https://github.com/SpineEventEngine/bootstrap

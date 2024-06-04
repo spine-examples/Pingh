@@ -24,26 +24,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-plugins {
-    java
-}
+package io.spine.internal.dependency
 
-/**
- * Configures repositories for access to dependencies, including
- * Spine Event Engine.
- */
-repositories {
-    mavenLocal()
-    gradlePluginPortal()
-    mavenCentral()
+// https://github.com/Kotlin/dokka
+@Suppress("unused", "ConstPropertyName")
+public object Dokka {
 
-    maven {
-        url = uri("https://spine.mycloudrepo.io/public/repositories/releases")
-        mavenContent {
-            releasesOnly()
-        }
-    }
-    maven {
-        url = uri("https://spine.mycloudrepo.io/public/repositories/snapshots")
+    /**
+     * Custom Dokka plugins developed for Spine-specific needs like excluding by
+     * `@Internal` annotation.
+     *
+     * @see <a href="https://github.com/SpineEventEngine/dokka-tools/tree/master/dokka-extensions">
+     *     Custom Dokka Plugins</a>
+     */
+    public object SpineExtensions {
+        private const val group = "io.spine.tools"
+        private const val version = "2.0.0-SNAPSHOT.5"
+
+        public const val lib: String = "${group}:spine-dokka-extensions:${version}"
     }
 }

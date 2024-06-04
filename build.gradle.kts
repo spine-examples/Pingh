@@ -43,12 +43,18 @@ allprojects {
  * Each of these plugins contains a more detailed description in their source file.
  */
 subprojects {
+
     apply<JavaPlugin>()
 
     /*
      * Configure repositories.
      */
     apply<RepositoriesConfigurationPlugin>()
+
+    /*
+     * Adds dependencies for Dokka and configures it.
+     */
+    apply<DokkaConfigurationPlugin>()
 
     /*
      * Adds dependencies for testing and configure test-running tasks.

@@ -24,26 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.jetbrains.dokka.gradle.DokkaTask
+
 plugins {
-    java
+    id("org.jetbrains.dokka")
 }
 
-/**
- * Configures repositories for access to dependencies, including
- * Spine Event Engine.
- */
-repositories {
-    mavenLocal()
-    gradlePluginPortal()
-    mavenCentral()
+dependencies {
+    useDokkaWithSpineExtensions()
+}
 
-    maven {
-        url = uri("https://spine.mycloudrepo.io/public/repositories/releases")
-        mavenContent {
-            releasesOnly()
-        }
-    }
-    maven {
-        url = uri("https://spine.mycloudrepo.io/public/repositories/snapshots")
-    }
+tasks.withType<DokkaTask>().configureEach {
+    configureForKotlin()
 }
