@@ -52,7 +52,7 @@ private fun DependencyHandler.dokkaPlugin(dependencyNotation: Any): Dependency? 
     add("dokkaPlugin", dependencyNotation)
 
 /**
- * Configures this [DokkaTask] to accept Kotlin files.
+ * Configures [DokkaTask]s to accept Kotlin files.
  */
 public fun DokkaTask.configureForKotlin() {
     dokkaSourceSets.configureEach {
