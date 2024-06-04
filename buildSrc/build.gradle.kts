@@ -25,9 +25,7 @@
  */
 
 plugins {
-    java
     `kotlin-dsl`
-    kotlin("jvm").version("1.4.20").apply(false)
 }
 
 repositories {
@@ -40,8 +38,21 @@ kotlin {
     explicitApiWarning()
 }
 
+/**
+ * The version of Kotlin used for compile `buildSrc` module.
+ *
+ * Kotlin 1.4.20 is the highest possible version for Gradle 6.9.4 configuration.
+ *
+ * This version can be different with Kotlin version in other modules.
+ */
 val kotlinVersion = "1.4.20"
 
+/**
+ * The version of Dokka Gradle Plugins.
+ *
+ * @see <a href="https://github.com/Kotlin/dokka/releases">
+ *     Dokka Releases</a>
+ */
 val dokkaVersion = "1.9.20"
 
 configurations.all {
@@ -55,20 +66,12 @@ configurations.all {
     }
 }
 
-val jvmVersion = JavaLanguageVersion.of(11)
-
-java {
-    toolchain.languageVersion.set(jvmVersion)
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = jvmVersion.toString()
-    }
-}
-
 dependencies {
     implementation("org.jetbrains.dokka:dokka-base:$dokkaVersion")
     implementation("org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion")
+
+    // Kotlin plugin, which is used to run Dokka, and is also added to Gradle classpath,
+    // from where it is used in other modules. For Dokka to work correctly above 1.4 version,
+    // need to use a version of Kotlin higher than 1.4.
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.20")
 }
