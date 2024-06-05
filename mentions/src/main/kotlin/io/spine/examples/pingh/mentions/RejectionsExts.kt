@@ -30,7 +30,7 @@ import io.spine.examples.pingh.mentions.rejection.MentionIsAlreadyRead
 import kotlin.reflect.KClass
 
 /**
- * Creates a new MentionIsAlreadyRead rejection with the specified ID of the mention.
+ * Creates a new `MentionIsAlreadyRead` rejection with the specified ID of the mention.
  */
 public fun KClass<MentionIsAlreadyRead>.buildBy(id: MentionId): MentionIsAlreadyRead =
     MentionIsAlreadyRead.newBuilder()

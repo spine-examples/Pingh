@@ -47,7 +47,7 @@ import io.spine.testing.TestValues.randomString
 import kotlin.reflect.KClass
 
 /**
- * Creates a new MentionId with random ID of node and name of user that was mentioned.
+ * Creates a new `MentionId` with random ID of node and name of user that was mentioned.
  */
 internal fun KClass<MentionId>.generate(): MentionId =
     this.buildBy(
@@ -56,7 +56,7 @@ internal fun KClass<MentionId>.generate(): MentionId =
     )
 
 /**
- * Creates a new UserMentioned event with the specified ID of the mention.
+ * Creates a new `UserMentioned` event with the specified ID of the mention.
  * Other event fields are set randomly.
  */
 internal fun KClass<UserMentioned>.buildBy(id: MentionId): UserMentioned =
@@ -69,7 +69,7 @@ internal fun KClass<UserMentioned>.buildBy(id: MentionId): UserMentioned =
         .vBuild()
 
 /**
- * Creates a new Mention entity with the specified ID and status of this mention.
+ * Creates a new `Mention` with the specified ID and the status of this mention.
  */
 internal fun KClass<Mention>.buildBy(id: MentionId, status: MentionStatus): Mention =
     Mention.newBuilder()
@@ -78,7 +78,7 @@ internal fun KClass<Mention>.buildBy(id: MentionId, status: MentionStatus): Ment
         .vBuild()
 
 /**
- * Creates a new MarkMentionAsRead command with the specified ID of the mention.
+ * Creates a new `MarkMentionAsRead` command with the specified ID of the mention.
  */
 internal fun KClass<MarkMentionAsRead>.buildBy(id: MentionId): MarkMentionAsRead =
     MarkMentionAsRead.newBuilder()
@@ -86,7 +86,7 @@ internal fun KClass<MarkMentionAsRead>.buildBy(id: MentionId): MarkMentionAsRead
         .vBuild()
 
 /**
- * Creates a new MentionRead event with the specified ID of the mention.
+ * Creates a new `MentionRead` event with the specified ID of the mention.
  */
 internal fun KClass<MentionRead>.buildBy(id: MentionId): MentionRead =
     MentionRead.newBuilder()
@@ -94,7 +94,7 @@ internal fun KClass<MentionRead>.buildBy(id: MentionId): MentionRead =
         .vBuild()
 
 /**
- * Creates a new SnoozeMention command with the specified ID of the mention and
+ * Creates a new `SnoozeMention` command with the specified ID of the mention and
  * time to which the mention is snoozing.
  */
 internal fun KClass<SnoozeMention>.buildBy(id: MentionId, untilWhen: Timestamp): SnoozeMention =
@@ -104,7 +104,7 @@ internal fun KClass<SnoozeMention>.buildBy(id: MentionId, untilWhen: Timestamp):
         .vBuild()
 
 /**
- * Creates a new MentionSnoozed event with the specified ID of the mention and
+ * Creates a new `MentionSnoozed` event with the specified ID of the mention and
  * time to which the mention is snoozing.
  */
 internal fun KClass<MentionSnoozed>.buildBy(id: MentionId, untilWhen: Timestamp): MentionSnoozed =
@@ -114,7 +114,7 @@ internal fun KClass<MentionSnoozed>.buildBy(id: MentionId, untilWhen: Timestamp)
         .vBuild()
 
 /**
- * Creates a new MentionIsAlreadyRead rejection with the specified ID of the mention.
+ * Creates a new `MentionIsAlreadyRead` rejection with the specified ID of the mention.
  */
 internal fun KClass<MentionIsAlreadyRead>.buildBy(id: MentionId): MentionIsAlreadyRead =
     MentionIsAlreadyRead.newBuilder()

@@ -45,7 +45,9 @@ public class MentionProcess :
     ProcessManager<MentionId, Mention, Mention.Builder>() {
 
     /**
-     * Initializes the mention when it occurred and indicates that mention is unread.
+     * Creates the process for the mention occurred.
+     *
+     * The process is created in "unread" status.
      */
     @React
     internal fun on(event: UserMentioned): Nothing {
@@ -74,7 +76,7 @@ public class MentionProcess :
     }
 
     /**
-     * Completes the lifecycle of the mention, indicating that it has been read.
+     * Marks this mention as read by the mentioned user.
      */
     @Assign
     @Throws(MentionIsAlreadyRead::class)
