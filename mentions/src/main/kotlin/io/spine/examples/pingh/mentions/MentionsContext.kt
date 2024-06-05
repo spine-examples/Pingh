@@ -48,3 +48,4 @@ public const val NAME: String = "Mentions"
 public fun newMentionsContext(gitHubClientService: GitHubClientService): BoundedContextBuilder =
     BoundedContext.singleTenant(NAME)
         .add(GitHubClientRepository(gitHubClientService))
+        .add(MentionRepository())
