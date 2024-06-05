@@ -26,26 +26,13 @@
 
 package io.spine.examples.pingh.mentions
 
-import io.spine.server.BoundedContext
-import io.spine.server.BoundedContextBuilder
+import io.spine.examples.pingh.mentions.rejection.MentionIsAlreadyRead
+import kotlin.reflect.KClass
 
 /**
- * Name of the Mentions bounded context.
+ * Creates a new `MentionIsAlreadyRead` rejection with the specified ID of the mention.
  */
-public const val NAME: String = "Mentions"
-
-/**
- * Creates a new builder for the Mentions bounded context.
- *
- * The returned builder instance is already configured
- * to serve the entities which belong to this context.
- *
- * It is expected that the business scenarios
- * of the created context require access to the GitHub API.
- * Therefore, an instance of GitHub client is required
- * as a parameter.
- */
-public fun newMentionsContext(gitHubClientService: GitHubClientService): BoundedContextBuilder =
-    BoundedContext.singleTenant(NAME)
-        .add(GitHubClientRepository(gitHubClientService))
-        .add(MentionRepository())
+public fun KClass<MentionIsAlreadyRead>.buildBy(id: MentionId): MentionIsAlreadyRead =
+    MentionIsAlreadyRead.newBuilder()
+        .setId(id)
+        .build()

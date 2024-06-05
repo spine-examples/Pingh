@@ -26,26 +26,22 @@
 
 package io.spine.examples.pingh.mentions
 
-import io.spine.server.BoundedContext
-import io.spine.server.BoundedContextBuilder
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
+import io.spine.examples.pingh.mentions.event.UserMentioned
+import io.spine.server.procman.ProcessManagerRepository
+import io.spine.server.route.EventRoute.withId
+import io.spine.server.route.EventRouting
 
 /**
- * Name of the Mentions bounded context.
+ * Manages instances of [MentionProcess].
  */
-public const val NAME: String = "Mentions"
+public class MentionRepository :
+    ProcessManagerRepository<MentionId, MentionProcess, Mention>() {
 
-/**
- * Creates a new builder for the Mentions bounded context.
- *
- * The returned builder instance is already configured
- * to serve the entities which belong to this context.
- *
- * It is expected that the business scenarios
- * of the created context require access to the GitHub API.
- * Therefore, an instance of GitHub client is required
- * as a parameter.
- */
-public fun newMentionsContext(gitHubClientService: GitHubClientService): BoundedContextBuilder =
-    BoundedContext.singleTenant(NAME)
-        .add(GitHubClientRepository(gitHubClientService))
-        .add(MentionRepository())
+    @OverridingMethodsMustInvokeSuper
+    protected override fun setupEventRouting(routing: EventRouting<MentionId>) {
+        super.setupEventRouting(routing)
+        routing
+            .route(UserMentioned::class.java) { event, _ -> withId(event.id) }
+    }
+}

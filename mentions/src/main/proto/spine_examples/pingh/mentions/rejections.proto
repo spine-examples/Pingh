@@ -23,29 +23,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.examples.pingh.mentions
+package spine_examples.pingh.mentions;
 
-import io.spine.server.BoundedContext
-import io.spine.server.BoundedContextBuilder
+import "spine/options.proto";
 
-/**
- * Name of the Mentions bounded context.
- */
-public const val NAME: String = "Mentions"
+option (type_url_prefix) = "type.pingh.spine.io";
+option java_package = "io.spine.examples.pingh.mentions.rejection";
+option java_multiple_files = false;
 
-/**
- * Creates a new builder for the Mentions bounded context.
- *
- * The returned builder instance is already configured
- * to serve the entities which belong to this context.
- *
- * It is expected that the business scenarios
- * of the created context require access to the GitHub API.
- * Therefore, an instance of GitHub client is required
- * as a parameter.
- */
-public fun newMentionsContext(gitHubClientService: GitHubClientService): BoundedContextBuilder =
-    BoundedContext.singleTenant(NAME)
-        .add(GitHubClientRepository(gitHubClientService))
-        .add(MentionRepository())
+import "spine_examples/pingh/mentions/identifiers.proto";
+
+// Cannot change the status of the mention because it is already read.
+message MentionIsAlreadyRead {
+
+    // The ID of the mention.
+    MentionId id = 1 [(required) = true];
+}
