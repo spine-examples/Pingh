@@ -46,3 +46,11 @@ internal fun KClass<GitHubClientId>.buildBy(username: Username): GitHubClientId 
     GitHubClientId.newBuilder()
         .setUsername(username)
         .vBuild()
+
+/**
+ * Creates a new `UserMentionsId` with the specified GitHub username.
+ */
+internal fun KClass<UserMentionsId>.buildBy(username: Username): UserMentionsId =
+    UserMentionsId.newBuilder()
+        .setUsername(username)
+        .vBuild()

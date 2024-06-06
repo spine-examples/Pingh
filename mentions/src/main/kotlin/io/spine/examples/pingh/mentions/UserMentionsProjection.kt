@@ -36,37 +36,58 @@ import io.spine.server.projection.Projection
  * The view of the mentions that have occurred.
  */
 public class UserMentionsProjection :
-    Projection<MentionId, UserMentions, UserMentions.Builder>() {
+    Projection<UserMentionsId, UserMentions, UserMentions.Builder>() {
 
     /**
      * Creates the view when a user is mentioned.
      */
     @Subscribe
     internal fun on(event: UserMentioned) {
-        with(builder()) {
-            id = event.id
-            whoWasMentioned = event.id.user
-            whoMentioned = event.whoMentioned
-            title = event.title
-            whenMentioned = event.whenMentioned
-            url = event.url
-            status = MentionStatus.UNREAD
-        }
+        builder()
+            .addMention(
+                with(MentionView.newBuilder()) {
+                    id = event.id
+                    whoMentioned = event.whoMentioned
+                    title = event.title
+                    whenMentioned = event.whenMentioned
+                    url = event.url
+                    status = MentionStatus.UNREAD
+                    vBuild()
+                }
+            )
     }
 
     /**
-     * Marks this mention as snoozed.
+     * Marks mention with the specified ID as snoozed.
+     * `MentionId` is contained in the passed event.
      */
     @Subscribe
     internal fun on(event: MentionSnoozed) {
-        builder().setStatus(MentionStatus.SNOOZED)
+        setMentionStatus(event.id, MentionStatus.SNOOZED)
+        println(builder())
     }
 
     /**
-     * Marks this mention as read.
+     * Marks mention with the specified ID as read.
+     * `MentionId` is contained in the passed event.
      */
     @Subscribe
     internal fun on(event: MentionRead) {
-        builder().setStatus(MentionStatus.READ)
+        setMentionStatus(event.id, MentionStatus.READ)
+    }
+
+    /**
+     * Sets a new status for a mention by its ID.
+     */
+    private fun setMentionStatus(mentionId: MentionId, status: MentionStatus) {
+        val idInList = builder()
+            .mentionList
+            .indexOfFirst { mention -> mention.id == mentionId }
+        val updatedMention = builder()
+            .mentionList[idInList]
+            .toBuilder()
+            .setStatus(status)
+            .vBuild()
+        builder().setMention(idInList, updatedMention)
     }
 }

@@ -30,20 +30,27 @@ import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.server.projection.ProjectionRepository
-import io.spine.server.route.EventRoute.withId
 import io.spine.server.route.EventRouting
 
 /**
  * Manages instances of [UserMentionsProjection].
  */
 public class UserMentionsRepository :
-    ProjectionRepository<MentionId, UserMentionsProjection, UserMentions>() {
+    ProjectionRepository<UserMentionsId, UserMentionsProjection, UserMentions>() {
 
-    override fun setupEventRouting(routing: EventRouting<MentionId>) {
+    protected override fun setupEventRouting(routing: EventRouting<UserMentionsId>) {
         super.setupEventRouting(routing)
         routing
-            .route(UserMentioned::class.java) { event, _ -> withId(event.id) }
-            .route(MentionSnoozed::class.java) { event, _ -> withId(event.id) }
-            .route(MentionRead::class.java) { event, _ -> withId(event.id) }
+            .route(UserMentioned::class.java) { event, _ -> toUserMentionsId(event.id) }
+            .route(MentionSnoozed::class.java) { event, _ -> toUserMentionsId(event.id) }
+            .route(MentionRead::class.java) { event, _ -> toUserMentionsId(event.id) }
+    }
+
+    /**
+     * Returns a set with a single `UserMentionsId`, that is created with
+     * the name of the mentioned user from the passed `MentionId`.
+     */
+    private fun toUserMentionsId(mentionId: MentionId): Set<UserMentionsId> {
+        return setOf(UserMentionsId::class.buildBy(mentionId.user))
     }
 }
