@@ -64,7 +64,6 @@ public class UserMentionsProjection :
     @Subscribe
     internal fun on(event: MentionSnoozed) {
         setMentionStatus(event.id, MentionStatus.SNOOZED)
-        println(builder())
     }
 
     /**
