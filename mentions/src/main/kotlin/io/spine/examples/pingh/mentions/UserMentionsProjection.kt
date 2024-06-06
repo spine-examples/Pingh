@@ -40,6 +40,8 @@ public class UserMentionsProjection :
 
     /**
      * Creates the view when a user is mentioned.
+     *
+     * The view is created with "unread" status.
      */
     @Subscribe
     internal fun on(event: UserMentioned) {
