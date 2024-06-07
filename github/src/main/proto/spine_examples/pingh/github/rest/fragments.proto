@@ -74,12 +74,18 @@ message IssueOrPullRequestFragment {
     // Time when this item was created.
     string when_created = 4 [(required) = true, json_name = "created_at"];
 
+    // The text body of this item.
+    string body = 5 [(required) = true];
+
     // The URL of this GitHub item.
     //
     // To avoid conflicts with the `url` field in the JSON response received from GitHub,
     // the name `html_url` is used.
     //
-    string html_url = 5 [(required) = true, json_name = "html_url"];
+    string html_url = 6 [(required) = true, json_name = "html_url"];
+
+    // The URL of all comments under this item.
+    string comments_url = 7 [(required) = true, json_name = "comments_url"];
 }
 
 // The GitHub API response received when searching for mentions
@@ -93,4 +99,38 @@ message IssuesAndPullRequestsSearchResult {
 
     // GitHub items on which the mention occurred.
     repeated IssueOrPullRequestFragment item = 1 [(required) = true, json_name = "items"];
+}
+
+// Comment data received via GitHub API.
+message CommentFragment {
+
+    // The comment's ID in GitHub.
+    //
+    // To avoid conflicts with the `id` field in the JSON response received from GitHub,
+    // the name `node_id` is used.
+    //
+    string node_id = 1 [(required) = true, json_name = "node_id"];
+
+    // The comment's author.
+    UserFragment who_created = 2 [(required) = true, json_name = "user"];
+
+    // The time when this comment was created.
+    string when_created = 3 [(required) = true, json_name = "created_at"];
+
+    // The text body of this comment.
+    string body = 4 [(required) = true];
+
+    // The URL of this GitHub comment.
+    //
+    // To avoid conflicts with the `url` field in the JSON response received from GitHub,
+    // the name `html_url` is used.
+    //
+    string html_url = 5 [(required) = true, json_name = "html_url"];
+}
+
+// The GitHub API response received when getting comments by the URL.
+message CommentsGetResult {
+
+    // GitHub comments.
+    repeated CommentFragment item = 1 [(required) = true];
 }
