@@ -26,6 +26,7 @@
 
 import io.spine.internal.BuildSettings
 import io.spine.internal.dependency.JavaX
+import io.spine.internal.dependency.Ktor
 
 plugins {
     kotlin("jvm")
@@ -70,4 +71,8 @@ dependencies {
     implementation(project(":sessions"))
 
     implementation(JavaX.annotations)
+    implementation(Ktor.Client.core)
+    implementation(Ktor.Client.cio)
+
+    testImplementation(Ktor.Client.mock)
 }
