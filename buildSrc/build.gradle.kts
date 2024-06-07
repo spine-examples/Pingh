@@ -48,6 +48,13 @@ kotlin {
 val kotlinVersion = "1.4.20"
 
 /**
+ * The version of Detekt Gradle Plugin.
+ *
+ * @see <a href="https://github.com/detekt/detekt/releases">Detekt Releases</a>
+ */
+val detektVersion = "1.15.0"
+
+/**
  * The version of Dokka Gradle Plugins.
  *
  * @see <a href="https://github.com/Kotlin/dokka/releases">
@@ -67,6 +74,7 @@ configurations.all {
 }
 
 dependencies {
+    implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:$detektVersion")
     implementation("org.jetbrains.dokka:dokka-base:$dokkaVersion")
     implementation("org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion")
 
