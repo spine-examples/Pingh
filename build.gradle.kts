@@ -57,7 +57,7 @@ subprojects {
     apply<DokkaConfigurationPlugin>()
 
     /*
-     * Adds and configures Detekt Plugin for analysis code.
+     * Adds and configures the Detekt Plugin for analysis code.
      */
     apply<DetektCodeAnalysisPlugin>()
 

@@ -48,7 +48,7 @@ kotlin {
 val kotlinVersion = "1.4.20"
 
 /**
- * The version of Detekt Gradle Plugin.
+ * The version of the Detekt Gradle Plugin.
  *
  * @see <a href="https://github.com/detekt/detekt/releases">Detekt Releases</a>
  */
