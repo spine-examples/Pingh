@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.mentions
 
 import io.spine.examples.pingh.mentions.rejection.MentionIsAlreadyRead
+import io.spine.examples.pingh.mentions.rejection.MentionsUpdateIsAlreadyInProgress
 import kotlin.reflect.KClass
 
 /**
@@ -34,5 +35,14 @@ import kotlin.reflect.KClass
  */
 public fun KClass<MentionIsAlreadyRead>.buildBy(id: MentionId): MentionIsAlreadyRead =
     MentionIsAlreadyRead.newBuilder()
+        .setId(id)
+        .build()
+
+/**
+ * Creates a new `MentionsUpdateIsAlreadyInProgress` rejection with the specified `GitHubClientId`.
+ */
+public fun KClass<MentionsUpdateIsAlreadyInProgress>.buildBy(id: GitHubClientId):
+        MentionsUpdateIsAlreadyInProgress =
+    MentionsUpdateIsAlreadyInProgress.newBuilder()
         .setId(id)
         .build()

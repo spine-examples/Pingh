@@ -32,12 +32,10 @@ import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.mentions.MentionId
-import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
 import io.spine.examples.pingh.mentions.UserMentions
 import io.spine.examples.pingh.mentions.UserMentionsId
 import io.spine.examples.pingh.mentions.buildBy
-import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.net.Url
 import io.spine.testing.TestValues.randomString
@@ -61,20 +59,6 @@ internal fun KClass<UserMentioned>.generateWith(whoWasMentioned: Username): User
     }
 
 /**
- * Creates a new `MentionView` with the specified status and data from the passed event.
- */
-internal fun KClass<MentionView>.buildBy(event: UserMentioned, status: MentionStatus):
-        MentionView =
-    MentionView.newBuilder()
-        .setId(event.id)
-        .setWhoMentioned(event.whoMentioned)
-        .setTitle(event.title)
-        .setWhenMentioned(event.whenMentioned)
-        .setUrl(event.url)
-        .setStatus(status)
-        .vBuild()
-
-/**
  * Creates a new `UserMentions` with the specified ID and mention's views.
  */
 internal fun KClass<UserMentions>.buildBy(
@@ -88,12 +72,3 @@ internal fun KClass<UserMentions>.buildBy(
         }
         vBuild()
     }
-
-/**
- * Creates a new `MentionSnoozed` event with the specified ID of the mention.
- */
-internal fun KClass<MentionSnoozed>.buildBy(id: MentionId): MentionSnoozed =
-    MentionSnoozed.newBuilder()
-        .setId(id)
-        .setUntilWhen(currentTime())
-        .vBuild()

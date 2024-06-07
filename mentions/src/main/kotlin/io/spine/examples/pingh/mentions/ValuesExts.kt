@@ -26,31 +26,19 @@
 
 package io.spine.examples.pingh.mentions
 
-import io.spine.examples.pingh.mentions.event.MentionRead
-import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
-import io.spine.server.projection.ProjectionRepository
-import io.spine.server.route.EventRouting
+import kotlin.reflect.KClass
 
 /**
- * Manages instances of [UserMentionsProjection].
+ * Creates a new `MentionView` with the specified status and data from the passed event.
  */
-public class UserMentionsRepository :
-    ProjectionRepository<UserMentionsId, UserMentionsProjection, UserMentions>() {
-
-    protected override fun setupEventRouting(routing: EventRouting<UserMentionsId>) {
-        super.setupEventRouting(routing)
-        routing
-            .route(UserMentioned::class.java) { event, _ -> toUserMentions(event.id) }
-            .route(MentionSnoozed::class.java) { event, _ -> toUserMentions(event.id) }
-            .route(MentionRead::class.java) { event, _ -> toUserMentions(event.id) }
-    }
-
-    /**
-     * Returns a set with a single `UserMentionsId`, that is created with
-     * the name of the mentioned user from the passed `MentionId`.
-     */
-    private fun toUserMentions(mentionId: MentionId): Set<UserMentionsId> {
-        return setOf(UserMentionsId::class.buildBy(mentionId.user))
-    }
-}
+public fun KClass<MentionView>.buildBy(event: UserMentioned, status: MentionStatus):
+        MentionView =
+    MentionView.newBuilder()
+        .setId(event.id)
+        .setWhoMentioned(event.whoMentioned)
+        .setTitle(event.title)
+        .setWhenMentioned(event.whenMentioned)
+        .setUrl(event.url)
+        .setStatus(status)
+        .vBuild()

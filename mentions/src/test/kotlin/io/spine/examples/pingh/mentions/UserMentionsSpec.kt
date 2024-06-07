@@ -41,7 +41,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
-@DisplayName("UserMentions should")
+@DisplayName("`UserMentions` should")
 public class UserMentionsSpec : ContextAwareTest() {
 
     private lateinit var id: UserMentionsId

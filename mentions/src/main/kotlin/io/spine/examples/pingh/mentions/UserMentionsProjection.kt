@@ -47,21 +47,12 @@ public class UserMentionsProjection :
     internal fun on(event: UserMentioned) {
         builder()
             .addMention(
-                with(MentionView.newBuilder()) {
-                    id = event.id
-                    whoMentioned = event.whoMentioned
-                    title = event.title
-                    whenMentioned = event.whenMentioned
-                    url = event.url
-                    status = MentionStatus.UNREAD
-                    vBuild()
-                }
+                MentionView::class.buildBy(event, MentionStatus.UNREAD)
             )
     }
 
     /**
      * Marks mention with the specified ID as snoozed.
-     * `MentionId` is contained in the passed event.
      */
     @Subscribe
     internal fun on(event: MentionSnoozed) {
@@ -70,7 +61,6 @@ public class UserMentionsProjection :
 
     /**
      * Marks mention with the specified ID as read.
-     * `MentionId` is contained in the passed event.
      */
     @Subscribe
     internal fun on(event: MentionRead) {

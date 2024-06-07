@@ -38,7 +38,6 @@ import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.buildBy
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
 import io.spine.examples.pingh.mentions.command.SnoozeMention
-import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.Rejections.MentionIsAlreadyRead
@@ -86,14 +85,6 @@ internal fun KClass<MarkMentionAsRead>.buildBy(id: MentionId): MarkMentionAsRead
         .vBuild()
 
 /**
- * Creates a new `MentionRead` event with the specified ID of the mention.
- */
-internal fun KClass<MentionRead>.buildBy(id: MentionId): MentionRead =
-    MentionRead.newBuilder()
-        .setId(id)
-        .vBuild()
-
-/**
  * Creates a new `SnoozeMention` command with the specified ID of the mention and
  * time to which the mention is snoozing.
  */
@@ -104,14 +95,10 @@ internal fun KClass<SnoozeMention>.buildBy(id: MentionId, untilWhen: Timestamp):
         .vBuild()
 
 /**
- * Creates a new `MentionSnoozed` event with the specified ID of the mention and
- * time to which the mention is snoozing.
+ * Creates a new `MentionSnoozed` event with the specified ID of the mention.
  */
-internal fun KClass<MentionSnoozed>.buildBy(id: MentionId, untilWhen: Timestamp): MentionSnoozed =
-    MentionSnoozed.newBuilder()
-        .setId(id)
-        .setUntilWhen(untilWhen)
-        .vBuild()
+internal fun KClass<MentionSnoozed>.buildBy(id: MentionId): MentionSnoozed =
+    this.buildBy(id, currentTime())
 
 /**
  * Creates a new `MentionIsAlreadyRead` rejection with the specified ID of the mention.
