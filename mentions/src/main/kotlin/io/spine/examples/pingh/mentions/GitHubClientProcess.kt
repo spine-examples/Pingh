@@ -63,10 +63,10 @@ public class GitHubClientProcess :
     @React
     internal fun on(@External event: UserLoggedIn): GitHubTokenUpdated {
         builder().setToken(event.token)
-        return GitHubTokenUpdated.newBuilder()
-            .setId(GitHubClientId::class.buildBy(event.id.username))
-            .setToken(event.token)
-            .vBuild()
+        return GitHubTokenUpdated::class.buildBy(
+            GitHubClientId::class.buildBy(event.id.username),
+            event.token
+        )
     }
 
     /**
@@ -80,14 +80,10 @@ public class GitHubClientProcess :
     @Throws(MentionsUpdateIsAlreadyInProgress::class)
     internal fun handle(command: UpdateMentionsFromGitHub): MentionsUpdateFromGitHubRequested {
         if (state().hasWhenStarted()) {
-            throw MentionsUpdateIsAlreadyInProgress.newBuilder()
-                .setId(command.id)
-                .build()
+            throw MentionsUpdateIsAlreadyInProgress::class.buildBy(command.id)
         }
         builder().setWhenStarted(currentTime())
-        return MentionsUpdateFromGitHubRequested.newBuilder()
-            .setId(state().id)
-            .vBuild()
+        return MentionsUpdateFromGitHubRequested::class.buildBy(state().id)
     }
 
     /**
@@ -102,9 +98,8 @@ public class GitHubClientProcess :
         val token = state().token
         val mentions = gitHubClientService.fetchMentions(username, token)
         val userMentionedEvents = createUserMentionedEvents(mentions)
-        val mentionsUpdateFromGitHubCompleted = MentionsUpdateFromGitHubCompleted.newBuilder()
-            .setId(state().id)
-            .vBuild()
+        val mentionsUpdateFromGitHubCompleted =
+            MentionsUpdateFromGitHubCompleted::class.buildBy(state().id)
         builder().clearWhenStarted()
         return listOf(
             *userMentionedEvents.toTypedArray(),

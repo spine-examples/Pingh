@@ -44,7 +44,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-@DisplayName("Mention should")
+@DisplayName("`Mention` should")
 public class MentionSpec : ContextAwareTest() {
 
     private lateinit var id: MentionId

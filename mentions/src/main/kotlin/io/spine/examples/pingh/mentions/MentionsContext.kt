@@ -49,3 +49,4 @@ public fun newMentionsContext(gitHubClientService: GitHubClientService): Bounded
     BoundedContext.singleTenant(NAME)
         .add(GitHubClientRepository(gitHubClientService))
         .add(MentionRepository())
+        .add(UserMentionsRepository())

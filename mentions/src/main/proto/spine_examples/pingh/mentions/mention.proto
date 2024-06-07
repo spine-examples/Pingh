@@ -59,22 +59,32 @@ message Mention {
 message UserMentions {
     option (entity) = { kind: PROJECTION };
 
+    // The ID of the user's mentions view.
+    UserMentionsId id = 1;
+
+    // List of user mentions.
+    repeated MentionView mention = 2 [(required) = true];
+}
+
+// Information about mention of the user.
+message MentionView {
+
     // The ID of the mention.
-    MentionId id = 1;
+    MentionId id = 1 [(required) = true];
 
     // The user who created the mention.
     spine_examples.pingh.github.User who_mentioned = 2 [(required) = true];
 
-    // The title of the topic in which the mention created.
+    // The title of the GitHub page in which the mention occurred.
     string title = 3 [(required) = true];
 
-    // Time when the user was mentioned.
+    // The time when the user was mentioned.
     google.protobuf.Timestamp when_mentioned = 4 [(required) = true];
 
-    // The link to the GitHub page where the user was mentioned.
+    // The URL of the GitHub page where the user was mentioned.
     spine.net.Url url = 5 [(required) = true];
 
-    // The read status of mention.
+    // The read status of the mention.
     MentionStatus status = 6 [(required) = true];
 }
 

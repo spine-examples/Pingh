@@ -23,42 +23,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine_examples.pingh.mentions;
+package io.spine.examples.pingh.mentions
 
-import "spine/options.proto";
+import io.spine.examples.pingh.mentions.event.UserMentioned
+import kotlin.reflect.KClass
 
-option (type_url_prefix) = "type.pingh.spine.io";
-option java_package = "io.spine.examples.pingh.mentions";
-option java_outer_classname = "IdentifiersProto";
-option java_multiple_files = true;
-
-import "spine_examples/pingh/github/github.proto";
-import "spine_examples/pingh/github/identifiers.proto";
-
-// Identifies a mention.
-message MentionId {
-
-    // The ID of the GitHub item where the user was mentioned.
-    spine_examples.pingh.github.NodeId where = 1 [(required) = true];
-
-    // The name of the GitHub user who was mentioned.
-    spine_examples.pingh.github.Username user = 2 [(required) = true];
-}
-
-// Identifies a process of updating mentions from the GitHub.
-//
-// There is a single `GitHubClient` for each GitHub user. GitHub usernames are unique.
-// Therefore, usernames are used as an identifier of `GitHubClient`.
-//
-message GitHubClientId {
-
-    spine_examples.pingh.github.Username username = 1 [(required) = true];
-}
-
-// The identifier of the user's mentions view.
-message UserMentionsId {
-
-    spine_examples.pingh.github.Username username = 1 [(required) = true];
-}
+/**
+ * Creates a new `MentionView` with the specified status and data from the passed event.
+ */
+public fun KClass<MentionView>.buildBy(event: UserMentioned, status: MentionStatus):
+        MentionView =
+    MentionView.newBuilder()
+        .setId(event.id)
+        .setWhoMentioned(event.whoMentioned)
+        .setTitle(event.title)
+        .setWhenMentioned(event.whenMentioned)
+        .setUrl(event.url)
+        .setStatus(status)
+        .vBuild()

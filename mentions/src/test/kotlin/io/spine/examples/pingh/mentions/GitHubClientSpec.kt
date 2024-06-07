@@ -53,7 +53,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-@DisplayName("GitHub Client should")
+@DisplayName("`GitHubClient` should")
 public class GitHubClientSpec : ContextAwareTest() {
 
     private val gitHubClientService = PredefinedGitHubResponses()

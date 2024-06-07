@@ -68,11 +68,10 @@ public class MentionProcess :
             throw MentionIsAlreadyRead::class.buildBy(command.id)
         }
         builder().setStatus(MentionStatus.SNOOZED)
-        return with(MentionSnoozed.newBuilder()) {
-            id = command.id
-            untilWhen = command.untilWhen
-            vBuild()
-        }
+        return MentionSnoozed::class.buildBy(
+            command.id,
+            command.untilWhen
+        )
     }
 
     /**
@@ -85,9 +84,6 @@ public class MentionProcess :
             throw MentionIsAlreadyRead::class.buildBy(command.id)
         }
         builder().setStatus(MentionStatus.READ)
-        return with(MentionRead.newBuilder()) {
-            id = command.id
-            vBuild()
-        }
+        return MentionRead::class.buildBy(command.id)
     }
 }

@@ -33,7 +33,7 @@ import kotlin.reflect.KClass
 /**
  * Creates a new [MentionId] with the specified [NodeId] and [Username].
  */
-internal fun KClass<MentionId>.buildBy(nodeId: NodeId, whomMentioned: Username): MentionId =
+public fun KClass<MentionId>.buildBy(nodeId: NodeId, whomMentioned: Username): MentionId =
     MentionId.newBuilder()
         .setWhere(nodeId)
         .setUser(whomMentioned)
@@ -42,7 +42,15 @@ internal fun KClass<MentionId>.buildBy(nodeId: NodeId, whomMentioned: Username):
 /**
  * Creates a new [GitHubClientId] with the specified [Username].
  */
-internal fun KClass<GitHubClientId>.buildBy(username: Username): GitHubClientId =
+public fun KClass<GitHubClientId>.buildBy(username: Username): GitHubClientId =
     GitHubClientId.newBuilder()
+        .setUsername(username)
+        .vBuild()
+
+/**
+ * Creates a new `UserMentionsId` with the specified GitHub username.
+ */
+public fun KClass<UserMentionsId>.buildBy(username: Username): UserMentionsId =
+    UserMentionsId.newBuilder()
         .setUsername(username)
         .vBuild()

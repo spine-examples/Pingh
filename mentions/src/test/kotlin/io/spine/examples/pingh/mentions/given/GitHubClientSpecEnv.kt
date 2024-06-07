@@ -35,9 +35,6 @@ import io.spine.examples.pingh.mentions.GitHubClientId
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.buildBy
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
-import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
-import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
-import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.parseJson
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
@@ -88,35 +85,6 @@ internal fun KClass<UserLoggedIn>.buildBy(username: Username, token: PersonalAcc
                 .vBuild()
         )
         .setToken(token)
-        .vBuild()
-
-/**
- * Creates a new [GitHubTokenUpdated] event with the specified [GitHubClientId]
- * and [PersonalAccessToken].
- */
-internal fun KClass<GitHubTokenUpdated>.buildBy(id: GitHubClientId, token: PersonalAccessToken):
-        GitHubTokenUpdated =
-    GitHubTokenUpdated.newBuilder()
-        .setId(id)
-        .setToken(token)
-        .vBuild()
-
-/**
- * Creates a new [MentionsUpdateFromGitHubRequested] event with the specified [GitHubClientId].
- */
-internal fun KClass<MentionsUpdateFromGitHubRequested>.buildBy(id: GitHubClientId):
-        MentionsUpdateFromGitHubRequested =
-    MentionsUpdateFromGitHubRequested.newBuilder()
-        .setId(id)
-        .vBuild()
-
-/**
- * Creates a new [MentionsUpdateFromGitHubCompleted] event with the specified [GitHubClientId].
- */
-internal fun KClass<MentionsUpdateFromGitHubCompleted>.buildBy(id: GitHubClientId):
-        MentionsUpdateFromGitHubCompleted =
-    MentionsUpdateFromGitHubCompleted.newBuilder()
-        .setId(id)
         .vBuild()
 
 /**

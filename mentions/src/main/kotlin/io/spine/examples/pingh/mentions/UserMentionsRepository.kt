@@ -23,42 +23,34 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine_examples.pingh.mentions;
+package io.spine.examples.pingh.mentions
 
-import "spine/options.proto";
+import io.spine.examples.pingh.mentions.event.MentionRead
+import io.spine.examples.pingh.mentions.event.MentionSnoozed
+import io.spine.examples.pingh.mentions.event.UserMentioned
+import io.spine.server.projection.ProjectionRepository
+import io.spine.server.route.EventRouting
 
-option (type_url_prefix) = "type.pingh.spine.io";
-option java_package = "io.spine.examples.pingh.mentions";
-option java_outer_classname = "IdentifiersProto";
-option java_multiple_files = true;
+/**
+ * Manages instances of [UserMentionsProjection].
+ */
+public class UserMentionsRepository :
+    ProjectionRepository<UserMentionsId, UserMentionsProjection, UserMentions>() {
 
-import "spine_examples/pingh/github/github.proto";
-import "spine_examples/pingh/github/identifiers.proto";
+    protected override fun setupEventRouting(routing: EventRouting<UserMentionsId>) {
+        super.setupEventRouting(routing)
+        routing
+            .route(UserMentioned::class.java) { event, _ -> toUserMentions(event.id) }
+            .route(MentionSnoozed::class.java) { event, _ -> toUserMentions(event.id) }
+            .route(MentionRead::class.java) { event, _ -> toUserMentions(event.id) }
+    }
 
-// Identifies a mention.
-message MentionId {
-
-    // The ID of the GitHub item where the user was mentioned.
-    spine_examples.pingh.github.NodeId where = 1 [(required) = true];
-
-    // The name of the GitHub user who was mentioned.
-    spine_examples.pingh.github.Username user = 2 [(required) = true];
-}
-
-// Identifies a process of updating mentions from the GitHub.
-//
-// There is a single `GitHubClient` for each GitHub user. GitHub usernames are unique.
-// Therefore, usernames are used as an identifier of `GitHubClient`.
-//
-message GitHubClientId {
-
-    spine_examples.pingh.github.Username username = 1 [(required) = true];
-}
-
-// The identifier of the user's mentions view.
-message UserMentionsId {
-
-    spine_examples.pingh.github.Username username = 1 [(required) = true];
+    /**
+     * Returns a set with a single `UserMentionsId`, that is created with
+     * the name of the mentioned user from the passed `MentionId`.
+     */
+    private fun toUserMentions(mentionId: MentionId): Set<UserMentionsId> {
+        return setOf(UserMentionsId::class.buildBy(mentionId.user))
+    }
 }
