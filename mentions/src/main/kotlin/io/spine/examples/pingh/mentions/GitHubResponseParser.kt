@@ -26,44 +26,33 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.protobuf.GeneratedMessageV3
 import com.google.protobuf.util.JsonFormat
-import com.google.protobuf.util.Timestamps
-import io.spine.examples.pingh.github.Mention
-import io.spine.examples.pingh.github.NodeId
-import io.spine.examples.pingh.github.User
-import io.spine.examples.pingh.github.buildBy
-import io.spine.examples.pingh.github.rest.IssueOrPullRequestFragment
+import io.spine.examples.pingh.github.rest.CommentsGetResult
 import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResult
-import io.spine.net.Url
+import io.spine.protobuf.ValidatingBuilder
 
 /**
- * Converts JSON to a set of [Mention]s.
+ * Parses `IssuesAndPullRequestsSearchResult` from the JSON.
  */
-public fun parseJson(json: String): Set<Mention> {
-    val responseBuilder = IssuesAndPullRequestsSearchResult.newBuilder()
+public fun parseIssuesAndPullRequestsFromJson(json: String): IssuesAndPullRequestsSearchResult =
+    parseJson(json, IssuesAndPullRequestsSearchResult.newBuilder())
+
+/**
+ * Parses `CommentsGetResult` from the JSON.
+ */
+public fun parseCommentsFromJson(json: String): CommentsGetResult =
+    parseJson(json, CommentsGetResult.newBuilder())
+
+/**
+ * Parses a message from JSON.
+ */
+private fun <M : GeneratedMessageV3, B : ValidatingBuilder<M>> parseJson(
+    json: String,
+    builder: B
+): M {
     JsonFormat.parser()
         .ignoringUnknownFields()
-        .merge(json, responseBuilder)
-    val response = responseBuilder.vBuild()
-    return mapToMentions(response.itemList).toSet()
+        .merge(json, builder)
+    return builder.vBuild()
 }
-
-/**
- * Converts list of [IssueOrPullRequestFragment]s to list of [Mention]s.
- */
-private fun mapToMentions(gitHubItems: List<IssueOrPullRequestFragment>):
-        List<Mention> =
-    gitHubItems
-        .map { fragment ->
-            with(Mention.newBuilder()) {
-                id = NodeId::class.buildBy(fragment.nodeId)
-                author = User::class.buildBy(
-                    fragment.whoCreated.username,
-                    fragment.whoCreated.avatarUrl
-                )
-                title = fragment.title
-                whenMentioned = Timestamps.parse(fragment.whenCreated)
-                url = Url::class.buildBy(fragment.htmlUrl)
-                vBuild()
-            }
-        }
