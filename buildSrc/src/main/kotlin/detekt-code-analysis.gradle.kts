@@ -26,14 +26,16 @@
 
 /**
  * This script-plugin sets up Kotlin code analyzing with Detekt.
- *
- * After applying, Detekt is configured to use
- * `${rootDir}/config/quality/detekt-config.yml` file.
  */
 plugins {
     id("io.gitlab.arturbosch.detekt")
 }
 
+/**
+ * After applying, Detekt is configured to use
+ * `${rootDir}/config/quality/detekt-config.yml` file.
+ * Specifies that only HTML reports is generated.
+ */
 detekt {
     buildUponDefaultConfig = true
     config.from(files("${rootDir}/config/quality/detekt-config.yml"))
