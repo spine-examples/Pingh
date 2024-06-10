@@ -25,44 +25,25 @@
  */
 
 /**
- * Gradle configuration for the whole project.
+ * This script-plugin sets up Kotlin code analyzing with Detekt.
  */
-allprojects {
-    /*
-    * Import the `version.gradle.kts` file and set the version and group for each module.
-    */
-    apply(from = "$rootDir/version.gradle.kts")
-    version = extra["pinghVersion"]!!
-    group = "io.spine.examples"
-
-    apply<IdeaPlugin>()
+plugins {
+    id("io.gitlab.arturbosch.detekt")
 }
 
 /**
- * The configuration is divided in multiple script plugins located in `buildSrc/src/main/kotlin`.
- * Each of these plugins contains a more detailed description in their source file.
+ * After applying, Detekt is configured to use
+ * `${rootDir}/config/quality/detekt-config.yml` file.
+ * Specifies that only HTML reports is generated.
  */
-subprojects {
+detekt {
+    buildUponDefaultConfig = true
+    config.from(files("${rootDir}/config/quality/detekt-config.yml"))
 
-    apply<JavaPlugin>()
-
-    /*
-     * Configure repositories.
-     */
-    apply<RepositoriesConfigurationPlugin>()
-
-    /*
-     * Adds dependencies for Dokka and configures it.
-     */
-    apply<DokkaConfigurationPlugin>()
-
-    /*
-     * Adds and configures the Detekt Plugin for analysis code.
-     */
-    apply<DetektCodeAnalysisPlugin>()
-
-    /*
-     * Adds dependencies for testing and configure test-running tasks.
-     */
-    apply<TestsConfigurationPlugin>()
+    reports {
+        html {
+            enabled = true
+            destination = file("build/reports/detekt.html")
+        }
+    }
 }
