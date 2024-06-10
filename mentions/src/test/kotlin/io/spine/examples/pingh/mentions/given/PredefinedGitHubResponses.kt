@@ -29,9 +29,10 @@ package io.spine.examples.pingh.mentions.given
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
+import io.spine.examples.pingh.github.buildFromFragment
 import io.spine.examples.pingh.mentions.GitHubClient
 import io.spine.examples.pingh.mentions.GitHubClientService
-import io.spine.examples.pingh.mentions.parseJson
+import io.spine.examples.pingh.mentions.parseIssuesAndPullRequestsFromJson
 import java.lang.Thread.sleep
 
 /**
@@ -60,7 +61,10 @@ public class PredefinedGitHubResponses : GitHubClientService {
         val jsonFile = this::class.java.getResource("github_response.json")
         checkNotNull(jsonFile)
         val json = jsonFile.readText(Charsets.UTF_8)
-        val mentions = parseJson(json)
+        val mentions = parseIssuesAndPullRequestsFromJson(json)
+            .itemList
+            .map { fragment -> Mention::class.buildFromFragment(fragment) }
+            .toSet()
         waitWhileServiceIsFrozen()
         return mentions
     }
