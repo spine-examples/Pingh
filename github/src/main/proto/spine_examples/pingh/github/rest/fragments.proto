@@ -98,7 +98,10 @@ message IssueOrPullRequestFragment {
 message IssuesAndPullRequestsSearchResult {
 
     // GitHub items on which the mention occurred.
-    repeated IssueOrPullRequestFragment item = 1 [(required) = true, json_name = "items"];
+    //
+    // No results may be found for a search request, in this case the list is empty.
+    //
+    repeated IssueOrPullRequestFragment item = 1 [(validate) = true, json_name = "items"];
 }
 
 // Comment data received via GitHub API.
@@ -132,5 +135,8 @@ message CommentFragment {
 message CommentsGetResult {
 
     // GitHub comments.
-    repeated CommentFragment item = 1 [(required) = true];
+    //
+    // If a GitHub item has no comments, the list is empty.
+    //
+    repeated CommentFragment item = 1 [(validate) = true];
 }
