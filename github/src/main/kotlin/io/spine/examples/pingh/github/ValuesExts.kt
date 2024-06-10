@@ -26,6 +26,9 @@
 
 package io.spine.examples.pingh.github
 
+import com.google.protobuf.util.Timestamps
+import io.spine.examples.pingh.github.rest.CommentFragment
+import io.spine.examples.pingh.github.rest.IssueOrPullRequestFragment
 import io.spine.net.Url
 import kotlin.reflect.KClass
 
@@ -70,3 +73,41 @@ public fun KClass<User>.buildBy(username: String, avatarUrl: String): User =
         Username::class.buildBy(username),
         Url::class.buildBy(avatarUrl)
     )
+
+/**
+ * Creates a new `Mention` with the data specified in the `IssueOrPullRequestFragment`.
+ */
+public fun KClass<Mention>.buildFromFragment(fragment: IssueOrPullRequestFragment): Mention =
+    with(Mention.newBuilder()) {
+        id = NodeId::class.buildBy(fragment.nodeId)
+        author = User::class.buildBy(
+            fragment.whoCreated.username,
+            fragment.whoCreated.avatarUrl
+        )
+        title = fragment.title
+        whenMentioned = Timestamps.parse(fragment.whenCreated)
+        url = Url::class.buildBy(fragment.htmlUrl)
+        vBuild()
+    }
+
+/**
+ * Creates a new `Mention` with the data specified in the `IssueOrPullRequestFragment`.
+ *
+ * The comments don't have titles, so the GitHub page title where the comment is posted
+ * is used instead.
+ */
+public fun KClass<Mention>.buildFromFragment(
+    fragment: CommentFragment,
+    itemTitle: String
+): Mention =
+    with(Mention.newBuilder()) {
+        id = NodeId::class.buildBy(fragment.nodeId)
+        author = User::class.buildBy(
+            fragment.whoCreated.username,
+            fragment.whoCreated.avatarUrl
+        )
+        title = itemTitle
+        whenMentioned = Timestamps.parse(fragment.whenCreated)
+        url = Url::class.buildBy(fragment.htmlUrl)
+        vBuild()
+    }
