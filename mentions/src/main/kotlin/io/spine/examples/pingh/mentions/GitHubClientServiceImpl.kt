@@ -30,9 +30,9 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.request.get
+import io.ktor.http.HttpMessageBuilder
+import io.ktor.http.HeadersBuilder
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.Headers
-import io.ktor.http.headers
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
@@ -157,8 +157,8 @@ public class GitHubClientServiceImpl(
      * @see <a href="https://docs.github.com/en/rest/authentication/authenticating-to-the-rest-api">
      *     Authenticating to the GitHub REST API</a>
      */
-    private fun configureHeaders(token: PersonalAccessToken): Headers =
-        headers {
+    private fun HttpMessageBuilder.configureHeaders(token: PersonalAccessToken): HeadersBuilder =
+        headers.apply {
             append("Authorization", "Bearer ${token.value}")
             append("Accept", "application/vnd.github+json")
         }
