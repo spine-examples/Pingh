@@ -35,6 +35,7 @@ import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
+import io.spine.examples.pingh.mentions.event.RequestMentionsFromGitHubFailed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
@@ -89,14 +90,23 @@ public class GitHubClientProcess :
     /**
      * Fetches user's mentions from GitHub and terminates the mention update process.
      *
-     * @return List of events, where the [UserMentioned] event for each mention comes first,
+     * @return If the mentions fetching from GitHub is successful, a list of events,
+     * where the [UserMentioned] event for each mention comes first,
      * followed by a single [MentionsUpdateFromGitHubCompleted] event.
+     * Otherwise, the list is one [RequestMentionsFromGitHubFailed] event.
      */
     @React
     internal fun on(event: MentionsUpdateFromGitHubRequested): List<EventMessage> {
         val username = state().id.username
         val token = state().token
-        val mentions = gitHubClientService.fetchMentions(username, token)
+        val mentions = try {
+            gitHubClientService.fetchMentions(username, token)
+        } catch (exception: CannotFetchMentionsFromGitHubException) {
+            builder().clearWhenStarted()
+            return listOf(
+                RequestMentionsFromGitHubFailed::class.buildBy(state().id, exception.statusCode())
+            )
+        }
         val userMentionedEvents = createUserMentionedEvents(mentions)
         val mentionsUpdateFromGitHubCompleted =
             MentionsUpdateFromGitHubCompleted::class.buildBy(state().id)
