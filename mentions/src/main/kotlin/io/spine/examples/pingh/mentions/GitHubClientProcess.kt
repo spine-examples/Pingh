@@ -90,7 +90,7 @@ public class GitHubClientProcess :
     /**
      * Fetches user's mentions from GitHub and terminates the mention update process.
      *
-     * @return If the mentions fetching from GitHub is successful, a list of events,
+     * @return If the mentions fetching from GitHub is successful, list of events,
      * where the [UserMentioned] event for each mention comes first,
      * followed by a single [MentionsUpdateFromGitHubCompleted] event.
      * Otherwise, the list is one [RequestMentionsFromGitHubFailed] event.

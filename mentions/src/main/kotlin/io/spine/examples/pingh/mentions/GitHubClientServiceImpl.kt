@@ -43,7 +43,7 @@ import kotlin.jvm.Throws
 import kotlinx.coroutines.runBlocking
 
 /**
- * Using the GitHub API retrieves mentions of a specific user.
+ * Using the GitHub API fetches mentions of a specific user.
  *
  * A user can be mentioned multiple times in comments or in the body of the item itself.
  * Each mention is treated as a separate entity and saved.
@@ -61,7 +61,7 @@ public class GitHubClientServiceImpl(
      * Searches and returns user `Mention`s by `Username` that was mentioned
      * and their `PersonalAccessToken`.
      *
-     * Mentions are searched in problems and pull requests.
+     * Mentions are searched in issues and pull requests.
      */
     @Throws(CannotFetchMentionsFromGitHubException::class)
     public override fun fetchMentions(username: Username, token: PersonalAccessToken):

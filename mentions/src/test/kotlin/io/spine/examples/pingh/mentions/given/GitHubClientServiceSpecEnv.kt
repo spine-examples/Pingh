@@ -63,7 +63,7 @@ internal fun mockEngine(token: PersonalAccessToken): HttpClientEngine =
     }
 
 /**
- * Reads mentions from a prepared JSON and return their set.
+ * Reads mentions from a prepared JSON and returns their set.
  */
 internal fun expectedMentions(): Set<Mention> {
     val json = loadJson("expected_github_client_service_result.json")
