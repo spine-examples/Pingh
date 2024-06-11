@@ -87,3 +87,17 @@ message UserMentioned {
     // The link to the GitHub page where the user was mentioned.
     spine.net.Url url = 5 [(required) = true];
 }
+
+// Fetching user mentions from GitHub failed.
+//
+// Emitted when there are technical issues on the GitHub side or
+// when the user's personal access token is expired.
+//
+message RequestMentionsFromGitHubFailed {
+
+    // The ID of the GitHub client that tried to fetch mentions from GitHub.
+    GitHubClientId id = 1;
+
+    // The HTTP status code of the response received from GitHub when trying to fetch mentions.
+    int32 response_status_code = 2 [(required) = true];
+}

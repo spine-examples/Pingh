@@ -33,6 +33,7 @@ import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
+import io.spine.examples.pingh.mentions.event.RequestMentionsFromGitHubFailed
 import kotlin.reflect.KClass
 
 /**
@@ -80,4 +81,15 @@ public fun KClass<MentionSnoozed>.buildBy(id: MentionId, untilWhen: Timestamp): 
     MentionSnoozed.newBuilder()
         .setId(id)
         .setUntilWhen(untilWhen)
+        .vBuild()
+
+/**
+ * Creates a new `RequestMentionsFromGitHubFailed` event with the specified `GitHubClientId`
+ * and HTTP status code of the response from GitHub.
+ */
+public fun KClass<RequestMentionsFromGitHubFailed>.buildBy(id: GitHubClientId, statusCode: Int):
+        RequestMentionsFromGitHubFailed =
+    RequestMentionsFromGitHubFailed.newBuilder()
+        .setId(id)
+        .setResponseStatusCode(statusCode)
         .vBuild()
