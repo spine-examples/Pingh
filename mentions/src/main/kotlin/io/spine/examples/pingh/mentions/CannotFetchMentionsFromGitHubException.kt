@@ -26,21 +26,19 @@
 
 package io.spine.examples.pingh.mentions
 
-import io.spine.examples.pingh.github.Mention
-import io.spine.examples.pingh.github.PersonalAccessToken
-import io.spine.examples.pingh.github.Username
-import kotlin.jvm.Throws
-
 /**
- * Allows to access GitHub Search API.
+ * Fetching user mentions from GitHub failed.
  */
-public interface GitHubClientService {
+public class CannotFetchMentionsFromGitHubException(
+    private val statusCode: Int
+) : Exception() {
+
+    public companion object {
+        private const val serialVersionUID: Long = 2363420196737905299L
+    }
 
     /**
-     * Searches and returns user [Mention]s by [Username] that was mentioned
-     * and their [PersonalAccessToken].
+     * Returns the HTTP status code of the response.
      */
-    @Throws(CannotFetchMentionsFromGitHubException::class)
-    public fun fetchMentions(username: Username, token: PersonalAccessToken):
-            Set<Mention>
+    public fun statusCode(): Int = statusCode
 }

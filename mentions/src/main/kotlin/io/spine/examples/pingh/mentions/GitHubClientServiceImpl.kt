@@ -26,18 +26,20 @@
 
 package io.spine.examples.pingh.mentions
 
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.engine.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.request.*
-import io.ktor.http.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.request.get
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.Headers
+import io.ktor.http.headers
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildFromFragment
 import io.spine.examples.pingh.github.rest.CommentsGetResult
 import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResult
+import kotlin.jvm.Throws
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -47,7 +49,7 @@ import kotlinx.coroutines.runBlocking
  * Each mention is treated as a separate entity and saved.
  */
 public class GitHubClientServiceImpl(
-    engine: HttpClientEngine = CIO.create()
+    engine: HttpClientEngine
 ) : GitHubClientService {
 
     /**
@@ -61,6 +63,7 @@ public class GitHubClientServiceImpl(
      *
      * Mentions are searched in problems and pull requests.
      */
+    @Throws(CannotFetchMentionsFromGitHubException::class)
     public override fun fetchMentions(username: Username, token: PersonalAccessToken):
             Set<Mention> =
         findMentions(username, token, ItemType.ISSUE) +
@@ -70,6 +73,7 @@ public class GitHubClientServiceImpl(
      * Requests GitHub for mentions of a user in issues or pull requests,
      * then looks for where the user was specifically mentioned in that item.
      */
+    @Throws(CannotFetchMentionsFromGitHubException::class)
     private fun findMentions(
         username: Username,
         token: PersonalAccessToken,
@@ -103,6 +107,7 @@ public class GitHubClientServiceImpl(
      * @see <a href="https://docs.github.com/en/rest/search/search#search-issues-and-pull-requests">
      *     Search issues and pull requests</a>
      */
+    @Throws(CannotFetchMentionsFromGitHubException::class)
     private fun searchIssuesOrPullRequests(
         username: Username,
         token: PersonalAccessToken,
@@ -121,16 +126,23 @@ public class GitHubClientServiceImpl(
                 }
                 configureHeaders(token)
             }
+            if (response.status != HttpStatusCode.OK) {
+                throw CannotFetchMentionsFromGitHubException(response.status.value)
+            }
             parseIssuesAndPullRequestsFromJson(response.body())
         }
 
     /**
      * Requests comments from GitHub on their URL previously received.
      */
+    @Throws(CannotFetchMentionsFromGitHubException::class)
     private fun getComments(url: String, token: PersonalAccessToken): CommentsGetResult =
         runBlocking {
             val response = client.get(url) {
                 configureHeaders(token)
+            }
+            if (response.status != HttpStatusCode.OK) {
+                throw CannotFetchMentionsFromGitHubException(response.status.value)
             }
             val json = response.body<String>()
             // The received JSON contains only an array, but Protobuf JSON Parser
