@@ -26,14 +26,17 @@
 
 package io.spine.examples.pingh.mentions.given
 
+import io.ktor.http.HttpStatusCode
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildFromFragment
 import io.spine.examples.pingh.mentions.GitHubClient
 import io.spine.examples.pingh.mentions.GitHubClientService
+import io.spine.examples.pingh.mentions.CannotFetchMentionsFromGitHubException
 import io.spine.examples.pingh.mentions.parseIssuesAndPullRequestsFromJson
 import java.lang.Thread.sleep
+import kotlin.jvm.Throws
 
 /**
  * Implementation of [GitHubClientService] that fetches mentions
@@ -52,12 +55,23 @@ public class PredefinedGitHubResponses : GitHubClientService {
     private var isFrozen = false
 
     /**
+     * The HTTP status response code from GitHub.
+     *
+     * If the value differs from 200, an [CannotFetchMentionsFromGitHubException] is generated.
+     */
+    private var responseStatusCode = HttpStatusCode.OK
+
+    /**
      * Returns set of [Mention]s retrieved from a JSON file in the resource folder.
      */
+    @Throws(CannotFetchMentionsFromGitHubException::class)
     public override fun fetchMentions(
         username: Username,
         token: PersonalAccessToken
     ): Set<Mention> {
+        if (responseStatusCode != HttpStatusCode.OK) {
+            throw CannotFetchMentionsFromGitHubException(responseStatusCode.value)
+        }
         val jsonFile = this::class.java.getResource("github_response.json")
         checkNotNull(jsonFile)
         val json = jsonFile.readText(Charsets.UTF_8)
@@ -94,5 +108,23 @@ public class PredefinedGitHubResponses : GitHubClientService {
      */
     public fun unfreeze() {
         isFrozen = false
+    }
+
+    /**
+     * Sets the HTTP status of the response.
+     *
+     * If the status code is different from 200, an exception will be thrown.
+     * After changing the status, it is necessary to return it to the default state,
+     * for this use the [setDefaultResponseStatusCode] method.
+     */
+    public fun setResponseStatusCode(responseStatusCode: HttpStatusCode) {
+        this.responseStatusCode = responseStatusCode
+    }
+
+    /**
+     * Sets the HTTP response status to 200.
+     */
+    public fun setDefaultResponseStatusCode() {
+        responseStatusCode = HttpStatusCode.OK
     }
 }
