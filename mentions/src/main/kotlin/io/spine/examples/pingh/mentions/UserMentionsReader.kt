@@ -33,7 +33,6 @@ import io.spine.core.ActorContext
 import io.spine.core.EventContext
 import io.spine.examples.pingh.github.Username
 import io.spine.grpc.MemoizingObserver
-import io.spine.protobuf.AnyPacker.unpack
 import io.spine.server.stand.Stand
 
 /**
@@ -75,7 +74,7 @@ public class UserMentionsReader(
         stand.execute(query, observer)
         return observer.firstResponse()
             .messageList
-            .map { unpack(it.state, UserMentions::class.java) }
+            .map { it.state.unpack(UserMentions::class) }
             .toSet()
     }
 }
