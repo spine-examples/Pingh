@@ -58,6 +58,8 @@ public class GitHubClientProcess :
      */
     private lateinit var gitHubClientService: GitHubClientService
 
+    private lateinit var userMentionsReader: UserMentionsReader
+
     /**
      * Updates the user's [PersonalAccessToken] each time the user logs in.
      */
@@ -141,5 +143,9 @@ public class GitHubClientProcess :
      */
     internal fun inject(gitHubClientService: GitHubClientService) {
         this.gitHubClientService = gitHubClientService
+    }
+
+    internal fun inject(userMentionsReader: UserMentionsReader) {
+        this.userMentionsReader = userMentionsReader
     }
 }
