@@ -98,10 +98,13 @@ public fun KClass<Mention>.buildFromFragment(fragment: IssueOrPullRequestFragmen
     }
 
 /**
- * Creates a new `Mention` with the data specified in the `IssueOrPullRequestFragment`.
+ * Creates a new `Mention` with the passed title value and
+ * the data specified in the `CommentFragment`.
  *
- * The comments don't have titles, so the GitHub page title where the comment is posted
- * is used instead.
+ * Comments do not have titles, which are required to create a `Mention`s.
+ * Therefore, it is necessary to additionally specify which value is considered
+ * a mention's title. It is recommended to use the GitHub title of the item
+ * under which the comment is left.
  */
 public fun KClass<Mention>.buildFromFragment(
     fragment: CommentFragment,
