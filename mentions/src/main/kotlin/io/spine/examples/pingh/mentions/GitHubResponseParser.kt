@@ -26,33 +26,18 @@
 
 package io.spine.examples.pingh.mentions
 
-import com.google.protobuf.GeneratedMessageV3
-import com.google.protobuf.util.JsonFormat
 import io.spine.examples.pingh.github.rest.CommentsResponse
 import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResult
-import io.spine.protobuf.ValidatingBuilder
+import io.spine.json.Json
 
 /**
  * Parses `IssuesAndPullRequestsSearchResult` from the JSON.
  */
 public fun parseIssuesAndPullRequestsFromJson(json: String): IssuesAndPullRequestsSearchResult =
-    parseJson(json, IssuesAndPullRequestsSearchResult.newBuilder())
+    Json.fromJson(json, IssuesAndPullRequestsSearchResult::class.java)
 
 /**
  * Parses `CommentsGetResult` from the JSON.
  */
 public fun parseCommentsFromJson(json: String): CommentsResponse =
-    parseJson(json, CommentsResponse.newBuilder())
-
-/**
- * Parses a message from JSON.
- */
-private fun <M : GeneratedMessageV3, B : ValidatingBuilder<M>> parseJson(
-    json: String,
-    builder: B
-): M {
-    JsonFormat.parser()
-        .ignoringUnknownFields()
-        .merge(json, builder)
-    return builder.vBuild()
-}
+    Json.fromJson(json, CommentsResponse::class.java)
