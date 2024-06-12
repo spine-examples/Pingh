@@ -80,22 +80,22 @@ public class GitHubClientServiceImpl(
         token: PersonalAccessToken,
         itemType: ItemType
     ): Set<Mention> {
-        val mentions = mutableSetOf<Mention>()
         val userTag = username.tag()
-        val items = searchIssuesOrPullRequests(username, token, itemType)
+        return searchIssuesOrPullRequests(username, token, itemType)
+            .itemList
+            .flatMap { item ->
+                val mentionsInComments = requestCommentsByUrl(item.commentsUrl, token)
+                    .itemList
+                    .filter { comment -> comment.body.contains(userTag) }
+                    .map { comment -> Mention::class.buildFromFragment(comment, item.title) }
 
-        for (item in items.itemList) {
-            if (item.body.contains(userTag)) {
-                mentions.add(Mention::class.buildFromFragment(item))
-            }
-            val comments = requestCommentsByUrl(item.commentsUrl, token)
-            for (comment in comments.itemList) {
-                if (comment.body.contains(userTag)) {
-                    mentions.add(Mention::class.buildFromFragment(comment, item.title))
+                if (item.body.contains(userTag)) {
+                    mentionsInComments.plus(Mention::class.buildFromFragment(item))
+                } else {
+                    mentionsInComments
                 }
             }
-        }
-        return mentions.toSet()
+            .toSet()
     }
 
     /**
