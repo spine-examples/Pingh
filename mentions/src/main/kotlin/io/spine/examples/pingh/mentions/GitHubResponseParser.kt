@@ -28,7 +28,7 @@ package io.spine.examples.pingh.mentions
 
 import com.google.protobuf.GeneratedMessageV3
 import com.google.protobuf.util.JsonFormat
-import io.spine.examples.pingh.github.rest.CommentsGetResult
+import io.spine.examples.pingh.github.rest.CommentsResponse
 import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResult
 import io.spine.protobuf.ValidatingBuilder
 
@@ -41,8 +41,8 @@ public fun parseIssuesAndPullRequestsFromJson(json: String): IssuesAndPullReques
 /**
  * Parses `CommentsGetResult` from the JSON.
  */
-public fun parseCommentsFromJson(json: String): CommentsGetResult =
-    parseJson(json, CommentsGetResult.newBuilder())
+public fun parseCommentsFromJson(json: String): CommentsResponse =
+    parseJson(json, CommentsResponse.newBuilder())
 
 /**
  * Parses a message from JSON.

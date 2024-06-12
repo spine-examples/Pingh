@@ -131,8 +131,8 @@ message CommentFragment {
     string html_url = 5 [(required) = true, json_name = "html_url"];
 }
 
-// The GitHub API response received when getting comments by the URL.
-message CommentsGetResult {
+// The GitHub API response received when obtaining comments by the URL.
+message CommentsResponse {
 
     // GitHub comments.
     //

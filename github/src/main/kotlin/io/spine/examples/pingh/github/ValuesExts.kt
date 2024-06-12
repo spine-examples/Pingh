@@ -41,6 +41,13 @@ public fun KClass<Username>.buildBy(value: String): Username =
         .vBuild()
 
 /**
+ * Returns the GitHub tag of the user.
+ *
+ * The tag consists of the `'@'` character followed by the `Username`.
+ */
+public fun Username.tag(): String = "@${this.value}"
+
+/**
  * Creates a new [PersonalAccessToken] with the specified string value.
  */
 public fun KClass<PersonalAccessToken>.buildBy(value: String): PersonalAccessToken =
