@@ -136,7 +136,7 @@ public class GitHubClientServiceImpl(
         }
 
     /**
-     * Requests comments from GitHub on their URL previously received.
+     * Sends a request to GitHub API to obtain comments on their URL previously received.
      */
     @Throws(CannotFetchMentionsFromGitHubException::class)
     private fun obtainCommentsByUrl(url: String, token: PersonalAccessToken): CommentsResponse =
