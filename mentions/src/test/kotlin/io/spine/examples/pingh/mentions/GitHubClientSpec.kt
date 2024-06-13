@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.mentions
 
 import io.kotest.matchers.shouldBe
+import io.ktor.http.HttpStatusCode
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
@@ -34,6 +35,7 @@ import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
+import io.spine.examples.pingh.mentions.event.RequestMentionsFromGitHubFailed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.given.buildBy
@@ -66,6 +68,8 @@ public class GitHubClientSpec : ContextAwareTest() {
 
     @BeforeEach
     public fun prepareSessionsContextAndEmitEvent() {
+        gitHubClientService.unfreeze()
+        gitHubClientService.setDefaultResponseStatusCode()
         sessionContext = BlackBoxContext.from(newSessionsContext())
         val username = Username::class.buildBy(randomString())
         gitHubClientId = GitHubClientId::class.buildBy(username)
@@ -163,14 +167,9 @@ public class GitHubClientSpec : ContextAwareTest() {
     @Nested
     public inner class `react on 'MentionsUpdateFromGitHubRequested' event, and` {
 
-        @BeforeEach
-        public fun emitMentionsUpdateFromGitHubRequestedEvent() {
-            val event = MentionsUpdateFromGitHubRequested::class.buildBy(gitHubClientId)
-            context().receivesEvent(event)
-        }
-
         @Test
         public fun `emit 'UserMentioned' events for each mentions fetched from GitHub`() {
+            emitMentionsUpdateFromGitHubRequestedEvent()
             val expectedUserMentionedSet = expectedUserMentionedSet(gitHubClientId.username)
             val eventSubject = context().assertEvents()
                 .withType(UserMentioned::class.java)
@@ -184,8 +183,33 @@ public class GitHubClientSpec : ContextAwareTest() {
 
         @Test
         public fun `emit 'MentionsUpdateFromGitHubCompleted' event`() {
+            emitMentionsUpdateFromGitHubRequestedEvent()
             val expected = MentionsUpdateFromGitHubCompleted::class.buildBy(gitHubClientId)
             context().assertEvent(expected)
+        }
+
+        @Test
+        public fun `emit 'RequestMentionsFromGitHubFailed' event if request to GitHub failed`() {
+            val responseStatusCode = HttpStatusCode.ServiceUnavailable
+            gitHubClientService.setResponseStatusCode(responseStatusCode)
+            emitMentionsUpdateFromGitHubRequestedEvent()
+            val expected = RequestMentionsFromGitHubFailed::class.buildBy(
+                gitHubClientId,
+                responseStatusCode.value
+            )
+            context().assertEvents()
+                .withType(UserMentioned::class.java)
+                .hasSize(0)
+            context().assertEvents()
+                .withType(MentionsUpdateFromGitHubCompleted::class.java)
+                .hasSize(0)
+            context().assertEvent(expected)
+            gitHubClientService.setDefaultResponseStatusCode()
+        }
+
+        private fun emitMentionsUpdateFromGitHubRequestedEvent() {
+            val event = MentionsUpdateFromGitHubRequested::class.buildBy(gitHubClientId)
+            context().receivesEvent(event)
         }
     }
 

@@ -26,22 +26,18 @@
 
 package io.spine.examples.pingh.mentions
 
-import io.spine.examples.pingh.github.Mention
-import io.spine.examples.pingh.github.PersonalAccessToken
-import io.spine.examples.pingh.github.Username
-import kotlin.jvm.Throws
+import io.spine.examples.pingh.github.rest.CommentsResponse
+import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResult
+import io.spine.json.Json
 
 /**
- * Allows to access GitHub Search API.
+ * Parses `IssuesAndPullRequestsSearchResult` from the JSON.
  */
-public interface GitHubClientService {
+public fun parseIssuesAndPullRequestsFromJson(json: String): IssuesAndPullRequestsSearchResult =
+    Json.fromJson(json, IssuesAndPullRequestsSearchResult::class.java)
 
-    /**
-     * Searches for user `Mentions` by the GitHub name of the user.
-     *
-     * Uses `PersonalAccessToken` to access GitHub API.
-     */
-    @Throws(CannotFetchMentionsFromGitHubException::class)
-    public fun fetchMentions(username: Username, token: PersonalAccessToken):
-            Set<Mention>
-}
+/**
+ * Parses `CommentsGetResult` from the JSON.
+ */
+public fun parseCommentsFromJson(json: String): CommentsResponse =
+    Json.fromJson(json, CommentsResponse::class.java)

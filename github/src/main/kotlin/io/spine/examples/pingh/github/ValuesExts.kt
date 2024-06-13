@@ -26,6 +26,9 @@
 
 package io.spine.examples.pingh.github
 
+import com.google.protobuf.util.Timestamps
+import io.spine.examples.pingh.github.rest.CommentFragment
+import io.spine.examples.pingh.github.rest.IssueOrPullRequestFragment
 import io.spine.net.Url
 import kotlin.reflect.KClass
 
@@ -36,6 +39,13 @@ public fun KClass<Username>.buildBy(value: String): Username =
     Username.newBuilder()
         .setValue(value)
         .vBuild()
+
+/**
+ * Returns the GitHub tag of the user.
+ *
+ * The tag consists of the `'@'` character followed by the `Username`.
+ */
+public fun Username.tag(): String = "@${this.value}"
 
 /**
  * Creates a new [PersonalAccessToken] with the specified string value.
@@ -70,3 +80,44 @@ public fun KClass<User>.buildBy(username: String, avatarUrl: String): User =
         Username::class.buildBy(username),
         Url::class.buildBy(avatarUrl)
     )
+
+/**
+ * Creates a new `Mention` with the data specified in the `IssueOrPullRequestFragment`.
+ */
+public fun KClass<Mention>.buildFromFragment(fragment: IssueOrPullRequestFragment): Mention =
+    with(Mention.newBuilder()) {
+        id = NodeId::class.buildBy(fragment.nodeId)
+        author = User::class.buildBy(
+            fragment.whoCreated.username,
+            fragment.whoCreated.avatarUrl
+        )
+        title = fragment.title
+        whenMentioned = Timestamps.parse(fragment.whenCreated)
+        url = Url::class.buildBy(fragment.htmlUrl)
+        vBuild()
+    }
+
+/**
+ * Creates a new `Mention` with the passed title value and
+ * the data specified in the `CommentFragment`.
+ *
+ * Comments do not have titles, which are required to create a `Mention`s.
+ * Therefore, it is necessary to additionally specify which value is considered
+ * a mention's title. It is recommended to use the GitHub title of the item
+ * under which the comment is made.
+ */
+public fun KClass<Mention>.buildFromFragment(
+    fragment: CommentFragment,
+    itemTitle: String
+): Mention =
+    with(Mention.newBuilder()) {
+        id = NodeId::class.buildBy(fragment.nodeId)
+        author = User::class.buildBy(
+            fragment.whoCreated.username,
+            fragment.whoCreated.avatarUrl
+        )
+        title = itemTitle
+        whenMentioned = Timestamps.parse(fragment.whenCreated)
+        url = Url::class.buildBy(fragment.htmlUrl)
+        vBuild()
+    }

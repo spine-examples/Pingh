@@ -24,24 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.mentions
+package io.spine.internal.dependency
 
-import io.spine.examples.pingh.github.Mention
-import io.spine.examples.pingh.github.PersonalAccessToken
-import io.spine.examples.pingh.github.Username
-import kotlin.jvm.Throws
+// https://github.com/ktorio/ktor
+@Suppress("ConstPropertyName")
+public object Ktor {
+    private const val version = "2.3.11"
 
-/**
- * Allows to access GitHub Search API.
- */
-public interface GitHubClientService {
-
-    /**
-     * Searches for user `Mentions` by the GitHub name of the user.
-     *
-     * Uses `PersonalAccessToken` to access GitHub API.
-     */
-    @Throws(CannotFetchMentionsFromGitHubException::class)
-    public fun fetchMentions(username: Username, token: PersonalAccessToken):
-            Set<Mention>
+    public object Client {
+        public const val core: String = "io.ktor:ktor-client-core:$version"
+        public const val cio: String = "io.ktor:ktor-client-cio:$version"
+        public const val mock: String = "io.ktor:ktor-client-mock:$version"
+    }
 }
