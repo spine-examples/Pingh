@@ -165,7 +165,7 @@ private fun sendSameResponseToSearchingRequests(
  * Loads JSON by its name and returns the contents of the file.
  */
 private fun loadJson(name: String): String {
-    val jsonFile = PredefinedGitHubResponses::class.java.getResource(name)
+    val jsonFile = PredefinedGitHubResponses::class.java.getResource("/github-responses/$name")
     checkNotNull(jsonFile)
     return jsonFile.readText(Charsets.UTF_8)
 }
