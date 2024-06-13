@@ -46,23 +46,23 @@ internal fun mockEngineThatContainsMentions(token: PersonalAccessToken): HttpCli
         }
 
         if (request.url.pathSegments[2] == "issues") {
-            if (request.url.parameters["q"]!!.startsWith("is:issue")) {
-                val body = loadJson("response_to_search_issues.json")
+            if (request.url.parameters["q"]!!.startsWith("is:pull-request")) {
+                val body = loadJson("prs-search-response.json")
                 return@MockEngine respond(body)
             }
-            if (request.url.parameters["q"]!!.startsWith("is:pull-request")) {
-                val body = loadJson("response_to_search_pull_requests.json")
+            if (request.url.parameters["q"]!!.startsWith("is:issue")) {
+                val body = loadJson("issues-search-response.json")
                 return@MockEngine respond(body)
             }
         }
 
         if (request.url.pathSegments.size == 7 && request.url.pathSegments[6] == "comments") {
             if (request.url.pathSegments[5] == "3") {
-                val body = loadJson("response_to_obtain_pull_request_comments.json")
+                val body = loadJson("pr-comments-obtain-response.json")
                 return@MockEngine respond(body)
             }
             if (request.url.pathSegments[5] == "8") {
-                val body = loadJson("response_to_obtain_issue_comments.json")
+                val body = loadJson("issue-comments-obtain-response.json")
                 return@MockEngine respond(body)
             }
         }
@@ -74,7 +74,7 @@ internal fun mockEngineThatContainsMentions(token: PersonalAccessToken): HttpCli
  * Reads mentions from a prepared JSON and returns their set.
  */
 internal fun expectedMentions(): Set<Mention> {
-    val json = loadJson("expected_github_client_service_result.json")
+    val json = loadJson("expected-github-client-service-result.json")
     return Json.fromJson(json, ExpectedMentionList::class.java)
         .mentionList
         .toSet()
@@ -86,7 +86,7 @@ internal fun expectedMentions(): Set<Mention> {
  */
 internal fun mockEngineThatFailsAllRequest(token: PersonalAccessToken): HttpClientEngine =
     sendSameResponseToSearchingRequests(
-        "error_response_to_search_issues_and_pull_requests.json",
+        "error-issues-prs-search-response.json",
         token,
         HttpStatusCode.UnprocessableEntity
     )
@@ -97,7 +97,7 @@ internal fun mockEngineThatFailsAllRequest(token: PersonalAccessToken): HttpClie
  */
 internal fun mockEngineThatDoesNotContainMentions(token: PersonalAccessToken): HttpClientEngine =
     sendSameResponseToSearchingRequests(
-        "empty_response_to_search_issues_and_pull_requests.json",
+        "empty-issues-prs-search-response.json",
         token,
         HttpStatusCode.OK
     )
