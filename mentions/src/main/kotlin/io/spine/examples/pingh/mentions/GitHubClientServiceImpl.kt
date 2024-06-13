@@ -59,8 +59,9 @@ public class GitHubClientServiceImpl(
     private val client = HttpClient(engine)
 
     /**
-     * Searches and returns user `Mention`s by `Username` that was mentioned
-     * and their `PersonalAccessToken`.
+     * Searches for user `Mentions` by the GitHub name of the user.
+     *
+     * Uses `PersonalAccessToken` to access GitHub API.
      *
      * Mentions are searched in issues and pull requests.
      */
@@ -84,7 +85,7 @@ public class GitHubClientServiceImpl(
         return searchIssuesOrPullRequests(username, token, itemType)
             .itemList
             .flatMap { item ->
-                val mentionsInComments = requestCommentsByUrl(item.commentsUrl, token)
+                val mentionsInComments = obtainCommentsByUrl(item.commentsUrl, token)
                     .itemList
                     .filter { comment -> comment.body.contains(userTag) }
                     .map { comment -> Mention::class.buildFromFragment(comment, item.title) }
@@ -138,7 +139,7 @@ public class GitHubClientServiceImpl(
      * Requests comments from GitHub on their URL previously received.
      */
     @Throws(CannotFetchMentionsFromGitHubException::class)
-    private fun requestCommentsByUrl(url: String, token: PersonalAccessToken): CommentsResponse =
+    private fun obtainCommentsByUrl(url: String, token: PersonalAccessToken): CommentsResponse =
         runBlocking {
             val response = client.get(url) {
                 configureHeaders(token)

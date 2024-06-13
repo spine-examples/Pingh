@@ -57,7 +57,7 @@ public class PredefinedGitHubResponses : GitHubClientService {
     /**
      * The HTTP status response code from GitHub.
      *
-     * If the value differs from 200, an [CannotFetchMentionsFromGitHubException] is generated.
+     * If the value differs from 200, an [CannotFetchMentionsFromGitHubException] is thrown.
      */
     private var responseStatusCode = HttpStatusCode.OK
 

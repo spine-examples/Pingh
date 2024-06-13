@@ -55,23 +55,24 @@ public class GitHubClientServiceSpec {
     @Test
     public fun `fetch mentions from GitHub`() {
         val service = GitHubClientServiceImpl(mockEngineThatContainsMentions(token))
-        val result = service.fetchMentions(username, token)
+        val mentions = service.fetchMentions(username, token)
         val expected = expectedMentions()
-        result shouldBe expected
+        mentions shouldBe expected
     }
 
     @Test
     public fun `throw exception if fetching from GitHub failed`() {
         val service = GitHubClientServiceImpl(mockEngineThatFailsAllRequest(token))
-        shouldThrow<CannotFetchMentionsFromGitHubException> {
+        val exception = shouldThrow<CannotFetchMentionsFromGitHubException> {
             service.fetchMentions(username, token)
         }
+        exception.statusCode() shouldBe 422
     }
 
     @Test
     public fun `return empty set if the user has not been mentioned`() {
         val service = GitHubClientServiceImpl(mockEngineThatDoesNotContainMentions(token))
-        val result = service.fetchMentions(username, token)
-        result.shouldBeEmpty()
+        val mentions = service.fetchMentions(username, token)
+        mentions.shouldBeEmpty()
     }
 }

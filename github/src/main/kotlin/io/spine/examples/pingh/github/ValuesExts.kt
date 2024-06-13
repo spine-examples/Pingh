@@ -104,7 +104,7 @@ public fun KClass<Mention>.buildFromFragment(fragment: IssueOrPullRequestFragmen
  * Comments do not have titles, which are required to create a `Mention`s.
  * Therefore, it is necessary to additionally specify which value is considered
  * a mention's title. It is recommended to use the GitHub title of the item
- * under which the comment is left.
+ * under which the comment is made.
  */
 public fun KClass<Mention>.buildFromFragment(
     fragment: CommentFragment,

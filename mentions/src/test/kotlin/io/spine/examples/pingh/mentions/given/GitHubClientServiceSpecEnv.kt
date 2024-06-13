@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.mentions.given
 
-import com.google.protobuf.util.JsonFormat
 import io.kotest.assertions.fail
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.mock.MockEngine
@@ -34,6 +33,7 @@ import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpStatusCode
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.json.Json
 
 /**
  * Intercepts requests to GitHub and returns prepared responses from JSON
@@ -58,11 +58,11 @@ internal fun mockEngineThatContainsMentions(token: PersonalAccessToken): HttpCli
 
         if (request.url.pathSegments.size == 7 && request.url.pathSegments[6] == "comments") {
             if (request.url.pathSegments[5] == "3") {
-                val body = loadJson("response_to_get_pull_request_comments.json")
+                val body = loadJson("response_to_obtain_pull_request_comments.json")
                 return@MockEngine respond(body)
             }
             if (request.url.pathSegments[5] == "8") {
-                val body = loadJson("response_to_get_issue_comments.json")
+                val body = loadJson("response_to_obtain_issue_comments.json")
                 return@MockEngine respond(body)
             }
         }
@@ -75,9 +75,7 @@ internal fun mockEngineThatContainsMentions(token: PersonalAccessToken): HttpCli
  */
 internal fun expectedMentions(): Set<Mention> {
     val json = loadJson("expected_github_client_service_result.json")
-    val builder = ExpectedMentionList.newBuilder()
-    JsonFormat.parser().merge(json, builder)
-    return builder.vBuild()
+    return Json.fromJson(json, ExpectedMentionList::class.java)
         .mentionList
         .toSet()
 }
