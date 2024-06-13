@@ -26,14 +26,18 @@
 
 package io.spine.examples.pingh.mentions.given
 
+import com.google.protobuf.util.Timestamps
 import io.kotest.assertions.fail
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpStatusCode
 import io.spine.examples.pingh.github.Mention
+import io.spine.examples.pingh.github.NodeId
 import io.spine.examples.pingh.github.PersonalAccessToken
-import io.spine.json.Json
+import io.spine.examples.pingh.github.User
+import io.spine.examples.pingh.github.buildBy
+import io.spine.net.Url
 
 /**
  * Intercepts requests to GitHub and returns prepared responses from JSON
@@ -58,11 +62,11 @@ internal fun mockEngineThatContainsMentions(token: PersonalAccessToken): HttpCli
 
         if (request.url.pathSegments.size == 7 && request.url.pathSegments[6] == "comments") {
             if (request.url.pathSegments[5] == "3") {
-                val body = loadJson("pr-comments-obtain-response.json")
+                val body = loadJson("comments-under-pr-response.json")
                 return@MockEngine respond(body)
             }
             if (request.url.pathSegments[5] == "8") {
-                val body = loadJson("issue-comments-obtain-response.json")
+                val body = loadJson("comments-under-issue-response.json")
                 return@MockEngine respond(body)
             }
         }
@@ -71,14 +75,44 @@ internal fun mockEngineThatContainsMentions(token: PersonalAccessToken): HttpCli
     }
 
 /**
- * Reads mentions from a prepared JSON and returns their set.
+ * Returns the set of `Mentions` that must be fetched from GitHub.
  */
-internal fun expectedMentions(): Set<Mention> {
-    val json = loadJson("expected-github-client-service-result.json")
-    return Json.fromJson(json, ExpectedMentionList::class.java)
-        .mentionList
-        .toSet()
-}
+internal fun expectedMentions(): Set<Mention> =
+    setOf(
+        Mention.newBuilder()
+            .setId("IC_kwDOL2L5hc5-0lTv")
+            .setAuthor("armiol", "https://avatars.githubusercontent.com/u/82468?v=4")
+            .setTitle("Request updates for assigned issues without activity")
+            .setWhenMentioned("2024-05-23T17:38:40Z")
+            .setUrl("https://github.com/spine-examples/Pingh/pull/8#issuecomment-2127713519")
+            .vBuild(),
+        Mention.newBuilder()
+            .setId("IC_kwDOL2L5hc5-0lTv")
+            .setAuthor("armiol", "https://avatars.githubusercontent.com/u/82468?v=4")
+            .setTitle("Implement user session flow")
+            .setWhenMentioned("2024-05-23T17:38:40Z")
+            .setUrl("https://github.com/spine-examples/Pingh/pull/8#issuecomment-2127713519")
+            .vBuild(),
+        Mention.newBuilder()
+            .setId("PR_kwDOL2L5hc5vY_JP")
+            .setAuthor("MykytaPimonovTD", "https://avatars.githubusercontent.com/u/160486193?v=4")
+            .setTitle("Implement user session flow")
+            .setWhenMentioned("2024-05-14T12:12:02Z")
+            .setUrl("https://github.com/spine-examples/Pingh/pull/3")
+            .vBuild(),
+    )
+
+private fun Mention.Builder.setId(value: String): Mention.Builder =
+    this.setId(NodeId::class.buildBy(value))
+
+private fun Mention.Builder.setAuthor(username: String, avatarUrl: String): Mention.Builder =
+    this.setAuthor(User::class.buildBy(username, avatarUrl))
+
+private fun Mention.Builder.setWhenMentioned(value: String): Mention.Builder =
+    this.setWhenMentioned(Timestamps.parse(value))
+
+private fun Mention.Builder.setUrl(value: String): Mention.Builder =
+    this.setUrl(Url::class.buildBy(value))
 
 /**
  * Intercepts requests to GitHub and returns an error response
