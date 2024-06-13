@@ -26,28 +26,52 @@
 
 package io.spine.examples.pingh.mentions
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.mentions.given.expectedMentions
-import io.spine.examples.pingh.mentions.given.mockEngine
+import io.spine.examples.pingh.mentions.given.mockEngineThatContainsMentions
+import io.spine.examples.pingh.mentions.given.mockEngineThatFailsAllRequest
+import io.spine.examples.pingh.mentions.given.mockEngineThatDoesNotContainMentions
 import io.spine.testing.TestValues.randomString
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 @DisplayName("`GitHubClientService` should")
 public class GitHubClientServiceSpec {
 
-    private val token = PersonalAccessToken::class.buildBy(randomString())
-    private val gitHubClientService: GitHubClientService =
-        GitHubClientServiceImpl(mockEngine(token))
+    private val username = Username::class.buildBy("MykytaPimonovTD")
+    private lateinit var token: PersonalAccessToken
+
+    @BeforeEach
+    public fun generateToken() {
+        token = PersonalAccessToken::class.buildBy(randomString())
+    }
 
     @Test
     public fun `fetch mentions from GitHub`() {
-        val username = Username::class.buildBy("MykytaPimonovTD")
-        val result = gitHubClientService.fetchMentions(username, token)
+        val service = GitHubClientServiceImpl(mockEngineThatContainsMentions(token))
+        val result = service.fetchMentions(username, token)
         val expected = expectedMentions()
         result shouldBe expected
+    }
+
+    @Test
+    public fun `throw exception if fetching from GitHub failed`() {
+        val service = GitHubClientServiceImpl(mockEngineThatFailsAllRequest(token))
+        shouldThrow<CannotFetchMentionsFromGitHubException> {
+            service.fetchMentions(username, token)
+        }
+    }
+
+    @Test
+    public fun `return empty set if the user has not been mentioned`() {
+        val service = GitHubClientServiceImpl(mockEngineThatDoesNotContainMentions(token))
+        val result = service.fetchMentions(username, token)
+        result.shouldBeEmpty()
     }
 }

@@ -31,13 +31,15 @@ import io.kotest.assertions.fail
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.http.HttpStatusCode
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
 
 /**
- * Intercepts requests addressed to GitHub and returns prepared results from JSON files.
+ * Intercepts requests to GitHub and returns prepared responses from JSON
+ * that contain mentions of the user.
  */
-internal fun mockEngine(token: PersonalAccessToken): HttpClientEngine =
+internal fun mockEngineThatContainsMentions(token: PersonalAccessToken): HttpClientEngine =
     MockEngine { request ->
         if (request.headers["Authorization"] != "Bearer ${token.value}") {
             fail("Authentication failed.")
@@ -55,8 +57,14 @@ internal fun mockEngine(token: PersonalAccessToken): HttpClientEngine =
         }
 
         if (request.url.pathSegments.size == 7 && request.url.pathSegments[6] == "comments") {
-            val body = loadJson("response_to_get_comments.json")
-            return@MockEngine respond(body)
+            if (request.url.pathSegments[5] == "3") {
+                val body = loadJson("response_to_get_pull_request_comments.json")
+                return@MockEngine respond(body)
+            }
+            if (request.url.pathSegments[5] == "8") {
+                val body = loadJson("response_to_get_issue_comments.json")
+                return@MockEngine respond(body)
+            }
         }
 
         fail("Unexpected request.")
@@ -73,6 +81,52 @@ internal fun expectedMentions(): Set<Mention> {
         .mentionList
         .toSet()
 }
+
+/**
+ * Intercepts requests to GitHub and returns an error response with HTTP status code 422.
+ */
+internal fun mockEngineThatFailsAllRequest(token: PersonalAccessToken): HttpClientEngine =
+    sendSameResponseToSearchingRequests(
+        "error_response_to_search_issues_and_pull_requests.json",
+        token,
+        HttpStatusCode.UnprocessableEntity
+    )
+
+/**
+ * Intercepts requests to GitHub and returns prepared responses from JSON
+ * that do not contain mentions of the user.
+ */
+internal fun mockEngineThatDoesNotContainMentions(token: PersonalAccessToken): HttpClientEngine =
+    sendSameResponseToSearchingRequests(
+        "empty_response_to_search_issues_and_pull_requests.json",
+        token,
+        HttpStatusCode.OK
+    )
+
+/**
+ * Creates  `MockEngine` that returns the same JSON response for all requests to search
+ * issues and pull requests. Does not process comment requests.
+ */
+private fun sendSameResponseToSearchingRequests(
+    jsonFileName: String,
+    token: PersonalAccessToken,
+    responseStatusCode: HttpStatusCode
+): MockEngine =
+    MockEngine { request ->
+        if (request.headers["Authorization"] != "Bearer ${token.value}") {
+            fail("Authentication failed.")
+        }
+
+        if (request.url.pathSegments[2] == "issues") {
+            val q = request.url.parameters["q"]!!
+            if (q.startsWith("is:issue") || q.startsWith("is:pull-request")) {
+                val body = loadJson(jsonFileName)
+                return@MockEngine respond(body, responseStatusCode)
+            }
+        }
+
+        fail("Unexpected request.")
+    }
 
 /**
  * Loads JSON by its name and returns the contents of the file.
