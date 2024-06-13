@@ -57,7 +57,7 @@ public class PredefinedGitHubResponses : GitHubClientService {
     /**
      * The HTTP status response code from GitHub.
      *
-     * If the value differs from 200, an [CannotFetchMentionsFromGitHubException] is thrown.
+     * If the value differs from `200 OK`, an [CannotFetchMentionsFromGitHubException] is thrown.
      */
     private var responseStatusCode = HttpStatusCode.OK
 
@@ -113,16 +113,16 @@ public class PredefinedGitHubResponses : GitHubClientService {
     /**
      * Sets the HTTP status of the response.
      *
-     * If the status code is different from 200, an exception will be thrown.
-     * After changing the status, it is necessary to return it to the default state,
-     * for this use the [setDefaultResponseStatusCode] method.
+     * If the status code is different from `200 OK`, an exception will be thrown.
+     * The [setDefaultResponseStatusCode] method can be used to return the response status code
+     * to the default value.
      */
     public fun setResponseStatusCode(responseStatusCode: HttpStatusCode) {
         this.responseStatusCode = responseStatusCode
     }
 
     /**
-     * Sets the HTTP response status to 200.
+     * Sets the HTTP response status to `200 OK`.
      */
     public fun setDefaultResponseStatusCode() {
         responseStatusCode = HttpStatusCode.OK

@@ -81,7 +81,8 @@ internal fun expectedMentions(): Set<Mention> {
 }
 
 /**
- * Intercepts requests to GitHub and returns an error response with HTTP status code 422.
+ * Intercepts requests to GitHub and returns an error response
+ * with HTTP status `422 UnprocessableEntity`.
  */
 internal fun mockEngineThatFailsAllRequest(token: PersonalAccessToken): HttpClientEngine =
     sendSameResponseToSearchingRequests(
