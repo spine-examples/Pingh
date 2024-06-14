@@ -48,8 +48,8 @@ public class UserMentionsReader(
     public fun mentionsOfUser(username: Username, context: EventContext): List<MentionView> {
         val id = UserMentionsId::class.buildBy(username)
         val userMentions = read(setOf(id), context.actorContext())
-        if (userMentions.size != 1) {
-            throw IllegalStateException("Must be one projection per identifier.")
+        if (userMentions.size !in 0..1) {
+            throw IllegalStateException("Must be zero or one projection per identifier.")
         }
         return userMentions
             .flatMap { it.mentionList }
