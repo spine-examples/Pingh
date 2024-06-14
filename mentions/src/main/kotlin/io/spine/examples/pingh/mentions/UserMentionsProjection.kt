@@ -45,10 +45,12 @@ public class UserMentionsProjection :
      */
     @Subscribe
     internal fun on(event: UserMentioned) {
-        builder()
-            .addMention(
-                MentionView::class.buildBy(event, MentionStatus.UNREAD)
-            )
+        if (state().mentionList.none { it.id == event.id }) {
+            builder()
+                .addMention(
+                    MentionView::class.buildBy(event, MentionStatus.UNREAD)
+                )
+        }
     }
 
     /**
