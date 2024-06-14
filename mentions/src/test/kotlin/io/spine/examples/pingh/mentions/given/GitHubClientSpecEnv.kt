@@ -106,7 +106,8 @@ internal fun KClass<MentionsUpdateIsAlreadyInProgress>.buildBy(id: GitHubClientI
  * and returns their set.
  */
 internal fun expectedUserMentionedSet(whoWasMentioned: Username): Set<UserMentioned> {
-    val jsonFile = PredefinedGitHubResponses::class.java.getResource("github_response.json")
+    val jsonFile = PredefinedGitHubResponses::class.java
+        .getResource("/github-responses/prs-search-response.json")
     checkNotNull(jsonFile)
     val json = jsonFile.readText(Charsets.UTF_8)
     return parseIssuesAndPullRequestsFromJson(json)

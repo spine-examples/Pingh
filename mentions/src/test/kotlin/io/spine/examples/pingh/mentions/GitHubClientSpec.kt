@@ -173,7 +173,7 @@ public class GitHubClientSpec : ContextAwareTest() {
             val expectedUserMentionedSet = expectedUserMentionedSet(gitHubClientId.username)
             val eventSubject = context().assertEvents()
                 .withType(UserMentioned::class.java)
-            eventSubject.hasSize(3)
+            eventSubject.hasSize(expectedUserMentionedSet.size)
             val actualUserMentionedSet = eventSubject
                 .actual()
                 .map { event -> AnyPacker.unpack(event.message, UserMentioned::class.java) }
