@@ -231,4 +231,19 @@ public class GitHubClientSpec : ContextAwareTest() {
             .withType(MentionsUpdateFromGitHubRequested::class.java)
             .hasSize(2)
     }
+
+    @Test
+    public fun `not emit 'UserMentioned' events for repeated mentions` () {
+        val event = MentionsUpdateFromGitHubRequested::class.buildBy(gitHubClientId)
+        val expectedSet = expectedUserMentionedSet(gitHubClientId.username)
+        context()
+            .receivesEvent(event)
+            .receivesEvent(event)
+        val eventSubject = context().assertEvents()
+            .withType(UserMentioned::class.java)
+        eventSubject.hasSize(expectedSet.size)
+        eventSubject.actual()
+            .map { mentions -> mentions.message.unpack(UserMentioned::class) }
+            .toSet() shouldBe expectedSet
+    }
 }
