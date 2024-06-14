@@ -41,6 +41,13 @@ public fun KClass<Username>.buildBy(value: String): Username =
         .vBuild()
 
 /**
+ * Returns the GitHub tag of the user.
+ *
+ * The tag consists of the `'@'` character followed by the `Username`.
+ */
+public fun Username.tag(): String = "@${this.value}"
+
+/**
  * Creates a new [PersonalAccessToken] with the specified string value.
  */
 public fun KClass<PersonalAccessToken>.buildBy(value: String): PersonalAccessToken =
@@ -91,10 +98,13 @@ public fun KClass<Mention>.buildFromFragment(fragment: IssueOrPullRequestFragmen
     }
 
 /**
- * Creates a new `Mention` with the data specified in the `IssueOrPullRequestFragment`.
+ * Creates a new `Mention` with the passed title value and
+ * the data specified in the `CommentFragment`.
  *
- * The comments don't have titles, so the GitHub page title where the comment is posted
- * is used instead.
+ * Comments do not have titles, which are required to create a `Mention`s.
+ * Therefore, it is necessary to additionally specify which value is considered
+ * a mention's title. It is recommended to use the GitHub title of the item
+ * under which the comment is made.
  */
 public fun KClass<Mention>.buildFromFragment(
     fragment: CommentFragment,

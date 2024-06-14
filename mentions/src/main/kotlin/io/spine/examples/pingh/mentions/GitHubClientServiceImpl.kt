@@ -37,8 +37,9 @@ import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildFromFragment
-import io.spine.examples.pingh.github.rest.CommentsGetResult
+import io.spine.examples.pingh.github.rest.CommentsResponse
 import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResult
+import io.spine.examples.pingh.github.tag
 import kotlin.jvm.Throws
 import kotlinx.coroutines.runBlocking
 
@@ -58,8 +59,9 @@ public class GitHubClientServiceImpl(
     private val client = HttpClient(engine)
 
     /**
-     * Searches and returns user `Mention`s by `Username` that was mentioned
-     * and their `PersonalAccessToken`.
+     * Searches for user `Mentions` by the GitHub name of the user.
+     *
+     * Uses `PersonalAccessToken` to access GitHub API.
      *
      * Mentions are searched in issues and pull requests.
      */
@@ -79,26 +81,27 @@ public class GitHubClientServiceImpl(
         token: PersonalAccessToken,
         itemType: ItemType
     ): Set<Mention> {
-        val mentions = mutableSetOf<Mention>()
-        val userTag = "@${username.value}"
-        val items = searchIssuesOrPullRequests(username, token, itemType)
+        val userTag = username.tag()
+        return searchIssuesOrPullRequests(username, token, itemType)
+            .itemList
+            .flatMap { item ->
+                val mentionsInComments = obtainCommentsByUrl(item.commentsUrl, token)
+                    .itemList
+                    .filter { comment -> comment.body.contains(userTag) }
+                    .map { comment -> Mention::class.buildFromFragment(comment, item.title) }
 
-        for (item in items.itemList) {
-            if (item.body.contains(userTag)) {
-                mentions.add(Mention::class.buildFromFragment(item))
-            }
-            val comments = getComments(item.commentsUrl, token)
-            for (comment in comments.itemList) {
-                if (comment.body.contains(userTag)) {
-                    mentions.add(Mention::class.buildFromFragment(comment, item.title))
+                if (item.body.contains(userTag)) {
+                    mentionsInComments.plus(Mention::class.buildFromFragment(item))
+                } else {
+                    mentionsInComments
                 }
             }
-        }
-        return mentions.toSet()
+            .toSet()
     }
 
     /**
-     * Requests to GitHub for searching issues or pull requests that mention a particular user.
+     * Sends a request to GitHub API for searching issues or pull requests that
+     * mention a particular user.
      *
      * There is only one endpoint for searching issues or pull requests from the GitHub API,
      * but when using GitHub Apps, it is mandatory to specify what is being searched
@@ -118,7 +121,7 @@ public class GitHubClientServiceImpl(
                 url {
                     parameters.append(
                         "q",
-                        "is:${itemType.gitHubName()} mentions:${username.value}"
+                        "is:${itemType.value()} mentions:${username.value}"
                     )
                     parameters.append("per_page", "100")
                     parameters.append("sort", "updated")
@@ -133,10 +136,10 @@ public class GitHubClientServiceImpl(
         }
 
     /**
-     * Requests comments from GitHub on their URL previously received.
+     * Sends a request to GitHub API to obtain comments on their URL previously received.
      */
     @Throws(CannotFetchMentionsFromGitHubException::class)
-    private fun getComments(url: String, token: PersonalAccessToken): CommentsGetResult =
+    private fun obtainCommentsByUrl(url: String, token: PersonalAccessToken): CommentsResponse =
         runBlocking {
             val response = client.get(url) {
                 configureHeaders(token)
@@ -152,7 +155,7 @@ public class GitHubClientServiceImpl(
         }
 
     /**
-     * Configures header for an HTTP request to the GitHub API.
+     * Configures headers for an HTTP request to the GitHub API.
      *
      * @see <a href="https://docs.github.com/en/rest/authentication/authenticating-to-the-rest-api">
      *     Authenticating to the GitHub REST API</a>
@@ -174,6 +177,6 @@ public class GitHubClientServiceImpl(
         /**
          * Returns GitHub name to search for an item of this type.
          */
-        public fun gitHubName(): String = gitHubName
+        public fun value(): String = gitHubName
     }
 }
