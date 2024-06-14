@@ -51,8 +51,10 @@ public class GitHubClientRepository(
     @OverridingMethodsMustInvokeSuper
     protected override fun configure(processManager: GitHubClientProcess) {
         super.configure(processManager)
-        processManager.inject(gitHubClientService)
-        processManager.inject(UserMentionsReader(context().stand()))
+        processManager.inject(
+            gitHubClientService,
+            UserMentionsReader(context().stand())
+        )
     }
 
     /**

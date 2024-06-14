@@ -28,6 +28,7 @@ package io.spine.examples.pingh.mentions
 
 import io.spine.base.EventMessage
 import io.spine.base.Time.currentTime
+import io.spine.core.EventContext
 import io.spine.core.External
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
@@ -58,6 +59,12 @@ public class GitHubClientProcess :
      */
     private lateinit var gitHubClientService: GitHubClientService
 
+    /**
+     * Reads the user's mentions from the [UserMentions] projection.
+     *
+     * It is expected this field is set by calling [inject]
+     * right after the instance creation.
+     */
     private lateinit var userMentionsReader: UserMentionsReader
 
     /**
@@ -98,7 +105,10 @@ public class GitHubClientProcess :
      * Otherwise, the list is one [RequestMentionsFromGitHubFailed] event.
      */
     @React
-    internal fun on(event: MentionsUpdateFromGitHubRequested): List<EventMessage> {
+    internal fun on(
+        event: MentionsUpdateFromGitHubRequested,
+        context: EventContext
+    ): List<EventMessage> {
         val username = state().id.username
         val token = state().token
         val mentions = try {
@@ -109,16 +119,16 @@ public class GitHubClientProcess :
                 RequestMentionsFromGitHubFailed::class.buildBy(state().id, exception.statusCode())
             )
         }
-        val userMentionedEvents = createUserMentionedEvents(mentions)
+        val userMentionedEvents = createUserMentionedEvents(mentions).onlyNew(context)
         val mentionsUpdateFromGitHubCompleted =
             MentionsUpdateFromGitHubCompleted::class.buildBy(state().id)
         builder().clearWhenStarted()
         return userMentionedEvents
-            .toList()
+            .toList<EventMessage>()
             .plus(mentionsUpdateFromGitHubCompleted)
     }
 
-    private fun createUserMentionedEvents(gitHubMentions: Set<Mention>): Set<EventMessage> =
+    private fun createUserMentionedEvents(gitHubMentions: Set<Mention>): Set<UserMentioned> =
         gitHubMentions
             .map { mention ->
                 with(UserMentioned.newBuilder()) {
@@ -136,16 +146,30 @@ public class GitHubClientProcess :
             .toSet()
 
     /**
-     * Supplies this instance of the process with a service allowing to access GitHub.
+     * Removes from the set mentions that are already saved in the [UserMentions] projection.
+     */
+    private fun Set<UserMentioned>.onlyNew(context: EventContext): Set<UserMentioned> {
+        val savedMentionIds = userMentionsReader
+            .mentionsOfUser(state().id.username, context)
+            .map { it.id }
+            .toSet()
+        return this
+            .filter { mention -> !savedMentionIds.contains(mention.id) }
+            .toSet()
+    }
+
+    /**
+     * Supplies this instance of the process with a service allowing to access GitHub and
+     * a reader to retrieve user's mentions from the [UserMentions] projection.
      *
      * It is expected this method is called right after the creation of the process instance.
      * Otherwise, the process will not be able to function properly.
      */
-    internal fun inject(gitHubClientService: GitHubClientService) {
+    internal fun inject(
+        gitHubClientService: GitHubClientService,
+        userMentionsReader: UserMentionsReader
+    ) {
         this.gitHubClientService = gitHubClientService
-    }
-
-    internal fun inject(userMentionsReader: UserMentionsReader) {
         this.userMentionsReader = userMentionsReader
     }
 }
