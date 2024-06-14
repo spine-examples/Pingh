@@ -150,7 +150,7 @@ public class GitHubClientProcess :
      */
     private fun Set<UserMentioned>.onlyNew(context: EventContext): Set<UserMentioned> {
         val savedMentionIds = userMentionsReader
-            .mentionsOfUser(state().id.username, context)
+            .readUserMentions(state().id.username, context)
             .map { it.id }
             .toSet()
         return this

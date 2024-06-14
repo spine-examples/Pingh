@@ -45,9 +45,9 @@ public class UserMentionsReader(
     /**
      * Returns all saved mentions for a specific user by name.
      */
-    public fun mentionsOfUser(username: Username, context: EventContext): List<MentionView> {
+    public fun readUserMentions(username: Username, context: EventContext): List<MentionView> {
         val id = UserMentionsId::class.buildBy(username)
-        val userMentions = read(setOf(id), context.actorContext())
+        val userMentions = readByIds(setOf(id), context.actorContext())
         if (userMentions.size !in 0..1) {
             throw IllegalStateException("Must be zero or one projection per identifier.")
         }
@@ -58,7 +58,7 @@ public class UserMentionsReader(
     /**
      * Reads projections by identifiers on behalf of the actor from the context.
      */
-    private fun read(ids: Set<UserMentionsId>, context: ActorContext): Set<UserMentions> {
+    private fun readByIds(ids: Set<UserMentionsId>, context: ActorContext): Set<UserMentions> {
         val queryFactory = ActorRequestFactory
             .fromContext(context)
             .query()
