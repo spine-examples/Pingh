@@ -36,6 +36,8 @@ plugins {
     // Add the Gradle plugin for bootstrapping projects built with Spine.
     // See: https://github.com/SpineEventEngine/bootstrap
     id("io.spine.tools.gradle.bootstrap").version("1.9.0")
+
+    application
 }
 
 spine {
@@ -61,4 +63,8 @@ dependencies {
     implementation(Ktor.Client.cio)
     implementation(Guava.lib)
     implementation(Grpc.netty)
+}
+
+application {
+    mainClass.set("io.spine.examples.pingh.server.PinghServerKt")
 }
