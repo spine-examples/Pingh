@@ -24,5 +24,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "Pingh"
-include("github", "sessions", "mentions", "server", "client")
+import io.spine.internal.BuildSettings
+import io.spine.internal.dependency.JavaX
+
+plugins {
+    kotlin("jvm")
+
+    // Add the Gradle plugin for bootstrapping projects built with Spine.
+    // See: https://github.com/SpineEventEngine/bootstrap
+    id("io.spine.tools.gradle.bootstrap").version("1.9.0")
+}
+
+spine {
+    enableJava().client()
+}
+
+kotlin {
+    jvmToolchain {
+        languageVersion.set(BuildSettings.javaVersion)
+    }
+    explicitApi()
+}
+
+dependencies {
+    implementation(project(":server"))
+
+    implementation(JavaX.annotations)
+}
