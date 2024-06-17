@@ -55,9 +55,9 @@ kotlin {
 }
 
 dependencies {
-    implementation(project(":github"))
-    implementation(project(":sessions"))
-    implementation(project(":mentions"))
+    api(project(":github"))
+    api(project(":sessions"))
+    api(project(":mentions"))
 
     implementation(JavaX.annotations)
     implementation(Ktor.Client.cio)
