@@ -24,41 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.BuildSettings
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.dependency.Guava
-import io.spine.internal.dependency.JavaX
-import io.spine.internal.dependency.Ktor
+package io.spine.internal.dependency
 
-plugins {
-    kotlin("jvm")
-
-    // Add the Gradle plugin for bootstrapping projects built with Spine.
-    // See: https://github.com/SpineEventEngine/bootstrap
-    id("io.spine.tools.gradle.bootstrap").version("1.9.0")
-}
-
-spine {
-    // Add and configure required dependencies for developing a Spine-based Java server.
-    // See: https://github.com/SpineEventEngine/bootstrap#java-projects
-    enableJava().server()
-    forceDependencies = true
-}
-
-kotlin {
-    jvmToolchain {
-        languageVersion.set(BuildSettings.javaVersion)
-    }
-    explicitApi()
-}
-
-dependencies {
-    implementation(project(":github"))
-    implementation(project(":sessions"))
-    implementation(project(":mentions"))
-
-    implementation(JavaX.annotations)
-    implementation(Ktor.Client.cio)
-    implementation(Guava.lib)
-    implementation(Grpc.netty)
+// https://github.com/grpc/grpc-java
+public object Grpc {
+    private const val version = "1.47.0"
+    public const val netty: String = "io.grpc:grpc-netty:$version"
 }

@@ -72,7 +72,6 @@ dependencies {
 
     implementation(JavaX.annotations)
     implementation(Ktor.Client.core)
-    implementation(Ktor.Client.cio)
 
     testImplementation(Ktor.Client.mock)
 }
