@@ -65,6 +65,8 @@ import kotlin.reflect.KClass
  * By default, client will open channel to 'localhost:[50051]
  * [io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT]'.
  */
+@Suppress("TooManyFunctions") // The client must contain multiple methods
+// to interact with the server, which does not enable Detekt.
 public class DesktopClient(
     address: String = "localhost",
     port: Int = DEFAULT_CLIENT_SERVICE_PORT,
