@@ -24,37 +24,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.BuildSettings
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.dependency.Guava
-import io.spine.internal.dependency.JavaX
-import io.spine.internal.dependency.Spine
+package io.spine.internal.dependency
 
-plugins {
-    kotlin("jvm")
+// https://github.com/SpineEventEngine
+@Suppress("ConstPropertyName")
+public object Spine {
 
-    // Add the Gradle plugin for bootstrapping projects built with Spine.
-    // See: https://github.com/SpineEventEngine/bootstrap
-    id("io.spine.tools.gradle.bootstrap").version("1.9.0")
-}
+    // Keep in sync with in sync with Spine Bootstraps plugin
+    // in `build.gradle.kts` in each module.
+    private const val version = "1.9.0"
 
-spine {
-    enableJava().client()
-}
-
-kotlin {
-    jvmToolchain {
-        languageVersion.set(BuildSettings.javaVersion)
+    // https://github.com/SpineEventEngine/core-java
+    public object Server {
+        public const val lib: String = "io.spine:spine-server:$version"
     }
-    explicitApi()
-}
-
-dependencies {
-    implementation(project(":server"))
-
-    implementation(JavaX.annotations)
-    implementation(Guava.lib)
-    implementation(Grpc.netty)
-
-    testImplementation(Spine.Server.lib)
 }
