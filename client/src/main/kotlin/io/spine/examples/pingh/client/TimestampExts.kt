@@ -31,7 +31,7 @@ import com.google.protobuf.util.Durations
 import com.google.protobuf.util.Timestamps
 
 /**
- * Sets the time 2 hours from the current time.
+ * Sets the time 2 hours from this time.
  */
 public fun Timestamp.inTwoHours(): Timestamp =
     Timestamps.add(this, Durations.fromHours(2))

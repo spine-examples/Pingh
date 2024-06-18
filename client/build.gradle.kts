@@ -25,6 +25,8 @@
  */
 
 import io.spine.internal.BuildSettings
+import io.spine.internal.dependency.Grpc
+import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.JavaX
 
 plugins {
@@ -50,4 +52,6 @@ dependencies {
     implementation(project(":server"))
 
     implementation(JavaX.annotations)
+    implementation(Guava.lib)
+    implementation(Grpc.netty)
 }
