@@ -255,4 +255,11 @@ public class DesktopClient(
         client.subscriptions()
             .cancel(subscription)
     }
+
+    /**
+     * Closes the client by shutting down the gRPC connection.
+     */
+    public fun close() {
+        client.close()
+    }
 }
