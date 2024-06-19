@@ -26,62 +26,37 @@
 
 package io.spine.examples.pingh.sessions.given
 
-import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.github.Username
+import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.UserSession
-import io.spine.examples.pingh.sessions.command.LogUserIn
-import io.spine.examples.pingh.sessions.command.LogUserOut
+import io.spine.examples.pingh.sessions.buildBy
+import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.testing.TestValues.randomString
+import kotlin.reflect.KClass
 
 /**
- * Returns the identifier for the session.
- *
- * The creator's [Username] is selected randomly,
- * and the creation time is set at the current moment.
+ * Creates a new `SessionId` with a randomly generated `Username`
+ * and creation time specified as now.
  */
-public fun sessionId(): SessionId =
-    sessionIdBy(
-        with(Username.newBuilder()) {
-            value = randomString()
-            vBuild()
-        })
+internal fun KClass<SessionId>.generate(): SessionId =
+    this.buildBy(Username::class.buildBy(randomString()))
 
 /**
- * Returns the identifier for the session based on the passed [Username].
- *
- * The creation time is indicated at the current moment.
+ * Creates a new `UserSession` with the specified ID of the session.
  */
-public fun sessionIdBy(name: Username): SessionId =
-    with(SessionId.newBuilder()) {
-        username = name
-        whenCreated = currentTime()
-        vBuild()
-    }
+internal fun KClass<UserSession>.buildBy(id: SessionId): UserSession =
+    UserSession.newBuilder()
+        .setId(id)
+        .vBuild()
 
 /**
- * Returns the [UserSession] process manager, created using the passed [SessionId].
+ * Creates a new `UserLoggedIn` event with the specified ID of the session
+ * and the unspecified token.
  */
-public fun userSession(session: SessionId): UserSession =
-    with(UserSession.newBuilder()) {
-        id = session
-        vBuild()
-    }
-
-/**
- * Returns the [LogUserIn] command, created using the passed [SessionId].
- */
-public fun logUserIn(sessionId: SessionId): LogUserIn =
-    with(LogUserIn.newBuilder()) {
-        id = sessionId
-        vBuild()
-    }
-
-/**
- * Returns the [LogUserOut] command, created using the passed [SessionId].
- */
-public fun logUserOut(sessionId: SessionId): LogUserOut =
-    with(LogUserOut.newBuilder()) {
-        id = sessionId
-        vBuild()
-    }
+internal fun KClass<UserLoggedIn>.buildWithoutToken(id: SessionId): UserLoggedIn =
+    UserLoggedIn.newBuilder()
+        .setId(id)
+        // Building the message partially to include
+        // only the tested fields.
+        .buildPartial()
