@@ -37,13 +37,13 @@ import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
 import io.spine.examples.pingh.mentions.event.RequestMentionsFromGitHubFailed
 import io.spine.examples.pingh.mentions.event.UserMentioned
-import io.spine.examples.pingh.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.given.buildBy
 import io.spine.examples.pingh.mentions.given.buildWithDefaultWhenStartedField
 import io.spine.examples.pingh.mentions.given.expectedUserMentionedSet
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.newSessionsContext
+import io.spine.examples.pingh.testing.github.given.PredefinedGitHubResponses
 import io.spine.protobuf.AnyPacker
 import io.spine.server.BoundedContextBuilder
 import io.spine.testing.TestValues.randomString

@@ -37,6 +37,7 @@ import io.spine.examples.pingh.github.NodeId
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.buildBy
+import io.spine.examples.pingh.testing.github.given.PredefinedGitHubResponses
 import io.spine.net.Url
 
 /**

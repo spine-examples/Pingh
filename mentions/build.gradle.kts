@@ -69,10 +69,10 @@ tasks.named("compileKotlin") {
 dependencies {
     implementation(project(":github"))
     implementation(project(":sessions"))
-
     implementation(JavaX.annotations)
     implementation(Ktor.Client.core)
     implementation(Ktor.Client.cio)
 
+    testImplementation(project(":testutil-github"))
     testImplementation(Ktor.Client.mock)
 }

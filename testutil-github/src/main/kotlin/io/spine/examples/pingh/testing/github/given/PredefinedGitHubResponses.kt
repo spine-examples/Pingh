@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.mentions.given
+package io.spine.examples.pingh.testing.github.given
 
 import io.ktor.http.HttpStatusCode
 import io.spine.examples.pingh.github.Mention
@@ -72,7 +72,7 @@ public class PredefinedGitHubResponses : GitHubClientService {
         if (responseStatusCode != HttpStatusCode.OK) {
             throw CannotFetchMentionsFromGitHubException(responseStatusCode.value)
         }
-        val jsonFile = this::class.java.getResource("/github-responses/prs-search-response.json")
+        val jsonFile = this::class.java.getResource("github_response.json")
         checkNotNull(jsonFile)
         val json = jsonFile.readText(Charsets.UTF_8)
         val mentions = parseIssuesAndPullRequestsFromJson(json)
