@@ -24,39 +24,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.sessions.given
+package io.spine.examples.pingh.mentions
 
-import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.buildBy
-import io.spine.examples.pingh.sessions.SessionId
-import io.spine.examples.pingh.sessions.UserSession
-import io.spine.examples.pingh.sessions.buildBy
-import io.spine.examples.pingh.sessions.event.UserLoggedIn
-import io.spine.testing.TestValues.randomString
+import com.google.protobuf.Timestamp
+import io.spine.base.Time.currentTime
+import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
+import io.spine.examples.pingh.mentions.command.SnoozeMention
+import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import kotlin.reflect.KClass
 
 /**
- * Creates a new `SessionId` with a randomly generated `Username`
- * and creation time specified as now.
+ * Creates a new `MarkMentionAsRead` command with the specified ID of the mention.
  */
-internal fun KClass<SessionId>.generate(): SessionId =
-    this.buildBy(Username::class.buildBy(randomString()))
-
-/**
- * Creates a new `UserSession` with the specified ID of the session.
- */
-internal fun KClass<UserSession>.buildBy(id: SessionId): UserSession =
-    UserSession.newBuilder()
+public fun KClass<MarkMentionAsRead>.buildBy(id: MentionId): MarkMentionAsRead =
+    MarkMentionAsRead.newBuilder()
         .setId(id)
         .vBuild()
 
 /**
- * Creates a new `UserLoggedIn` event with the specified ID of the session
- * and the unspecified token.
+ * Creates a new `SnoozeMention` command with the specified ID of the mention and
+ * time to which the mention is snoozing.
  */
-internal fun KClass<UserLoggedIn>.buildWithoutToken(id: SessionId): UserLoggedIn =
-    UserLoggedIn.newBuilder()
+public fun KClass<SnoozeMention>.buildBy(id: MentionId, untilWhen: Timestamp): SnoozeMention =
+    SnoozeMention.newBuilder()
         .setId(id)
-        // Building the message partially to include
-        // only the tested fields.
-        .buildPartial()
+        .setUntilWhen(untilWhen)
+        .vBuild()
+
+/**
+ * Creates a new `UpdateMentionsFromGitHub` command with the specified `GitHubClientId`.
+ */
+public fun KClass<UpdateMentionsFromGitHub>.buildBy(id: GitHubClientId):
+        UpdateMentionsFromGitHub =
+    UpdateMentionsFromGitHub.newBuilder()
+        .setId(id)
+        .setWhenRequested(currentTime())
+        .vBuild()

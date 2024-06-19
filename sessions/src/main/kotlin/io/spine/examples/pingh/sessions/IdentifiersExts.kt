@@ -24,39 +24,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.sessions.given
+package io.spine.examples.pingh.sessions
 
+import com.google.protobuf.Timestamp
+import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.buildBy
-import io.spine.examples.pingh.sessions.SessionId
-import io.spine.examples.pingh.sessions.UserSession
-import io.spine.examples.pingh.sessions.buildBy
-import io.spine.examples.pingh.sessions.event.UserLoggedIn
-import io.spine.testing.TestValues.randomString
 import kotlin.reflect.KClass
 
 /**
- * Creates a new `SessionId` with a randomly generated `Username`
- * and creation time specified as now.
+ * Creates a new `SessionId` with the specified name of the user to which the session belongs.
+ * The time of the session creation is the current time.
  */
-internal fun KClass<SessionId>.generate(): SessionId =
-    this.buildBy(Username::class.buildBy(randomString()))
+public fun KClass<SessionId>.buildBy(username: Username): SessionId =
+    this.buildBy(username, currentTime())
 
 /**
- * Creates a new `UserSession` with the specified ID of the session.
+ * Creates a new `SessionId` with the specified name of the user to which the session belongs
+ * and the time when the session is created.
  */
-internal fun KClass<UserSession>.buildBy(id: SessionId): UserSession =
-    UserSession.newBuilder()
-        .setId(id)
+public fun KClass<SessionId>.buildBy(username: Username, whenCreated: Timestamp): SessionId =
+    SessionId.newBuilder()
+        .setUsername(username)
+        .setWhenCreated(whenCreated)
         .vBuild()
-
-/**
- * Creates a new `UserLoggedIn` event with the specified ID of the session
- * and the unspecified token.
- */
-internal fun KClass<UserLoggedIn>.buildWithoutToken(id: SessionId): UserLoggedIn =
-    UserLoggedIn.newBuilder()
-        .setId(id)
-        // Building the message partially to include
-        // only the tested fields.
-        .buildPartial()

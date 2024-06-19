@@ -24,39 +24,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.sessions.given
+package io.spine.examples.pingh.sessions
 
-import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.buildBy
-import io.spine.examples.pingh.sessions.SessionId
-import io.spine.examples.pingh.sessions.UserSession
-import io.spine.examples.pingh.sessions.buildBy
-import io.spine.examples.pingh.sessions.event.UserLoggedIn
-import io.spine.testing.TestValues.randomString
+import io.spine.examples.pingh.sessions.command.LogUserIn
+import io.spine.examples.pingh.sessions.command.LogUserOut
 import kotlin.reflect.KClass
 
 /**
- * Creates a new `SessionId` with a randomly generated `Username`
- * and creation time specified as now.
+ * Creates a new `LogUserIn` command with the specified ID of the session.
  */
-internal fun KClass<SessionId>.generate(): SessionId =
-    this.buildBy(Username::class.buildBy(randomString()))
-
-/**
- * Creates a new `UserSession` with the specified ID of the session.
- */
-internal fun KClass<UserSession>.buildBy(id: SessionId): UserSession =
-    UserSession.newBuilder()
+public fun KClass<LogUserIn>.buildBy(id: SessionId): LogUserIn =
+    LogUserIn.newBuilder()
         .setId(id)
         .vBuild()
 
 /**
- * Creates a new `UserLoggedIn` event with the specified ID of the session
- * and the unspecified token.
+ * Creates a new `LogUserOut` command with the specified ID of the session.
  */
-internal fun KClass<UserLoggedIn>.buildWithoutToken(id: SessionId): UserLoggedIn =
-    UserLoggedIn.newBuilder()
+public fun KClass<LogUserOut>.buildBy(id: SessionId): LogUserOut =
+    LogUserOut.newBuilder()
         .setId(id)
-        // Building the message partially to include
-        // only the tested fields.
-        .buildPartial()
+        .vBuild()
