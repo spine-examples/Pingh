@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.sessions
 
 import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
@@ -46,14 +47,10 @@ public class UserSessionProcess :
     @Assign
     internal fun handle(command: LogUserIn): UserLoggedIn {
         initState(command)
-        return with(UserLoggedIn.newBuilder()) {
-            id = command.id
-            token = with(PersonalAccessToken.newBuilder()) {
-                value = "token"
-                vBuild()
-            }
-            vBuild()
-        }
+        return UserLoggedIn::class.buildBy(
+            command.id,
+            PersonalAccessToken::class.buildBy("token")
+        )
     }
 
     private fun initState(command: LogUserIn) {
@@ -66,9 +63,6 @@ public class UserSessionProcess :
     @Assign
     internal fun handle(command: LogUserOut): UserLoggedOut {
         deleted = true
-        return with(UserLoggedOut.newBuilder()) {
-            id = command.id
-            vBuild()
-        }
+        return UserLoggedOut::class.buildBy(command.id)
     }
 }
