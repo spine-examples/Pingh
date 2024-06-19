@@ -46,6 +46,14 @@ import kotlin.jvm.Throws
  */
 public class PredefinedGitHubResponses : GitHubClientService {
 
+    public companion object {
+        /**
+         * The time after which the process will try to run again if it is frozen.
+         * The value is specified in milliseconds.
+         */
+        private const val timeBetweenExecutionAttempts = 100L
+    }
+
     /**
      * Indicates whether to freeze the execution of the [fetchMentions] method.
      *
@@ -88,7 +96,7 @@ public class PredefinedGitHubResponses : GitHubClientService {
      */
     private fun waitWhileServiceIsFrozen() {
         while (isFrozen) {
-            sleep(100)
+            sleep(timeBetweenExecutionAttempts)
         }
     }
 
