@@ -52,6 +52,7 @@ import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
 import io.spine.examples.pingh.mentions.event.RequestMentionsFromGitHubFailed
 import io.spine.examples.pingh.sessions.SessionId
+import io.spine.examples.pingh.sessions.buildBy
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
@@ -96,14 +97,9 @@ public class DesktopClient(
         username: Username,
         onSuccess: (event: UserLoggedIn) -> Unit = {}
     ) {
-        val command = LogUserIn.newBuilder()
-            .setId(
-                SessionId.newBuilder()
-                    .setUsername(username)
-                    .setWhenCreated(currentTime())
-                    .vBuild()
-            )
-            .vBuild()
+        val command = LogUserIn::class.buildBy(
+            SessionId::class.buildBy(username),
+        )
         observeEvent(command.id, UserLoggedIn::class) { event ->
             this.session = command.id
             onSuccess(event)
@@ -118,9 +114,7 @@ public class DesktopClient(
         onSuccess: (event: UserLoggedOut) -> Unit = {}
     ) {
         checkNotNull(session) { "The user has not been logged in." }
-        val command = LogUserOut.newBuilder()
-            .setId(session)
-            .vBuild()
+        val command = LogUserOut::class.buildBy(session!!)
         observeEvent(command.id, UserLoggedOut::class) { event ->
             this.session = null
             onSuccess(event)
@@ -136,10 +130,9 @@ public class DesktopClient(
         onFail: (event: RequestMentionsFromGitHubFailed) -> Unit = {}
     ) {
         checkNotNull(session) { "The user has not been logged in." }
-        val command = UpdateMentionsFromGitHub.newBuilder()
-            .setId(GitHubClientId::class.buildBy(session!!.username))
-            .setWhenRequested(currentTime())
-            .vBuild()
+        val command = UpdateMentionsFromGitHub::class.buildBy(
+            GitHubClientId::class.buildBy(session!!.username)
+        )
         observeCommandOutcome(
             command.id,
             MentionsUpdateFromGitHubCompleted::class,
@@ -173,10 +166,7 @@ public class DesktopClient(
      * Marks the mention as a 2-hour snooze.
      */
     public fun snoozeMention(id: MentionId) {
-        val command = SnoozeMention.newBuilder()
-            .setId(id)
-            .setUntilWhen(currentTime().inTwoHours())
-            .vBuild()
+        val command = SnoozeMention::class.buildBy(id, currentTime().inTwoHours())
         send(command)
     }
 
@@ -184,9 +174,7 @@ public class DesktopClient(
      * Marks that the mention is read.
      */
     public fun readMention(id: MentionId) {
-        val command = MarkMentionAsRead.newBuilder()
-            .setId(id)
-            .vBuild()
+        val command = MarkMentionAsRead::class.buildBy(id)
         send(command)
     }
 
