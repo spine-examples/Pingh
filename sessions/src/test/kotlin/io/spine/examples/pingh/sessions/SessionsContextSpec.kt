@@ -27,13 +27,13 @@
 package io.spine.examples.pingh.sessions
 
 import io.spine.base.EventMessage
+import io.spine.examples.pingh.sessions.command.LogUserIn
+import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
-import io.spine.examples.pingh.sessions.given.userSession
-import io.spine.examples.pingh.sessions.given.logUserOut
-import io.spine.examples.pingh.sessions.given.logUserIn
-import io.spine.examples.pingh.sessions.given.sessionId
-import io.spine.examples.pingh.sessions.given.sessionIdBy
+import io.spine.examples.pingh.sessions.given.buildBy
+import io.spine.examples.pingh.sessions.given.buildWithoutToken
+import io.spine.examples.pingh.sessions.given.generate
 import io.spine.server.BoundedContextBuilder
 import io.spine.testing.server.EventSubject
 import io.spine.testing.server.blackbox.ContextAwareTest
@@ -51,23 +51,18 @@ public class SessionsContextSpec : ContextAwareTest() {
     @Nested
     public inner class `handle 'LogUserIn' command, and` {
 
-        private lateinit var session: SessionId
+        private lateinit var sessionId: SessionId
 
         @BeforeEach
         public fun sendCommand() {
-            session = sessionId()
-            val command = logUserIn(session)
+            sessionId = SessionId::class.generate()
+            val command = LogUserIn::class.buildBy(sessionId)
             context().receivesCommand(command)
         }
 
         @Test
         public fun `emit 'UserLoggedIn' event`() {
-            val expected = with(UserLoggedIn.newBuilder()) {
-                id = session
-                // Building the message partially to include
-                // only the tested fields.
-                buildPartial()
-            }
+            val expected = UserLoggedIn::class.buildWithoutToken(sessionId)
             val events = assertEvents(UserLoggedIn::class.java)
             events.hasSize(1)
             events.message(0)
@@ -77,36 +72,33 @@ public class SessionsContextSpec : ContextAwareTest() {
 
         @Test
         public fun `update 'UserSession' entity`() {
-            val expected = userSession(session)
-            context().assertState(session, expected)
+            val expected = UserSession::class.buildBy(sessionId)
+            context().assertState(sessionId, expected)
         }
     }
 
     @Nested
     public inner class `handle 'LogUserOut' command, and` {
 
-        private lateinit var session: SessionId
+        private lateinit var sessionId: SessionId
 
         @BeforeEach
         public fun sendCommand() {
-            session = sessionId()
+            sessionId = SessionId::class.generate()
             context()
-                .receivesCommand(logUserIn(session))
-                .receivesCommand(logUserOut(session))
+                .receivesCommand(LogUserIn::class.buildBy(sessionId))
+                .receivesCommand(LogUserOut::class.buildBy(sessionId))
         }
 
         @Test
         public fun `emit 'UserLoggedOut' event`() {
-            val expected = with(UserLoggedOut.newBuilder()) {
-                id = session
-                vBuild()
-            }
+            val expected = UserLoggedOut::class.buildBy(sessionId)
             context().assertEvent(expected)
         }
 
         @Test
         public fun `delete 'UserSession' entity`() {
-            context().assertEntity(session, UserSessionProcess::class.java)
+            context().assertEntity(sessionId, UserSessionProcess::class.java)
                 .deletedFlag()
                 .isTrue()
         }
@@ -114,28 +106,28 @@ public class SessionsContextSpec : ContextAwareTest() {
 
     @Test
     public fun `support simultaneous sessions`() {
-        val firstSession = sessionId()
-        val secondSession = sessionIdBy(firstSession.username)
+        val firstSession = SessionId::class.generate()
+        val secondSession = SessionId::class.buildBy(firstSession.username)
         context()
-            .receivesCommand(logUserIn(firstSession))
-            .receivesCommand(logUserIn(secondSession))
+            .receivesCommand(LogUserIn::class.buildBy(firstSession))
+            .receivesCommand(LogUserIn::class.buildBy(secondSession))
 
-        val firstExpected = userSession(firstSession)
-        val secondExpected = userSession(secondSession)
+        val firstExpected = UserSession::class.buildBy(firstSession)
+        val secondExpected = UserSession::class.buildBy(secondSession)
         context().assertState(firstSession, firstExpected)
         context().assertState(secondSession, secondExpected)
     }
 
     @Test
     public fun `create new session when user logs in again`() {
-        val firstSession = sessionId()
-        val secondSession = sessionIdBy(firstSession.username)
+        val firstSession = SessionId::class.generate()
+        val secondSession = SessionId::class.buildBy(firstSession.username)
         context()
-            .receivesCommand(logUserIn(firstSession))
-            .receivesCommand(logUserOut(firstSession))
-            .receivesCommand(logUserIn(secondSession))
+            .receivesCommand(LogUserIn::class.buildBy(firstSession))
+            .receivesCommand(LogUserOut::class.buildBy(firstSession))
+            .receivesCommand(LogUserIn::class.buildBy(secondSession))
 
-        val secondExpected = userSession(secondSession)
+        val secondExpected = UserSession::class.buildBy(secondSession)
         context().assertEntity(firstSession, UserSessionProcess::class.java)
             .deletedFlag()
             .isTrue()
