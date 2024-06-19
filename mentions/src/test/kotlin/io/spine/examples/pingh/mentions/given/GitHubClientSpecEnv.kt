@@ -27,24 +27,18 @@
 package io.spine.examples.pingh.mentions.given
 
 import com.google.protobuf.Timestamp
-import com.google.protobuf.util.Timestamps
-import io.spine.examples.pingh.github.NodeId
 import io.spine.examples.pingh.github.PersonalAccessToken
-import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.mentions.GitHubClient
 import io.spine.examples.pingh.mentions.GitHubClientId
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.buildBy
 import io.spine.examples.pingh.mentions.event.UserMentioned
-import io.spine.examples.pingh.mentions.parseIssuesAndPullRequestsFromJson
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.buildBy
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
-import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
-import io.spine.net.Url
+import io.spine.examples.pingh.testing.mentions.given.predefinedMentionsSet
 import kotlin.reflect.KClass
 
 /**
@@ -90,28 +84,19 @@ internal fun KClass<MentionsUpdateIsAlreadyInProgress>.buildBy(id: GitHubClientI
  * Reads mention data from a prepared JSON, converts it to `UserMentioned` events,
  * and returns their set.
  */
-internal fun expectedUserMentionedSet(whoWasMentioned: Username): Set<UserMentioned> {
-    val jsonFile = PredefinedGitHubResponses::class.java
-        .getResource("/github-responses/prs-search-response.json")
-    checkNotNull(jsonFile)
-    val json = jsonFile.readText(Charsets.UTF_8)
-    return parseIssuesAndPullRequestsFromJson(json)
-        .itemList
-        .map { fragment ->
+internal fun expectedUserMentionedSet(whoWasMentioned: Username): Set<UserMentioned> =
+    predefinedMentionsSet()
+        .map { mention ->
             with(UserMentioned.newBuilder()) {
                 id = MentionId::class.buildBy(
-                    NodeId::class.buildBy(fragment.nodeId),
+                    mention.id,
                     whoWasMentioned
                 )
-                whoMentioned = User::class.buildBy(
-                    fragment.whoCreated.username,
-                    fragment.whoCreated.avatarUrl
-                )
-                title = fragment.title
-                whenMentioned = Timestamps.parse(fragment.whenCreated)
-                url = Url::class.buildBy(fragment.htmlUrl)
+                whoMentioned = mention.author
+                title = mention.title
+                whenMentioned = mention.whenMentioned
+                url = mention.url
                 vBuild()
             }
         }
         .toSet()
-}
