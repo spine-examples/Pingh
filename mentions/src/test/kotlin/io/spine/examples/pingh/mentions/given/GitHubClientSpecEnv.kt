@@ -43,7 +43,7 @@ import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.Mention
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.buildBy
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
-import io.spine.examples.pingh.testing.github.given.PredefinedGitHubResponses
+import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.net.Url
 import kotlin.reflect.KClass
 

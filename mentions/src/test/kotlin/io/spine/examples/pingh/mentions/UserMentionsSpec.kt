@@ -31,7 +31,7 @@ import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
-import io.spine.examples.pingh.testing.github.given.PredefinedGitHubResponses
+import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.given.buildBy
 import io.spine.examples.pingh.mentions.given.generateWith
 import io.spine.server.BoundedContextBuilder

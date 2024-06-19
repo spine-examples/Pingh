@@ -73,6 +73,6 @@ dependencies {
     implementation(Ktor.Client.core)
     implementation(Ktor.Client.cio)
 
-    testImplementation(project(":testutil-github"))
+    testImplementation(project(":testutil-mentions"))
     testImplementation(Ktor.Client.mock)
 }
