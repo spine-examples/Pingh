@@ -25,4 +25,4 @@
  */
 
 rootProject.name = "Pingh"
-include("github", "sessions", "mentions")
+include("github", "sessions", "mentions", "testutil-github")
