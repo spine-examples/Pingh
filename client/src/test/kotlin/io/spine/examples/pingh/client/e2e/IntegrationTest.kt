@@ -31,6 +31,7 @@ import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.newMentionsContext
 import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.server.Server
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 
 /**
@@ -38,7 +39,7 @@ import org.junit.jupiter.api.BeforeEach
  *
  * Also provides a [DesktopClient] for interacting with the `Server`.
  */
-public open class IntegrationTest {
+public abstract class IntegrationTest {
 
     private val port = 4242
     private val address = "localhost"
@@ -61,7 +62,7 @@ public open class IntegrationTest {
             .add(newMentionsContext(PredefinedGitHubResponses()))
             .build()
 
-    @BeforeEach
+    @AfterEach
     public fun shutdownServer() {
         client.close()
         server.shutdown()
