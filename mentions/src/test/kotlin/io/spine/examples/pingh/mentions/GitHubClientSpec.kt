@@ -243,7 +243,7 @@ public class GitHubClientSpec : ContextAwareTest() {
             .withType(UserMentioned::class.java)
         eventSubject.hasSize(expectedSet.size)
         eventSubject.actual()
-            .map { mentions -> mentions.message.unpack(UserMentioned::class) }
+            .map { mention -> mention.message.unpack(UserMentioned::class) }
             .toSet() shouldBe expectedSet
     }
 }
