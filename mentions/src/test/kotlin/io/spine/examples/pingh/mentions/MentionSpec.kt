@@ -33,7 +33,7 @@ import io.spine.examples.pingh.mentions.command.SnoozeMention
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
-import io.spine.examples.pingh.mentions.given.PredefinedGitHubResponses
+import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.given.buildBy
 import io.spine.examples.pingh.mentions.given.generate
 import io.spine.examples.pingh.mentions.rejection.Rejections.MentionIsAlreadyRead
