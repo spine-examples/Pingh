@@ -27,8 +27,8 @@
 package io.spine.examples.pingh.client.e2e
 
 import io.kotest.matchers.shouldBe
-import io.spine.examples.pingh.client.e2e.given.expectedMentionsSet
-import io.spine.examples.pingh.client.e2e.given.updateStatus
+import io.spine.examples.pingh.client.e2e.given.expectedMentionsList
+import io.spine.examples.pingh.client.e2e.given.updateStatusById
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.mentions.MentionStatus
@@ -47,24 +47,23 @@ public class PersonalInteractionTest : IntegrationTest() {
     @Test
     public fun `the user should log in, update mentions and change their statuses`() {
         val username = Username::class.buildBy("MykytaPimonovTD")
-
         client().logIn(username)
+
         client().updateMentions()
+        var actual = client().findUserMentions()
+        var expected = expectedMentionsList(username)
+        actual shouldBe expected
 
-        var actualMentions = client().findUserMentions()
-        var expectedMentions = expectedMentionsSet(username)
-        actualMentions shouldBe expectedMentions
-
-        var changedMention = actualMentions.random()
+        var changedMention = actual.random()
         client().snoozeMention(changedMention.id)
-        actualMentions = client().findUserMentions()
-        expectedMentions = expectedMentions.updateStatus(changedMention.id, MentionStatus.SNOOZED)
-        actualMentions shouldBe expectedMentions
+        actual = client().findUserMentions()
+        expected = expected.updateStatusById(changedMention.id, MentionStatus.SNOOZED)
+        actual shouldBe expected
 
-        changedMention = actualMentions.random()
+        changedMention = actual.random()
         client().readMention(changedMention.id)
-        actualMentions = client().findUserMentions()
-        expectedMentions = expectedMentions.updateStatus(changedMention.id, MentionStatus.READ)
-        actualMentions shouldBe expectedMentions
+        actual = client().findUserMentions()
+        expected = expected.updateStatusById(changedMention.id, MentionStatus.READ)
+        actual shouldBe expected
     }
 }

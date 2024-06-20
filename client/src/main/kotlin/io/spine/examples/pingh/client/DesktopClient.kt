@@ -36,7 +36,7 @@ import io.spine.base.Time.currentTime
 import io.spine.client.Client
 import io.spine.client.ClientRequest
 import io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT
-import io.spine.client.EventFilter
+import io.spine.client.EventFilter.eq
 import io.spine.client.Subscription
 import io.spine.core.UserId
 import io.spine.examples.pingh.github.Username
@@ -49,6 +49,8 @@ import io.spine.examples.pingh.mentions.buildBy
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
 import io.spine.examples.pingh.mentions.command.SnoozeMention
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
+import io.spine.examples.pingh.mentions.event.MentionRead
+import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
 import io.spine.examples.pingh.mentions.event.RequestMentionsFromGitHubFailed
 import io.spine.examples.pingh.sessions.SessionId
@@ -98,9 +100,9 @@ public class DesktopClient(
         onSuccess: (event: UserLoggedIn) -> Unit = {}
     ) {
         val command = LogUserIn::class.buildBy(
-            SessionId::class.buildBy(username),
+            SessionId::class.buildBy(username)
         )
-        observeEvent(command.id, UserLoggedIn::class) { event ->
+        observeEventOnce(command.id, UserLoggedIn::class) { event ->
             this.session = command.id
             onSuccess(event)
         }
@@ -115,8 +117,10 @@ public class DesktopClient(
     ) {
         checkNotNull(session) { "The user has not been logged in." }
         val command = LogUserOut::class.buildBy(session!!)
-        observeEvent(command.id, UserLoggedOut::class) { event ->
+        observeEventOnce(command.id, UserLoggedOut::class) { event ->
             this.session = null
+            client.subscriptions()
+                .cancelAll()
             onSuccess(event)
         }
         send(command)
@@ -165,16 +169,18 @@ public class DesktopClient(
     /**
      * Marks the mention as a 2-hour snooze.
      */
-    public fun snoozeMention(id: MentionId) {
+    public fun snoozeMention(id: MentionId, onSuccess: (event: MentionSnoozed) -> Unit = {}) {
         val command = SnoozeMention::class.buildBy(id, currentTime().inTwoHours())
+        observeEventOnce(command.id, MentionSnoozed::class, onSuccess)
         send(command)
     }
 
     /**
      * Marks that the mention is read.
      */
-    public fun readMention(id: MentionId) {
+    public fun readMention(id: MentionId, onSuccess: (event: MentionRead) -> Unit = {}) {
         val command = MarkMentionAsRead::class.buildBy(id)
+        observeEventOnce(command.id, MentionRead::class, onSuccess)
         send(command)
     }
 
@@ -212,14 +218,12 @@ public class DesktopClient(
     ) {
         var subscriptionOnSuccess: Subscription? = null
         var subscriptionOnFail: Subscription? = null
-        subscriptionOnSuccess = observeEvent(id, successType) { event ->
-            stopObservation(subscriptionOnSuccess!!)
+        subscriptionOnSuccess = observeEventOnce(id, successType) { event ->
             stopObservation(subscriptionOnFail!!)
             onSuccess(event)
         }
-        subscriptionOnFail = observeEvent(id, failType) { event ->
+        subscriptionOnFail = observeEventOnce(id, failType) { event ->
             stopObservation(subscriptionOnSuccess)
-            stopObservation(subscriptionOnFail!!)
             onFail(event)
         }
     }
@@ -234,10 +238,26 @@ public class DesktopClient(
     ): Subscription =
         clientRequest()
             .subscribeToEvent(type.java)
-            .where(EventFilter.eq(EventMessageField(Field.named("id")), id))
+            .where(eq(EventMessageField(Field.named("id")), id))
             .observe(onEmit)
             .post()
 
+    /**
+     * Subscribes to the event of the provided type and cancels itself after
+     * the observer has worked.
+     */
+    private fun <E : EventMessage> observeEventOnce(
+        id: Message,
+        type: KClass<E>,
+        onEmit: (event: E) -> Unit
+    ): Subscription {
+        var subscription: Subscription? = null
+        subscription = observeEvent(id, type) { event ->
+            stopObservation(subscription!!)
+            onEmit(event)
+        }
+        return subscription
+    }
     /**
      * Stops observation by provided subscription.
      */
