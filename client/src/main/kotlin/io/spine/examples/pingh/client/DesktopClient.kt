@@ -110,7 +110,7 @@ public class DesktopClient(
     }
 
     /**
-     * Logs the user out and clears the session ID.
+     * Logs the user out, cancels all subscriptions and clears the session ID.
      */
     public fun logOut(
         onSuccess: (event: UserLoggedOut) -> Unit = {}
@@ -258,6 +258,7 @@ public class DesktopClient(
         }
         return subscription
     }
+
     /**
      * Stops observation by provided subscription.
      */

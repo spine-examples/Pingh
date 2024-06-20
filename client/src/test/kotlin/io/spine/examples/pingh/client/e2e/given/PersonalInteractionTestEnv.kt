@@ -34,7 +34,7 @@ import io.spine.examples.pingh.mentions.buildBy
 import io.spine.examples.pingh.testing.mentions.given.predefinedMentionsSet
 
 /**
- * Returns a predefined list of user mentions that occurred on GitHub.
+ * Returns the predefined list of user mentions that occurred on GitHub.
  *
  * @return List of mentions in order by descending time of mention creation.
  */

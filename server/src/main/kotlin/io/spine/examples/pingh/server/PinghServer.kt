@@ -54,7 +54,7 @@ public fun main() {
  * The server includes bounded contexts of [Sessions][io.spine.examples.pingh.sessions]
  * and [Mentions][io.spine.examples.pingh.mentions].
  */
-internal fun createServer(): Server {
+private fun createServer(): Server {
     configureEnvironment()
     return Server
         .atPort(DEFAULT_CLIENT_SERVICE_PORT)

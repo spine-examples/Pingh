@@ -39,6 +39,8 @@ plugins {
 }
 
 spine {
+    // Add and configure required dependencies for developing a Spine-based Java client.
+    // See: https://github.com/SpineEventEngine/bootstrap#java-projects
     enableJava().client()
 }
 
