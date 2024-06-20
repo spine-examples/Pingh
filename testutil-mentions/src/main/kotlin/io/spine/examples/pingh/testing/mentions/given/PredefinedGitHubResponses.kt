@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.mentions.given
+package io.spine.examples.pingh.testing.mentions.given
 
 import io.ktor.http.HttpStatusCode
 import io.spine.examples.pingh.github.Mention
@@ -45,6 +45,14 @@ import kotlin.jvm.Throws
  * Uses exclusively for testing [GitHubClient] behavior.
  */
 public class PredefinedGitHubResponses : GitHubClientService {
+
+    public companion object {
+        /**
+         * The time after which the process will try to run again if it is frozen.
+         * The value is specified in milliseconds.
+         */
+        private const val timeBetweenExecutionAttempts = 100L
+    }
 
     /**
      * Indicates whether to freeze the execution of the [fetchMentions] method.
@@ -72,7 +80,7 @@ public class PredefinedGitHubResponses : GitHubClientService {
         if (responseStatusCode != HttpStatusCode.OK) {
             throw CannotFetchMentionsFromGitHubException(responseStatusCode.value)
         }
-        val jsonFile = this::class.java.getResource("github_response.json")
+        val jsonFile = this::class.java.getResource("/github-responses/prs-search-response.json")
         checkNotNull(jsonFile)
         val json = jsonFile.readText(Charsets.UTF_8)
         val mentions = parseIssuesAndPullRequestsFromJson(json)
@@ -88,7 +96,7 @@ public class PredefinedGitHubResponses : GitHubClientService {
      */
     private fun waitWhileServiceIsFrozen() {
         while (isFrozen) {
-            sleep(100)
+            sleep(timeBetweenExecutionAttempts)
         }
     }
 

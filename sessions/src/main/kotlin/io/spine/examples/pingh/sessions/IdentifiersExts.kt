@@ -24,5 +24,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "Pingh"
-include("github", "sessions", "mentions", "testutil-mentions")
+package io.spine.examples.pingh.sessions
+
+import com.google.protobuf.Timestamp
+import io.spine.base.Time.currentTime
+import io.spine.examples.pingh.github.Username
+import kotlin.reflect.KClass
+
+/**
+ * Creates a new `SessionId` with the specified name of the user to which the session belongs.
+ * The time of the session creation is the current time.
+ */
+public fun KClass<SessionId>.buildBy(username: Username): SessionId =
+    this.buildBy(username, currentTime())
+
+/**
+ * Creates a new `SessionId` with the specified name of the user to which the session belongs
+ * and the time when the session is created.
+ */
+public fun KClass<SessionId>.buildBy(username: Username, whenCreated: Timestamp): SessionId =
+    SessionId.newBuilder()
+        .setUsername(username)
+        .setWhenCreated(whenCreated)
+        .vBuild()

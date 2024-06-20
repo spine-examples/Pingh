@@ -24,5 +24,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "Pingh"
-include("github", "sessions", "mentions", "testutil-mentions")
+package io.spine.examples.pingh.testing.mentions.given
+
+import io.spine.examples.pingh.github.Mention
+import io.spine.examples.pingh.github.buildFromFragment
+import io.spine.examples.pingh.mentions.parseIssuesAndPullRequestsFromJson
+
+/**
+ * Returns the set of mentions that [PredefinedGitHubResponses] returns on successful execution.
+ */
+public fun predefinedMentionsSet(): Set<Mention> {
+    val jsonFile = PredefinedGitHubResponses::class.java
+        .getResource("/github-responses/prs-search-response.json")
+    checkNotNull(jsonFile)
+    val json = jsonFile.readText(Charsets.UTF_8)
+    return parseIssuesAndPullRequestsFromJson(json)
+        .itemList
+        .map { fragment -> Mention::class.buildFromFragment(fragment) }
+        .toSet()
+}

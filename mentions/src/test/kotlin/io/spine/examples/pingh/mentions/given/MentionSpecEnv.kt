@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.mentions.given
 
-import com.google.protobuf.Timestamp
 import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.github.NodeId
 import io.spine.examples.pingh.github.User
@@ -36,8 +35,6 @@ import io.spine.examples.pingh.mentions.Mention
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.buildBy
-import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
-import io.spine.examples.pingh.mentions.command.SnoozeMention
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.Rejections.MentionIsAlreadyRead
@@ -74,24 +71,6 @@ internal fun KClass<Mention>.buildBy(id: MentionId, status: MentionStatus): Ment
     Mention.newBuilder()
         .setId(id)
         .setStatus(status)
-        .vBuild()
-
-/**
- * Creates a new `MarkMentionAsRead` command with the specified ID of the mention.
- */
-internal fun KClass<MarkMentionAsRead>.buildBy(id: MentionId): MarkMentionAsRead =
-    MarkMentionAsRead.newBuilder()
-        .setId(id)
-        .vBuild()
-
-/**
- * Creates a new `SnoozeMention` command with the specified ID of the mention and
- * time to which the mention is snoozing.
- */
-internal fun KClass<SnoozeMention>.buildBy(id: MentionId, untilWhen: Timestamp): SnoozeMention =
-    SnoozeMention.newBuilder()
-        .setId(id)
-        .setUntilWhen(untilWhen)
         .vBuild()
 
 /**

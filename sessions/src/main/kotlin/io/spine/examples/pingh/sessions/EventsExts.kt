@@ -24,5 +24,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "Pingh"
-include("github", "sessions", "mentions", "testutil-mentions")
+package io.spine.examples.pingh.sessions
+
+import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.sessions.event.UserLoggedIn
+import io.spine.examples.pingh.sessions.event.UserLoggedOut
+import kotlin.reflect.KClass
+
+/**
+ * Creates a new `UserLoggedIn` event with the specified ID of the session
+ * and `PersonalAccessToken`.
+ */
+public fun KClass<UserLoggedIn>.buildBy(id: SessionId, token: PersonalAccessToken): UserLoggedIn =
+    UserLoggedIn.newBuilder()
+        .setId(id)
+        .setToken(token)
+        .vBuild()
+
+/**
+ * Creates a new `UserLoggedOut` event with the specified ID of the session.
+ */
+public fun KClass<UserLoggedOut>.buildBy(id: SessionId): UserLoggedOut =
+    UserLoggedOut.newBuilder()
+        .setId(id)
+        .vBuild()
