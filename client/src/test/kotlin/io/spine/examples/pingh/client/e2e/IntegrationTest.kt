@@ -27,7 +27,7 @@
 package io.spine.examples.pingh.client.e2e
 
 import io.spine.examples.pingh.client.DesktopClient
-//import io.spine.examples.pingh.mentions.given.PredefinedGitHubResponses
+import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.newMentionsContext
 import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.server.Server
@@ -58,7 +58,7 @@ public open class IntegrationTest {
     private fun createServer(): Server =
         Server.atPort(port)
             .add(newSessionsContext())
-            //.add(newMentionsContext(PredefinedGitHubResponses()))
+            .add(newMentionsContext(PredefinedGitHubResponses()))
             .build()
 
     @BeforeEach

@@ -51,10 +51,10 @@ kotlin {
 
 dependencies {
     implementation(project(":server"))
-
     implementation(JavaX.annotations)
     implementation(Guava.lib)
     implementation(Grpc.netty)
 
+    testImplementation(project(":testutil-mentions"))
     testImplementation(Spine.Server.lib)
 }
