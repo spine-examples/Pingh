@@ -24,5 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "Pingh"
-include("github", "sessions", "mentions", "testutil-mentions", "server", "client")
+package io.spine.examples.pingh.client
+
+import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Durations
+import com.google.protobuf.util.Timestamps
+
+/**
+ * Sets the time 2 hours from this time.
+ */
+public fun Timestamp.inTwoHours(): Timestamp =
+    Timestamps.add(this, Durations.fromHours(2))

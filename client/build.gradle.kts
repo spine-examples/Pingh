@@ -25,8 +25,10 @@
  */
 
 import io.spine.internal.BuildSettings
+import io.spine.internal.dependency.Grpc
+import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.JavaX
-import io.spine.internal.dependency.Ktor
+import io.spine.internal.dependency.Spine
 
 plugins {
     kotlin("jvm")
@@ -37,15 +39,9 @@ plugins {
 }
 
 spine {
-    // Enable the code generation for the elements of the ubiquitous language,
-    // declared in Proto files.
-    assembleModel()
-    enableJava()
-
-    // Add and configure required dependencies for developing a Spine-based Java server.
+    // Add and configure required dependencies for developing a Spine-based Java client.
     // See: https://github.com/SpineEventEngine/bootstrap#java-projects
-    enableJava().server()
-    forceDependencies = true
+    enableJava().client()
 }
 
 kotlin {
@@ -55,23 +51,12 @@ kotlin {
     explicitApi()
 }
 
-/**
- * Kotlin code compilation task waits until
- * Protobuf files are fully generated and rejections are created.
- */
-// TODO:2024-05-20:mykyta.pimonov: Rewrite the way of organizing tasks,
-//  using task inputs and outputs.
-//  See: https://github.com/spine-examples/Pingh/pull/7#discussion_r1607043747.
-tasks.named("compileKotlin") {
-    dependsOn("generateRejections")
-}
-
 dependencies {
-    implementation(project(":github"))
-    implementation(project(":sessions"))
+    implementation(project(":server"))
     implementation(JavaX.annotations)
-    implementation(Ktor.Client.core)
+    implementation(Guava.lib)
+    implementation(Grpc.netty)
 
     testImplementation(project(":testutil-mentions"))
-    testImplementation(Ktor.Client.mock)
+    testImplementation(Spine.Server.lib)
 }

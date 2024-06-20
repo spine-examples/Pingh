@@ -24,5 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "Pingh"
-include("github", "sessions", "mentions", "testutil-mentions", "server", "client")
+package io.spine.internal.dependency
+
+// https://github.com/google/guava
+@Suppress("ConstPropertyName")
+public object Guava {
+    private const val version = "31.1-jre"
+    public const val lib: String = "com.google.guava:guava:$version"
+}

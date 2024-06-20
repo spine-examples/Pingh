@@ -24,5 +24,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "Pingh"
-include("github", "sessions", "mentions", "testutil-mentions", "server", "client")
+package io.spine.internal.dependency
+
+// https://github.com/SpineEventEngine
+@Suppress("ConstPropertyName")
+public object Spine {
+
+    // Keep in sync with in sync with Spine Bootstraps plugin
+    // in `build.gradle.kts` in each module.
+    private const val version = "1.9.0"
+
+    // https://github.com/SpineEventEngine/core-java
+    public object Server {
+        public const val lib: String = "io.spine:spine-server:$version"
+    }
+}
