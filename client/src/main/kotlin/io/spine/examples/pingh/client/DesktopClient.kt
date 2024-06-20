@@ -216,9 +216,8 @@ public class DesktopClient(
         failType: KClass<F>,
         onFail: (event: F) -> Unit
     ) {
-        var subscriptionOnSuccess: Subscription? = null
         var subscriptionOnFail: Subscription? = null
-        subscriptionOnSuccess = observeEventOnce(id, successType) { event ->
+        val subscriptionOnSuccess = observeEventOnce(id, successType) { event ->
             stopObservation(subscriptionOnFail!!)
             onSuccess(event)
         }
