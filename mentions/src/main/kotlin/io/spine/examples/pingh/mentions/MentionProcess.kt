@@ -39,6 +39,7 @@ import io.spine.server.command.Assign
 import io.spine.server.event.React
 import io.spine.server.model.Nothing
 import io.spine.server.procman.ProcessManager
+import java.util.Optional
 import kotlin.jvm.Throws
 
 /**
@@ -92,14 +93,16 @@ public class MentionProcess :
 
     /**
      * Marks this mention as unread if the snooze time passed.
+     *
+     * @return Empty `Optional` if the mention is already read,
+     * otherwise `MentionUnsnoozed` wrapped in `Optional`.
      */
     @React
-    @Throws(MentionIsAlreadyRead::class)
-    internal fun on(@External event: SnoozeTimePassed): MentionUnsnoozed {
+    internal fun on(@External event: SnoozeTimePassed): Optional<MentionUnsnoozed> {
         if (state().status == MentionStatus.READ) {
-            throw MentionIsAlreadyRead::class.buildBy(event.id)
+            return Optional.empty()
         }
         builder().setStatus(MentionStatus.UNREAD)
-        return MentionUnsnoozed::class.buildBy(event.id)
+        return Optional.of(MentionUnsnoozed::class.buildBy(event.id))
     }
 }
