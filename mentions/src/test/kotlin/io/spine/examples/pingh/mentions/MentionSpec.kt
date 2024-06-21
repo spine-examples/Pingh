@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.mentions
 
 import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Timestamps
 import io.spine.base.Time.currentTime
 import io.spine.core.UserId
 import io.spine.examples.pingh.clock.buildBy
@@ -139,7 +140,7 @@ public class MentionSpec : ContextAwareTest() {
         }
 
         @Test
-        public fun `do nothing if mention is not snoozed`() {
+        public fun `do nothing, if mention is not snoozed`() {
             val command = MarkMentionAsRead::class.buildBy(id)
             context().receivesCommand(command)
             emitTimePassedEvent()
@@ -151,15 +152,25 @@ public class MentionSpec : ContextAwareTest() {
         }
 
         @Test
+        public fun `do nothing, if the time in 'TimePassed' event is less than the snooze time`() {
+            emitTimePassedEvent(Timestamps.MIN_VALUE)
+            context().assertEvents()
+                .withType(MentionUnsnoozed::class.java)
+                .hasSize(0)
+            val expected = Mention::class.buildBy(id, MentionStatus.SNOOZED)
+            context().assertState(id, expected)
+        }
+
+        @Test
         public fun `set 'UNREAD' status in 'Mention' entity, if mention is snoozed`() {
             emitTimePassedEvent()
             val expected = Mention::class.buildBy(id, MentionStatus.UNREAD)
             context().assertState(id, expected)
         }
 
-        private fun emitTimePassedEvent() {
+        private fun emitTimePassedEvent(time: Timestamp = currentTime()) {
             val clockContext = ThirdPartyContext.singleTenant("Clock")
-            val event = TimePassed::class.buildBy(currentTime())
+            val event = TimePassed::class.buildBy(time)
             val actor = UserId.newBuilder()
                 .setValue(UUID.randomUUID().toString())
                 .vBuild()

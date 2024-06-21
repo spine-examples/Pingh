@@ -53,6 +53,10 @@ message Mention {
 
     // The read status of mention.
     MentionStatus status = 2 [(required) = true];
+
+    // The time until which the mention will snooze, if the mention status is `SNOOZED`.
+    // If the status is different, the field is empty.
+    google.protobuf.Timestamp snooze_until_when = 3;
 }
 
 // Information about all mentions of the user.

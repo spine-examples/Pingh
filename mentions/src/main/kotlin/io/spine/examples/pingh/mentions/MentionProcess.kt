@@ -27,12 +27,13 @@
 package io.spine.examples.pingh.mentions
 
 import io.spine.core.External
+import io.spine.examples.pingh.clock.event.TimePassed
+import io.spine.examples.pingh.clock.time
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
 import io.spine.examples.pingh.mentions.command.SnoozeMention
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
-import io.spine.examples.pingh.mentions.event.SnoozeTimePassed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.MentionIsAlreadyRead
 import io.spine.server.command.Assign
@@ -71,7 +72,9 @@ public class MentionProcess :
         if (state().status == MentionStatus.READ) {
             throw MentionIsAlreadyRead::class.buildBy(command.id)
         }
-        builder().setStatus(MentionStatus.SNOOZED)
+        builder()
+            .setStatus(MentionStatus.SNOOZED)
+            .setSnoozeUntilWhen(command.untilWhen)
         return MentionSnoozed::class.buildBy(
             command.id,
             command.untilWhen
@@ -87,22 +90,28 @@ public class MentionProcess :
         if (state().status == MentionStatus.READ) {
             throw MentionIsAlreadyRead::class.buildBy(command.id)
         }
-        builder().setStatus(MentionStatus.READ)
+        builder()
+            .setStatus(MentionStatus.READ)
+            .clearSnoozeUntilWhen()
         return MentionRead::class.buildBy(command.id)
     }
 
     /**
      * Marks this mention as unread if the snooze time passed.
      *
-     * @return Empty `Optional` if the mention is already read,
-     * otherwise `MentionUnsnoozed` wrapped in `Optional`.
+     * @return Empty `Optional`, if the mention is not snoozed or the time in `TimePassed` is less
+     * than the `snoozeUntilWhen`, otherwise `MentionUnsnoozed` wrapped in `Optional`.
      */
     @React
-    internal fun on(@External event: SnoozeTimePassed): Optional<MentionUnsnoozed> {
-        if (state().status == MentionStatus.READ) {
+    internal fun on(@External event: TimePassed): Optional<MentionUnsnoozed> {
+        if (state().status != MentionStatus.SNOOZED
+            || state().snoozeUntilWhen.after(event.time())
+        ) {
             return Optional.empty()
         }
-        builder().setStatus(MentionStatus.UNREAD)
-        return Optional.of(MentionUnsnoozed::class.buildBy(event.id))
+        builder()
+            .setStatus(MentionStatus.UNREAD)
+            .clearSnoozeUntilWhen()
+        return Optional.of(MentionUnsnoozed::class.buildBy(state().id))
     }
 }
