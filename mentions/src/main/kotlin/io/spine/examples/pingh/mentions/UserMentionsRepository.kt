@@ -28,6 +28,7 @@ package io.spine.examples.pingh.mentions
 
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
+import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.server.projection.ProjectionRepository
 import io.spine.server.route.EventRouting
@@ -44,6 +45,7 @@ public class UserMentionsRepository :
             .route(UserMentioned::class.java) { event, _ -> toUserMentions(event.id) }
             .route(MentionSnoozed::class.java) { event, _ -> toUserMentions(event.id) }
             .route(MentionRead::class.java) { event, _ -> toUserMentions(event.id) }
+            .route(MentionUnsnoozed::class.java) { event, _ -> toUserMentions(event.id) }
     }
 
     /**
