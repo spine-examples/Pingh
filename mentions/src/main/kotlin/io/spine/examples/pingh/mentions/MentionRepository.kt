@@ -27,7 +27,7 @@
 package io.spine.examples.pingh.mentions
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
-import io.spine.examples.pingh.mentions.event.SnoozeTimePassed
+import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.server.procman.ProcessManagerRepository
 import io.spine.server.route.EventRoute.withId
@@ -44,6 +44,15 @@ public class MentionRepository :
         super.setupEventRouting(routing)
         routing
             .route(UserMentioned::class.java) { event, _ -> withId(event.id) }
-            .route(SnoozeTimePassed::class.java) { event, _ -> withId(event.id) }
+            .route(TimePassed::class.java) { _, _ -> toAll() }
     }
+
+    /**
+     * Returns a set of identifiers of records in the process manager storage.
+     */
+    private fun toAll(): Set<MentionId> =
+        storage()
+            .index()
+            .asSequence()
+            .toSet()
 }
