@@ -29,6 +29,7 @@ package io.spine.examples.pingh.mentions
 import io.spine.core.Subscribe
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
+import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.server.projection.Projection
 
@@ -65,6 +66,15 @@ public class UserMentionsProjection :
     @Subscribe
     internal fun on(event: MentionRead) {
         setMentionStatus(event.id, MentionStatus.READ)
+    }
+
+    /**
+     * Sets the status to unread when the snooze time of
+     * the mention with the specified ID passed.
+     */
+    @Subscribe
+    internal fun on(event: MentionUnsnoozed) {
+        setMentionStatus(event.id, MentionStatus.UNREAD)
     }
 
     /**
