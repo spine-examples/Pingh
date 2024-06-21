@@ -23,22 +23,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine_examples.pingh.mentions;
+package io.spine.examples.pingh.clock
 
-import "spine/options.proto";
+import com.google.protobuf.Timestamp
+import io.spine.examples.pingh.clock.event.TimePassed
+import kotlin.reflect.KClass
 
-option (type_url_prefix) = "type.pingh.spine.io";
-option java_package = "io.spine.examples.pingh.mentions.event";
-option java_outer_classname = "SchedulerEventsProto";
-option java_multiple_files = true;
+/**
+ * Creates a new `TimePassed` event with the specified time value.
+ */
+public fun KClass<TimePassed>.buildBy(time: Timestamp): TimePassed =
+    TimePassed.newBuilder()
+        .setId(TimeId::class.buildBy(time))
+        .vBuild()
 
-import "spine_examples/pingh/mentions/identifiers.proto";
-
-// The time to which the mention was snoozing passed.
-message SnoozeTimePassed {
-
-    // The ID of the mention.
-    MentionId id = 1;
-}
+/**
+ * Returns the time recorded in the `TimePassed` event.
+ */
+public fun TimePassed.time(): Timestamp = this.id.time

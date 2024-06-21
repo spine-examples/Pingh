@@ -24,13 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "Pingh"
-include(
-    "github",
-    "sessions",
-    "mentions",
-    "testutil-mentions",
-    "server",
-    "client",
-    "clock"
-)
+package io.spine.examples.pingh.clock
+
+import com.google.protobuf.Timestamp
+import kotlin.reflect.KClass
+
+/**
+ * Creates a new `TimeId` with the specified time value.
+ */
+public fun KClass<TimeId>.buildBy(value: Timestamp): TimeId =
+    TimeId.newBuilder()
+        .setTime(value)
+        .vBuild()

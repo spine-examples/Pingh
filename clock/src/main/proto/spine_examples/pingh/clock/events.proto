@@ -24,13 +24,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "Pingh"
-include(
-    "github",
-    "sessions",
-    "mentions",
-    "testutil-mentions",
-    "server",
-    "client",
-    "clock"
-)
+syntax = "proto3";
+
+package spine_examples.pingh.clock;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.pingh.spine.io";
+option java_package = "io.spine.examples.pingh.clock.event";
+option java_outer_classname = "ClockEventsProto";
+option java_multiple_files = true;
+
+import "spine_examples/pingh/clock/identifiers.proto";
+
+// Reports the current point in time in the system.
+message TimePassed {
+
+    // The ID that contains the time.
+    TimeId id = 1;
+}
