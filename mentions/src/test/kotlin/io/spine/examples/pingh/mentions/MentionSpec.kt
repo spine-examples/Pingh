@@ -28,17 +28,22 @@ package io.spine.examples.pingh.mentions
 
 import com.google.protobuf.Timestamp
 import io.spine.base.Time.currentTime
+import io.spine.core.UserId
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
 import io.spine.examples.pingh.mentions.command.SnoozeMention
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
+import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
+import io.spine.examples.pingh.mentions.event.SnoozeTimePassed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.given.buildBy
 import io.spine.examples.pingh.mentions.given.generate
 import io.spine.examples.pingh.mentions.rejection.Rejections.MentionIsAlreadyRead
 import io.spine.server.BoundedContextBuilder
+import io.spine.server.integration.ThirdPartyContext
 import io.spine.testing.server.blackbox.ContextAwareTest
+import java.util.UUID
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -113,6 +118,51 @@ public class MentionSpec : ContextAwareTest() {
         public fun `set 'READ' status in 'Mention' entity`() {
             val expected = Mention::class.buildBy(id, MentionStatus.READ)
             context().assertState(id, expected)
+        }
+    }
+
+    @Nested
+    public inner class `react on 'SnoozeTimePassed' event, and` {
+
+        @BeforeEach
+        public fun setSnoozedStatus() {
+            val command = SnoozeMention::class.buildBy(id, currentTime())
+            context().receivesCommand(command)
+        }
+
+        @Test
+        public fun `emit 'MentionUnsnoozed' event if mention is snoozed`() {
+            emitSnoozeTimePassedEvent()
+            val expected = MentionUnsnoozed::class.buildBy(id)
+            context().assertEvent(expected)
+        }
+
+        @Test
+        public fun `do nothing if mention is read`() {
+            val command = MarkMentionAsRead::class.buildBy(id)
+            context().receivesCommand(command)
+            emitSnoozeTimePassedEvent()
+            context().assertEvents()
+                .withType(MentionUnsnoozed::class.java)
+                .hasSize(0)
+            val expected = Mention::class.buildBy(id, MentionStatus.READ)
+            context().assertState(id, expected)
+        }
+
+        @Test
+        public fun `set 'UNREAD' status in 'Mention' entity`() {
+            emitSnoozeTimePassedEvent()
+            val expected = Mention::class.buildBy(id, MentionStatus.UNREAD)
+            context().assertState(id, expected)
+        }
+
+        private fun emitSnoozeTimePassedEvent() {
+            val schedulerContext = ThirdPartyContext.singleTenant("Scheduler")
+            val event = SnoozeTimePassed::class.buildBy(id)
+            val actor = UserId.newBuilder()
+                .setValue(UUID.randomUUID().toString())
+                .vBuild()
+            schedulerContext.emittedEvent(event, actor)
         }
     }
 

@@ -36,7 +36,7 @@ option java_multiple_files = true;
 
 import "spine_examples/pingh/mentions/identifiers.proto";
 
-// The time to which the mention was snoozing has passed.
+// The time to which the mention was snoozing passed.
 message SnoozeTimePassed {
 
     // The ID of the mention.
