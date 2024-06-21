@@ -26,10 +26,13 @@
 
 package io.spine.examples.pingh.mentions
 
+import io.spine.core.External
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
 import io.spine.examples.pingh.mentions.command.SnoozeMention
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
+import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
+import io.spine.examples.pingh.mentions.event.SnoozeTimePassed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.MentionIsAlreadyRead
 import io.spine.server.command.Assign
@@ -85,5 +88,18 @@ public class MentionProcess :
         }
         builder().setStatus(MentionStatus.READ)
         return MentionRead::class.buildBy(command.id)
+    }
+
+    /**
+     * Marks this mention as unread if the snooze time passed.
+     */
+    @React
+    @Throws(MentionIsAlreadyRead::class)
+    internal fun on(@External event: SnoozeTimePassed): MentionUnsnoozed {
+        if (state().status == MentionStatus.READ) {
+            throw MentionIsAlreadyRead::class.buildBy(event.id)
+        }
+        builder().setStatus(MentionStatus.UNREAD)
+        return MentionUnsnoozed::class.buildBy(event.id)
     }
 }
