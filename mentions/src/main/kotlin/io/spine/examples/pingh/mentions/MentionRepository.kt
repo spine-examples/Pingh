@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.mentions
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
+import io.spine.examples.pingh.mentions.event.SnoozeTimePassed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.server.procman.ProcessManagerRepository
 import io.spine.server.route.EventRoute.withId
@@ -43,5 +44,6 @@ public class MentionRepository :
         super.setupEventRouting(routing)
         routing
             .route(UserMentioned::class.java) { event, _ -> withId(event.id) }
+            .route(SnoozeTimePassed::class.java) { event, _ -> withId(event.id) }
     }
 }
