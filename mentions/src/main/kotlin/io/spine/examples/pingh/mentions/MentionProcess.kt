@@ -105,7 +105,7 @@ public class MentionProcess :
     @React
     internal fun on(@External event: TimePassed): Optional<MentionUnsnoozed> {
         if (state().status != MentionStatus.SNOOZED
-            || state().snoozeUntilWhen.after(event.time())
+            || state().snoozeUntilWhen.isAfter(event.time())
         ) {
             return Optional.empty()
         }

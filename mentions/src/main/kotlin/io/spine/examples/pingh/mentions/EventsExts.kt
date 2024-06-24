@@ -35,7 +35,6 @@ import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
 import io.spine.examples.pingh.mentions.event.RequestMentionsFromGitHubFailed
-import io.spine.examples.pingh.mentions.event.SnoozeTimePassed
 import kotlin.reflect.KClass
 
 /**
@@ -102,12 +101,4 @@ public fun KClass<RequestMentionsFromGitHubFailed>.buildBy(id: GitHubClientId, s
     RequestMentionsFromGitHubFailed.newBuilder()
         .setId(id)
         .setResponseStatusCode(statusCode)
-        .vBuild()
-
-/**
- * Creates a new `SnoozeTimePassed` event with the specified ID of the mention.
- */
-public fun KClass<SnoozeTimePassed>.buildBy(id: MentionId): SnoozeTimePassed =
-    SnoozeTimePassed.newBuilder()
-        .setId(id)
         .vBuild()
