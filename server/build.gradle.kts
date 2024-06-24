@@ -58,6 +58,7 @@ dependencies {
     api(project(":github"))
     api(project(":sessions"))
     api(project(":mentions"))
+    api(project(":clock"))
 
     implementation(JavaX.annotations)
     implementation(Ktor.Client.cio)
