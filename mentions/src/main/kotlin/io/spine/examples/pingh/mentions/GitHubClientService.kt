@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.protobuf.Timestamp
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
@@ -37,11 +38,14 @@ import kotlin.jvm.Throws
 public interface GitHubClientService {
 
     /**
-     * Searches for user `Mentions` by the GitHub name of the user.
+     * Searches for user `Mentions` by the GitHub name of the user from the last update time.
      *
      * Uses `PersonalAccessToken` to access GitHub API.
      */
     @Throws(CannotFetchMentionsFromGitHubException::class)
-    public fun fetchMentions(username: Username, token: PersonalAccessToken):
-            Set<Mention>
+    public fun fetchMentions(
+        username: Username,
+        token: PersonalAccessToken,
+        lastSuccessfulUpdate: Timestamp
+    ): Set<Mention>
 }

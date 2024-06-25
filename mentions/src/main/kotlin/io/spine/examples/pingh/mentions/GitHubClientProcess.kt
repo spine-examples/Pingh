@@ -99,8 +99,9 @@ public class GitHubClientProcess :
     internal fun on(event: MentionsUpdateFromGitHubRequested): List<EventMessage> {
         val username = state().id.username
         val token = state().token
+        val lastSuccessfulUpdate = state().whenLastSuccessfulUpdate
         val mentions = try {
-            gitHubClientService.fetchMentions(username, token)
+            gitHubClientService.fetchMentions(username, token, lastSuccessfulUpdate)
         } catch (exception: CannotFetchMentionsFromGitHubException) {
             builder().clearWhenStarted()
             return listOf(

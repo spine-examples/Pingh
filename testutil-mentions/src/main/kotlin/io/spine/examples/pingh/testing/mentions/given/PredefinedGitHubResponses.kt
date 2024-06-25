@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.testing.mentions.given
 
+import com.google.protobuf.Timestamp
 import io.ktor.http.HttpStatusCode
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
@@ -75,7 +76,8 @@ public class PredefinedGitHubResponses : GitHubClientService {
     @Throws(CannotFetchMentionsFromGitHubException::class)
     public override fun fetchMentions(
         username: Username,
-        token: PersonalAccessToken
+        token: PersonalAccessToken,
+        lastSuccessfulUpdate: Timestamp
     ): Set<Mention> {
         if (responseStatusCode != HttpStatusCode.OK) {
             throw CannotFetchMentionsFromGitHubException(responseStatusCode.value)

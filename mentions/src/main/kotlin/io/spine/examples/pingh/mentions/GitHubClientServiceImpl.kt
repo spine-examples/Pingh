@@ -26,6 +26,8 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Timestamps
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
@@ -59,17 +61,20 @@ public class GitHubClientServiceImpl(
     private val client = HttpClient(engine)
 
     /**
-     * Searches for user `Mentions` by the GitHub name of the user.
+     * Searches for user `Mentions` by the GitHub name of the user from the last update time.
      *
      * Uses `PersonalAccessToken` to access GitHub API.
      *
      * Mentions are searched in issues and pull requests.
      */
     @Throws(CannotFetchMentionsFromGitHubException::class)
-    public override fun fetchMentions(username: Username, token: PersonalAccessToken):
-            Set<Mention> =
-        findMentions(username, token, ItemType.ISSUE) +
-                findMentions(username, token, ItemType.PULL_REQUEST)
+    public override fun fetchMentions(
+        username: Username,
+        token: PersonalAccessToken,
+        lastSuccessfulUpdate: Timestamp
+    ): Set<Mention> =
+        findMentions(username, token, lastSuccessfulUpdate, ItemType.ISSUE) +
+                findMentions(username, token, lastSuccessfulUpdate, ItemType.PULL_REQUEST)
 
     /**
      * Requests GitHub for mentions of a user in issues or pull requests,
@@ -79,10 +84,11 @@ public class GitHubClientServiceImpl(
     private fun findMentions(
         username: Username,
         token: PersonalAccessToken,
+        lastSuccessfulUpdate: Timestamp,
         itemType: ItemType
     ): Set<Mention> {
         val userTag = username.tag()
-        return searchIssuesOrPullRequests(username, token, itemType)
+        return searchIssuesOrPullRequests(username, token, lastSuccessfulUpdate, itemType)
             .itemList
             .flatMap { item ->
                 val mentionsInComments = obtainCommentsByUrl(item.commentsUrl, token)
@@ -114,6 +120,7 @@ public class GitHubClientServiceImpl(
     private fun searchIssuesOrPullRequests(
         username: Username,
         token: PersonalAccessToken,
+        lastSuccessfulUpdate: Timestamp,
         itemType: ItemType
     ): IssuesAndPullRequestsSearchResult =
         runBlocking {
@@ -121,7 +128,8 @@ public class GitHubClientServiceImpl(
                 url {
                     parameters.append(
                         "q",
-                        "is:${itemType.value()} mentions:${username.value}"
+                        "is:${itemType.value()} mentions:${username.value} " +
+                                "updated:>${Timestamps.toString(lastSuccessfulUpdate)}"
                     )
                     parameters.append("per_page", "100")
                     parameters.append("sort", "updated")
