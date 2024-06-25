@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.protobuf.Timestamp
 import io.spine.base.EventMessage
 import io.spine.base.Time.currentTime
 import io.spine.core.External
@@ -99,7 +100,7 @@ public class GitHubClientProcess :
     internal fun on(event: MentionsUpdateFromGitHubRequested): List<EventMessage> {
         val username = state().id.username
         val token = state().token
-        val lastSuccessfulUpdate = state().whenLastSuccessfulUpdate
+        val lastSuccessfulUpdate = defineLastSuccessfulUpdate()
         val mentions = try {
             gitHubClientService.fetchMentions(username, token, lastSuccessfulUpdate)
         } catch (exception: CannotFetchMentionsFromGitHubException) {
@@ -117,6 +118,21 @@ public class GitHubClientProcess :
         return userMentionedEvents
             .toList<EventMessage>()
             .plus(mentionsUpdateFromGitHubCompleted)
+    }
+
+    /**
+     * Defines and returns the time when the mentions were last updated.
+     *
+     * If updates were already performed, it returns the time of the last successfully
+     * completed update. If no updates are made, it returns the time equal to midnight
+     * of the previous work day.
+     */
+    private fun defineLastSuccessfulUpdate(): Timestamp {
+        val time = state().whenLastSuccessfulUpdate
+        if (!time.equals(time.defaultInstanceForType)) {
+            return time
+        }
+        return definePreviousWorkday()
     }
 
     private fun createUserMentionedEvents(gitHubMentions: Set<Mention>): Set<UserMentioned> =
