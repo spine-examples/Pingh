@@ -248,7 +248,7 @@ public class GitHubClientSpec : ContextAwareTest() {
     }
 
     @Test
-    public fun `update the time of the last time data was updated from GitHub`() {
+    public fun `update the time of the last time mentions was updated from GitHub`() {
         val firstWhenRequested = currentTime()
         val secondWhenRequested = firstWhenRequested.inMinute()
         val firstCommand =

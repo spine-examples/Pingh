@@ -71,7 +71,7 @@ public class PredefinedGitHubResponses : GitHubClientService {
     private var responseStatusCode = HttpStatusCode.OK
 
     /**
-     * List of times of successful data fetches from GitHub.
+     * List of times of successful fetching mentions from GitHub.
      * The order is correspond to the [fetchMentions] method call is preserved.
      */
     private val successfulUpdateTimes = mutableListOf<Timestamp>()
