@@ -62,4 +62,7 @@ message GitHubClient {
 
     // The time at which it started updating mentions from GitHub.
     google.protobuf.Timestamp when_started = 3;
+
+    // The time at which the last successful mentions fetch from GitHub occurred.
+    google.protobuf.Timestamp when_last_successful_update = 4;
 }

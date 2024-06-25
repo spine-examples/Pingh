@@ -110,7 +110,9 @@ public class GitHubClientProcess :
         val userMentionedEvents = createUserMentionedEvents(mentions)
         val mentionsUpdateFromGitHubCompleted =
             MentionsUpdateFromGitHubCompleted::class.buildBy(state().id)
-        builder().clearWhenStarted()
+        builder()
+            .setWhenLastSuccessfulUpdate(state().whenStarted)
+            .clearWhenStarted()
         return userMentionedEvents
             .toList<EventMessage>()
             .plus(mentionsUpdateFromGitHubCompleted)
