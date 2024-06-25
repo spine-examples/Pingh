@@ -62,6 +62,17 @@ internal fun KClass<GitHubClient>.buildWithDefaultWhenStartedField(): GitHubClie
         .buildPartial()
 
 /**
+ * Creates a new `GitHubClient` with the `when_last_successful_update` field
+ * filled with the default value.
+ */
+internal fun KClass<GitHubClient>.buildWithDefaultWhenLastSuccessfulUpdateField(): GitHubClient =
+    GitHubClient.newBuilder()
+        .setWhenLastSuccessfulUpdate(Timestamp.getDefaultInstance())
+        // Building the message partially to include
+        // only the tested fields.
+        .buildPartial()
+
+/**
  * Creates a new `UserLoggedIn` event with the specified `Username` and `PersonalAccessToken`.
  */
 internal fun KClass<UserLoggedIn>.buildBy(username: Username, token: PersonalAccessToken):

@@ -38,6 +38,7 @@ import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
 import io.spine.examples.pingh.mentions.event.RequestMentionsFromGitHubFailed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.given.buildBy
+import io.spine.examples.pingh.mentions.given.buildWithDefaultWhenLastSuccessfulUpdateField
 import io.spine.examples.pingh.mentions.given.buildWithDefaultWhenStartedField
 import io.spine.examples.pingh.mentions.given.expectedUserMentionedSet
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
@@ -219,6 +220,17 @@ public class GitHubClientSpec : ContextAwareTest() {
         context().receivesCommand(command)
         val expected = GitHubClient::class.buildBy(gitHubClientId, token)
         context().assertState(gitHubClientId, expected)
+    }
+
+    @Test
+    public fun `update 'when_last_successful_update' field after completing the update process`() {
+        val command = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
+        context().receivesCommand(command)
+        val expected = GitHubClient::class.buildWithDefaultWhenLastSuccessfulUpdateField()
+        context().assertEntity(gitHubClientId, GitHubClientProcess::class.java)
+            .hasStateThat()
+            .ignoringFields(1, 2, 3)
+            .isNotEqualTo(expected)
     }
 
     @Test
