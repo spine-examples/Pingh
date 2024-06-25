@@ -71,6 +71,12 @@ public class PredefinedGitHubResponses : GitHubClientService {
     private var responseStatusCode = HttpStatusCode.OK
 
     /**
+     * List of times of successful data fetches from GitHub.
+     * The order is correspond to the [fetchMentions] method call is preserved.
+     */
+    private val successfulUpdateTimes = mutableListOf<Timestamp>()
+
+    /**
      * Returns set of [Mention]s retrieved from a JSON file in the resource folder.
      */
     @Throws(CannotFetchMentionsFromGitHubException::class)
@@ -90,6 +96,7 @@ public class PredefinedGitHubResponses : GitHubClientService {
             .map { fragment -> Mention::class.buildFromFragment(fragment) }
             .toSet()
         waitWhileServiceIsFrozen()
+        successfulUpdateTimes.add(lastSuccessfulUpdate)
         return mentions
     }
 
@@ -136,5 +143,17 @@ public class PredefinedGitHubResponses : GitHubClientService {
      */
     public fun setDefaultResponseStatusCode() {
         responseStatusCode = HttpStatusCode.OK
+    }
+
+    /**
+     * Returns [successfulUpdateTimes].
+     */
+    public fun successfulUpdateTimes(): List<Timestamp> = successfulUpdateTimes.toList()
+
+    /**
+     * Clear [successfulUpdateTimes].
+     */
+    public fun clearSuccessfulUpdateTimes() {
+        successfulUpdateTimes.clear()
     }
 }

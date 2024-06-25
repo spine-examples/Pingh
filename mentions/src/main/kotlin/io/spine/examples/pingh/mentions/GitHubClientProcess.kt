@@ -28,7 +28,6 @@ package io.spine.examples.pingh.mentions
 
 import com.google.protobuf.Timestamp
 import io.spine.base.EventMessage
-import io.spine.base.Time.currentTime
 import io.spine.core.External
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
@@ -84,7 +83,7 @@ public class GitHubClientProcess :
         if (state().hasWhenStarted()) {
             throw MentionsUpdateIsAlreadyInProgress::class.buildBy(command.id)
         }
-        builder().setWhenStarted(currentTime())
+        builder().setWhenStarted(command.whenRequested)
         return MentionsUpdateFromGitHubRequested::class.buildBy(state().id)
     }
 

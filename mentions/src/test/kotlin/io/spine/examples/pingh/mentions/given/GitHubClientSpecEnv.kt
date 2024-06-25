@@ -27,18 +27,21 @@
 package io.spine.examples.pingh.mentions.given
 
 import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Timestamps
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.GitHubClient
 import io.spine.examples.pingh.mentions.GitHubClientId
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.buildBy
+import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.buildBy
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.testing.mentions.given.predefinedMentionsSet
+import io.spine.protobuf.Durations2
 import kotlin.reflect.KClass
 
 /**
@@ -83,6 +86,17 @@ internal fun KClass<UserLoggedIn>.buildBy(username: Username, token: PersonalAcc
     )
 
 /**
+ * Create a new `UpdateMentionsFromGitHub` command with the specified ID of the `GitHubClient`
+ * and time when the mentions update process is requested.
+ */
+internal fun KClass<UpdateMentionsFromGitHub>.buildBy(id: GitHubClientId, whenRequested: Timestamp):
+        UpdateMentionsFromGitHub =
+    UpdateMentionsFromGitHub.newBuilder()
+        .setId(id)
+        .setWhenRequested(whenRequested)
+        .vBuild()
+
+/**
  * Creates a new `MentionsUpdateIsAlreadyInProgress` rejection with the specified `GitHubClientId`.
  */
 internal fun KClass<MentionsUpdateIsAlreadyInProgress>.buildBy(id: GitHubClientId):
@@ -111,3 +125,9 @@ internal fun expectedUserMentionedSet(whoWasMentioned: Username): Set<UserMentio
             }
         }
         .toSet()
+
+/**
+ * Returns the value of the time in one minute.
+ */
+internal fun Timestamp.inMinute(): Timestamp =
+    Timestamps.add(this, Durations2.minutes(1))
