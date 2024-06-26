@@ -31,6 +31,7 @@ import io.spine.base.EventMessage
 import io.spine.core.External
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
@@ -99,7 +100,7 @@ public class GitHubClientProcess :
     internal fun on(event: MentionsUpdateFromGitHubRequested): List<EventMessage> {
         val username = state().id.username
         val token = state().token
-        val lastSuccessfulUpdate = defineLastSuccessfulUpdate()
+        val lastSuccessfulUpdate = defineLastSuccessfulUpdate(state().whenLastSuccessfulUpdate)
         val mentions = try {
             gitHubClientService.fetchMentions(username, token, lastSuccessfulUpdate)
         } catch (exception: CannotFetchMentionsFromGitHubException) {
@@ -108,7 +109,7 @@ public class GitHubClientProcess :
                 RequestMentionsFromGitHubFailed::class.buildBy(state().id, exception.statusCode())
             )
         }
-        val userMentionedEvents = createUserMentionedEvents(mentions)
+        val userMentionedEvents = toEvents(mentions, state().id.username)
         val mentionsUpdateFromGitHubCompleted =
             MentionsUpdateFromGitHubCompleted::class.buildBy(state().id)
         builder()
@@ -120,38 +121,6 @@ public class GitHubClientProcess :
     }
 
     /**
-     * Defines and returns the time when the mentions were last updated.
-     *
-     * If updates were already performed, it returns the time of the last successfully
-     * completed update. If no updates are made, it returns the time equal to midnight
-     * of the previous work day.
-     */
-    private fun defineLastSuccessfulUpdate(): Timestamp {
-        val time = state().whenLastSuccessfulUpdate
-        if (!time.equals(time.defaultInstanceForType)) {
-            return time
-        }
-        return definePreviousWorkday()
-    }
-
-    private fun createUserMentionedEvents(gitHubMentions: Set<Mention>): Set<UserMentioned> =
-        gitHubMentions
-            .map { mention ->
-                with(UserMentioned.newBuilder()) {
-                    id = MentionId::class.buildBy(
-                        mention.id,
-                        state().id.username
-                    )
-                    whoMentioned = mention.author
-                    title = mention.title
-                    whenMentioned = mention.whenMentioned
-                    url = mention.url
-                    vBuild()
-                }
-            }
-            .toSet()
-
-    /**
      * Supplies this instance of the process with a service allowing to access GitHub.
      *
      * It is expected this method is called right after the creation of the process instance.
@@ -159,5 +128,31 @@ public class GitHubClientProcess :
      */
     internal fun inject(gitHubClientService: GitHubClientService) {
         this.gitHubClientService = gitHubClientService
+    }
+
+    private companion object {
+        /**
+         * Defines and returns the time when the mentions were last updated.
+         *
+         * If updates were already performed, it returns the time of the last successfully
+         * completed update. If no updates are made, it returns the time equal to midnight
+         * of the previous work day.
+         */
+        private fun defineLastSuccessfulUpdate(whenLastUpdate: Timestamp): Timestamp {
+            if (!whenLastUpdate.equals(whenLastUpdate.defaultInstanceForType)) {
+                return whenLastUpdate
+            }
+            return definePreviousWorkday()
+        }
+
+        /**
+         * Converts the set of `Mention`s to the set of `UserMentioned` events
+         * with the specified name of the mentioned user.
+         */
+        private fun toEvents(gitHubMentions: Set<Mention>, whoWasMentioned: Username):
+                Set<UserMentioned> =
+            gitHubMentions
+                .map { mention -> UserMentioned::class.buildBy(mention, whoWasMentioned) }
+                .toSet()
     }
 }
