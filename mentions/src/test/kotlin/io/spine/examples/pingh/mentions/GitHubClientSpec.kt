@@ -247,7 +247,7 @@ public class GitHubClientSpec : ContextAwareTest() {
     }
 
     @Test
-    public fun `update the time of the last time mentions was updated from GitHub`() {
+    public fun `use updated 'when_last_successful_update' time to fetch mentions from GitHub`() {
         val firstWhenRequested = currentTime()
         val secondWhenRequested = firstWhenRequested.inMinute()
         val firstCommand =

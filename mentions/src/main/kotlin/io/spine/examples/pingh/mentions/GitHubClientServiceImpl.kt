@@ -257,7 +257,7 @@ public class GitHubClientServiceImpl(
         /**
          * Creates and sends request with specified data.
          *
-         * @throws IllegalArgumentException If any request builder data is not specified.
+         * @throws IllegalArgumentException some request data is not specified.
          */
         public suspend fun requestOnBehalfOf(client: HttpClient): HttpResponse {
             checkNotNull(itemType) { "The type of the searched item is not specified." }
