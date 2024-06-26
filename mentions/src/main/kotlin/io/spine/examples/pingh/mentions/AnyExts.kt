@@ -29,10 +29,19 @@ package io.spine.examples.pingh.mentions
 import com.google.protobuf.Any
 import com.google.protobuf.Message
 import io.spine.protobuf.AnyPacker
-import kotlin.reflect.KClass
 
 /**
- * Unwraps `Any` value into an instance of the passed class.
+ * Unpacks this `Any` into the given message type.
+ *
+ * @param T the concrete type of the message stored in the `Any`.
  */
-public fun <S : Message> Any.unpack(targetClass: KClass<S>): S =
-    AnyPacker.unpack(this, targetClass.java)
+public inline fun <reified T : Message> Any.unpack(): T {
+    val cls = T::class
+    if (!cls.isFinal) {
+        throw IllegalArgumentException(
+            "Message type for the `unpack` call must be a concrete message, with a `final` class." +
+                    " `${cls.qualifiedName}` is not `final`."
+        )
+    }
+    return AnyPacker.unpack(this, cls.java)
+}

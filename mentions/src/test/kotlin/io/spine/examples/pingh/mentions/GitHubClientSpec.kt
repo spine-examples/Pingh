@@ -47,7 +47,6 @@ import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.Mention
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
-import io.spine.protobuf.AnyPacker
 import io.spine.server.BoundedContextBuilder
 import io.spine.testing.TestValues.randomString
 import io.spine.testing.server.blackbox.BlackBoxContext
@@ -180,7 +179,7 @@ public class GitHubClientSpec : ContextAwareTest() {
             eventSubject.hasSize(expectedUserMentionedSet.size)
             val actualUserMentionedSet = eventSubject
                 .actual()
-                .map { event -> AnyPacker.unpack(event.message, UserMentioned::class.java) }
+                .map { it.message.unpack<UserMentioned>() }
                 .toSet()
             actualUserMentionedSet shouldBe expectedUserMentionedSet
         }
