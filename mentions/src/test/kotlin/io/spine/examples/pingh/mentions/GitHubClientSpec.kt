@@ -257,7 +257,7 @@ public class GitHubClientSpec : ContextAwareTest() {
         context()
             .receivesCommand(firstCommand)
             .receivesCommand(secondCommand)
-        val expected = listOf(definePreviousWorkday(), firstWhenRequested)
+        val expected = listOf(identifyPreviousWorkday(), firstWhenRequested)
         gitHubClientService.updatedAfterList() shouldBe expected
     }
 }

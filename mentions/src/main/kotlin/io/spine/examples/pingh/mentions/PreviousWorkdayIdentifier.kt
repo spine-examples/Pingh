@@ -39,7 +39,7 @@ import java.time.ZoneOffset
  * if counted from the current point in time.
  * Working days are days from Monday to Friday, inclusive.
  */
-internal fun definePreviousWorkday(): Timestamp {
+internal fun identifyPreviousWorkday(): Timestamp {
     var localDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN)
     do {
         localDateTime = localDateTime.minusDays(1)
