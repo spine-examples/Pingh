@@ -72,7 +72,7 @@ public class GitHubClientSpec : ContextAwareTest() {
     public fun prepareSessionsContextAndEmitEvent() {
         gitHubClientService.unfreeze()
         gitHubClientService.setDefaultResponseStatusCode()
-        gitHubClientService.clearSuccessfulUpdateTimes()
+        gitHubClientService.clearUpdatedAfterList()
         sessionContext = BlackBoxContext.from(newSessionsContext())
         val username = Username::class.buildBy(randomString())
         gitHubClientId = GitHubClientId::class.buildBy(username)
@@ -258,6 +258,6 @@ public class GitHubClientSpec : ContextAwareTest() {
             .receivesCommand(firstCommand)
             .receivesCommand(secondCommand)
         val expected = listOf(definePreviousWorkday(), firstWhenRequested)
-        gitHubClientService.successfulUpdateTimes() shouldBe expected
+        gitHubClientService.updatedAfterList() shouldBe expected
     }
 }

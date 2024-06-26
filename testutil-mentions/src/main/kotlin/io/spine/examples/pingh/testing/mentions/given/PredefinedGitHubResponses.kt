@@ -71,10 +71,10 @@ public class PredefinedGitHubResponses : GitHubClientService {
     private var responseStatusCode = HttpStatusCode.OK
 
     /**
-     * List of times of successful fetching mentions from GitHub.
-     * The order is correspond to the [fetchMentions] method call is preserved.
+     * List of values of the `updatedAfter` arguments which were passed to [fetchMentions] methods.
+     * The order of the elements corresponds to the order of methods call.
      */
-    private val successfulUpdateTimes = mutableListOf<Timestamp>()
+    private val updatedAfterList = mutableListOf<Timestamp>()
 
     /**
      * Returns set of [Mention]s retrieved from a JSON file in the resource folder.
@@ -83,7 +83,7 @@ public class PredefinedGitHubResponses : GitHubClientService {
     public override fun fetchMentions(
         username: Username,
         token: PersonalAccessToken,
-        lastSuccessfulUpdate: Timestamp
+        updatedAfter: Timestamp
     ): Set<Mention> {
         if (responseStatusCode != HttpStatusCode.OK) {
             throw CannotFetchMentionsFromGitHubException(responseStatusCode.value)
@@ -96,7 +96,7 @@ public class PredefinedGitHubResponses : GitHubClientService {
             .map { fragment -> Mention::class.buildFromFragment(fragment) }
             .toSet()
         waitWhileServiceIsFrozen()
-        successfulUpdateTimes.add(lastSuccessfulUpdate)
+        updatedAfterList.add(updatedAfter)
         return mentions
     }
 
@@ -146,14 +146,16 @@ public class PredefinedGitHubResponses : GitHubClientService {
     }
 
     /**
-     * Returns [successfulUpdateTimes].
+     * Returns the list of values of the `updatedAfter` arguments which were passed
+     * to [fetchMentions] methods.
      */
-    public fun successfulUpdateTimes(): List<Timestamp> = successfulUpdateTimes.toList()
+    public fun updatedAfterList(): List<Timestamp> = updatedAfterList.toList()
 
     /**
-     * Clear [successfulUpdateTimes].
+     * Clear the list of values of the `updatedAfter` arguments which were passed
+     * to [fetchMentions] methods.
      */
-    public fun clearSuccessfulUpdateTimes() {
-        successfulUpdateTimes.clear()
+    public fun clearUpdatedAfterList() {
+        updatedAfterList.clear()
     }
 }

@@ -38,7 +38,9 @@ import kotlin.jvm.Throws
 public interface GitHubClientService {
 
     /**
-     * Searches for user `Mentions` by the GitHub name of the user from the last update time.
+     * Searches for user `Mention`s by the GitHub name of the user. The mentions that occurred
+     * in GitHub items that were updated between the specified time
+     * and the current moment are fetched.
      *
      * Uses `PersonalAccessToken` to access GitHub API.
      */
@@ -46,6 +48,6 @@ public interface GitHubClientService {
     public fun fetchMentions(
         username: Username,
         token: PersonalAccessToken,
-        lastSuccessfulUpdate: Timestamp
+        updatedAfter: Timestamp
     ): Set<Mention>
 }

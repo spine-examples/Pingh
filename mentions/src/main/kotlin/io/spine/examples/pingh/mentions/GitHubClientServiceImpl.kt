@@ -63,7 +63,9 @@ public class GitHubClientServiceImpl(
     private val client = HttpClient(engine)
 
     /**
-     * Searches for user `Mentions` by the GitHub name of the user from the last update time.
+     * Searches for user `Mention`s by the GitHub name of the user. The mentions that occurred
+     * in GitHub items that were updated between the specified time
+     * and the current moment are fetched.
      *
      * Uses `PersonalAccessToken` to access GitHub API.
      *
@@ -73,10 +75,10 @@ public class GitHubClientServiceImpl(
     public override fun fetchMentions(
         username: Username,
         token: PersonalAccessToken,
-        lastSuccessfulUpdate: Timestamp
+        updatedAfter: Timestamp
     ): Set<Mention> =
-        findMentions(username, token, lastSuccessfulUpdate, ItemType.ISSUE) +
-                findMentions(username, token, lastSuccessfulUpdate, ItemType.PULL_REQUEST)
+        findMentions(username, token, updatedAfter, ItemType.ISSUE) +
+                findMentions(username, token, updatedAfter, ItemType.PULL_REQUEST)
 
     /**
      * Requests GitHub for mentions of a user in issues or pull requests,
@@ -86,11 +88,11 @@ public class GitHubClientServiceImpl(
     private fun findMentions(
         username: Username,
         token: PersonalAccessToken,
-        lastSuccessfulUpdate: Timestamp,
+        updatedAfter: Timestamp,
         itemType: ItemType
     ): Set<Mention> {
         val userTag = username.tag()
-        return searchIssuesOrPullRequests(username, token, lastSuccessfulUpdate, itemType)
+        return searchIssuesOrPullRequests(username, token, updatedAfter, itemType)
             .itemList
             .flatMap { item ->
                 val mentionsInComments = obtainCommentsByUrl(item.commentsUrl, token)
@@ -122,7 +124,7 @@ public class GitHubClientServiceImpl(
     private fun searchIssuesOrPullRequests(
         username: Username,
         token: PersonalAccessToken,
-        lastSuccessfulUpdate: Timestamp,
+        updatedAfter: Timestamp,
         itemType: ItemType
     ): IssuesAndPullRequestsSearchResult =
         runBlocking {
@@ -130,7 +132,7 @@ public class GitHubClientServiceImpl(
                 .get("https://api.github.com/search/issues")
                 .by(itemType)
                 .by(username)
-                .by(lastSuccessfulUpdate)
+                .by(updatedAfter)
                 .withHeaders { configureHeaders(token) }
                 .requestOnBehalfOf(client)
 
@@ -208,9 +210,10 @@ public class GitHubClientServiceImpl(
         private var username: Username? = null
 
         /**
-         * The time of the last successful receiving mentions from GitHub.
+         * The time after which GitHub items containing the searched mentions
+         * should have been updated.
          */
-        private var lastSuccessfulUpdate: Timestamp? = null
+        private var updatedAfter: Timestamp? = null
 
         /**
          * The function that sets request headers.
@@ -234,10 +237,11 @@ public class GitHubClientServiceImpl(
         }
 
         /**
-         * Sets the time of the last successful receiving mentions from GitHub.
+         * Sets the time after which GitHub items containing the searched mentions
+         * should have been updated.
          */
-        public fun by(lastUpdated: Timestamp): GitHubSearchRequest {
-            this.lastSuccessfulUpdate = lastUpdated
+        public fun by(updatedAfter: Timestamp): GitHubSearchRequest {
+            this.updatedAfter = updatedAfter
             return this
         }
 
@@ -260,15 +264,16 @@ public class GitHubClientServiceImpl(
             checkNotNull(username) {
                 "The name of the user whose mentions are requested is not specified."
             }
-            checkNotNull(lastSuccessfulUpdate) {
-                "The time of the last successful receiving mentions from GitHub is not specified."
+            checkNotNull(updatedAfter) {
+                "The time after which GitHub items containing the searched mentions " +
+                        "should have been updated is not specified."
             }
             checkNotNull(headersConfigurer) {
                 "The function that sets request headers is not specified."
             }
 
             val query = "is:${itemType!!.value()} mentions:${username!!.value} " +
-                    "updated:>${Timestamps.toString(lastSuccessfulUpdate)}"
+                    "updated:>${Timestamps.toString(updatedAfter)}"
             return client.get(url) {
                 url {
                     parameters.append("q", query)
