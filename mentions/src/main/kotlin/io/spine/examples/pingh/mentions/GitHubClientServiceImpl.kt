@@ -32,6 +32,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.request.get
+import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpMessageBuilder
 import io.ktor.http.HeadersBuilder
 import io.ktor.http.HttpStatusCode
@@ -124,19 +126,14 @@ public class GitHubClientServiceImpl(
         itemType: ItemType
     ): IssuesAndPullRequestsSearchResult =
         runBlocking {
-            val response = client.get("https://api.github.com/search/issues") {
-                url {
-                    parameters.append(
-                        "q",
-                        "is:${itemType.value()} mentions:${username.value} " +
-                                "updated:>${Timestamps.toString(lastSuccessfulUpdate)}"
-                    )
-                    parameters.append("per_page", "100")
-                    parameters.append("sort", "updated")
-                    parameters.append("order", "desc")
-                }
-                configureHeaders(token)
-            }
+            val response = GitHubSearchRequest
+                .get("https://api.github.com/search/issues")
+                .by(itemType)
+                .by(username)
+                .by(lastSuccessfulUpdate)
+                .withHeaders { configureHeaders(token) }
+                .requestOnBehalfOf(client)
+
             if (response.status != HttpStatusCode.OK) {
                 throw CannotFetchMentionsFromGitHubException(response.status.value)
             }
@@ -186,5 +183,101 @@ public class GitHubClientServiceImpl(
          * Returns GitHub name to search for an item of this type.
          */
         public fun value(): String = gitHubName
+    }
+
+    /**
+     * Builder for creating and sending request to search for mentions to GitHub.
+     */
+    private class GitHubSearchRequest private constructor(private val url: String) {
+
+        public companion object {
+            /**
+             * Creates builder and sets the request URL.
+             */
+            public fun get(url: String): GitHubSearchRequest = GitHubSearchRequest(url)
+        }
+
+        /**
+         * The type of the searched item.
+         */
+        private var itemType: ItemType? = null
+
+        /**
+         * The name of the user whose mentions are requested.
+         */
+        private var username: Username? = null
+
+        /**
+         * The time of the last successful receiving mentions from GitHub.
+         */
+        private var lastSuccessfulUpdate: Timestamp? = null
+
+        /**
+         * The function that sets request headers.
+         */
+        private var headersConfigurer: (HttpRequestBuilder.() -> Unit)? = null
+
+        /**
+         * Sets the type of the searched item.
+         */
+        public fun by(itemType: ItemType): GitHubSearchRequest {
+            this.itemType = itemType
+            return this
+        }
+
+        /**
+         * Sets the name of the user whose mentions are requested.
+         */
+        public fun by(username: Username): GitHubSearchRequest {
+            this.username = username
+            return this
+        }
+
+        /**
+         * Sets the time of the last successful receiving mentions from GitHub.
+         */
+        public fun by(lastUpdated: Timestamp): GitHubSearchRequest {
+            this.lastSuccessfulUpdate = lastUpdated
+            return this
+        }
+
+        /**
+         * Sets the function that sets request headers.
+         */
+        public fun withHeaders(headersConfigurer: HttpRequestBuilder.() -> Unit):
+                GitHubSearchRequest {
+            this.headersConfigurer = headersConfigurer
+            return this
+        }
+
+        /**
+         * Creates and sends request with specified data.
+         *
+         * @throws IllegalArgumentException If any request builder data is not specified.
+         */
+        public suspend fun requestOnBehalfOf(client: HttpClient): HttpResponse {
+            checkNotNull(itemType) { "The type of the searched item is not specified." }
+            checkNotNull(username) {
+                "The name of the user whose mentions are requested is not specified."
+            }
+            checkNotNull(lastSuccessfulUpdate) {
+                "The time of the last successful receiving mentions from GitHub is not specified."
+            }
+            checkNotNull(headersConfigurer) {
+                "The function that sets request headers is not specified."
+            }
+
+            val query = "is:${itemType!!.value()} mentions:${username!!.value} " +
+                    "updated:>${Timestamps.toString(lastSuccessfulUpdate)}"
+            return client.get(url) {
+                url {
+                    parameters.append("q", query)
+                    parameters.append("per_page", "100")
+                    parameters.append("sort", "updated")
+                    parameters.append("order", "desc")
+                }
+                headersConfigurer!!()
+            }
+        }
     }
 }
