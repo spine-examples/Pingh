@@ -33,4 +33,4 @@ import com.google.protobuf.util.Timestamps
  * Returns `true` if passed `Timestamp` value is less than current one, otherwise `false`.
  */
 public fun Timestamp.isAfter(time: Timestamp): Boolean =
-    Timestamps.toMillis(this) > Timestamps.toMillis(time)
+    Timestamps.compare(this, time) > 0

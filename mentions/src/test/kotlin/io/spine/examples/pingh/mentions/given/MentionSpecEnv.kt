@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.mentions.given
 
 import io.spine.base.Time.currentTime
+import io.spine.core.UserId
 import io.spine.examples.pingh.github.NodeId
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
@@ -40,6 +41,7 @@ import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.Rejections.MentionIsAlreadyRead
 import io.spine.net.Url
 import io.spine.testing.TestValues.randomString
+import java.util.UUID
 import kotlin.reflect.KClass
 
 /**
@@ -85,4 +87,12 @@ internal fun KClass<MentionSnoozed>.buildBy(id: MentionId): MentionSnoozed =
 internal fun KClass<MentionIsAlreadyRead>.buildBy(id: MentionId): MentionIsAlreadyRead =
     MentionIsAlreadyRead.newBuilder()
         .setId(id)
+        .vBuild()
+
+/**
+ * Creates a new `UserId` with the randomly specified value.
+ */
+internal fun KClass<UserId>.generate(): UserId =
+    UserId.newBuilder()
+        .setValue(UUID.randomUUID().toString())
         .vBuild()
