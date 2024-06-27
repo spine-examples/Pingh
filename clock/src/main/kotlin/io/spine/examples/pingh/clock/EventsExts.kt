@@ -31,7 +31,7 @@ import io.spine.examples.pingh.clock.event.TimePassed
 import kotlin.reflect.KClass
 
 /**
- * Creates a new `TimePassed` event with the specified time value.
+ * Creates a new `TimePassed` event with the specified value of the time.
  */
 public fun KClass<TimePassed>.buildBy(time: Timestamp): TimePassed =
     TimePassed.newBuilder()

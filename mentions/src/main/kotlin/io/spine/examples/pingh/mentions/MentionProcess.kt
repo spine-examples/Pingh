@@ -100,7 +100,7 @@ public class MentionProcess :
      * Marks this mention as unread if the snooze time passed.
      *
      * @return Empty `Optional`, if the mention is not snoozed or the time in `TimePassed` is less
-     * than the `snoozeUntilWhen`, otherwise `MentionUnsnoozed` wrapped in `Optional`.
+     * than the `snoozeUntilWhen`. Otherwise, `MentionUnsnoozed` event wrapped in `Optional`.
      */
     @React
     internal fun on(@External event: TimePassed): Optional<MentionUnsnoozed> {

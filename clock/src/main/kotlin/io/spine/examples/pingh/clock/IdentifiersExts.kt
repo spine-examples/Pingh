@@ -30,7 +30,7 @@ import com.google.protobuf.Timestamp
 import kotlin.reflect.KClass
 
 /**
- * Creates a new `TimeId` with the specified time value.
+ * Creates a new `TimeId` with the specified value of the time.
  */
 public fun KClass<TimeId>.buildBy(value: Timestamp): TimeId =
     TimeId.newBuilder()

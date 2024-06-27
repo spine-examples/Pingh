@@ -53,20 +53,10 @@ public abstract class IntegrationTest {
     @BeforeEach
     public fun runServer() {
         clock = IntervalClock(50)
-        server = createServer(clock)
+        server = createServer(port, clock)
         server.start()
         client = DesktopClient(address, port)
     }
-
-    /**
-     * Creates a new test Pingh `Server`.
-     */
-    private fun createServer(clock: Clock): Server =
-        Server.atPort(port)
-            .enableClock(clock)
-            .add(newSessionsContext())
-            .add(newMentionsContext(PredefinedGitHubResponses()))
-            .build()
 
     @AfterEach
     public fun shutdownServer() {
@@ -79,4 +69,16 @@ public abstract class IntegrationTest {
      * Returns the `DesktopClient` connected to the server.
      */
     protected fun client(): DesktopClient = client
+
+    private companion object {
+        /**
+         * Creates a new test Pingh `Server`.
+         */
+        private fun createServer(port: Int, clock: Clock): Server =
+            Server.atPort(port)
+                .enableClock(clock)
+                .add(newSessionsContext())
+                .add(newMentionsContext(PredefinedGitHubResponses()))
+                .build()
+    }
 }

@@ -26,11 +26,11 @@
 
 rootProject.name = "Pingh"
 include(
+    "clock",
     "github",
     "sessions",
     "mentions",
     "testutil-mentions",
     "server",
-    "client",
-    "clock"
+    "client"
 )
