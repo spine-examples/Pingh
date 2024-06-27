@@ -35,8 +35,8 @@ import java.time.LocalTime
 import java.time.ZoneOffset
 
 /**
- * Returns the midnight of the previous working day,
- * if counted from the current point in time.
+ * Returns the midnight of the previous working day, if counted from the current point in time.
+ *
  * Working days are days from Monday to Friday, inclusive.
  */
 internal fun identifyPreviousWorkday(): Timestamp {

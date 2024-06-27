@@ -72,6 +72,7 @@ public class PredefinedGitHubResponses : GitHubClientService {
 
     /**
      * List of values of the `updatedAfter` arguments which were passed to [fetchMentions] methods.
+     *
      * The order of the elements corresponds to the order of methods call.
      */
     private val updatedAfterList = mutableListOf<Timestamp>()

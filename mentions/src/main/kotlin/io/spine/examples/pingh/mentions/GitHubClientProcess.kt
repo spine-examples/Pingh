@@ -100,7 +100,7 @@ public class GitHubClientProcess :
     internal fun on(event: MentionsUpdateFromGitHubRequested): List<EventMessage> {
         val username = state().id.username
         val token = state().token
-        val updatedAfter = determineFromWhenFetchMentions(state().whenLastSuccessfulUpdate)
+        val updatedAfter = state().whenLastSuccessfulUpdate.thisOrPreviousWorkday()
         val mentions = try {
             gitHubClientService.fetchMentions(username, token, updatedAfter)
         } catch (exception: CannotFetchMentionsFromGitHubException) {
@@ -132,15 +132,14 @@ public class GitHubClientProcess :
 
     private companion object {
         /**
-         * Determines and returns the time from which mentions should be updated.
+         * Returns this `Timestamp` if its value is not default,
+         * otherwise returns the midnight of the previous workday.
          *
-         * If updates were already performed, it returns the time of the last successfully
-         * completed update. If no updates are made, it returns the time equal to midnight
-         * of the previous work day.
+         * @see [identifyPreviousWorkday]
          */
-        private fun determineFromWhenFetchMentions(whenLastSuccessfulUpdate: Timestamp): Timestamp {
-            if (!whenLastSuccessfulUpdate.equals(whenLastSuccessfulUpdate.defaultInstanceForType)) {
-                return whenLastSuccessfulUpdate
+        private fun Timestamp.thisOrPreviousWorkday(): Timestamp {
+            if (!this.equals(this.defaultInstanceForType)) {
+                return this
             }
             return identifyPreviousWorkday()
         }

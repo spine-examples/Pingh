@@ -63,13 +63,10 @@ public class GitHubClientServiceImpl(
     private val client = HttpClient(engine)
 
     /**
-     * Searches for user `Mention`s by the GitHub name of the user. The mentions that occurred
-     * in GitHub items that were updated between the specified time
-     * and the current moment are fetched.
+     * Searches for user `Mention`s on GitHub in issues and pull requests,
+     * as well as in comments under those items.
      *
-     * Uses `PersonalAccessToken` to access GitHub API.
-     *
-     * Mentions are searched in issues and pull requests.
+     * @see [GitHubClientService.fetchMentions]
      */
     @Throws(CannotFetchMentionsFromGitHubException::class)
     public override fun fetchMentions(
