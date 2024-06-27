@@ -185,7 +185,7 @@ public class GitHubClientServiceImpl(
     }
 
     /**
-     * Builder for creating and sending request to search for mentions to GitHub.
+     * Builder for creating and sending request to search for mentions on GitHub.
      */
     private class GitHubSearchRequest private constructor(private val url: String) {
 

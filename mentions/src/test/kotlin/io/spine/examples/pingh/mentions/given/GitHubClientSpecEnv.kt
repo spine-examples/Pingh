@@ -55,22 +55,26 @@ internal fun KClass<GitHubClient>.buildBy(id: GitHubClientId, token: PersonalAcc
         .vBuild()
 
 /**
+ * Creates a new `GitHubClient` with the specified `GitHubClientId`, `PersonalAccessToken` and
+ * the time when the last successful update occurred.
+ */
+internal fun KClass<GitHubClient>.buildBy(
+    id: GitHubClientId,
+    token: PersonalAccessToken,
+    lastUpdate: Timestamp
+): GitHubClient =
+    GitHubClient.newBuilder()
+        .setId(id)
+        .setToken(token)
+        .setWhenLastSuccessfulUpdate(lastUpdate)
+        .vBuild()
+
+/**
  * Creates a new `GitHubClient` with the `when_started` field filled with the default value.
  */
 internal fun KClass<GitHubClient>.buildWithDefaultWhenStartedField(): GitHubClient =
     GitHubClient.newBuilder()
         .setWhenStarted(Timestamp.getDefaultInstance())
-        // Building the message partially to include
-        // only the tested fields.
-        .buildPartial()
-
-/**
- * Creates a new `GitHubClient` with the `when_last_successful_update` field
- * filled with the default value.
- */
-internal fun KClass<GitHubClient>.buildWithDefaultWhenLastSuccessfulUpdateField(): GitHubClient =
-    GitHubClient.newBuilder()
-        .setWhenLastSuccessfulUpdate(Timestamp.getDefaultInstance())
         // Building the message partially to include
         // only the tested fields.
         .buildPartial()

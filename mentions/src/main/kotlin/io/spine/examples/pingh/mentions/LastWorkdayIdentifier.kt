@@ -35,14 +35,16 @@ import java.time.LocalTime
 import java.time.ZoneOffset
 
 /**
- * Returns the midnight of the previous working day, if counted from the current point in time.
+ * Returns the midnight of the last working day, if counted from the current point in time.
  *
  * Working days are days from Monday to Friday, inclusive.
+ *
+ * If today is a workday, returns midnight today.
  */
-internal fun identifyPreviousWorkday(): Timestamp {
+internal fun identifyLastWorkday(): Timestamp {
     var localDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN)
-    do {
+    while (localDateTime.dayOfWeek in listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)) {
         localDateTime = localDateTime.minusDays(1)
-    } while (localDateTime.dayOfWeek in listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY))
+    }
     return Timestamps.fromSeconds(localDateTime.toEpochSecond(ZoneOffset.UTC))
 }
