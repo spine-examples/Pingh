@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.mentions.given
 
+import com.google.protobuf.Timestamp
 import io.spine.base.Time.currentTime
 import io.spine.core.UserId
 import io.spine.examples.pingh.github.NodeId
@@ -73,6 +74,21 @@ internal fun KClass<Mention>.buildBy(id: MentionId, status: MentionStatus): Ment
     Mention.newBuilder()
         .setId(id)
         .setStatus(status)
+        .vBuild()
+
+/**
+ * Creates a new `Mention` with the specified ID, the status of this mention, and
+ * the time until which the mention is snoozed.
+ */
+internal fun KClass<Mention>.buildBy(
+    id: MentionId,
+    status: MentionStatus,
+    snoozedUntilWhen: Timestamp
+): Mention =
+    Mention.newBuilder()
+        .setId(id)
+        .setStatus(status)
+        .setSnoozeUntilWhen(snoozedUntilWhen)
         .vBuild()
 
 /**

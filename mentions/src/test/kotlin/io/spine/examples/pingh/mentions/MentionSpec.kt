@@ -94,8 +94,8 @@ public class MentionSpec : ContextAwareTest() {
         }
 
         @Test
-        public fun `set 'SNOOZED' status in 'Mention' entity`() {
-            val expected = Mention::class.buildBy(id, MentionStatus.SNOOZED)
+        public fun `set 'SNOOZED' status and set 'snooze_until_when' field in 'Mention' entity`() {
+            val expected = Mention::class.buildBy(id, MentionStatus.SNOOZED, untilWhen)
             context().assertState(id, expected)
         }
     }
