@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.mentions
 
-import com.google.protobuf.Timestamp
 import io.kotest.matchers.shouldBe
 import io.ktor.http.HttpStatusCode
 import io.spine.base.Time.currentTime
@@ -42,7 +41,6 @@ import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.given.buildBy
 import io.spine.examples.pingh.mentions.given.buildWithDefaultWhenStartedField
 import io.spine.examples.pingh.mentions.given.expectedUserMentionedSet
-import io.spine.examples.pingh.mentions.given.inMinute
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.newSessionsContext
@@ -72,7 +70,6 @@ public class GitHubClientSpec : ContextAwareTest() {
     public fun prepareSessionsContextAndEmitEvent() {
         gitHubClientService.unfreeze()
         gitHubClientService.setDefaultResponseStatusCode()
-        gitHubClientService.clearUpdatedAfterList()
         sessionContext = BlackBoxContext.from(newSessionsContext())
         val username = Username::class.buildBy(randomString())
         gitHubClientId = GitHubClientId::class.buildBy(username)
@@ -242,20 +239,5 @@ public class GitHubClientSpec : ContextAwareTest() {
         context().assertEvents()
             .withType(MentionsUpdateFromGitHubRequested::class.java)
             .hasSize(2)
-    }
-
-    @Test
-    public fun `use updated 'when_last_successfully_updated' time to fetch mentions from GitHub`() {
-        val firstWhenRequested = currentTime()
-        val secondWhenRequested = firstWhenRequested.inMinute()
-        val firstCommand =
-            UpdateMentionsFromGitHub::class.buildBy(gitHubClientId, firstWhenRequested)
-        val secondCommand =
-            UpdateMentionsFromGitHub::class.buildBy(gitHubClientId, secondWhenRequested)
-        context()
-            .receivesCommand(firstCommand)
-            .receivesCommand(secondCommand)
-        val expected = listOf(Timestamp::class.identifyLastWorkday(), firstWhenRequested)
-        gitHubClientService.updatedAfterList() shouldBe expected
     }
 }

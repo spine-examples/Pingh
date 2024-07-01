@@ -71,13 +71,6 @@ public class PredefinedGitHubResponses : GitHubClientService {
     private var responseStatusCode = HttpStatusCode.OK
 
     /**
-     * List of values of the `updatedAfter` arguments which were passed to [fetchMentions] methods.
-     *
-     * The order of the elements corresponds to the order of methods call.
-     */
-    private val updatedAfterList = mutableListOf<Timestamp>()
-
-    /**
      * Returns set of [Mention]s retrieved from a JSON file in the resource folder.
      */
     @Throws(CannotFetchMentionsFromGitHubException::class)
@@ -97,7 +90,6 @@ public class PredefinedGitHubResponses : GitHubClientService {
             .map { fragment -> Mention::class.buildFromFragment(fragment) }
             .toSet()
         waitWhileServiceIsFrozen()
-        updatedAfterList.add(updatedAfter)
         return mentions
     }
 
@@ -144,19 +136,5 @@ public class PredefinedGitHubResponses : GitHubClientService {
      */
     public fun setDefaultResponseStatusCode() {
         responseStatusCode = HttpStatusCode.OK
-    }
-
-    /**
-     * Returns the list of values of the `updatedAfter` arguments which were passed
-     * to [fetchMentions] methods.
-     */
-    public fun updatedAfterList(): List<Timestamp> = updatedAfterList.toList()
-
-    /**
-     * Clear the list of values of the `updatedAfter` arguments which were passed
-     * to [fetchMentions] methods.
-     */
-    public fun clearUpdatedAfterList() {
-        updatedAfterList.clear()
     }
 }
