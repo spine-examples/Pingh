@@ -26,11 +26,13 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Timestamps
 import io.spine.base.EventMessage
-import io.spine.base.Time.currentTime
 import io.spine.core.External
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
@@ -42,7 +44,13 @@ import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.server.command.Assign
 import io.spine.server.event.React
 import io.spine.server.procman.ProcessManager
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneOffset
 import kotlin.jvm.Throws
+import kotlin.reflect.KClass
 
 /**
  * A process of reading user's mentions from GitHub.
@@ -83,7 +91,7 @@ public class GitHubClientProcess :
         if (state().hasWhenStarted()) {
             throw MentionsUpdateIsAlreadyInProgress::class.buildBy(command.id)
         }
-        builder().setWhenStarted(currentTime())
+        builder().setWhenStarted(command.whenRequested)
         return MentionsUpdateFromGitHubRequested::class.buildBy(state().id)
     }
 
@@ -99,39 +107,25 @@ public class GitHubClientProcess :
     internal fun on(event: MentionsUpdateFromGitHubRequested): List<EventMessage> {
         val username = state().id.username
         val token = state().token
+        val updatedAfter = state().whenLastSuccessfullyUpdated.thisOrLastWorkday()
         val mentions = try {
-            gitHubClientService.fetchMentions(username, token)
+            gitHubClientService.fetchMentions(username, token, updatedAfter)
         } catch (exception: CannotFetchMentionsFromGitHubException) {
             builder().clearWhenStarted()
             return listOf(
                 RequestMentionsFromGitHubFailed::class.buildBy(state().id, exception.statusCode())
             )
         }
-        val userMentionedEvents = createUserMentionedEvents(mentions)
+        val userMentionedEvents = toEvents(mentions, state().id.username)
         val mentionsUpdateFromGitHubCompleted =
             MentionsUpdateFromGitHubCompleted::class.buildBy(state().id)
-        builder().clearWhenStarted()
+        builder()
+            .setWhenLastSuccessfullyUpdated(state().whenStarted)
+            .clearWhenStarted()
         return userMentionedEvents
-            .toList()
+            .toList<EventMessage>()
             .plus(mentionsUpdateFromGitHubCompleted)
     }
-
-    private fun createUserMentionedEvents(gitHubMentions: Set<Mention>): Set<EventMessage> =
-        gitHubMentions
-            .map { mention ->
-                with(UserMentioned.newBuilder()) {
-                    id = MentionId::class.buildBy(
-                        mention.id,
-                        state().id.username
-                    )
-                    whoMentioned = mention.author
-                    title = mention.title
-                    whenMentioned = mention.whenMentioned
-                    url = mention.url
-                    vBuild()
-                }
-            }
-            .toSet()
 
     /**
      * Supplies this instance of the process with a service allowing to access GitHub.
@@ -142,4 +136,44 @@ public class GitHubClientProcess :
     internal fun inject(gitHubClientService: GitHubClientService) {
         this.gitHubClientService = gitHubClientService
     }
+
+    private companion object {
+        /**
+         * Converts the set of `Mention`s to the set of `UserMentioned` events
+         * with the specified name of the mentioned user.
+         */
+        private fun toEvents(gitHubMentions: Set<Mention>, whoWasMentioned: Username):
+                Set<UserMentioned> =
+            gitHubMentions
+                .map { mention -> UserMentioned::class.buildBy(mention, whoWasMentioned) }
+                .toSet()
+    }
+}
+
+/**
+ * Returns this `Timestamp` if its value is not default,
+ * otherwise returns the midnight of the last workday.
+ *
+ * @see [thisOrLastWorkday]
+ */
+private fun Timestamp.thisOrLastWorkday(): Timestamp {
+    if (!this.equals(this.defaultInstanceForType)) {
+        return this
+    }
+    return Timestamp::class.identifyLastWorkday()
+}
+
+/**
+ * Returns the midnight of the last working day, if counted from the current point in time.
+ *
+ * Working days are days from Monday to Friday, inclusive.
+ *
+ * If today is a workday, returns midnight today.
+ */
+public fun KClass<Timestamp>.identifyLastWorkday(): Timestamp {
+    var localDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN)
+    while (localDateTime.dayOfWeek in listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)) {
+        localDateTime = localDateTime.minusDays(1)
+    }
+    return Timestamps.fromSeconds(localDateTime.toEpochSecond(ZoneOffset.UTC))
 }

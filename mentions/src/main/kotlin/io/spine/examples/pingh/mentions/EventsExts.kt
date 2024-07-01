@@ -27,7 +27,9 @@
 package io.spine.examples.pingh.mentions
 
 import com.google.protobuf.Timestamp
+import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
@@ -35,6 +37,7 @@ import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
 import io.spine.examples.pingh.mentions.event.RequestMentionsFromGitHubFailed
+import io.spine.examples.pingh.mentions.event.UserMentioned
 import kotlin.reflect.KClass
 
 /**
@@ -101,4 +104,18 @@ public fun KClass<RequestMentionsFromGitHubFailed>.buildBy(id: GitHubClientId, s
     RequestMentionsFromGitHubFailed.newBuilder()
         .setId(id)
         .setResponseStatusCode(statusCode)
+        .vBuild()
+
+/**
+ * Creates a new `UserMentioned` event with the name of the mentioned user
+ * and the data specified in the `Mention`.
+ */
+public fun KClass<UserMentioned>.buildBy(mention: Mention, whoWasMentioned: Username):
+        UserMentioned =
+    UserMentioned.newBuilder()
+        .setId(MentionId::class.buildBy(mention.id, whoWasMentioned))
+        .setWhoMentioned(mention.author)
+        .setTitle(mention.title)
+        .setWhenMentioned(mention.whenMentioned)
+        .setUrl(mention.url)
         .vBuild()
