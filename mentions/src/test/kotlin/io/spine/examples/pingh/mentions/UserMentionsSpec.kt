@@ -30,6 +30,7 @@ import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
+import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.given.buildBy
@@ -68,6 +69,16 @@ public class UserMentionsSpec : ContextAwareTest() {
         val event = MentionSnoozed::class.buildBy(userMentioned.id)
         context().receivesEvent(event)
         assertMentionStatus(MentionStatus.SNOOZED)
+    }
+
+    @Test
+    public fun `react on 'MentionUnsnoozed', and set 'UNREAD' status`() {
+        val snoozedEvent = MentionSnoozed::class.buildBy(userMentioned.id)
+        val unsnoozedEvent = MentionUnsnoozed::class.buildBy(userMentioned.id)
+        context()
+            .receivesEvent(snoozedEvent)
+            .receivesEvent(unsnoozedEvent)
+        assertMentionStatus(MentionStatus.UNREAD)
     }
 
     @Test

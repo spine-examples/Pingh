@@ -27,10 +27,12 @@
 package io.spine.examples.pingh.client.e2e
 
 import io.spine.examples.pingh.client.DesktopClient
+import io.spine.examples.pingh.clock.IntervalClock
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.newMentionsContext
 import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.server.Server
+import kotlin.time.Duration.Companion.milliseconds
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 
@@ -43,28 +45,23 @@ public abstract class IntegrationTest {
 
     private val port = 4242
     private val address = "localhost"
+    private lateinit var clock: IntervalClock
     private lateinit var server: Server
     private lateinit var client: DesktopClient
 
     @BeforeEach
     public fun runServer() {
-        server = createServer()
+        clock = IntervalClock(100.milliseconds)
+        clock.start()
+        server = createServer(port)
         server.start()
         client = DesktopClient(address, port)
     }
 
-    /**
-     * Creates a new test Pingh `Server`.
-     */
-    private fun createServer(): Server =
-        Server.atPort(port)
-            .add(newSessionsContext())
-            .add(newMentionsContext(PredefinedGitHubResponses()))
-            .build()
-
     @AfterEach
     public fun shutdownServer() {
         client.close()
+        clock.stop()
         server.shutdown()
     }
 
@@ -72,4 +69,15 @@ public abstract class IntegrationTest {
      * Returns the `DesktopClient` connected to the server.
      */
     protected fun client(): DesktopClient = client
+
+    private companion object {
+        /**
+         * Creates a new test Pingh `Server`.
+         */
+        private fun createServer(port: Int): Server =
+            Server.atPort(port)
+                .add(newSessionsContext())
+                .add(newMentionsContext(PredefinedGitHubResponses()))
+                .build()
+    }
 }

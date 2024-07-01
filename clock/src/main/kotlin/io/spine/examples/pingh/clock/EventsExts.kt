@@ -24,35 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.mentions
+package io.spine.examples.pingh.clock
 
-import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
+import com.google.protobuf.Timestamp
 import io.spine.examples.pingh.clock.event.TimePassed
-import io.spine.examples.pingh.mentions.event.UserMentioned
-import io.spine.server.procman.ProcessManagerRepository
-import io.spine.server.route.EventRoute.withId
-import io.spine.server.route.EventRouting
+import kotlin.reflect.KClass
 
 /**
- * Manages instances of [MentionProcess].
+ * Creates a new `TimePassed` event with the specified value of the time.
  */
-public class MentionRepository :
-    ProcessManagerRepository<MentionId, MentionProcess, Mention>() {
-
-    @OverridingMethodsMustInvokeSuper
-    protected override fun setupEventRouting(routing: EventRouting<MentionId>) {
-        super.setupEventRouting(routing)
-        routing
-            .route(UserMentioned::class.java) { event, _ -> withId(event.id) }
-            .route(TimePassed::class.java) { _, _ -> toAll() }
-    }
-
-    /**
-     * Returns a set of identifiers of records in the process manager storage.
-     */
-    private fun toAll(): Set<MentionId> =
-        storage()
-            .index()
-            .asSequence()
-            .toSet()
-}
+public fun KClass<TimePassed>.buildBy(time: Timestamp): TimePassed =
+    TimePassed.newBuilder()
+        .setTime(time)
+        .vBuild()

@@ -26,7 +26,9 @@
 
 package io.spine.examples.pingh.mentions.given
 
+import com.google.protobuf.Timestamp
 import io.spine.base.Time.currentTime
+import io.spine.core.UserId
 import io.spine.examples.pingh.github.NodeId
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
@@ -40,6 +42,7 @@ import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.Rejections.MentionIsAlreadyRead
 import io.spine.net.Url
 import io.spine.testing.TestValues.randomString
+import java.util.UUID
 import kotlin.reflect.KClass
 
 /**
@@ -74,6 +77,21 @@ internal fun KClass<Mention>.buildBy(id: MentionId, status: MentionStatus): Ment
         .vBuild()
 
 /**
+ * Creates a new `Mention` with the specified ID, the status of this mention, and
+ * the time until which the mention is snoozed.
+ */
+internal fun KClass<Mention>.buildBy(
+    id: MentionId,
+    status: MentionStatus,
+    snoozedUntilWhen: Timestamp
+): Mention =
+    Mention.newBuilder()
+        .setId(id)
+        .setStatus(status)
+        .setSnoozeUntilWhen(snoozedUntilWhen)
+        .vBuild()
+
+/**
  * Creates a new `MentionSnoozed` event with the specified ID of the mention.
  */
 internal fun KClass<MentionSnoozed>.buildBy(id: MentionId): MentionSnoozed =
@@ -85,4 +103,12 @@ internal fun KClass<MentionSnoozed>.buildBy(id: MentionId): MentionSnoozed =
 internal fun KClass<MentionIsAlreadyRead>.buildBy(id: MentionId): MentionIsAlreadyRead =
     MentionIsAlreadyRead.newBuilder()
         .setId(id)
+        .vBuild()
+
+/**
+ * Creates a new `UserId` with the randomly specified value.
+ */
+internal fun KClass<UserId>.generate(): UserId =
+    UserId.newBuilder()
+        .setValue(UUID.randomUUID().toString())
         .vBuild()

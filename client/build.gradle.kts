@@ -58,5 +58,6 @@ dependencies {
     implementation(Grpc.netty)
 
     testImplementation(project(":testutil-mentions"))
+    testImplementation(project(":clock"))
     testImplementation(Spine.Server.lib)
 }
