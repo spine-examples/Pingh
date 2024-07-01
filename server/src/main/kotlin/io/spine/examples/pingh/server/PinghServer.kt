@@ -36,16 +36,7 @@ import io.spine.server.delivery.Delivery
 import io.spine.server.storage.memory.InMemoryStorageFactory
 import io.spine.server.transport.memory.InMemoryTransportFactory
 import io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT
-import io.spine.examples.pingh.clock.IntervalClock
-import io.spine.examples.pingh.clock.enableClock
 import io.spine.examples.pingh.sessions.newSessionsContext
-
-/**
- * The interval at which the [IntervalClock] emits the `TimePassed` events.
- * The value is specified in milliseconds.
- */
-@Suppress("TopLevelPropertyNaming") // For naming const in the project using camel case.
-private const val pauseTimeInClock = 1000L
 
 /**
  * The entry point of the server application.
@@ -62,13 +53,11 @@ public fun main() {
  *
  * The server includes bounded contexts of [Sessions][io.spine.examples.pingh.sessions]
  * and [Mentions][io.spine.examples.pingh.mentions].
- * Also enables system [Clock][io.spine.examples.pingh.clock].
  */
 private fun createServer(): Server {
     configureEnvironment()
     return Server
         .atPort(DEFAULT_CLIENT_SERVICE_PORT)
-        .enableClock(IntervalClock(pauseTimeInClock))
         .add(newSessionsContext())
         .add(newMentionsContext(GitHubClientServiceImpl(CIO.create())))
         .build()

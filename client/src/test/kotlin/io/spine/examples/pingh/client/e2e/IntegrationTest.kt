@@ -29,7 +29,6 @@ package io.spine.examples.pingh.client.e2e
 import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.clock.Clock
 import io.spine.examples.pingh.clock.IntervalClock
-import io.spine.examples.pingh.clock.enableClock
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.newMentionsContext
 import io.spine.examples.pingh.sessions.newSessionsContext
@@ -53,7 +52,8 @@ public abstract class IntegrationTest {
     @BeforeEach
     public fun runServer() {
         clock = IntervalClock(50)
-        server = createServer(port, clock)
+        clock.start()
+        server = createServer(port)
         server.start()
         client = DesktopClient(address, port)
     }
@@ -74,9 +74,8 @@ public abstract class IntegrationTest {
         /**
          * Creates a new test Pingh `Server`.
          */
-        private fun createServer(port: Int, clock: Clock): Server =
+        private fun createServer(port: Int): Server =
             Server.atPort(port)
-                .enableClock(clock)
                 .add(newSessionsContext())
                 .add(newMentionsContext(PredefinedGitHubResponses()))
                 .build()
