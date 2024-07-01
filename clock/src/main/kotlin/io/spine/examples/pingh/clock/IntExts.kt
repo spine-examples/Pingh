@@ -27,7 +27,7 @@
 package io.spine.examples.pingh.clock
 
 /**
- * Creates a new `Millis` with this integer value.
+ * Creates a new `Millis` value-object with this integer value.
  */
 public fun Int.millis(): Millis =
     Millis.newBuilder()

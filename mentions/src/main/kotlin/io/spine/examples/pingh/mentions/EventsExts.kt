@@ -88,7 +88,7 @@ public fun KClass<MentionSnoozed>.buildBy(id: MentionId, untilWhen: Timestamp): 
         .vBuild()
 
 /**
- * Create a new `MentionUnsnoozed` event with the specified ID of the mention.
+ * Creates a new `MentionUnsnoozed` event with the specified ID of the mention.
  */
 public fun KClass<MentionUnsnoozed>.buildBy(id: MentionId): MentionUnsnoozed =
     MentionUnsnoozed.newBuilder()

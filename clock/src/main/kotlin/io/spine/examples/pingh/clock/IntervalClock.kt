@@ -30,9 +30,6 @@ import java.lang.Thread.sleep
 
 /**
  * The system clock that emits a `TimePassed` event after the specified time interval.
- *
- * The `pauseTime` between the emitting of two `TimePassed` events
- * is specified in milliseconds.
  */
 public class IntervalClock(
     pauseTime: Millis
