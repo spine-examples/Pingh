@@ -27,10 +27,9 @@
 package io.spine.examples.pingh.mentions
 
 import com.google.protobuf.Timestamp
-import com.google.protobuf.util.Timestamps
+import com.google.protobuf.util.Timestamps.compare
 
 /**
- * Returns `true` if passed `Timestamp` value is less than current one, otherwise `false`.
+ * Verifies whether this point in time is after the passed one.
  */
-public fun Timestamp.isAfter(time: Timestamp): Boolean =
-    Timestamps.compare(this, time) > 0
+public fun Timestamp.isAfter(time: Timestamp): Boolean = compare(this, time) > 0
