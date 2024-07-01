@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.mentions
 
 import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Timestamps
 import io.spine.base.EventMessage
 import io.spine.core.External
 import io.spine.examples.pingh.github.Mention
@@ -43,7 +44,13 @@ import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.server.command.Assign
 import io.spine.server.event.React
 import io.spine.server.procman.ProcessManager
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneOffset
 import kotlin.jvm.Throws
+import kotlin.reflect.KClass
 
 /**
  * A process of reading user's mentions from GitHub.
@@ -153,5 +160,20 @@ private fun Timestamp.thisOrLastWorkday(): Timestamp {
     if (!this.equals(this.defaultInstanceForType)) {
         return this
     }
-    return identifyLastWorkday()
+    return Timestamp::class.identifyLastWorkday()
+}
+
+/**
+ * Returns the midnight of the last working day, if counted from the current point in time.
+ *
+ * Working days are days from Monday to Friday, inclusive.
+ *
+ * If today is a workday, returns midnight today.
+ */
+public fun KClass<Timestamp>.identifyLastWorkday(): Timestamp {
+    var localDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN)
+    while (localDateTime.dayOfWeek in listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)) {
+        localDateTime = localDateTime.minusDays(1)
+    }
+    return Timestamps.fromSeconds(localDateTime.toEpochSecond(ZoneOffset.UTC))
 }
