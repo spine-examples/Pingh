@@ -28,7 +28,6 @@ package io.spine.examples.pingh.mentions
 
 import io.spine.core.External
 import io.spine.examples.pingh.clock.event.TimePassed
-import io.spine.examples.pingh.clock.time
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
 import io.spine.examples.pingh.mentions.command.SnoozeMention
 import io.spine.examples.pingh.mentions.event.MentionRead
@@ -105,7 +104,7 @@ public class MentionProcess :
     @React
     internal fun on(@External event: TimePassed): Optional<MentionUnsnoozed> {
         if (state().status != MentionStatus.SNOOZED
-            || state().snoozeUntilWhen.isAfter(event.time())
+            || state().snoozeUntilWhen.isAfter(event.time)
         ) {
             return Optional.empty()
         }

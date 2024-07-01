@@ -35,10 +35,5 @@ import kotlin.reflect.KClass
  */
 public fun KClass<TimePassed>.buildBy(time: Timestamp): TimePassed =
     TimePassed.newBuilder()
-        .setId(TimeId::class.buildBy(time))
+        .setTime(time)
         .vBuild()
-
-/**
- * Returns the time recorded in the `TimePassed` event.
- */
-public fun TimePassed.time(): Timestamp = this.id.time
