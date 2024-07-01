@@ -28,11 +28,11 @@ package io.spine.examples.pingh.client.e2e
 
 import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.clock.IntervalClock
-import io.spine.examples.pingh.clock.millis
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.newMentionsContext
 import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.server.Server
+import kotlin.time.Duration.Companion.milliseconds
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 
@@ -51,7 +51,7 @@ public abstract class IntegrationTest {
 
     @BeforeEach
     public fun runServer() {
-        clock = IntervalClock(100.millis())
+        clock = IntervalClock(100.milliseconds)
         clock.start()
         server = createServer(port)
         server.start()

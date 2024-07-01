@@ -27,12 +27,13 @@
 package io.spine.examples.pingh.clock
 
 import java.lang.Thread.sleep
+import kotlin.time.Duration
 
 /**
  * The system clock that emits a `TimePassed` event after the specified time interval.
  */
 public class IntervalClock(
-    pauseTime: Millis
+    pauseTime: Duration
 ) {
 
     /**
@@ -45,7 +46,7 @@ public class IntervalClock(
      */
     private val clockThread: Thread = Thread {
         while (isRun) {
-            sleep(pauseTime.value.toLong())
+            sleep(pauseTime.inWholeMilliseconds)
             emitTimePassedEvent()
         }
     }
