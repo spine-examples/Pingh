@@ -32,7 +32,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.request.get
-import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpMessageBuilder
 import io.ktor.http.HeadersBuilder
@@ -130,7 +129,7 @@ public class GitHubClientServiceImpl(
                 .by(itemType)
                 .by(username)
                 .by(updatedAfter)
-                .withHeaders { configureHeaders(token) }
+                .with(token)
                 .requestOnBehalfOf(client)
 
             if (response.status != HttpStatusCode.OK) {
@@ -156,18 +155,6 @@ public class GitHubClientServiceImpl(
             // cannot process it. So the array is converted to JSON, where the result
             // is just the value of the `item` field.
             parseCommentsFromJson("{ item: $json }")
-        }
-
-    /**
-     * Configures headers for an HTTP request to the GitHub API.
-     *
-     * @see <a href="https://docs.github.com/en/rest/authentication/authenticating-to-the-rest-api">
-     *     Authenticating to the GitHub REST API</a>
-     */
-    private fun HttpMessageBuilder.configureHeaders(token: PersonalAccessToken): HeadersBuilder =
-        headers.apply {
-            append("Authorization", "Bearer ${token.value}")
-            append("Accept", "application/vnd.github+json")
         }
 
     /**
@@ -213,9 +200,9 @@ public class GitHubClientServiceImpl(
         private var updatedAfter: Timestamp? = null
 
         /**
-         * The function that sets request headers.
+         * The user authentication token on GitHub.
          */
-        private var headersConfigurer: (HttpRequestBuilder.() -> Unit)? = null
+        private var token: PersonalAccessToken? = null
 
         /**
          * Sets the type of the searched item.
@@ -243,11 +230,10 @@ public class GitHubClientServiceImpl(
         }
 
         /**
-         * Sets the function that sets request headers.
+         * Sets the user authentication token on GitHub
          */
-        public fun withHeaders(headersConfigurer: HttpRequestBuilder.() -> Unit):
-                GitHubSearchRequest {
-            this.headersConfigurer = headersConfigurer
+        public fun with(token: PersonalAccessToken): GitHubSearchRequest {
+            this.token = token
             return this
         }
 
@@ -265,8 +251,8 @@ public class GitHubClientServiceImpl(
                 "The time after which GitHub items containing the searched mentions " +
                         "should have been updated is not specified."
             }
-            checkNotNull(headersConfigurer) {
-                "The function that sets request headers is not specified."
+            checkNotNull(token) {
+                "The user authentication token on GitHub is not specified."
             }
 
             val query = "is:${itemType!!.value()} mentions:${username!!.value} " +
@@ -278,8 +264,20 @@ public class GitHubClientServiceImpl(
                     parameters.append("sort", "updated")
                     parameters.append("order", "desc")
                 }
-                headersConfigurer!!()
+                configureHeaders(token!!)
             }
         }
     }
 }
+
+/**
+ * Configures headers for an HTTP request to the GitHub API.
+ *
+ * @see <a href="https://docs.github.com/en/rest/authentication/authenticating-to-the-rest-api">
+ *     Authenticating to the GitHub REST API</a>
+ */
+private fun HttpMessageBuilder.configureHeaders(token: PersonalAccessToken): HeadersBuilder =
+    headers.apply {
+        append("Authorization", "Bearer ${token.value}")
+        append("Accept", "application/vnd.github+json")
+    }

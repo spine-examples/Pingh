@@ -132,19 +132,6 @@ public class GitHubClientProcess :
 
     private companion object {
         /**
-         * Returns this `Timestamp` if its value is not default,
-         * otherwise returns the midnight of the last workday.
-         *
-         * @see [thisOrLastWorkday]
-         */
-        private fun Timestamp.thisOrLastWorkday(): Timestamp {
-            if (!this.equals(this.defaultInstanceForType)) {
-                return this
-            }
-            return identifyLastWorkday()
-        }
-
-        /**
          * Converts the set of `Mention`s to the set of `UserMentioned` events
          * with the specified name of the mentioned user.
          */
@@ -154,4 +141,17 @@ public class GitHubClientProcess :
                 .map { mention -> UserMentioned::class.buildBy(mention, whoWasMentioned) }
                 .toSet()
     }
+}
+
+/**
+ * Returns this `Timestamp` if its value is not default,
+ * otherwise returns the midnight of the last workday.
+ *
+ * @see [thisOrLastWorkday]
+ */
+private fun Timestamp.thisOrLastWorkday(): Timestamp {
+    if (!this.equals(this.defaultInstanceForType)) {
+        return this
+    }
+    return identifyLastWorkday()
 }
