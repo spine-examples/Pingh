@@ -66,7 +66,7 @@ internal fun KClass<GitHubClient>.buildBy(
     GitHubClient.newBuilder()
         .setId(id)
         .setToken(token)
-        .setWhenLastSuccessfulUpdate(lastUpdate)
+        .setWhenLastSuccessfullyUpdated(lastUpdate)
         .vBuild()
 
 /**
@@ -90,7 +90,7 @@ internal fun KClass<UserLoggedIn>.buildBy(username: Username, token: PersonalAcc
     )
 
 /**
- * Create a new `UpdateMentionsFromGitHub` command with the specified ID of the `GitHubClient`
+ * Creates a new `UpdateMentionsFromGitHub` command with the specified ID of the `GitHubClient`
  * and time when the mentions update process is requested.
  */
 internal fun KClass<UpdateMentionsFromGitHub>.buildBy(id: GitHubClientId, whenRequested: Timestamp):

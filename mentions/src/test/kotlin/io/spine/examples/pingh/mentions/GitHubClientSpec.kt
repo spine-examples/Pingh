@@ -225,7 +225,7 @@ public class GitHubClientSpec : ContextAwareTest() {
     }
 
     @Test
-    public fun `update 'when_last_successful_update' field after completing the update process`() {
+    public fun `remember the time of last successful update`() {
         val whenRequested = currentTime()
         val command = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId, whenRequested)
         context().receivesCommand(command)
@@ -245,7 +245,7 @@ public class GitHubClientSpec : ContextAwareTest() {
     }
 
     @Test
-    public fun `use updated 'when_last_successful_update' time to fetch mentions from GitHub`() {
+    public fun `use updated 'when_last_successfully_updated' time to fetch mentions from GitHub`() {
         val firstWhenRequested = currentTime()
         val secondWhenRequested = firstWhenRequested.inMinute()
         val firstCommand =
