@@ -26,46 +26,10 @@
 
 package io.spine.examples.pingh.clock
 
-import java.lang.Thread.sleep
-
 /**
- * The system clock that emits a `TimePassed` event after the specified time interval.
- *
- * The `pauseTime` between the emitting of two `TimePassed` events
- * is specified in milliseconds.
+ * Creates a new `Millis` with this integer value.
  */
-public class IntervalClock(
-    pauseTime: Millis
-) {
-
-    /**
-     * Whether the clock is currently running. Used to control the [clockThread].
-     */
-    private var isRun = false
-
-    /**
-     * The clock thread emits a `TimePassed` event after passing each time interval.
-     */
-    private val clockThread: Thread = Thread {
-        while (isRun) {
-            sleep(pauseTime.value.toLong())
-            emitTimePassedEvent()
-        }
-    }
-
-    /**
-     * Starts the clock.
-     */
-    public fun start() {
-        isRun = true
-        clockThread.start()
-    }
-
-    /**
-     * Stops the clock and waits while `clockThread` shutdowns.
-     */
-    public fun stop() {
-        isRun = false
-        clockThread.join()
-    }
-}
+public fun Int.millis(): Millis =
+    Millis.newBuilder()
+        .setValue(this)
+        .vBuild()

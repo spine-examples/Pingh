@@ -24,20 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.clock
+syntax = "proto3";
 
-/**
- * Manages the system clock.
- */
-public interface Clock {
+package spine_examples.pingh.clock;
 
-    /**
-     * Starts the system clock.
-     */
-    public fun start()
+import "spine/options.proto";
 
-    /**
-     * Stops the system clock.
-     */
-    public fun stop()
+option (type_url_prefix) = "type.pingh.spine.io";
+option java_package = "io.spine.examples.pingh.clock";
+option java_outer_classname = "DurationProto";
+option java_multiple_files = true;
+
+// The duration that specified in milliseconds.
+message Millis {
+
+    int32 value = 1 [(required) = true, (min).value = "0"];
 }

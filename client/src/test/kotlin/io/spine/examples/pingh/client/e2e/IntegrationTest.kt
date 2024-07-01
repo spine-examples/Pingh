@@ -27,8 +27,8 @@
 package io.spine.examples.pingh.client.e2e
 
 import io.spine.examples.pingh.client.DesktopClient
-import io.spine.examples.pingh.clock.Clock
 import io.spine.examples.pingh.clock.IntervalClock
+import io.spine.examples.pingh.clock.millis
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.newMentionsContext
 import io.spine.examples.pingh.sessions.newSessionsContext
@@ -46,12 +46,12 @@ public abstract class IntegrationTest {
     private val port = 4242
     private val address = "localhost"
     private lateinit var server: Server
-    private lateinit var clock: Clock
+    private lateinit var clock: IntervalClock
     private lateinit var client: DesktopClient
 
     @BeforeEach
     public fun runServer() {
-        clock = IntervalClock(50)
+        clock = IntervalClock(50.millis())
         clock.start()
         server = createServer(port)
         server.start()
