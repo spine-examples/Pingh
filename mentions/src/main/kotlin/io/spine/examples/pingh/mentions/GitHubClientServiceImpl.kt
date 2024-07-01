@@ -65,6 +65,8 @@ public class GitHubClientServiceImpl(
      * Searches for user `Mention`s on GitHub in issues and pull requests,
      * as well as in comments under those items.
      *
+     * The default value of `updateAfter` is `Timestamp.getDefaultInstance()`.
+     *
      * @see [GitHubClientService.fetchMentions]
      */
     @Throws(CannotFetchMentionsFromGitHubException::class)

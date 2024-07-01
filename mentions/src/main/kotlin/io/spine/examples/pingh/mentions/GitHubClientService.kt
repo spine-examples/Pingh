@@ -48,6 +48,6 @@ public interface GitHubClientService {
     public fun fetchMentions(
         username: Username,
         token: PersonalAccessToken,
-        updatedAfter: Timestamp
+        updatedAfter: Timestamp = Timestamp.getDefaultInstance()
     ): Set<Mention>
 }

@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.protobuf.Timestamp
 import io.kotest.matchers.shouldBe
 import io.ktor.http.HttpStatusCode
 import io.spine.base.Time.currentTime
@@ -254,7 +255,7 @@ public class GitHubClientSpec : ContextAwareTest() {
         context()
             .receivesCommand(firstCommand)
             .receivesCommand(secondCommand)
-        val expected = listOf(identifyLastWorkday(), firstWhenRequested)
+        val expected = listOf(Timestamp::class.identifyLastWorkday(), firstWhenRequested)
         gitHubClientService.updatedAfterList() shouldBe expected
     }
 }

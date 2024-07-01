@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.mentions
 
-import com.google.protobuf.Timestamp
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
@@ -46,7 +45,6 @@ import org.junit.jupiter.api.Test
 public class GitHubClientServiceSpec {
 
     private val username = Username::class.buildBy("MykytaPimonovTD")
-    private val updatedAfter = Timestamp.getDefaultInstance()
     private lateinit var token: PersonalAccessToken
 
     @BeforeEach
@@ -57,7 +55,7 @@ public class GitHubClientServiceSpec {
     @Test
     public fun `fetch mentions from GitHub`() {
         val service = GitHubClientServiceImpl(mockEngineThatContainsMentions(token))
-        val mentions = service.fetchMentions(username, token, updatedAfter)
+        val mentions = service.fetchMentions(username, token)
         val expected = expectedMentions()
         mentions shouldBe expected
     }
@@ -66,7 +64,7 @@ public class GitHubClientServiceSpec {
     public fun `throw exception if fetching from GitHub failed`() {
         val service = GitHubClientServiceImpl(mockEngineThatFailsAllRequest(token))
         val exception = shouldThrow<CannotFetchMentionsFromGitHubException> {
-            service.fetchMentions(username, token, updatedAfter)
+            service.fetchMentions(username, token)
         }
         exception.statusCode() shouldBe 422
     }
@@ -74,7 +72,7 @@ public class GitHubClientServiceSpec {
     @Test
     public fun `return empty set if the user has not been mentioned`() {
         val service = GitHubClientServiceImpl(mockEngineThatDoesNotContainMentions(token))
-        val mentions = service.fetchMentions(username, token, updatedAfter)
+        val mentions = service.fetchMentions(username, token)
         mentions.shouldBeEmpty()
     }
 }
