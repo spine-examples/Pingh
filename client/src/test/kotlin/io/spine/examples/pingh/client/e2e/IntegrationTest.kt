@@ -45,13 +45,13 @@ public abstract class IntegrationTest {
 
     private val port = 4242
     private val address = "localhost"
-    private lateinit var server: Server
     private lateinit var clock: IntervalClock
+    private lateinit var server: Server
     private lateinit var client: DesktopClient
 
     @BeforeEach
     public fun runServer() {
-        clock = IntervalClock(50.millis())
+        clock = IntervalClock(100.millis())
         clock.start()
         server = createServer(port)
         server.start()
