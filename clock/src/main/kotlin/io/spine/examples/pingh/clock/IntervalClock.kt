@@ -39,13 +39,13 @@ public class IntervalClock(
     /**
      * Whether the clock is currently running. Used to control the [clockThread].
      */
-    private var isRun = false
+    private var isRunning = false
 
     /**
      * The clock thread emits a `TimePassed` event after passing each time interval.
      */
     private val clockThread: Thread = Thread {
-        while (isRun) {
+        while (isRunning) {
             sleep(pauseTime.inWholeMilliseconds)
             emitTimePassedEvent()
         }
@@ -55,7 +55,7 @@ public class IntervalClock(
      * Starts the clock.
      */
     public fun start() {
-        isRun = true
+        isRunning = true
         clockThread.start()
     }
 
@@ -63,7 +63,7 @@ public class IntervalClock(
      * Stops the clock and waits while `clockThread` shutdowns.
      */
     public fun stop() {
-        isRun = false
+        isRunning = false
         clockThread.join()
     }
 }

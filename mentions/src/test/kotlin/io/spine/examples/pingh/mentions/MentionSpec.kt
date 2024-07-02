@@ -69,7 +69,7 @@ public class MentionSpec : ContextAwareTest() {
     public inner class `react on 'UserMentioned' event, and` {
 
         @Test
-        public fun `init 'Mention' state and set 'UNREAD' status`() {
+        public fun `init 'Mention' state and mark it as unread`() {
             val expected = Mention::class.buildBy(id, MentionStatus.UNREAD)
             context().assertState(id, expected)
         }
@@ -94,7 +94,7 @@ public class MentionSpec : ContextAwareTest() {
         }
 
         @Test
-        public fun `set 'SNOOZED' status and set 'snooze_until_when' field in 'Mention' entity`() {
+        public fun `snooze the target 'Mention', remembering the time until which it is snoozed`() {
             val expected = Mention::class.buildBy(id, MentionStatus.SNOOZED, untilWhen)
             context().assertState(id, expected)
         }
@@ -116,7 +116,7 @@ public class MentionSpec : ContextAwareTest() {
         }
 
         @Test
-        public fun `set 'READ' status in 'Mention' entity`() {
+        public fun `read the target 'Mention'`() {
             val expected = Mention::class.buildBy(id, MentionStatus.READ)
             context().assertState(id, expected)
         }
@@ -142,14 +142,14 @@ public class MentionSpec : ContextAwareTest() {
             }
 
             @Test
-            public fun `set 'UNREAD' status in 'Mention' entity`() {
+            public fun `mark the target 'Mention' as unread`() {
                 val expected = Mention::class.buildBy(id, MentionStatus.UNREAD)
                 context().assertState(id, expected)
             }
         }
 
         @Test
-        public fun `do nothing, if mention is read`() {
+        public fun `do nothing if mention is read`() {
             val command = MarkMentionAsRead::class.buildBy(id)
             context().receivesCommand(command)
             emitTimePassedEvent()
@@ -157,13 +157,13 @@ public class MentionSpec : ContextAwareTest() {
         }
 
         @Test
-        public fun `do nothing, if mention is unread`() {
+        public fun `do nothing if mention is unread`() {
             emitTimePassedEvent()
             assertThatNothingHappened(MentionStatus.UNREAD)
         }
 
         @Test
-        public fun `do nothing, if the time in 'TimePassed' event is less than the snooze time`() {
+        public fun `do nothing if snooze time hasn't already passed`() {
             val command = SnoozeMention::class.buildBy(id, currentTime())
             context().receivesCommand(command)
             emitTimePassedEvent(Timestamps.MIN_VALUE)
