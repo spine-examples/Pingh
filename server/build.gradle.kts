@@ -40,6 +40,8 @@ plugins {
     application
 }
 
+forceGrpcDependencies(configurations)
+
 spine {
     // Add and configure required dependencies for developing a Spine-based Java server.
     // See: https://github.com/SpineEventEngine/bootstrap#java-projects
@@ -63,6 +65,7 @@ dependencies {
     implementation(Ktor.Client.cio)
     implementation(Guava.lib)
     implementation(Grpc.netty)
+    implementation(Grpc.inprocess)
 }
 
 application {

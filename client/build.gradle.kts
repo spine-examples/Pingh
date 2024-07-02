@@ -44,6 +44,8 @@ spine {
     enableJava().client()
 }
 
+forceGrpcDependencies(configurations)
+
 kotlin {
     jvmToolchain {
         languageVersion.set(BuildSettings.javaVersion)
@@ -56,6 +58,7 @@ dependencies {
     implementation(JavaX.annotations)
     implementation(Guava.lib)
     implementation(Grpc.netty)
+    implementation(Grpc.inprocess)
 
     testImplementation(project(":testutil-mentions"))
     testImplementation(project(":clock"))
