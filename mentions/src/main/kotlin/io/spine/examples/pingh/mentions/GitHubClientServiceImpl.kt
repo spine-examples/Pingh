@@ -26,10 +26,13 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Timestamps
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.request.get
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpMessageBuilder
 import io.ktor.http.HeadersBuilder
 import io.ktor.http.HttpStatusCode
@@ -59,17 +62,21 @@ public class GitHubClientServiceImpl(
     private val client = HttpClient(engine)
 
     /**
-     * Searches for user `Mentions` by the GitHub name of the user.
+     * Searches for user `Mention`s on GitHub in issues and pull requests,
+     * as well as in comments under those items.
      *
-     * Uses `PersonalAccessToken` to access GitHub API.
+     * The default value of `updateAfter` is `Timestamp.getDefaultInstance()`.
      *
-     * Mentions are searched in issues and pull requests.
+     * @see [GitHubClientService.fetchMentions]
      */
     @Throws(CannotFetchMentionsFromGitHubException::class)
-    public override fun fetchMentions(username: Username, token: PersonalAccessToken):
-            Set<Mention> =
-        findMentions(username, token, ItemType.ISSUE) +
-                findMentions(username, token, ItemType.PULL_REQUEST)
+    public override fun fetchMentions(
+        username: Username,
+        token: PersonalAccessToken,
+        updatedAfter: Timestamp
+    ): Set<Mention> =
+        findMentions(username, token, updatedAfter, ItemType.ISSUE) +
+                findMentions(username, token, updatedAfter, ItemType.PULL_REQUEST)
 
     /**
      * Requests GitHub for mentions of a user in issues or pull requests,
@@ -79,10 +86,11 @@ public class GitHubClientServiceImpl(
     private fun findMentions(
         username: Username,
         token: PersonalAccessToken,
+        updatedAfter: Timestamp,
         itemType: ItemType
     ): Set<Mention> {
         val userTag = username.tag()
-        return searchIssuesOrPullRequests(username, token, itemType)
+        return searchIssuesOrPullRequests(username, token, updatedAfter, itemType)
             .itemList
             .flatMap { item ->
                 val mentionsInComments = obtainCommentsByUrl(item.commentsUrl, token)
@@ -114,21 +122,18 @@ public class GitHubClientServiceImpl(
     private fun searchIssuesOrPullRequests(
         username: Username,
         token: PersonalAccessToken,
+        updatedAfter: Timestamp,
         itemType: ItemType
     ): IssuesAndPullRequestsSearchResult =
         runBlocking {
-            val response = client.get("https://api.github.com/search/issues") {
-                url {
-                    parameters.append(
-                        "q",
-                        "is:${itemType.value()} mentions:${username.value}"
-                    )
-                    parameters.append("per_page", "100")
-                    parameters.append("sort", "updated")
-                    parameters.append("order", "desc")
-                }
-                configureHeaders(token)
-            }
+            val response = GitHubSearchRequest
+                .get("https://api.github.com/search/issues")
+                .by(itemType)
+                .by(username)
+                .by(updatedAfter)
+                .with(token)
+                .requestOnBehalfOf(client)
+
             if (response.status != HttpStatusCode.OK) {
                 throw CannotFetchMentionsFromGitHubException(response.status.value)
             }
@@ -155,18 +160,6 @@ public class GitHubClientServiceImpl(
         }
 
     /**
-     * Configures headers for an HTTP request to the GitHub API.
-     *
-     * @see <a href="https://docs.github.com/en/rest/authentication/authenticating-to-the-rest-api">
-     *     Authenticating to the GitHub REST API</a>
-     */
-    private fun HttpMessageBuilder.configureHeaders(token: PersonalAccessToken): HeadersBuilder =
-        headers.apply {
-            append("Authorization", "Bearer ${token.value}")
-            append("Accept", "application/vnd.github+json")
-        }
-
-    /**
      * GitHub item type. Contains the name by which they can be searching in the GitHub API
      * using the `is:` filter.
      */
@@ -179,4 +172,114 @@ public class GitHubClientServiceImpl(
          */
         public fun value(): String = gitHubName
     }
+
+    /**
+     * Builder for creating and sending request to search for mentions on GitHub.
+     */
+    private class GitHubSearchRequest private constructor(private val url: String) {
+
+        public companion object {
+            /**
+             * Creates builder and sets the request URL.
+             */
+            public fun get(url: String): GitHubSearchRequest = GitHubSearchRequest(url)
+        }
+
+        /**
+         * The type of the searched item.
+         */
+        private var itemType: ItemType? = null
+
+        /**
+         * The name of the user whose mentions are requested.
+         */
+        private var username: Username? = null
+
+        /**
+         * The time after which GitHub items containing the searched mentions
+         * should have been updated.
+         */
+        private var updatedAfter: Timestamp? = null
+
+        /**
+         * The user authentication token on GitHub.
+         */
+        private var token: PersonalAccessToken? = null
+
+        /**
+         * Sets the type of the searched item.
+         */
+        public fun by(itemType: ItemType): GitHubSearchRequest {
+            this.itemType = itemType
+            return this
+        }
+
+        /**
+         * Sets the name of the user whose mentions are requested.
+         */
+        public fun by(username: Username): GitHubSearchRequest {
+            this.username = username
+            return this
+        }
+
+        /**
+         * Sets the time after which GitHub items containing the searched mentions
+         * should have been updated.
+         */
+        public fun by(updatedAfter: Timestamp): GitHubSearchRequest {
+            this.updatedAfter = updatedAfter
+            return this
+        }
+
+        /**
+         * Sets the user authentication token on GitHub
+         */
+        public fun with(token: PersonalAccessToken): GitHubSearchRequest {
+            this.token = token
+            return this
+        }
+
+        /**
+         * Creates and sends request with specified data.
+         *
+         * @throws IllegalArgumentException some request data is not specified.
+         */
+        public suspend fun requestOnBehalfOf(client: HttpClient): HttpResponse {
+            checkNotNull(itemType) { "The type of the searched item is not specified." }
+            checkNotNull(username) {
+                "The name of the user whose mentions are requested is not specified."
+            }
+            checkNotNull(updatedAfter) {
+                "The time after which GitHub items containing the searched mentions " +
+                        "should have been updated is not specified."
+            }
+            checkNotNull(token) {
+                "The user authentication token on GitHub is not specified."
+            }
+
+            val query = "is:${itemType!!.value()} mentions:${username!!.value} " +
+                    "updated:>${Timestamps.toString(updatedAfter)}"
+            return client.get(url) {
+                url {
+                    parameters.append("q", query)
+                    parameters.append("per_page", "100")
+                    parameters.append("sort", "updated")
+                    parameters.append("order", "desc")
+                }
+                configureHeaders(token!!)
+            }
+        }
+    }
 }
+
+/**
+ * Configures headers for an HTTP request to the GitHub API.
+ *
+ * @see <a href="https://docs.github.com/en/rest/authentication/authenticating-to-the-rest-api">
+ *     Authenticating to the GitHub REST API</a>
+ */
+private fun HttpMessageBuilder.configureHeaders(token: PersonalAccessToken): HeadersBuilder =
+    headers.apply {
+        append("Authorization", "Bearer ${token.value}")
+        append("Accept", "application/vnd.github+json")
+    }

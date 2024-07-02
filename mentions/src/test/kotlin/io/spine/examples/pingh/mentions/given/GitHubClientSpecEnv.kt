@@ -33,6 +33,7 @@ import io.spine.examples.pingh.mentions.GitHubClient
 import io.spine.examples.pingh.mentions.GitHubClientId
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.buildBy
+import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.sessions.SessionId
@@ -49,6 +50,21 @@ internal fun KClass<GitHubClient>.buildBy(id: GitHubClientId, token: PersonalAcc
     GitHubClient.newBuilder()
         .setId(id)
         .setToken(token)
+        .vBuild()
+
+/**
+ * Creates a new `GitHubClient` with the specified `GitHubClientId`, `PersonalAccessToken` and
+ * the time when the last successful update occurred.
+ */
+internal fun KClass<GitHubClient>.buildBy(
+    id: GitHubClientId,
+    token: PersonalAccessToken,
+    lastUpdate: Timestamp
+): GitHubClient =
+    GitHubClient.newBuilder()
+        .setId(id)
+        .setToken(token)
+        .setWhenLastSuccessfullyUpdated(lastUpdate)
         .vBuild()
 
 /**
@@ -70,6 +86,17 @@ internal fun KClass<UserLoggedIn>.buildBy(username: Username, token: PersonalAcc
         SessionId::class.buildBy(username),
         token
     )
+
+/**
+ * Creates a new `UpdateMentionsFromGitHub` command with the specified ID of the `GitHubClient`
+ * and time when the mentions update process is requested.
+ */
+internal fun KClass<UpdateMentionsFromGitHub>.buildBy(id: GitHubClientId, whenRequested: Timestamp):
+        UpdateMentionsFromGitHub =
+    UpdateMentionsFromGitHub.newBuilder()
+        .setId(id)
+        .setWhenRequested(whenRequested)
+        .vBuild()
 
 /**
  * Creates a new `MentionsUpdateIsAlreadyInProgress` rejection with the specified `GitHubClientId`.

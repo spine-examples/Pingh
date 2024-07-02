@@ -26,28 +26,22 @@
 
 package io.spine.examples.pingh.mentions
 
-import com.google.protobuf.Timestamp
-import io.spine.examples.pingh.github.Mention
-import io.spine.examples.pingh.github.PersonalAccessToken
-import io.spine.examples.pingh.github.Username
-import kotlin.jvm.Throws
+import com.google.protobuf.Any
+import com.google.protobuf.Message
+import io.spine.protobuf.AnyPacker
 
 /**
- * Allows to access GitHub Search API.
+ * Unpacks this `Any` into the given message type.
+ *
+ * @param T the concrete type of the message stored in the `Any`.
  */
-public interface GitHubClientService {
-
-    /**
-     * Searches for user `Mention`s on GitHub.
-     *
-     * Mentions are searched by the name of the mentioned user. Mentions must be within items
-     * updated between the `updateAfter` time and the present. The `PersonalAccessToken` is used
-     * to access the GitHub API.
-     */
-    @Throws(CannotFetchMentionsFromGitHubException::class)
-    public fun fetchMentions(
-        username: Username,
-        token: PersonalAccessToken,
-        updatedAfter: Timestamp = Timestamp.getDefaultInstance()
-    ): Set<Mention>
+public inline fun <reified T : Message> Any.unpack(): T {
+    val cls = T::class
+    if (!cls.isFinal) {
+        throw IllegalArgumentException(
+            "Message type for the `unpack` call must be a concrete message, with a `final` class." +
+                    " `${cls.qualifiedName}` is not `final`."
+        )
+    }
+    return AnyPacker.unpack(this, cls.java)
 }

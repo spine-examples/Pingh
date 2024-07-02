@@ -28,6 +28,7 @@ package io.spine.examples.pingh.mentions
 
 import io.kotest.matchers.shouldBe
 import io.ktor.http.HttpStatusCode
+import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
@@ -44,7 +45,6 @@ import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.Mention
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
-import io.spine.protobuf.AnyPacker
 import io.spine.server.BoundedContextBuilder
 import io.spine.testing.TestValues.randomString
 import io.spine.testing.server.blackbox.BlackBoxContext
@@ -176,7 +176,7 @@ public class GitHubClientSpec : ContextAwareTest() {
             eventSubject.hasSize(expectedUserMentionedSet.size)
             val actualUserMentionedSet = eventSubject
                 .actual()
-                .map { event -> AnyPacker.unpack(event.message, UserMentioned::class.java) }
+                .map { it.message.unpack<UserMentioned>() }
                 .toSet()
             actualUserMentionedSet shouldBe expectedUserMentionedSet
         }
@@ -218,6 +218,15 @@ public class GitHubClientSpec : ContextAwareTest() {
         val command = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
         context().receivesCommand(command)
         val expected = GitHubClient::class.buildBy(gitHubClientId, token)
+        context().assertState(gitHubClientId, expected)
+    }
+
+    @Test
+    public fun `remember the time of last successful update`() {
+        val whenRequested = currentTime()
+        val command = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId, whenRequested)
+        context().receivesCommand(command)
+        val expected = GitHubClient::class.buildBy(gitHubClientId, token, whenRequested)
         context().assertState(gitHubClientId, expected)
     }
 
