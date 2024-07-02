@@ -24,12 +24,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.dependency
+import io.spine.internal.dependency.Grpc
+import io.spine.internal.dependency.Guava
+import org.gradle.api.artifacts.ConfigurationContainer
 
-// https://github.com/grpc/grpc-java
-@Suppress("ConstPropertyName")
-public object Grpc {
-    private const val version = "1.58.0"
-    public const val netty: String = "io.grpc:grpc-netty:$version"
-    public const val inprocess: String = "io.grpc:grpc-inprocess:$version"
+/**
+ * Forces dependencies for gRPC operation in the project.
+ *
+ * Also forces necessary transitive dependencies.
+ */
+public fun forceGrpcDependencies(configurations: ConfigurationContainer) {
+    configurations.all {
+        resolutionStrategy {
+            force(
+                Guava.lib,
+                Grpc.netty,
+                Grpc.inprocess
+            )
+        }
+    }
 }
