@@ -29,6 +29,7 @@ package io.spine.internal.dependency
 // https://github.com/grpc/grpc-java
 @Suppress("ConstPropertyName")
 public object Grpc {
-    private const val version = "1.47.0"
+    private const val version = "1.58.0"
     public const val netty: String = "io.grpc:grpc-netty:$version"
+    public const val inprocess: String = "io.grpc:grpc-inprocess:$version"
 }
