@@ -31,11 +31,9 @@ import io.ktor.http.HttpStatusCode
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.buildFromFragment
 import io.spine.examples.pingh.mentions.GitHubClient
 import io.spine.examples.pingh.mentions.GitHubClientService
 import io.spine.examples.pingh.mentions.CannotFetchMentionsFromGitHubException
-import io.spine.examples.pingh.mentions.parseIssuesAndPullRequestsFromJson
 import java.lang.Thread.sleep
 import kotlin.jvm.Throws
 
@@ -82,13 +80,7 @@ public class PredefinedGitHubResponses : GitHubClientService {
         if (responseStatusCode != HttpStatusCode.OK) {
             throw CannotFetchMentionsFromGitHubException(responseStatusCode.value)
         }
-        val jsonFile = this::class.java.getResource("/github-responses/prs-search-response.json")
-        checkNotNull(jsonFile)
-        val json = jsonFile.readText(Charsets.UTF_8)
-        val mentions = parseIssuesAndPullRequestsFromJson(json)
-            .itemList
-            .map { fragment -> Mention::class.buildFromFragment(fragment) }
-            .toSet()
+        val mentions = predefinedMentionsSet()
         waitWhileServiceIsFrozen()
         return mentions
     }
