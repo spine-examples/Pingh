@@ -24,35 +24,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.mentions
+syntax = "proto3";
 
-import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
-import io.spine.examples.pingh.clock.event.TimePassed
-import io.spine.examples.pingh.mentions.event.UserMentioned
-import io.spine.server.procman.ProcessManagerRepository
-import io.spine.server.route.EventRoute.withId
-import io.spine.server.route.EventRouting
+package spine_examples.pingh.clock;
 
-/**
- * Manages instances of [MentionProcess].
- */
-public class MentionRepository :
-    ProcessManagerRepository<MentionId, MentionProcess, Mention>() {
+import "spine/options.proto";
 
-    @OverridingMethodsMustInvokeSuper
-    protected override fun setupEventRouting(routing: EventRouting<MentionId>) {
-        super.setupEventRouting(routing)
-        routing
-            .route(UserMentioned::class.java) { event, _ -> withId(event.id) }
-            .route(TimePassed::class.java) { _, _ -> toAll() }
-    }
+option (type_url_prefix) = "type.pingh.spine.io";
+option java_package = "io.spine.examples.pingh.clock.event";
+option java_outer_classname = "ClockEventsProto";
+option java_multiple_files = true;
 
-    /**
-     * Returns a set of identifiers of records in the process manager storage.
-     */
-    private fun toAll(): Set<MentionId> =
-        storage()
-            .index()
-            .asSequence()
-            .toSet()
+import "google/protobuf/timestamp.proto";
+
+// Reports the current point in time in the system.
+message TimePassed {
+
+    // The current system time.
+    google.protobuf.Timestamp time = 1 [(required) = true];
 }

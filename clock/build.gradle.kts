@@ -24,35 +24,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.mentions
+import io.spine.internal.BuildSettings
+import io.spine.internal.dependency.JavaX
 
-import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
-import io.spine.examples.pingh.clock.event.TimePassed
-import io.spine.examples.pingh.mentions.event.UserMentioned
-import io.spine.server.procman.ProcessManagerRepository
-import io.spine.server.route.EventRoute.withId
-import io.spine.server.route.EventRouting
+plugins {
+    kotlin("jvm")
 
-/**
- * Manages instances of [MentionProcess].
- */
-public class MentionRepository :
-    ProcessManagerRepository<MentionId, MentionProcess, Mention>() {
+    // Add the Gradle plugin for bootstrapping projects built with Spine.
+    // See: https://github.com/SpineEventEngine/bootstrap
+    id("io.spine.tools.gradle.bootstrap").version("1.9.0")
+}
 
-    @OverridingMethodsMustInvokeSuper
-    protected override fun setupEventRouting(routing: EventRouting<MentionId>) {
-        super.setupEventRouting(routing)
-        routing
-            .route(UserMentioned::class.java) { event, _ -> withId(event.id) }
-            .route(TimePassed::class.java) { _, _ -> toAll() }
+spine {
+    // Enable the code generation for the elements of the ubiquitous language,
+    // declared in Proto files.
+    assembleModel()
+    enableJava()
+
+    // Add and configure required dependencies for developing a Spine-based Java server.
+    // See: https://github.com/SpineEventEngine/bootstrap#java-projects
+    enableJava().server()
+    forceDependencies = true
+}
+
+kotlin {
+    jvmToolchain {
+        languageVersion.set(BuildSettings.javaVersion)
     }
+    explicitApi()
+}
 
-    /**
-     * Returns a set of identifiers of records in the process manager storage.
-     */
-    private fun toAll(): Set<MentionId> =
-        storage()
-            .index()
-            .asSequence()
-            .toSet()
+dependencies {
+    implementation(JavaX.annotations)
 }

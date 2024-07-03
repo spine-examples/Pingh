@@ -24,35 +24,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.mentions
+package io.spine.examples.pingh.clock
 
-import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
+import io.spine.base.Time.currentTime
+import io.spine.core.UserId
 import io.spine.examples.pingh.clock.event.TimePassed
-import io.spine.examples.pingh.mentions.event.UserMentioned
-import io.spine.server.procman.ProcessManagerRepository
-import io.spine.server.route.EventRoute.withId
-import io.spine.server.route.EventRouting
+import io.spine.server.integration.ThirdPartyContext
 
 /**
- * Manages instances of [MentionProcess].
+ * The Clock bounded context that is designed to notify the system of the current time.
  */
-public class MentionRepository :
-    ProcessManagerRepository<MentionId, MentionProcess, Mention>() {
+private val context = ThirdPartyContext.singleTenant("Clock")
 
-    @OverridingMethodsMustInvokeSuper
-    protected override fun setupEventRouting(routing: EventRouting<MentionId>) {
-        super.setupEventRouting(routing)
-        routing
-            .route(UserMentioned::class.java) { event, _ -> withId(event.id) }
-            .route(TimePassed::class.java) { _, _ -> toAll() }
-    }
+/**
+ * The system actor notifying about the current time.
+ */
+private val actor = UserId.newBuilder()
+    .setValue("System-Clock")
+    .vBuild()
 
-    /**
-     * Returns a set of identifiers of records in the process manager storage.
-     */
-    private fun toAll(): Set<MentionId> =
-        storage()
-            .index()
-            .asSequence()
-            .toSet()
+/**
+ * Emits the `TimePassed` event that contains the current time.
+ */
+internal fun emitTimePassedEvent() {
+    val event = TimePassed::class.buildBy(currentTime())
+    context.emittedEvent(event, actor)
 }

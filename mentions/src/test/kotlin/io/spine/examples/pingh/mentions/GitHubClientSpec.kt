@@ -214,7 +214,7 @@ public class GitHubClientSpec : ContextAwareTest() {
     }
 
     @Test
-    public fun `clear 'when_started' field after completing the update process`() {
+    public fun `reset process start time after completing the update process`() {
         val command = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
         context().receivesCommand(command)
         val expected = GitHubClient::class.buildBy(gitHubClientId, token)

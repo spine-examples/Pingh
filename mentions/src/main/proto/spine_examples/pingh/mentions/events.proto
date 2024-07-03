@@ -53,3 +53,10 @@ message MentionSnoozed {
     // The time until which the mention was snoozed.
     google.protobuf.Timestamp until_when = 2 [(required) = true];
 }
+
+// The mention's snooze time passed, so it changed status from `SNOOZED` to `UNREAD`.
+message MentionUnsnoozed {
+
+    // The ID of the mention.
+    MentionId id = 1;
+}

@@ -27,17 +27,23 @@
 package io.spine.examples.pingh.mentions
 
 import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Timestamps
 import io.spine.base.Time.currentTime
+import io.spine.core.UserId
+import io.spine.examples.pingh.clock.buildBy
+import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
 import io.spine.examples.pingh.mentions.command.SnoozeMention
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
+import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.given.buildBy
 import io.spine.examples.pingh.mentions.given.generate
 import io.spine.examples.pingh.mentions.rejection.Rejections.MentionIsAlreadyRead
 import io.spine.server.BoundedContextBuilder
+import io.spine.server.integration.ThirdPartyContext
 import io.spine.testing.server.blackbox.ContextAwareTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -63,7 +69,7 @@ public class MentionSpec : ContextAwareTest() {
     public inner class `react on 'UserMentioned' event, and` {
 
         @Test
-        public fun `init 'Mention' state and set 'UNREAD' status`() {
+        public fun `init 'Mention' state and mark it as unread`() {
             val expected = Mention::class.buildBy(id, MentionStatus.UNREAD)
             context().assertState(id, expected)
         }
@@ -88,8 +94,8 @@ public class MentionSpec : ContextAwareTest() {
         }
 
         @Test
-        public fun `set 'SNOOZED' status in 'Mention' entity`() {
-            val expected = Mention::class.buildBy(id, MentionStatus.SNOOZED)
+        public fun `snooze the target 'Mention', remembering the time until which it is snoozed`() {
+            val expected = Mention::class.buildBy(id, MentionStatus.SNOOZED, untilWhen)
             context().assertState(id, expected)
         }
     }
@@ -110,8 +116,72 @@ public class MentionSpec : ContextAwareTest() {
         }
 
         @Test
-        public fun `set 'READ' status in 'Mention' entity`() {
+        public fun `read the target 'Mention'`() {
             val expected = Mention::class.buildBy(id, MentionStatus.READ)
+            context().assertState(id, expected)
+        }
+    }
+
+    @Nested
+    public inner class `react on 'TimePassed' event, and` {
+
+        @Nested
+        public inner class `if mention is snoozed,` {
+
+            @BeforeEach
+            public fun setSnoozedStatus() {
+                val command = SnoozeMention::class.buildBy(id, currentTime())
+                context().receivesCommand(command)
+                emitTimePassedEvent()
+            }
+
+            @Test
+            public fun `emit 'MentionUnsnoozed' event`() {
+                val expected = MentionUnsnoozed::class.buildBy(id)
+                context().assertEvent(expected)
+            }
+
+            @Test
+            public fun `mark the target 'Mention' as unread`() {
+                val expected = Mention::class.buildBy(id, MentionStatus.UNREAD)
+                context().assertState(id, expected)
+            }
+        }
+
+        @Test
+        public fun `do nothing if mention is read`() {
+            val command = MarkMentionAsRead::class.buildBy(id)
+            context().receivesCommand(command)
+            emitTimePassedEvent()
+            assertThatNothingHappened(MentionStatus.READ)
+        }
+
+        @Test
+        public fun `do nothing if mention is unread`() {
+            emitTimePassedEvent()
+            assertThatNothingHappened(MentionStatus.UNREAD)
+        }
+
+        @Test
+        public fun `do nothing if snooze time hasn't already passed`() {
+            val command = SnoozeMention::class.buildBy(id, currentTime())
+            context().receivesCommand(command)
+            emitTimePassedEvent(Timestamps.MIN_VALUE)
+            assertThatNothingHappened(MentionStatus.SNOOZED)
+        }
+
+        private fun emitTimePassedEvent(time: Timestamp = currentTime()) {
+            val clockContext = ThirdPartyContext.singleTenant("Clock")
+            val event = TimePassed::class.buildBy(time)
+            val actor = UserId::class.generate()
+            clockContext.emittedEvent(event, actor)
+        }
+
+        private fun assertThatNothingHappened(initialStatus: MentionStatus) {
+            context().assertEvents()
+                .withType(MentionUnsnoozed::class.java)
+                .hasSize(0)
+            val expected = Mention::class.buildBy(id, initialStatus)
             context().assertState(id, expected)
         }
     }

@@ -30,6 +30,7 @@ import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
+import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.given.buildBy
@@ -59,19 +60,29 @@ public class UserMentionsSpec : ContextAwareTest() {
     }
 
     @Test
-    public fun `init 'UserMentions' state, and set 'UNREAD' status`() {
+    public fun `init 'UserMentions' state, and mark it as unread`() {
         assertMentionStatus(MentionStatus.UNREAD)
     }
 
     @Test
-    public fun `react on 'MentionSnoozed' event, and set 'SNOOZED' status`() {
+    public fun `react on 'MentionSnoozed' event, and mark the target mention as snoozed`() {
         val event = MentionSnoozed::class.buildBy(userMentioned.id)
         context().receivesEvent(event)
         assertMentionStatus(MentionStatus.SNOOZED)
     }
 
     @Test
-    public fun `react on 'MentionRead' event, and set 'READ' status`() {
+    public fun `react on 'MentionUnsnoozed', and mark the target mention as unread`() {
+        val snoozedEvent = MentionSnoozed::class.buildBy(userMentioned.id)
+        val unsnoozedEvent = MentionUnsnoozed::class.buildBy(userMentioned.id)
+        context()
+            .receivesEvent(snoozedEvent)
+            .receivesEvent(unsnoozedEvent)
+        assertMentionStatus(MentionStatus.UNREAD)
+    }
+
+    @Test
+    public fun `react on 'MentionRead' event, and mark the target mention as read`() {
         val event = MentionRead::class.buildBy(userMentioned.id)
         context().receivesEvent(event)
         assertMentionStatus(MentionStatus.READ)

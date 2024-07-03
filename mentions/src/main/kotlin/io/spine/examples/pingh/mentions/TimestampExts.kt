@@ -26,33 +26,10 @@
 
 package io.spine.examples.pingh.mentions
 
-import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
-import io.spine.examples.pingh.clock.event.TimePassed
-import io.spine.examples.pingh.mentions.event.UserMentioned
-import io.spine.server.procman.ProcessManagerRepository
-import io.spine.server.route.EventRoute.withId
-import io.spine.server.route.EventRouting
+import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Timestamps.compare
 
 /**
- * Manages instances of [MentionProcess].
+ * Tells whether this point in time is after the passed one.
  */
-public class MentionRepository :
-    ProcessManagerRepository<MentionId, MentionProcess, Mention>() {
-
-    @OverridingMethodsMustInvokeSuper
-    protected override fun setupEventRouting(routing: EventRouting<MentionId>) {
-        super.setupEventRouting(routing)
-        routing
-            .route(UserMentioned::class.java) { event, _ -> withId(event.id) }
-            .route(TimePassed::class.java) { _, _ -> toAll() }
-    }
-
-    /**
-     * Returns a set of identifiers of records in the process manager storage.
-     */
-    private fun toAll(): Set<MentionId> =
-        storage()
-            .index()
-            .asSequence()
-            .toSet()
-}
+public fun Timestamp.isAfter(time: Timestamp): Boolean = compare(this, time) > 0

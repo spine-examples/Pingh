@@ -61,5 +61,6 @@ dependencies {
     implementation(Grpc.inprocess)
 
     testImplementation(project(":testutil-mentions"))
+    testImplementation(project(":clock"))
     testImplementation(Spine.Server.lib)
 }

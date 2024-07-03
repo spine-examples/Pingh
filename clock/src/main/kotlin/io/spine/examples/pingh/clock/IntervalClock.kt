@@ -24,35 +24,46 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.mentions
+package io.spine.examples.pingh.clock
 
-import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
-import io.spine.examples.pingh.clock.event.TimePassed
-import io.spine.examples.pingh.mentions.event.UserMentioned
-import io.spine.server.procman.ProcessManagerRepository
-import io.spine.server.route.EventRoute.withId
-import io.spine.server.route.EventRouting
+import java.lang.Thread.sleep
+import kotlin.time.Duration
 
 /**
- * Manages instances of [MentionProcess].
+ * The system clock that continuously emits `TimePassed` events at the specified interval.
  */
-public class MentionRepository :
-    ProcessManagerRepository<MentionId, MentionProcess, Mention>() {
+public class IntervalClock(
+    pauseTime: Duration
+) {
 
-    @OverridingMethodsMustInvokeSuper
-    protected override fun setupEventRouting(routing: EventRouting<MentionId>) {
-        super.setupEventRouting(routing)
-        routing
-            .route(UserMentioned::class.java) { event, _ -> withId(event.id) }
-            .route(TimePassed::class.java) { _, _ -> toAll() }
+    /**
+     * Whether the clock is currently running. Used to control the [clockThread].
+     */
+    private var isRunning = false
+
+    /**
+     * The clock thread emits a `TimePassed` event after passing each time interval.
+     */
+    private val clockThread: Thread = Thread {
+        while (isRunning) {
+            sleep(pauseTime.inWholeMilliseconds)
+            emitTimePassedEvent()
+        }
     }
 
     /**
-     * Returns a set of identifiers of records in the process manager storage.
+     * Starts the clock.
      */
-    private fun toAll(): Set<MentionId> =
-        storage()
-            .index()
-            .asSequence()
-            .toSet()
+    public fun start() {
+        isRunning = true
+        clockThread.start()
+    }
+
+    /**
+     * Stops the clock and waits while `clockThread` shutdowns.
+     */
+    public fun stop() {
+        isRunning = false
+        clockThread.join()
+    }
 }
