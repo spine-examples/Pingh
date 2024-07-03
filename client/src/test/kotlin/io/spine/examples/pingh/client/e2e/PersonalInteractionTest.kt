@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.client.e2e
 
 import com.google.protobuf.Duration
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.spine.examples.pingh.client.e2e.given.expectedMentionsList
 import io.spine.examples.pingh.client.e2e.given.randomUnread
@@ -47,14 +48,13 @@ import org.junit.jupiter.api.Test
  */
 public class PersonalInteractionTest : IntegrationTest() {
 
+    private val username = Username::class.buildBy("MykytaPimonovTD")
     private var actual: List<MentionView> = listOf()
     private var expected: List<MentionView> = listOf()
 
     @BeforeEach
     public fun logInAndLoadMentions() {
-        val username = Username::class.buildBy("MykytaPimonovTD")
         client().logIn(username)
-
         client().updateMentions()
         actual = client().findUserMentions()
         expected = expectedMentionsList(username)
@@ -70,7 +70,7 @@ public class PersonalInteractionTest : IntegrationTest() {
      * 4. The user reads one mention.
      */
     @Test
-    public fun `the user should log in, update mentions and change their statuses`() {
+    public fun `the user should log in, update mentions, and change their statuses`() {
         snoozeRandomMention()
         actual shouldBe expected
         readRandomMention()
@@ -84,11 +84,11 @@ public class PersonalInteractionTest : IntegrationTest() {
      * 2. The user updates their mentions from GitHub.
      * 3. The user reads two random mentions.
      * 4. The user snoozes a random mention for 100 milliseconds.
-     * 5. The user waits until the snooze period is over.
-     * 6. The user checks that the snoozed mention is unsnoozed.
+     * 5. The user waits until the snooze time is over.
+     * 6. The user checks that the snoozed mention is already unsnoozed.
      */
     @Test
-    public fun `the user should snooze the mention and wait until the snooze period is over`() {
+    public fun `the user should snooze the mention and wait until the snooze time is over`() {
         readRandomMention()
         actual shouldBe expected
         readRandomMention()
@@ -98,6 +98,27 @@ public class PersonalInteractionTest : IntegrationTest() {
         sleep(300)
         actual = client().findUserMentions()
         expected = expected.updateStatusById(snoozedMentionId, MentionStatus.UNREAD)
+        actual shouldBe expected
+    }
+
+    /**
+     * End-to-end test that describes such a scenario:
+     *
+     * 1. The user logs in to the Pingh app.
+     * 2. The user updates their mentions from GitHub.
+     * 3. The user logs out of the Pingh app.
+     * 4. The user tries to get mentions but catches the exception.
+     * 5. The user logs in again.
+     * 6. The user gets mentions that were updated in the first session.
+     */
+    @Test
+    public fun `the user should log in, log out, log in again, and then gets mentions`() {
+        client().logOut()
+        shouldThrow<IllegalStateException> {
+            client().findUserMentions()
+        }
+        client().logIn(username)
+        actual = client().findUserMentions()
         actual shouldBe expected
     }
 

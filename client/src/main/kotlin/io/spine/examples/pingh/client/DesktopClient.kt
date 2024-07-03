@@ -128,8 +128,6 @@ public class DesktopClient(
         val command = LogUserOut::class.buildBy(session!!)
         observeEventOnce(command.id, UserLoggedOut::class) { event ->
             this.session = null
-            client.subscriptions()
-                .cancelAll()
             onSuccess(event)
         }
         send(command)
