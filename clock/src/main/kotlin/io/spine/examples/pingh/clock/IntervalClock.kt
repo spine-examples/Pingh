@@ -30,7 +30,7 @@ import java.lang.Thread.sleep
 import kotlin.time.Duration
 
 /**
- * The system clock that emits a `TimePassed` event after the specified time interval.
+ * The system clock that continuously emits `TimePassed` events at the specified interval.
  */
 public class IntervalClock(
     pauseTime: Duration
