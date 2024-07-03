@@ -44,16 +44,16 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 /**
- * End-to-end test that checks client-server interaction.
+ * End-to-end test to checks client-server interaction.
  */
 public class PersonalInteractionTest : IntegrationTest() {
 
     private val username = Username::class.buildBy("MykytaPimonovTD")
-    private var actual: List<MentionView> = listOf()
-    private var expected: List<MentionView> = listOf()
+    private lateinit var actual: List<MentionView>
+    private lateinit var expected: List<MentionView>
 
     @BeforeEach
-    public fun logInAndLoadMentions() {
+    public fun logInAndUpdateMentions() {
         client().logIn(username)
         client().updateMentions()
         actual = client().findUserMentions()
