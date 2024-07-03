@@ -26,81 +26,94 @@
 
 package io.spine.examples.pingh.client.e2e
 
+import com.google.protobuf.Duration
 import io.kotest.matchers.shouldBe
 import io.spine.examples.pingh.client.e2e.given.expectedMentionsList
 import io.spine.examples.pingh.client.e2e.given.randomUnread
 import io.spine.examples.pingh.client.e2e.given.updateStatusById
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
+import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionStatus
+import io.spine.examples.pingh.mentions.MentionView
+import io.spine.protobuf.Durations2.hours
 import io.spine.protobuf.Durations2.milliseconds
 import java.lang.Thread.sleep
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 /**
- * End-to-end test that describes such a scenario:
- *
- * 1. The user logs in to the Pingh app.
- * 2. The user updates their mentions from GitHub.
- * 3. The user changes the status of a single mention to snoozing.
- * 4. The user reads one mention.
+ * End-to-end test that checks client-server interaction.
  */
 public class PersonalInteractionTest : IntegrationTest() {
 
-    @Test
-    public fun `the user should log in, update mentions and change their statuses`() {
+    private var actual: List<MentionView> = listOf()
+    private var expected: List<MentionView> = listOf()
+
+    @BeforeEach
+    public fun logInAndLoadMentions() {
         val username = Username::class.buildBy("MykytaPimonovTD")
         client().logIn(username)
 
         client().updateMentions()
-        var actual = client().findUserMentions()
-        var expected = expectedMentionsList(username)
-        actual shouldBe expected
-
-        var changedMention = actual.randomUnread()
-        client().snoozeMention(changedMention.id)
         actual = client().findUserMentions()
-        expected = expected.updateStatusById(changedMention.id, MentionStatus.SNOOZED)
-        actual shouldBe expected
-
-        changedMention = actual.randomUnread()
-        client().readMention(changedMention.id)
-        actual = client().findUserMentions()
-        expected = expected.updateStatusById(changedMention.id, MentionStatus.READ)
+        expected = expectedMentionsList(username)
         actual shouldBe expected
     }
 
+    /**
+     * End-to-end test that describes such a scenario:
+     *
+     * 1. The user logs in to the Pingh app.
+     * 2. The user updates their mentions from GitHub.
+     * 3. The user changes the status of a single mention to snoozing.
+     * 4. The user reads one mention.
+     */
+    @Test
+    public fun `the user should log in, update mentions and change their statuses`() {
+        snoozeRandomMention()
+        actual shouldBe expected
+        readRandomMention()
+        actual shouldBe expected
+    }
+
+    /**
+     * End-to-end test that describes such a scenario:
+     *
+     * 1. The user logs in to the Pingh app.
+     * 2. The user updates their mentions from GitHub.
+     * 3. The user reads two random mentions.
+     * 4. The user snoozes a random mention for 100 milliseconds.
+     * 5. The user waits until the snooze period is over.
+     * 6. The user checks that the snoozed mention is unsnoozed.
+     */
     @Test
     public fun `the user should snooze the mention and wait until the snooze period is over`() {
-        val username = Username::class.buildBy("MykytaPimonovTD")
-        client().logIn(username)
-
-        client().updateMentions()
-        var actual = client().findUserMentions()
-        var expected = expectedMentionsList(username)
+        readRandomMention()
         actual shouldBe expected
-
-        var changedMention = actual.randomUnread()
-        client().readMention(changedMention.id)
-        actual = client().findUserMentions()
-        expected = expected.updateStatusById(changedMention.id, MentionStatus.READ)
+        readRandomMention()
         actual shouldBe expected
-
-        changedMention = actual.randomUnread()
-        client().readMention(changedMention.id)
-        actual = client().findUserMentions()
-        expected = expected.updateStatusById(changedMention.id, MentionStatus.READ)
+        val snoozedMentionId = snoozeRandomMention(milliseconds(100))
         actual shouldBe expected
-
-        changedMention = actual.randomUnread()
-        client().snoozeMention(changedMention.id, milliseconds(100))
-        actual = client().findUserMentions()
-        expected = expected.updateStatusById(changedMention.id, MentionStatus.SNOOZED)
-        actual shouldBe expected
-
         sleep(300)
         actual = client().findUserMentions()
-        expected = expected.updateStatusById(changedMention.id, MentionStatus.UNREAD)
+        expected = expected.updateStatusById(snoozedMentionId, MentionStatus.UNREAD)
         actual shouldBe expected
+    }
+
+    private fun readRandomMention(): MentionId {
+        val mention = actual.randomUnread()
+        client().readMention(mention.id)
+        actual = client().findUserMentions()
+        expected = expected.updateStatusById(mention.id, MentionStatus.READ)
+        return mention.id
+    }
+
+    private fun snoozeRandomMention(snoozeTime: Duration = hours(2)): MentionId {
+        val mention = actual.randomUnread()
+        client().snoozeMention(mention.id, snoozeTime)
+        actual = client().findUserMentions()
+        expected = expected.updateStatusById(mention.id, MentionStatus.SNOOZED)
+        return mention.id
     }
 }
