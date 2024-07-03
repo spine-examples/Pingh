@@ -33,6 +33,8 @@ import io.spine.examples.pingh.client.e2e.given.updateStatusById
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.mentions.MentionStatus
+import io.spine.protobuf.Durations2.milliseconds
+import java.lang.Thread.sleep
 import org.junit.jupiter.api.Test
 
 /**
@@ -65,6 +67,40 @@ public class PersonalInteractionTest : IntegrationTest() {
         client().readMention(changedMention.id)
         actual = client().findUserMentions()
         expected = expected.updateStatusById(changedMention.id, MentionStatus.READ)
+        actual shouldBe expected
+    }
+
+    @Test
+    public fun `the user should snooze the mention and wait until the snooze period is over`() {
+        val username = Username::class.buildBy("MykytaPimonovTD")
+        client().logIn(username)
+
+        client().updateMentions()
+        var actual = client().findUserMentions()
+        var expected = expectedMentionsList(username)
+        actual shouldBe expected
+
+        var changedMention = actual.randomUnread()
+        client().readMention(changedMention.id)
+        actual = client().findUserMentions()
+        expected = expected.updateStatusById(changedMention.id, MentionStatus.READ)
+        actual shouldBe expected
+
+        changedMention = actual.randomUnread()
+        client().readMention(changedMention.id)
+        actual = client().findUserMentions()
+        expected = expected.updateStatusById(changedMention.id, MentionStatus.READ)
+        actual shouldBe expected
+
+        changedMention = actual.randomUnread()
+        client().snoozeMention(changedMention.id, milliseconds(100))
+        actual = client().findUserMentions()
+        expected = expected.updateStatusById(changedMention.id, MentionStatus.SNOOZED)
+        actual shouldBe expected
+
+        sleep(300)
+        actual = client().findUserMentions()
+        expected = expected.updateStatusById(changedMention.id, MentionStatus.UNREAD)
         actual shouldBe expected
     }
 }
