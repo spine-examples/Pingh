@@ -66,3 +66,10 @@ internal fun List<MentionView>.updateStatusById(id: MentionId, status: MentionSt
             .setStatus(status)
             .vBuild()
     }
+
+/**
+ * Returns a random `MentionView` with `UNREAD` status from this list.
+ */
+internal fun List<MentionView>.randomUnread(): MentionView =
+    this.filter { it.status == MentionStatus.UNREAD }
+        .random()

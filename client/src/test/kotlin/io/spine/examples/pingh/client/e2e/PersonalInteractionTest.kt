@@ -28,6 +28,7 @@ package io.spine.examples.pingh.client.e2e
 
 import io.kotest.matchers.shouldBe
 import io.spine.examples.pingh.client.e2e.given.expectedMentionsList
+import io.spine.examples.pingh.client.e2e.given.randomUnread
 import io.spine.examples.pingh.client.e2e.given.updateStatusById
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
@@ -54,13 +55,13 @@ public class PersonalInteractionTest : IntegrationTest() {
         var expected = expectedMentionsList(username)
         actual shouldBe expected
 
-        var changedMention = actual.random()
+        var changedMention = actual.randomUnread()
         client().snoozeMention(changedMention.id)
         actual = client().findUserMentions()
         expected = expected.updateStatusById(changedMention.id, MentionStatus.SNOOZED)
         actual shouldBe expected
 
-        changedMention = actual.random()
+        changedMention = actual.randomUnread()
         client().readMention(changedMention.id)
         actual = client().findUserMentions()
         expected = expected.updateStatusById(changedMention.id, MentionStatus.READ)
