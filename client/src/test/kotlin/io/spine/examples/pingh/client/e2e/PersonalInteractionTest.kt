@@ -45,13 +45,6 @@ import org.junit.jupiter.api.Test
 
 /**
  * End-to-end test to checks client-server interaction.
- *
- * Each test checks a different use case. Any of the tests can be described as a scenario:
- *
- * 1. The user logs in to the Pingh app.
- * 2. The user updates their mentions from GitHub.
- *
- * Next steps of the scenario vary across different tests.
  */
 public class PersonalInteractionTest : IntegrationTest() {
 
@@ -69,8 +62,14 @@ public class PersonalInteractionTest : IntegrationTest() {
     }
 
     /**
-     * 3. The user snoozes a random mention
-     * 4. The user reads the snoozed mention.
+     * End-to-end test that describes such a scenario:
+     *
+     * The user:
+     *
+     * 1. Logs in to the Pingh app.
+     * 2. Updates their mentions from GitHub.
+     * 3. Snoozes a random mention
+     * 4. Reads the snoozed mention.
      */
     @Test
     public fun `the user should snooze the mention, and then read this mention`() {
@@ -83,9 +82,15 @@ public class PersonalInteractionTest : IntegrationTest() {
     }
 
     /**
-     * 3. The user snoozes a random mention for 100 milliseconds.
-     * 4. The user waits until the snooze time is over.
-     * 5. The user checks that the snoozed mention is already unsnoozed.
+     * End-to-end test that describes such a scenario:
+     *
+     * The user:
+     *
+     * 1. Logs in to the Pingh app.
+     * 2. Updates their mentions from GitHub.
+     * 3. Snoozes a random mention for 100 milliseconds.
+     * 4. Waits until the snooze time is over.
+     * 5. Checks that the snoozed mention is already unsnoozed.
      */
     @Test
     public fun `the user should snooze the mention and wait until the snooze time is over`() {
@@ -98,10 +103,16 @@ public class PersonalInteractionTest : IntegrationTest() {
     }
 
     /**
-     * 3. The user logs out of the Pingh app.
-     * 4. The user tries to get mentions but catches the exception.
-     * 5. The user logs in again.
-     * 6. The user gets mentions that were updated in the first session.
+     * End-to-end test that describes such a scenario:
+     *
+     * The user:
+     *
+     * 1. Logs in to the Pingh app.
+     * 2. Updates their mentions from GitHub.
+     * 3. Logs out of the Pingh app.
+     * 4. Tries to get mentions but catches the exception.
+     * 5. Logs in again.
+     * 6. Gets mentions that were updated in the first session.
      */
     @Test
     public fun `the user should log in, log out, log in again, and then gets mentions`() {
