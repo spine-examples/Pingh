@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.gradle.RunGradle
+
 /**
  * Gradle configuration for the whole project.
  */
@@ -65,4 +67,12 @@ subprojects {
      * Adds dependencies for testing and configure test-running tasks.
      */
     apply<TestsConfigurationPlugin>()
+}
+
+/**
+ * The task that builds the standalone Gradle project in the `desktop` directory.
+ */
+val buildDesktopClient = tasks.register<RunGradle>("buildDesktopClient") {
+    directoryPath = "$rootDir/desktop"
+    tasks("build")
 }
