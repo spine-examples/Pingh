@@ -27,11 +27,10 @@
 package io.spine.examples.pingh.client
 
 import com.google.protobuf.Timestamp
-import com.google.protobuf.util.Durations
+import com.google.protobuf.Duration
 import com.google.protobuf.util.Timestamps
 
 /**
- * Sets the time 2 hours from this time.
+ * Adds a duration to this timestamp.
  */
-public fun Timestamp.inTwoHours(): Timestamp =
-    Timestamps.add(this, Durations.fromHours(2))
+public fun Timestamp.add(duration: Duration): Timestamp = Timestamps.add(this, duration)

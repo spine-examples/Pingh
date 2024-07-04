@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.client
 
+import com.google.protobuf.Duration
 import com.google.protobuf.Message
 import io.grpc.ManagedChannelBuilder
 import io.spine.base.CommandMessage
@@ -59,6 +60,7 @@ import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
+import io.spine.protobuf.Durations2
 import java.util.UUID
 import kotlin.reflect.KClass
 
@@ -72,8 +74,15 @@ import kotlin.reflect.KClass
 // to interact with the server, which does not enable Detekt.
 public class DesktopClient(
     address: String = "localhost",
-    port: Int = DEFAULT_CLIENT_SERVICE_PORT,
+    port: Int = DEFAULT_CLIENT_SERVICE_PORT
 ) {
+
+    private companion object {
+        /**
+         * The default snooze time of mention.
+         */
+        private val defaultSnoozeTime = Durations2.hours(2)
+    }
 
     private val client: Client
     private val user: UserId
@@ -119,8 +128,6 @@ public class DesktopClient(
         val command = LogUserOut::class.buildBy(session!!)
         observeEventOnce(command.id, UserLoggedOut::class) { event ->
             this.session = null
-            client.subscriptions()
-                .cancelAll()
             onSuccess(event)
         }
         send(command)
@@ -167,10 +174,16 @@ public class DesktopClient(
     }
 
     /**
-     * Marks the mention as a 2-hour snooze.
+     * Marks the mention as snoozed.
+     *
+     * If snooze time is not specified, the mention will snooze the [defaultSnoozeTime].
      */
-    public fun snoozeMention(id: MentionId, onSuccess: (event: MentionSnoozed) -> Unit = {}) {
-        val command = SnoozeMention::class.buildBy(id, currentTime().inTwoHours())
+    public fun snoozeMention(
+        id: MentionId,
+        snoozeTime: Duration = defaultSnoozeTime,
+        onSuccess: (event: MentionSnoozed) -> Unit = {}
+    ) {
+        val command = SnoozeMention::class.buildBy(id, currentTime().add(snoozeTime))
         observeEventOnce(command.id, MentionSnoozed::class, onSuccess)
         send(command)
     }
