@@ -176,7 +176,7 @@ public class DesktopClient(
     /**
      * Marks the mention as snoozed.
      *
-     * If snooze time is not specified, the mention will snooze the `defaultSnoozeTime`.
+     * If snooze time is not specified, the mention will snooze the [defaultSnoozeTime].
      */
     public fun snoozeMention(
         id: MentionId,

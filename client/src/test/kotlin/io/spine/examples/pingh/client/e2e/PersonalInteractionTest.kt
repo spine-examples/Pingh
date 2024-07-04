@@ -45,6 +45,13 @@ import org.junit.jupiter.api.Test
 
 /**
  * End-to-end test to checks client-server interaction.
+ *
+ * Each test checks a different use case. Any of the tests can be described as a scenario:
+ *
+ * 1. The user logs in to the Pingh app.
+ * 2. The user updates their mentions from GitHub.
+ *
+ * Next steps of the scenario vary across different tests.
  */
 public class PersonalInteractionTest : IntegrationTest() {
 
@@ -62,37 +69,26 @@ public class PersonalInteractionTest : IntegrationTest() {
     }
 
     /**
-     * End-to-end test that describes such a scenario:
-     *
-     * 1. The user logs in to the Pingh app.
-     * 2. The user updates their mentions from GitHub.
-     * 3. The user changes the status of a single mention to snoozing.
-     * 4. The user reads one mention.
+     * 3. The user snoozes a random mention
+     * 4. The user reads the snoozed mention.
      */
     @Test
-    public fun `the user should log in, update mentions, and change their statuses`() {
-        snoozeRandomMention()
+    public fun `the user should snooze the mention, and then read this mention`() {
+        val snoozedMentionId = snoozeRandomMention()
         actual shouldBe expected
-        readRandomMention()
+        client().readMention(snoozedMentionId)
+        actual = client().findUserMentions()
+        expected = expected.updateStatusById(snoozedMentionId, MentionStatus.READ)
         actual shouldBe expected
     }
 
     /**
-     * End-to-end test that describes such a scenario:
-     *
-     * 1. The user logs in to the Pingh app.
-     * 2. The user updates their mentions from GitHub.
-     * 3. The user reads two random mentions.
-     * 4. The user snoozes a random mention for 100 milliseconds.
-     * 5. The user waits until the snooze time is over.
-     * 6. The user checks that the snoozed mention is already unsnoozed.
+     * 3. The user snoozes a random mention for 100 milliseconds.
+     * 4. The user waits until the snooze time is over.
+     * 5. The user checks that the snoozed mention is already unsnoozed.
      */
     @Test
     public fun `the user should snooze the mention and wait until the snooze time is over`() {
-        readRandomMention()
-        actual shouldBe expected
-        readRandomMention()
-        actual shouldBe expected
         val snoozedMentionId = snoozeRandomMention(milliseconds(100))
         actual shouldBe expected
         sleep(300)
@@ -102,10 +98,6 @@ public class PersonalInteractionTest : IntegrationTest() {
     }
 
     /**
-     * End-to-end test that describes such a scenario:
-     *
-     * 1. The user logs in to the Pingh app.
-     * 2. The user updates their mentions from GitHub.
      * 3. The user logs out of the Pingh app.
      * 4. The user tries to get mentions but catches the exception.
      * 5. The user logs in again.
@@ -120,14 +112,6 @@ public class PersonalInteractionTest : IntegrationTest() {
         client().logIn(username)
         actual = client().findUserMentions()
         actual shouldBe expected
-    }
-
-    private fun readRandomMention(): MentionId {
-        val mention = actual.randomUnread()
-        client().readMention(mention.id)
-        actual = client().findUserMentions()
-        expected = expected.updateStatusById(mention.id, MentionStatus.READ)
-        return mention.id
     }
 
     private fun snoozeRandomMention(snoozeTime: Duration = hours(2)): MentionId {

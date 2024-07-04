@@ -38,7 +38,10 @@ public fun predefinedMentionsSet(): Set<Mention> =
     loadMentionsInPr() + loadMentionsInCommentsUnderPr()
 
 /**
- * Loads mentions from the prepared JSON response to a mention search request in pull requests.
+ * Loads mentions from the predefined JSON file.
+ *
+ * The predefined response loaded corresponds to the exact response
+ * returned by the GitHub API when requesting for mentions in a pull request.
  */
 private fun loadMentionsInPr(): Set<Mention> {
     val jsonFile = PredefinedGitHubResponses::class.java
@@ -52,7 +55,10 @@ private fun loadMentionsInPr(): Set<Mention> {
 }
 
 /**
- * Loads mentions from the prepared JSON response to a comments obtain request under pull request.
+ * Loads mentions from the predefined JSON file.
+ *
+ * The predefined response loaded corresponds to the exact response
+ * returned by the GitHub API when requesting for mentions in comments under a pull request.
  */
 private fun loadMentionsInCommentsUnderPr(): Set<Mention> {
     val jsonFile = PredefinedGitHubResponses::class.java
