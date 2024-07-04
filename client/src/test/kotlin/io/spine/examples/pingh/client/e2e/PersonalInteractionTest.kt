@@ -112,7 +112,7 @@ public class PersonalInteractionTest : IntegrationTest() {
      * 3. Logs out of the Pingh app.
      * 4. Tries to get mentions but catches the exception.
      * 5. Logs in again.
-     * 6. Gets mentions that were updated in the first session.
+     * 6. Reads mentions that were updated in the first session.
      */
     @Test
     public fun `the user should log in, log out, log in again, and then gets mentions`() {
