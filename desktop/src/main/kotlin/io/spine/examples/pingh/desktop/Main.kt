@@ -26,6 +26,41 @@
 
 package io.spine.examples.pingh.desktop
 
-fun main() {
-    println("Hello World!")
+import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.application
+
+import io.spine.examples.pingh.client.DesktopClient
+import io.spine.examples.pingh.github.Username
+import io.spine.examples.pingh.github.buildBy
+
+@Composable
+@Preview
+public fun app() {
+    var text by remember { mutableStateOf("Hello, World!") }
+
+    MaterialTheme {
+        Button(onClick = {
+            text = "Hello, Desktop!"
+        }) {
+            Text(text)
+            val me = Username::class.buildBy("MykytaPimonovTD")
+            val client = DesktopClient()
+            client.logIn(me)
+        }
+    }
+}
+
+public fun main() = application {
+    Window(onCloseRequest = ::exitApplication) {
+        app()
+    }
 }
