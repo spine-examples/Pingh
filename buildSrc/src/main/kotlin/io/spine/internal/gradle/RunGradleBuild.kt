@@ -34,9 +34,9 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.os.OperatingSystem
 
 /**
- * The Gradle task which runs another Gradle build.
+ * The Gradle task which builds another Gradle project.
  */
-public open class RunGradle : DefaultTask() {
+public open class RunGradleBuild : DefaultTask() {
 
     private companion object {
         /**
@@ -52,20 +52,7 @@ public open class RunGradle : DefaultTask() {
     public lateinit var directoryPath: String
 
     /**
-     * The names of the task to be passed to the Gradle wrapper script.
-     */
-    private lateinit var taskNames: List<String>
-
-    /**
-     * Sets the names of the task to be passed to the Gradle wrapper script.
-     */
-    public fun tasks(vararg tasks: String) {
-        taskNames = tasks.toList()
-    }
-
-    /**
-     * Launches Gradle wrapper under a given [directoryPath] with
-     * the specified [taskNames] names.
+     * Builds Gradle wrapper under the given [directoryPath].
      */
     @TaskAction
     private fun execute() {
@@ -85,7 +72,7 @@ public open class RunGradle : DefaultTask() {
         val script = selectScript()
         return listOf(
             "$directoryPath/$script",
-            *taskNames.toTypedArray(),
+            "build",
             "--stacktrace"
         )
     }

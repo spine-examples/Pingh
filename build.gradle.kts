@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.gradle.RunGradle
+import io.spine.internal.gradle.RunGradleBuild
 
 /**
  * Gradle configuration for the whole project.
@@ -35,7 +35,7 @@ allprojects {
     */
     apply(from = "$rootDir/version.gradle.kts")
     version = extra["pinghVersion"]!!
-    group = "io.spine.examples"
+    group = "io.spine.examples.pingh"
 
     apply<IdeaPlugin>()
 }
@@ -72,7 +72,6 @@ subprojects {
 /**
  * The task that builds the standalone Gradle project in the `desktop` directory.
  */
-val buildDesktopClient = tasks.register<RunGradle>("buildDesktopClient") {
+val buildDesktopClient = tasks.register<RunGradleBuild>("buildDesktopClient") {
     directoryPath = "$rootDir/desktop"
-    tasks("build")
 }
