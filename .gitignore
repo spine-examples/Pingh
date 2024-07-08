@@ -27,9 +27,9 @@
 **/.idea/**/*.xml
 **/.idea/**/*.iml
 **/.idea/shelf/**
-!.idea/codeStyles/**
-!.idea/inspectionProfiles/**
-!.idea/copyright/**
-!.idea/misc.xml
+!**/.idea/codeStyles/**
+!**/.idea/inspectionProfiles/**
+!**/.idea/copyright/**
+!**/.idea/misc.xml
 
 **/generated
