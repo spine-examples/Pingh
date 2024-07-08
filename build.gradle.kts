@@ -27,6 +27,10 @@
 import io.spine.internal.gradle.RunGradleBuild
 import io.spine.internal.gradle.publishing.publishingToMavenLocal
 
+plugins {
+    java
+}
+
 /**
  * Gradle configuration for the whole project.
  */
@@ -91,4 +95,14 @@ val buildDesktopClient = tasks.register<RunGradleBuild>("buildDesktopClient") {
     project.subprojects.forEach { subproject ->
         task.dependsOn(":${subproject.name}:publishToMavenLocal")
     }
+}
+
+/**
+ * Adds the `buildDesktopClient` task to the `Pingh` build process.
+ *
+ * For the final build of the `Pingh` project, it is necessary to build
+ * the nested `desktop` standalone project.
+ */
+tasks.build {
+    dependsOn(buildDesktopClient)
 }
