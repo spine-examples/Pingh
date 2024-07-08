@@ -25,6 +25,7 @@
  */
 
 import io.spine.internal.gradle.RunGradleBuild
+import io.spine.internal.gradle.publishing.publishingToMavenLocal
 
 /**
  * Gradle configuration for the whole project.
@@ -70,8 +71,24 @@ subprojects {
 }
 
 /**
+ * Publish all modules to Maven Local.
+ */
+publishingToMavenLocal {
+    modules = project.subprojects
+        .map { it.name }
+        .toSet()
+}
+
+/**
  * The task that builds the standalone Gradle project in the `desktop` directory.
+ *
+ * This task depends on publishing all the submodules to Maven Local
+ * so that the `desktop` standalone project can get all the dependencies.
  */
 val buildDesktopClient = tasks.register<RunGradleBuild>("buildDesktopClient") {
+    val task = this
     directoryPath = "$rootDir/desktop"
+    project.subprojects.forEach { subproject ->
+        task.dependsOn(":${subproject.name}:publishToMavenLocal")
+    }
 }

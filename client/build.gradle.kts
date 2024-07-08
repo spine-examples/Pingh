@@ -54,7 +54,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(project(":server"))
+    api(project(":server"))
     implementation(JavaX.annotations)
     implementation(Guava.lib)
     implementation(Grpc.netty)
