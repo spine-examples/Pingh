@@ -89,5 +89,5 @@ public fun DokkaTask.configureForKotlin() {
     outputDirectory.set(project.dokkaOutput("kotlin"))
 }
 
-private fun Project.dokkaOutput(language: String): File =
+public fun Project.dokkaOutput(language: String): File =
     buildDir.resolve("docs/dokka${language.capitalize()}")

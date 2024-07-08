@@ -27,12 +27,9 @@
 package io.spine.internal.gradle.publishing
 
 import org.gradle.api.Project
-import org.gradle.api.publish.PublicationContainer
-import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.getByType
 
 /**
  * A publication for a typical Java project to Maven Local repository.
@@ -93,19 +90,19 @@ public class JavaPublicationHandler(
     /**
      * Specifies which artifacts this `MavenPublication` will contain.
      *
+     * This Maven publication contains:
+     *
+     *  1. Jar archives. For example: compilation output, sources, and Kotlin dokka docs.
+     *  2. Maven metadata file that has ".pom" extension.
+     *  3. Gradle's metadata file that has ".module" extension.
+     *
      * @see <a href="https://docs.gradle.org/current/userguide/publishing_gradle_module_metadata.html">
      *      Understanding Gradle Module Metadata</a>
      */
     private fun MavenPublication.specifyArtifacts() {
         val javaComponent = project.components.findByName("java")
         javaComponent?.let { from(it) }
+        project.addSourcesJar()
+        artifact(project.dokkaKotlinJar())
     }
 }
-
-/**
- * Obtains `PublicationContainer` of this project.
- */
-private val Project.publications: PublicationContainer
-    get() = extensions
-        .getByType<PublishingExtension>()
-        .publications

@@ -1,0 +1,96 @@
+/*
+ * Copyright 2024, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package io.spine.internal.gradle.publishing
+
+import dokkaOutput
+import org.gradle.api.Project
+import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.publish.PublicationContainer
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.tasks.TaskContainer
+import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.tasks.bundling.Jar
+import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.register
+
+/**
+ * Obtains `PublicationContainer` of this project.
+ */
+internal val Project.publications: PublicationContainer
+    get() = extensions
+        .getByType<PublishingExtension>()
+        .publications
+
+/**
+ * Locates or creates `sourcesJar` task in this [Project].
+ *
+ * The output of this task is a `jar` archive. The archive contains sources from `main` source set.
+ * The task makes sure that sources from the directories below will be included into
+ * a resulted archive:
+ *
+ *  - Kotlin;
+ *  - Java;
+ *  - Proto.
+ *
+ * The produced artifact is registered as a documentation variant on the `java` component and
+ * added as a dependency on the `assemble` task. This means that if `maven-publish` is also applied,
+ * the sources JAR will be published.
+ */
+internal fun Project.addSourcesJar() {
+    extensions.getByType<JavaPluginExtension>()
+        .withSourcesJar()
+}
+
+/**
+ * Locates or creates `dokkaKotlinJar` task in this `Project`.
+ *
+ * The output of this task is a `jar` archive. The archive contains the Dokka output,
+ * generated upon Kotlin sources from `main` source set.
+ */
+internal fun Project.dokkaKotlinJar(): TaskProvider<Jar> =
+    tasks.getOrCreate("dokkaKotlinJar") {
+        archiveClassifier.set("dokka")
+        from(files(dokkaOutput("kotlin")))
+
+        tasks.findByName("dokkaHtml")?.let { dokkaTask ->
+            this@getOrCreate.dependsOn(dokkaTask)
+        }
+    }
+
+/**
+ * Returns the `Jar` task by name if it exists,
+ * otherwise creates and initializes a new `Jar` task.
+ */
+private fun TaskContainer.getOrCreate(name: String, init: Jar.() -> Unit) =
+    if (names.contains(name)) {
+        named<Jar>(name)
+    } else {
+        register<Jar>(name) {
+            init()
+        }
+    }
