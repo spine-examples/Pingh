@@ -32,7 +32,7 @@ import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.create
 
 /**
- * A publication for a typical Java project to Maven Local repository.
+ * A publication for a typical Java project to the Maven Local repository.
  *
  * In Gradle, to publish something, one should create a publication.
  * A publication has a name and consists of one or more artifacts plus information about
@@ -40,13 +40,13 @@ import org.gradle.kotlin.dsl.create
  *
  * An instance of this class represents [MavenPublication] named `"mavenJava"`. It is generally
  * accepted that a publication with this name contains a Java project published to
- * Maven Local repository.
+ * the Maven Local repository.
  *
  * @param project a published `Project`.
  * @see <a href="https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:publications">
- *       Maven Publish Plugin</a>
+ *       Maven Publish Plugin | Publications</a>
  */
-public class JavaPublicationHandler(
+public class PublicationHandler(
     private val project: Project
 ) {
 
@@ -74,7 +74,7 @@ public class JavaPublicationHandler(
     }
 
     /**
-     * Copies the attributes og the Gradle [Project] to this `MavenPublication`.
+     * Copies the attributes of the Gradle [Project] to this `MavenPublication`.
      *
      * The following project attributes are copied:
      * - [group][Project.getGroup];
@@ -92,7 +92,7 @@ public class JavaPublicationHandler(
      *
      * This Maven publication contains:
      *
-     *  1. Jar archives. For example: compilation output, sources, and Kotlin dokka docs.
+     *  1. Jar archives: compilation output, sources, and Kotlin dokka docs.
      *  2. Maven metadata file that has ".pom" extension.
      *  3. Gradle's metadata file that has ".module" extension.
      *

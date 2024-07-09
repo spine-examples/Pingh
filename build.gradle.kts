@@ -75,7 +75,7 @@ subprojects {
 }
 
 /**
- * Publish all modules to Maven Local.
+ * Publishes all modules to Maven Local repository.
  */
 publishingToMavenLocal {
     modules = project.subprojects
@@ -86,7 +86,7 @@ publishingToMavenLocal {
 /**
  * The task that builds the standalone Gradle project in the `desktop` directory.
  *
- * This task depends on publishing all the submodules to Maven Local
+ * This task depends on publishing all the submodules to Maven Local repository
  * so that the `desktop` standalone project can get all the dependencies.
  */
 val buildDesktopClient = tasks.register<RunGradleBuild>("buildDesktopClient") {
@@ -100,7 +100,7 @@ val buildDesktopClient = tasks.register<RunGradleBuild>("buildDesktopClient") {
 /**
  * Adds the `buildDesktopClient` task to the `Pingh` build process.
  *
- * For the final build of the `Pingh` project, it is necessary to build
+ * For the build of the `Pingh` project, it is necessary to build
  * the nested `desktop` standalone project.
  */
 tasks.build {

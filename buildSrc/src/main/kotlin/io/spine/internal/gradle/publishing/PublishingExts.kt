@@ -39,7 +39,7 @@ import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
 
 /**
- * Obtains `PublicationContainer` of this project.
+ * Obtains the `PublicationContainer` of this project.
  */
 internal val Project.publications: PublicationContainer
     get() = extensions
@@ -47,7 +47,7 @@ internal val Project.publications: PublicationContainer
         .publications
 
 /**
- * Locates or creates `sourcesJar` task in this [Project].
+ * Creates the `sourcesJar` task in this [Project].
  *
  * The output of this task is a `jar` archive. The archive contains sources from `main` source set.
  * The task makes sure that sources from the directories below will be included into
@@ -57,9 +57,11 @@ internal val Project.publications: PublicationContainer
  *  - Java;
  *  - Proto.
  *
- * The produced artifact is registered as a documentation variant on the `java` component and
- * added as a dependency on the `assemble` task. This means that if `maven-publish` is also applied,
- * the sources JAR will be published.
+ * The produced artifact is registered as a variant on the `java` component and
+ * added as a dependency on the `assemble` task. This means that when the `java` component
+ * is published, its sources will also be published as a JAR archive.
+ *
+ * @see [JavaPluginExtension.withSourcesJar]
  */
 internal fun Project.addSourcesJar() {
     extensions.getByType<JavaPluginExtension>()
@@ -67,7 +69,7 @@ internal fun Project.addSourcesJar() {
 }
 
 /**
- * Locates or creates `dokkaKotlinJar` task in this `Project`.
+ * Creates the `dokkaKotlinJar` task in this `Project`.
  *
  * The output of this task is a `jar` archive. The archive contains the Dokka output,
  * generated upon Kotlin sources from `main` source set.

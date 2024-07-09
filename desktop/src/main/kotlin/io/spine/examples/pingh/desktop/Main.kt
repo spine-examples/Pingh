@@ -38,10 +38,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 
-import io.spine.examples.pingh.client.DesktopClient
-import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.buildBy
+/**
+ * Starts the Compose "Hello World" application.
+ */
+public fun main() {
+    application {
+        Window(onCloseRequest = ::exitApplication) {
+            app()
+        }
+    }
+}
 
+/**
+ * The "Hello World" application.
+ */
 @Composable
 @Preview
 public fun app() {
@@ -52,15 +62,6 @@ public fun app() {
             text = "Hello, Desktop!"
         }) {
             Text(text)
-            val me = Username::class.buildBy("MykytaPimonovTD")
-            val client = DesktopClient()
-            client.logIn(me)
         }
-    }
-}
-
-public fun main() = application {
-    Window(onCloseRequest = ::exitApplication) {
-        app()
     }
 }

@@ -34,12 +34,13 @@ import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.findByType
 
 /**
- * Configures [PublishingToMavenLocal] extension.
+ * Configures the [PublishingToMavenLocal] extension.
  *
- * This extension sets up publishing of artifacts to Maven Local.
+ * This extension sets up publishing of artifacts to Maven Local repository.
  *
  * The extension can be configured only for multi-module projects. The extension should be opened
- * in the root project's build file. The published modules are specified explicitly by their names:
+ * in the root project's build file. The published modules are specified explicitly by their names
+ * or paths:
  *
  * ```
  * publishingToMavenLocal {
@@ -51,7 +52,7 @@ import org.gradle.kotlin.dsl.findByType
  * ```
  *
  * In Gradle, in order to publish something somewhere one should create a publication.
- * In each of published modules, the extension will create a [publication][JavaPublicationHandler]
+ * In each of published modules, the extension will create a [publication][PublicationHandler]
  * named `"mavenJava"`. All artifacts, published by this extension belong to this publication.
  */
 public fun Project.publishingToMavenLocal(block: PublishingToMavenLocal.() -> Unit) {
@@ -67,11 +68,10 @@ public fun Project.publishingToMavenLocal(block: PublishingToMavenLocal.() -> Un
 }
 
 /**
- * A Gradle extension for setting up publishing of modules to Maven Local
+ * A Gradle extension for setting up publishing of modules to Maven Local repository
  * using `maven-publish` plugin.
  *
  * @param project a project in which extension is opened.
- *
  * @see [publishingToMavenLocal]
  */
 public open class PublishingToMavenLocal(
@@ -89,7 +89,7 @@ public open class PublishingToMavenLocal(
     public lateinit var modules: Set<String>
 
     /**
-     * Called to notify the extension that its configuration is completed.
+     * Notifies the extension that its configuration is completed.
      *
      * Adds the `maven-publish` plugin to each published module and
      * configures their publication properties.
@@ -115,14 +115,14 @@ public open class PublishingToMavenLocal(
     /**
      * Sets up the `maven-publish` plugin to this project and configures it.
      *
-     * Creates the [JavaPublicationHandler] for the project and
+     * Creates the [PublicationHandler] for the project and
      * schedules to apply it on [Project.afterEvaluate].
      *
      * The `afterEvaluate` is used to have access to information from already compiled modules.
      * This allows obtaining information about the module's group, its versions, and so on.
      */
     private fun Project.setUpPublishing() {
-        val handler = JavaPublicationHandler(project)
+        val handler = PublicationHandler(project)
         afterEvaluate {
             handler.apply()
         }
