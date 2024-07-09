@@ -45,6 +45,13 @@ import org.junit.jupiter.api.Test
 
 /**
  * End-to-end test to checks client-server interaction.
+ *
+ * The Pingh Server is designed according to the Event Sourcing architectural pattern,
+ * which inherently provides
+ * [eventual consistency](https://en.wikipedia.org/wiki/Eventual_consistency).
+ * When executing a command, cannot guarantee the immediate application of changes.
+ * Therefore, for testing purposes, a delay is introduced before sending a request to ensure
+ * that the server data is updated accordingly.
  */
 public class PersonalInteractionTest : IntegrationTest() {
 
@@ -76,6 +83,7 @@ public class PersonalInteractionTest : IntegrationTest() {
         val snoozedMentionId = snoozeRandomMention()
         actual shouldBe expected
         client().readMention(snoozedMentionId)
+        delay()
         actual = client().findUserMentions()
         expected = expected.updateStatusById(snoozedMentionId, MentionStatus.READ)
         actual shouldBe expected
@@ -94,9 +102,9 @@ public class PersonalInteractionTest : IntegrationTest() {
      */
     @Test
     public fun `the user should snooze the mention and wait until the snooze time is over`() {
-        val snoozedMentionId = snoozeRandomMention(milliseconds(100))
+        val snoozedMentionId = snoozeRandomMention(milliseconds(500))
         actual shouldBe expected
-        sleep(300)
+        sleep(1000)
         actual = client().findUserMentions()
         expected = expected.updateStatusById(snoozedMentionId, MentionStatus.UNREAD)
         actual shouldBe expected
@@ -117,10 +125,12 @@ public class PersonalInteractionTest : IntegrationTest() {
     @Test
     public fun `the user should log in, log out, log in again, and then gets mentions`() {
         client().logOut()
+        delay()
         shouldThrow<IllegalStateException> {
             client().findUserMentions()
         }
         client().logIn(username)
+        delay()
         actual = client().findUserMentions()
         actual shouldBe expected
     }
@@ -128,8 +138,13 @@ public class PersonalInteractionTest : IntegrationTest() {
     private fun snoozeRandomMention(snoozeTime: Duration = hours(2)): MentionId {
         val mention = actual.randomUnread()
         client().snoozeMention(mention.id, snoozeTime)
+        delay()
         actual = client().findUserMentions()
         expected = expected.updateStatusById(mention.id, MentionStatus.SNOOZED)
         return mention.id
+    }
+
+    private fun delay() {
+        sleep(100)
     }
 }
