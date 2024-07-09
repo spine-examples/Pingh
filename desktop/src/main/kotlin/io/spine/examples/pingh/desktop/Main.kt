@@ -39,7 +39,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 
 /**
- * Starts the Compose "Hello World" application.
+ * Starts the Compose "Hello, World!" application.
  */
 public fun main() {
     application {
@@ -50,7 +50,7 @@ public fun main() {
 }
 
 /**
- * The "Hello World" application.
+ * The "Hello, World!" application.
  */
 @Composable
 @Preview
