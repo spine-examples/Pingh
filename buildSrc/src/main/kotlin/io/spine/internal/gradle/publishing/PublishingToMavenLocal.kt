@@ -54,6 +54,8 @@ import org.gradle.kotlin.dsl.findByType
  * In Gradle, in order to publish something somewhere one should create a publication.
  * In each of published modules, the extension will create a [publication][PublicationHandler]
  * named `"mavenJava"`. All artifacts, published by this extension belong to this publication.
+ *
+ * @see [PublicationHandler]
  */
 public fun Project.publishingToMavenLocal(block: PublishingToMavenLocal.() -> Unit) {
     apply<MavenPublishPlugin>()

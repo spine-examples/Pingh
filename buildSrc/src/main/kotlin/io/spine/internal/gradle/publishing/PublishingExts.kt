@@ -47,7 +47,7 @@ internal val Project.publications: PublicationContainer
         .publications
 
 /**
- * Creates the `sourcesJar` task in this [Project].
+ * Creates the `sourcesJar` task in this `Project`.
  *
  * The output of this task is a `jar` archive. The archive contains sources from `main` source set.
  * The task makes sure that sources from the directories below will be included into
@@ -59,7 +59,7 @@ internal val Project.publications: PublicationContainer
  *
  * The produced artifact is registered as a variant on the `java` component and
  * added as a dependency on the `assemble` task. This means that when the `java` component
- * is published, its sources will also be published as a JAR archive.
+ * is published, its sources will also be published as a `jar` archive.
  *
  * @see [JavaPluginExtension.withSourcesJar]
  */

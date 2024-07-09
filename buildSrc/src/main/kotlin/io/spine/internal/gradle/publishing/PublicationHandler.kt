@@ -32,7 +32,7 @@ import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.create
 
 /**
- * A publication for a typical Java project to the Maven Local repository.
+ * A publication for a Java project to the Maven Local repository.
  *
  * In Gradle, to publish something, one should create a publication.
  * A publication has a name and consists of one or more artifacts plus information about
@@ -88,11 +88,11 @@ public class PublicationHandler(
     }
 
     /**
-     * Specifies which artifacts this `MavenPublication` will contain.
+     * Specifies which artifacts this `MavenPublication` contains.
      *
      * This Maven publication contains:
      *
-     *  1. Jar archives: compilation output, sources, and Kotlin dokka docs.
+     *  1. Jar archives: compilation output, sources, and Kotlin Dokka docs.
      *  2. Maven metadata file that has ".pom" extension.
      *  3. Gradle's metadata file that has ".module" extension.
      *
