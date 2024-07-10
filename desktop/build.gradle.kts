@@ -49,7 +49,7 @@ plugins {
  * The path to the parent project.
  *
  * This project is nested standalone.
- * Its parent contains project's version and `Detekt` configs.
+ * Its parent contains project's version and Detekt configs.
  */
 private val parentRootDir = rootDir.parent
 
@@ -90,12 +90,6 @@ dependencies {
     implementation("androidx.compose.runtime:runtime:1.6.0")
     implementation(compose.desktop.currentOs)
     implementation("io.spine.examples.pingh:client:$pinghVersion")
-}
-
-compose.desktop {
-    application {
-        mainClass = "io.spine.examples.pingh.desktop.MainKt"
-    }
 }
 
 /**
