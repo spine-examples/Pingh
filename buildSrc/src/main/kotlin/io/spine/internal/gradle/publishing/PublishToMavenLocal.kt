@@ -34,7 +34,7 @@ import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.findByType
 
 /**
- * Configures the [PublishingToMavenLocal] extension.
+ * Configures the [PublishToMavenLocal] extension.
  *
  * This extension sets up publishing of artifacts to Maven Local repository.
  *
@@ -43,7 +43,7 @@ import org.gradle.kotlin.dsl.findByType
  * or paths:
  *
  * ```
- * publishingToMavenLocal {
+ * publishToMavenLocal {
  *     modules = setOf(
  *         "subprojectA",
  *         "subprojectB"
@@ -57,11 +57,11 @@ import org.gradle.kotlin.dsl.findByType
  *
  * @see [PublicationHandler]
  */
-public fun Project.publishingToMavenLocal(block: PublishingToMavenLocal.() -> Unit) {
+public fun Project.publishToMavenLocal(block: PublishToMavenLocal.() -> Unit) {
     apply<MavenPublishPlugin>()
-    val name = PublishingToMavenLocal::class.java.simpleName
+    val name = PublishToMavenLocal::class.java.simpleName
     val extension = with(extensions) {
-        findByType<PublishingToMavenLocal>() ?: create(name, project)
+        findByType<PublishToMavenLocal>() ?: create(name, project)
     }
     extension.run {
         block()
@@ -74,9 +74,9 @@ public fun Project.publishingToMavenLocal(block: PublishingToMavenLocal.() -> Un
  * using `maven-publish` plugin.
  *
  * @param project a project in which extension is opened.
- * @see [publishingToMavenLocal]
+ * @see [publishToMavenLocal]
  */
-public open class PublishingToMavenLocal(
+public open class PublishToMavenLocal(
     private val project: Project
 ) {
 
