@@ -53,14 +53,14 @@ import org.junit.jupiter.api.Test
  * Therefore, for testing purposes, a delay is introduced before sending a request to ensure
  * that the server data is updated accordingly.
  */
-public class PersonalInteractionTest : IntegrationTest() {
+internal class PersonalInteractionTest : IntegrationTest() {
 
     private val username = Username::class.buildBy("MykytaPimonovTD")
     private lateinit var actual: List<MentionView>
     private lateinit var expected: List<MentionView>
 
     @BeforeEach
-    public fun logInAndUpdateMentions() {
+    internal fun logInAndUpdateMentions() {
         client().logIn(username)
         client().updateMentions()
         actual = client().findUserMentions()
@@ -79,7 +79,7 @@ public class PersonalInteractionTest : IntegrationTest() {
      * 4. Reads the snoozed mention.
      */
     @Test
-    public fun `the user should snooze the mention, and then read this mention`() {
+    internal fun `the user should snooze the mention, and then read this mention`() {
         val snoozedMentionId = snoozeRandomMention()
         actual shouldBe expected
         client().readMention(snoozedMentionId)
@@ -101,7 +101,7 @@ public class PersonalInteractionTest : IntegrationTest() {
      * 5. Checks that the snoozed mention is already unsnoozed.
      */
     @Test
-    public fun `the user should snooze the mention and wait until the snooze time is over`() {
+    internal fun `the user should snooze the mention and wait until the snooze time is over`() {
         val snoozedMentionId = snoozeRandomMention(milliseconds(500))
         actual shouldBe expected
         sleep(1000)
@@ -123,7 +123,7 @@ public class PersonalInteractionTest : IntegrationTest() {
      * 6. Reads mentions that were updated in the first session.
      */
     @Test
-    public fun `the user should log in, log out, log in again, and then gets mentions`() {
+    internal fun `the user should log in, log out, log in again, and then gets mentions`() {
         client().logOut()
         delay()
         shouldThrow<IllegalStateException> {
