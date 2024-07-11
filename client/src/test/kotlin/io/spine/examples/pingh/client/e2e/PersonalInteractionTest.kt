@@ -82,7 +82,7 @@ internal class PersonalInteractionTest : IntegrationTest() {
     internal fun `the user should snooze the mention, and then read this mention`() {
         val snoozedMentionId = snoozeRandomMention()
         actual shouldBe expected
-        client().readMention(snoozedMentionId)
+        client().markMentionAsRead(snoozedMentionId)
         delay()
         actual = client().findUserMentions()
         expected = expected.updateStatusById(snoozedMentionId, MentionStatus.READ)
@@ -137,7 +137,7 @@ internal class PersonalInteractionTest : IntegrationTest() {
 
     private fun snoozeRandomMention(snoozeTime: Duration = hours(2)): MentionId {
         val mention = actual.randomUnread()
-        client().snoozeMention(mention.id, snoozeTime)
+        client().markMentionAsSnoozed(mention.id, snoozeTime)
         delay()
         actual = client().findUserMentions()
         expected = expected.updateStatusById(mention.id, MentionStatus.SNOOZED)

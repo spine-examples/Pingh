@@ -34,8 +34,7 @@ plugins {
 }
 
 /**
- * After applying, Detekt is configured to use
- * `${parentRootDir}/config/quality/detekt-config.yml` file.
+ * After applying, Detekt is configured to use prepared `detekt-config.yml` file.
  */
 detekt {
     buildUponDefaultConfig = true

@@ -178,7 +178,7 @@ public class DesktopClient(
      *
      * If snooze time is not specified, the mention will snooze the [defaultSnoozeTime].
      */
-    public fun snoozeMention(
+    public fun markMentionAsSnoozed(
         id: MentionId,
         snoozeTime: Duration = defaultSnoozeTime,
         onSuccess: (event: MentionSnoozed) -> Unit = {}
@@ -191,7 +191,7 @@ public class DesktopClient(
     /**
      * Marks that the mention is read.
      */
-    public fun readMention(id: MentionId, onSuccess: (event: MentionRead) -> Unit = {}) {
+    public fun markMentionAsRead(id: MentionId, onSuccess: (event: MentionRead) -> Unit = {}) {
         val command = MarkMentionAsRead::class.buildBy(id)
         observeEventOnce(command.id, MentionRead::class, onSuccess)
         send(command)
