@@ -25,6 +25,8 @@
  */
 
 import io.spine.internal.BuildSettings
+import io.spine.internal.dependency.Compose
+import io.spine.internal.dependency.Guava
 
 plugins {
     kotlin("jvm")
@@ -44,8 +46,7 @@ apply<DetektCodeAnalysisPlugin>()
 /**
  * The path to the parent project.
  *
- * This project is nested standalone.
- * Its parent contains project's version and Detekt configs.
+ * This project is nested standalone. Its parent contains project's version.
  */
 private val parentRootDir = rootDir.parent
 
@@ -75,13 +76,13 @@ kotlin {
 configurations {
     all {
         resolutionStrategy {
-            force("com.google.guava:guava:31.1-jre")
+            force(Guava.lib)
         }
     }
 }
 
 dependencies {
-    implementation("androidx.compose.runtime:runtime:1.6.0")
+    implementation(Compose.Runtime.lib)
     implementation(compose.desktop.currentOs)
     implementation("io.spine.examples.pingh:client:$pinghVersion")
 }

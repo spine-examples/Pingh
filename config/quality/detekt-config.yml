@@ -5,6 +5,8 @@ naming:
       - "**/*Spec.kt"
   MatchingDeclarationName:
     excludes: *testFiles # Allows ticks-named top-level test and spec suites.
+  FunctionNaming:
+    ignoreAnnotated: ['Composable'] # Allows composable functions to be named with a capital letter.
 
 style:
   UnusedPrivateMember:
