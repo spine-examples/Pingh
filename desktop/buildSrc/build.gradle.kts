@@ -62,8 +62,8 @@ val detektVersion = "1.23.6"
 val dokkaVersion = "1.9.20"
 
 kotlin {
-    explicitApiWarning()
     jvmToolchain(jvmVersion)
+    explicitApiWarning()
 }
 
 configurations.all {

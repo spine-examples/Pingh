@@ -53,8 +53,8 @@ import org.junit.jupiter.api.Test
  * which inherently provides
  * [eventual consistency](https://en.wikipedia.org/wiki/Eventual_consistency).
  * When executing a command, cannot guarantee the immediate application of changes.
- * Therefore, for testing purposes, a delay is introduced before sending a request to ensure
- * that the server data is updated accordingly.
+ * Therefore, the tests are frozen until the necessary actions take place on the server.
+ * The [CompletableFuture] is used for this purpose.
  */
 internal class PersonalInteractionTest : IntegrationTest() {
 
