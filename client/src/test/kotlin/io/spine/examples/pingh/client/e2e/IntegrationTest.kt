@@ -41,7 +41,7 @@ import org.junit.jupiter.api.BeforeEach
  *
  * Also provides a [DesktopClient] for interacting with the `Server`.
  */
-public abstract class IntegrationTest {
+internal abstract class IntegrationTest {
 
     private val port = 4242
     private val address = "localhost"
@@ -50,7 +50,7 @@ public abstract class IntegrationTest {
     private lateinit var client: DesktopClient
 
     @BeforeEach
-    public fun runServer() {
+    internal fun runServer() {
         clock = IntervalClock(100.milliseconds)
         clock.start()
         server = createServer(port)
@@ -59,7 +59,7 @@ public abstract class IntegrationTest {
     }
 
     @AfterEach
-    public fun shutdownServer() {
+    internal fun shutdownServer() {
         client.close()
         clock.stop()
         server.shutdown()

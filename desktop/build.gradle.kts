@@ -25,45 +25,61 @@
  */
 
 import io.spine.internal.BuildSettings
-import io.spine.internal.dependency.Grpc
+import io.spine.internal.dependency.Compose
 import io.spine.internal.dependency.Guava
-import io.spine.internal.dependency.JavaX
-import io.spine.internal.dependency.Spine
+import io.spine.internal.dependency.Pingh
 
 plugins {
     kotlin("jvm")
+    id("org.jetbrains.compose").version("1.6.11")
 
-    // Add the Gradle plugin for bootstrapping projects built with Spine.
-    // See: https://github.com/SpineEventEngine/bootstrap
-    id("io.spine.tools.gradle.bootstrap").version("1.9.0")
+    // Adds dependencies for Dokka and configures it.
+    id("dokka-configuration")
+
+    // Adds and configures the Detekt for analysis code.
+    id("detekt-code-analysis")
 }
 
-spine {
-    // Add and configure required dependencies for developing a Spine-based Java client.
-    // See: https://github.com/SpineEventEngine/bootstrap#java-projects
-    enableJava().client()
-}
+/**
+ * The path to the parent project.
+ *
+ * This project is nested standalone. Its parent contains project's version.
+ */
+private val parentRootDir = rootDir.parent
 
-forceGrpcDependencies(configurations)
+apply(from = "$parentRootDir/version.gradle.kts")
+
+/**
+ * The last version of the Pingh project.
+ */
+private val pinghVersion = extra["pinghVersion"]!!
+
+group = "io.spine.example.pingh"
+version = pinghVersion
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    google()
+    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+    maven("https://spine.mycloudrepo.io/public/repositories/releases")
+}
 
 kotlin {
-    jvmToolchain {
-        languageVersion.set(BuildSettings.javaVersion)
-    }
+    jvmToolchain(BuildSettings.javaVersion.asInt())
     explicitApi()
 }
 
+configurations {
+    all {
+        resolutionStrategy {
+            force(Guava.lib)
+        }
+    }
+}
+
 dependencies {
-    // To work with `DesktopClient`, it is necessary to use values-objects and IDs declared
-    // in different bounded contexts. All necessary classes are collected in the `server` module.
-    api(project(":server"))
-
-    implementation(JavaX.annotations)
-    implementation(Guava.lib)
-    implementation(Grpc.netty)
-    implementation(Grpc.inprocess)
-
-    testImplementation(project(":testutil-mentions"))
-    testImplementation(project(":clock"))
-    testImplementation(Spine.Server.lib)
+    implementation(Compose.Runtime.lib)
+    implementation(compose.desktop.currentOs)
+    implementation(Pingh.client)
 }

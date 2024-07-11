@@ -30,6 +30,7 @@ import com.google.protobuf.Duration
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.spine.examples.pingh.client.e2e.given.expectedMentionsList
+import io.spine.examples.pingh.client.e2e.given.observeUserMentions
 import io.spine.examples.pingh.client.e2e.given.randomUnread
 import io.spine.examples.pingh.client.e2e.given.updateStatusById
 import io.spine.examples.pingh.github.Username
@@ -40,20 +41,29 @@ import io.spine.examples.pingh.mentions.MentionView
 import io.spine.protobuf.Durations2.hours
 import io.spine.protobuf.Durations2.milliseconds
 import java.lang.Thread.sleep
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 /**
  * End-to-end test to checks client-server interaction.
+ *
+ * The Pingh Server is designed according to the Event Sourcing architectural pattern,
+ * which inherently provides
+ * [eventual consistency](https://en.wikipedia.org/wiki/Eventual_consistency).
+ * When executing a command, cannot guarantee the immediate application of changes.
+ * Therefore, the tests are frozen until the necessary actions take place on the server.
+ * The [CompletableFuture] is used for this purpose.
  */
-public class PersonalInteractionTest : IntegrationTest() {
+internal class PersonalInteractionTest : IntegrationTest() {
 
     private val username = Username::class.buildBy("MykytaPimonovTD")
     private lateinit var actual: List<MentionView>
     private lateinit var expected: List<MentionView>
 
     @BeforeEach
-    public fun logInAndUpdateMentions() {
+    internal fun logInAndUpdateMentions() {
         client().logIn(username)
         client().updateMentions()
         actual = client().findUserMentions()
@@ -72,10 +82,12 @@ public class PersonalInteractionTest : IntegrationTest() {
      * 4. Reads the snoozed mention.
      */
     @Test
-    public fun `the user should snooze the mention, and then read this mention`() {
+    internal fun `the user should snooze the mention, and then read this mention`() {
         val snoozedMentionId = snoozeRandomMention()
         actual shouldBe expected
-        client().readMention(snoozedMentionId)
+        val observer = client().observeUserMentions(snoozedMentionId)
+        client().markMentionAsRead(snoozedMentionId)
+        observer.waitUntilUpdate()
         actual = client().findUserMentions()
         expected = expected.updateStatusById(snoozedMentionId, MentionStatus.READ)
         actual shouldBe expected
@@ -93,10 +105,10 @@ public class PersonalInteractionTest : IntegrationTest() {
      * 5. Checks that the snoozed mention is already unsnoozed.
      */
     @Test
-    public fun `the user should snooze the mention and wait until the snooze time is over`() {
-        val snoozedMentionId = snoozeRandomMention(milliseconds(100))
+    internal fun `the user should snooze the mention and wait until the snooze time is over`() {
+        val snoozedMentionId = snoozeRandomMention(milliseconds(500))
         actual shouldBe expected
-        sleep(300)
+        sleep(1000)
         actual = client().findUserMentions()
         expected = expected.updateStatusById(snoozedMentionId, MentionStatus.UNREAD)
         actual shouldBe expected
@@ -113,21 +125,32 @@ public class PersonalInteractionTest : IntegrationTest() {
      * 4. Tries to get mentions but catches the exception.
      * 5. Logs in again.
      * 6. Reads mentions that were updated in the first session.
+     *
+     * In this test, the arrival of an event in response to a sent command is important,
+     * so all assertions take place in the client callbacks. The [CompletableFuture] is used
+     * to ensure that the test does not end before the asynchronous callback is called.
      */
     @Test
-    public fun `the user should log in, log out, log in again, and then gets mentions`() {
-        client().logOut()
-        shouldThrow<IllegalStateException> {
-            client().findUserMentions()
+    internal fun `the user should log in, log out, log in again, and then read mentions`() {
+        val future = CompletableFuture<Void>()
+        client().logOut {
+            shouldThrow<IllegalStateException> {
+                client().findUserMentions()
+            }
+            client().logIn(username) {
+                actual = client().findUserMentions()
+                actual shouldBe expected
+                future.complete(null)
+            }
         }
-        client().logIn(username)
-        actual = client().findUserMentions()
-        actual shouldBe expected
+        future.get(5, TimeUnit.SECONDS)
     }
 
     private fun snoozeRandomMention(snoozeTime: Duration = hours(2)): MentionId {
         val mention = actual.randomUnread()
-        client().snoozeMention(mention.id, snoozeTime)
+        val observer = client().observeUserMentions(mention.id)
+        client().markMentionAsSnoozed(mention.id, snoozeTime)
+        observer.waitUntilUpdate()
         actual = client().findUserMentions()
         expected = expected.updateStatusById(mention.id, MentionStatus.SNOOZED)
         return mention.id

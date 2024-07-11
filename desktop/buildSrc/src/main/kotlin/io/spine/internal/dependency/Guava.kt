@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The version of the `Pingh` to publish.
- */
-val pinghVersion: String by extra("1.0.0-SNAPSHOT")
+package io.spine.internal.dependency
+
+// https://github.com/google/guava
+@Suppress("ConstPropertyName")
+public object Guava {
+    private const val version = "31.1-jre"
+    public const val lib: String = "com.google.guava:guava:$version"
+}

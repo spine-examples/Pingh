@@ -24,7 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The version of the `Pingh` to publish.
- */
-val pinghVersion: String by extra("1.0.0-SNAPSHOT")
+package io.spine.internal.dependency
+
+// https://github.com/JetBrains/compose-multiplatform
+@Suppress("ConstPropertyName")
+public object Compose {
+    private const val group = "androidx.compose"
+
+    public object Runtime {
+        private const val version = "1.6.0"
+        public const val lib: String = "$group.runtime:runtime:$version"
+    }
+}

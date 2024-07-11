@@ -24,6 +24,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.gradle.RunGradleBuild
+import io.spine.internal.gradle.publishing.publishToMavenLocal
+
+plugins {
+    java
+}
+
 /**
  * Gradle configuration for the whole project.
  */
@@ -33,7 +40,7 @@ allprojects {
     */
     apply(from = "$rootDir/version.gradle.kts")
     version = extra["pinghVersion"]!!
-    group = "io.spine.examples"
+    group = "io.spine.examples.pingh"
 
     apply<IdeaPlugin>()
 }
@@ -65,4 +72,47 @@ subprojects {
      * Adds dependencies for testing and configure test-running tasks.
      */
     apply<TestsConfigurationPlugin>()
+}
+
+/**
+ * The set of names of modules that required for building the `desktop` standalone project.
+ */
+val modulesRequiredForDesktop = setOf(
+    "github",
+    "sessions",
+    "mentions",
+    "server",
+    "client"
+)
+
+/**
+ * Publishes modules required for building the `desktop` standalone project
+ * to the Maven Local repository.
+ */
+publishToMavenLocal {
+    modules = modulesRequiredForDesktop
+}
+
+/**
+ * The task that builds the standalone Gradle project in the `desktop` directory.
+ *
+ * This task depends on publishing to the Local Maven repository the modules
+ * required for the `desktop` project.
+ */
+val buildDesktopClient = tasks.register<RunGradleBuild>("buildDesktopClient") {
+    val task = this
+    directoryPath = "$rootDir/desktop"
+    modulesRequiredForDesktop.forEach { name ->
+        task.dependsOn(":$name:publishToMavenLocal")
+    }
+}
+
+/**
+ * Adds the `buildDesktopClient` task to the `Pingh` build process.
+ *
+ * For the build of the `Pingh` project, it is necessary to build
+ * the nested `desktop` standalone project.
+ */
+tasks.build {
+    dependsOn(buildDesktopClient)
 }

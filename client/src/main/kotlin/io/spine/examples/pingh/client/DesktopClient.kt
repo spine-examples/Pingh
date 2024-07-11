@@ -30,6 +30,7 @@ import com.google.protobuf.Duration
 import com.google.protobuf.Message
 import io.grpc.ManagedChannelBuilder
 import io.spine.base.CommandMessage
+import io.spine.base.EntityState
 import io.spine.base.EventMessage
 import io.spine.base.EventMessageField
 import io.spine.base.Field
@@ -178,7 +179,7 @@ public class DesktopClient(
      *
      * If snooze time is not specified, the mention will snooze the [defaultSnoozeTime].
      */
-    public fun snoozeMention(
+    public fun markMentionAsSnoozed(
         id: MentionId,
         snoozeTime: Duration = defaultSnoozeTime,
         onSuccess: (event: MentionSnoozed) -> Unit = {}
@@ -191,7 +192,7 @@ public class DesktopClient(
     /**
      * Marks that the mention is read.
      */
-    public fun readMention(id: MentionId, onSuccess: (event: MentionRead) -> Unit = {}) {
+    public fun markMentionAsRead(id: MentionId, onSuccess: (event: MentionRead) -> Unit = {}) {
         val command = MarkMentionAsRead::class.buildBy(id)
         observeEventOnce(command.id, MentionRead::class, onSuccess)
         send(command)
@@ -284,5 +285,26 @@ public class DesktopClient(
      */
     public fun close() {
         client.close()
+    }
+
+    /**
+     * Subscribes to the update of the entity with the specified type and ID.
+     *
+     * The subscription cancels itself after the observer has completed its work.
+     */
+    internal fun <E : EntityState> observeEntityOnce(
+        id: Message,
+        type: KClass<E>,
+        onUpdated: (entity: E) -> Unit
+    ) {
+        var subscription: Subscription? = null
+        subscription = clientRequest()
+            .subscribeTo(type.java)
+            .byId(id)
+            .observe { entity ->
+                stopObservation(subscription!!)
+                onUpdated(entity)
+            }
+            .post()
     }
 }

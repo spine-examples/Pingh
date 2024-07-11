@@ -25,6 +25,6 @@
  */
 
 /**
- * The version of the `Pingh` to publish.
+ * The name of the `desktop` standalone project.
  */
-val pinghVersion: String by extra("1.0.0-SNAPSHOT")
+rootProject.name = "desktop"

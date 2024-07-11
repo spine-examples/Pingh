@@ -24,7 +24,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.internal
+
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+
 /**
- * The version of the `Pingh` to publish.
+ * This object provides high-level constants, like version of JVM, to be used
+ * throughout the project.
+ *
+ * It cannot be used in the build script of `buildSrc` itself.
  */
-val pinghVersion: String by extra("1.0.0-SNAPSHOT")
+@Suppress("ConstPropertyName")
+public object BuildSettings {
+    private const val jvmVersion = 11
+    public val javaVersion: JavaLanguageVersion = JavaLanguageVersion.of(jvmVersion)
+}

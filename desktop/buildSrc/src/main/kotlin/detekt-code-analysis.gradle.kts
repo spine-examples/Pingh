@@ -24,46 +24,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.BuildSettings
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.dependency.Guava
-import io.spine.internal.dependency.JavaX
-import io.spine.internal.dependency.Spine
+import io.gitlab.arturbosch.detekt.Detekt
 
+/**
+ * This script-plugin sets up Kotlin code analyzing with Detekt.
+ */
 plugins {
-    kotlin("jvm")
-
-    // Add the Gradle plugin for bootstrapping projects built with Spine.
-    // See: https://github.com/SpineEventEngine/bootstrap
-    id("io.spine.tools.gradle.bootstrap").version("1.9.0")
+    id("io.gitlab.arturbosch.detekt")
 }
 
-spine {
-    // Add and configure required dependencies for developing a Spine-based Java client.
-    // See: https://github.com/SpineEventEngine/bootstrap#java-projects
-    enableJava().client()
+/**
+ * After applying, Detekt is configured to use prepared `detekt-config.yml` file.
+ */
+detekt {
+    buildUponDefaultConfig = true
+    // The path to the Pingh project where the configuration for Detekt is stored.
+    val pinghRootDir = rootProject.rootDir.parent
+    config.from(files("$pinghRootDir/config/quality/detekt-config.yml"))
 }
 
-forceGrpcDependencies(configurations)
-
-kotlin {
-    jvmToolchain {
-        languageVersion.set(BuildSettings.javaVersion)
+/**
+ * Specifies that Detekt generates only HTML reports.
+ */
+tasks.withType<Detekt>().configureEach {
+    reports {
+        html.required.set(true)
+        xml.required.set(false)
+        txt.required.set(false)
+        sarif.required.set(false)
+        md.required.set(false)
     }
-    explicitApi()
-}
-
-dependencies {
-    // To work with `DesktopClient`, it is necessary to use values-objects and IDs declared
-    // in different bounded contexts. All necessary classes are collected in the `server` module.
-    api(project(":server"))
-
-    implementation(JavaX.annotations)
-    implementation(Guava.lib)
-    implementation(Grpc.netty)
-    implementation(Grpc.inprocess)
-
-    testImplementation(project(":testutil-mentions"))
-    testImplementation(project(":clock"))
-    testImplementation(Spine.Server.lib)
 }
