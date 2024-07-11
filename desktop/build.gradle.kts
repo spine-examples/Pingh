@@ -1,5 +1,3 @@
-import io.spine.internal.BuildSettings
-
 /*
  * Copyright 2024, TeamDev. All rights reserved.
  *
@@ -26,10 +24,11 @@ import io.spine.internal.BuildSettings
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.BuildSettings
+
 plugins {
     kotlin("jvm")
     id("org.jetbrains.compose").version("1.6.11")
-    //id("io.gitlab.arturbosch.detekt")
 }
 
 /**
@@ -38,9 +37,9 @@ plugins {
 apply<DokkaConfigurationPlugin>()
 
 /**
- * Adds and configures the Detekt Plugin for analysis code.
+ * Adds and configures the Detekt for analysis code.
  */
-//apply<DetektCodeAnalysisPlugin>()
+apply<DetektCodeAnalysisPlugin>()
 
 /**
  * The path to the parent project.
