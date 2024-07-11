@@ -54,7 +54,10 @@ kotlin {
 }
 
 dependencies {
+    // To work with DesktopClient, it is necessary to use values-objects and IDs declared
+    // in different bounded contexts. All necessary classes are collected in the `server` module.
     api(project(":server"))
+
     implementation(JavaX.annotations)
     implementation(Guava.lib)
     implementation(Grpc.netty)
