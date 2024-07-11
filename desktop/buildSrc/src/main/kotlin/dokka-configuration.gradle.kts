@@ -24,6 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.BuildSettings
 import org.jetbrains.dokka.DokkaConfiguration
 import org.jetbrains.dokka.base.DokkaBase
 import org.jetbrains.dokka.base.DokkaBaseConfiguration
@@ -42,7 +43,7 @@ tasks.withType<DokkaTask>().configureEach {
         /**
          * Configures links to the external Java documentation.
          */
-        jdkVersion.set(11)
+        jdkVersion.set(BuildSettings.javaVersion.asInt())
 
         skipEmptyPackages.set(true)
 

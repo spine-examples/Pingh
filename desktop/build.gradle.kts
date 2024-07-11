@@ -1,3 +1,5 @@
+import io.spine.internal.BuildSettings
+
 /*
  * Copyright 2024, TeamDev. All rights reserved.
  *
@@ -25,10 +27,20 @@
  */
 
 plugins {
-    kotlin("jvm").version("1.9.20")
+    kotlin("jvm")
     id("org.jetbrains.compose").version("1.6.11")
-    id("io.gitlab.arturbosch.detekt")
+    //id("io.gitlab.arturbosch.detekt")
 }
+
+/**
+ * Adds dependencies for Dokka and configures it.
+ */
+apply<DokkaConfigurationPlugin>()
+
+/**
+ * Adds and configures the Detekt Plugin for analysis code.
+ */
+//apply<DetektCodeAnalysisPlugin>()
 
 /**
  * The path to the parent project.
@@ -45,8 +57,6 @@ apply(from = "$parentRootDir/version.gradle.kts")
  */
 private val pinghVersion = extra["pinghVersion"]!!
 
-private val jvmVersion = 11
-
 group = "io.spine.example.pingh"
 version = pinghVersion
 
@@ -59,7 +69,7 @@ repositories {
 }
 
 kotlin {
-    jvmToolchain(jvmVersion)
+    jvmToolchain(BuildSettings.javaVersion.asInt())
     explicitApi()
 }
 

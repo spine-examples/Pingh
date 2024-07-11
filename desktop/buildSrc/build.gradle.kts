@@ -35,9 +35,17 @@ repositories {
     mavenLocal()
 }
 
-kotlin {
-    explicitApiWarning()
-}
+/**
+ * The version of the JVM used by the build process.
+ *
+ * Please keep in sync. with [io.spine.internal.BuildSettings].
+ */
+val jvmVersion = 11
+
+/**
+ * The version of the Kotlin Gradle plugin and Kotlin binaries used by the build process.
+ */
+val kotlinVersion = "1.9.20"
 
 /**
  * The version of the Detekt Gradle Plugin.
@@ -53,8 +61,25 @@ val detektVersion = "1.23.6"
  */
 val dokkaVersion = "1.9.20"
 
+kotlin {
+    explicitApiWarning()
+    jvmToolchain(jvmVersion)
+}
+
+configurations.all {
+    resolutionStrategy {
+        force(
+            // Force Kotlin lib versions avoiding using those bundled with Gradle.
+            "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
+            "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
+            "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+        )
+    }
+}
+
 dependencies {
     implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:$detektVersion")
     implementation("org.jetbrains.dokka:dokka-base:$dokkaVersion")
     implementation("org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
 }
