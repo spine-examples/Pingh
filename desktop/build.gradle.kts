@@ -27,21 +27,18 @@
 import io.spine.internal.BuildSettings
 import io.spine.internal.dependency.Compose
 import io.spine.internal.dependency.Guava
+import io.spine.internal.dependency.Pingh
 
 plugins {
     kotlin("jvm")
     id("org.jetbrains.compose").version("1.6.11")
+
+    // Adds dependencies for Dokka and configures it.
+    id("dokka-configuration")
+
+    // Adds and configures the Detekt for analysis code.
+    id("detekt-code-analysis")
 }
-
-/**
- * Adds dependencies for Dokka and configures it.
- */
-apply<DokkaConfigurationPlugin>()
-
-/**
- * Adds and configures the Detekt for analysis code.
- */
-apply<DetektCodeAnalysisPlugin>()
 
 /**
  * The path to the parent project.
@@ -84,5 +81,5 @@ configurations {
 dependencies {
     implementation(Compose.Runtime.lib)
     implementation(compose.desktop.currentOs)
-    implementation("io.spine.examples.pingh:client:$pinghVersion")
+    implementation(Pingh.client)
 }

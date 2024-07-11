@@ -123,7 +123,7 @@ internal class PersonalInteractionTest : IntegrationTest() {
      * 6. Reads mentions that were updated in the first session.
      */
     @Test
-    internal fun `the user should log in, log out, log in again, and then gets mentions`() {
+    internal fun `the user should log in, log out, log in again, and then read mentions`() {
         client().logOut()
         delay()
         shouldThrow<IllegalStateException> {
