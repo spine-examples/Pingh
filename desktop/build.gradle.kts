@@ -27,6 +27,7 @@
 import io.spine.internal.BuildSettings
 import io.spine.internal.dependency.Compose
 import io.spine.internal.dependency.Guava
+import io.spine.internal.dependency.Material3
 import io.spine.internal.dependency.Pingh
 
 plugins {
@@ -81,6 +82,7 @@ configurations {
 dependencies {
     implementation(Compose.Runtime.lib)
     implementation(compose.desktop.currentOs)
+    implementation(Material3.Desktop.lib)
     implementation(Pingh.client)
 }
 
