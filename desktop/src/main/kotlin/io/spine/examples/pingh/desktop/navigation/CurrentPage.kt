@@ -24,41 +24,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop
+package io.spine.examples.pingh.desktop.navigation
 
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowState
-import androidx.compose.ui.window.application
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import io.spine.examples.pingh.client.DesktopClient
-import io.spine.examples.pingh.desktop.navigation.CurrentPage
+import io.spine.examples.pingh.desktop.home.HomePage
 
 /**
- * Enables interaction with the Pingh server.
+ * Displays the current page of the application.
+ *
+ * It will be recomposed when the page changes.
  */
-private val client = DesktopClient()
+@Composable
+public fun CurrentPage(client: DesktopClient) {
+    val model = remember { NavigationModel(client) }
 
-/**
- * Entry point of the desktop application.
- */
-public fun main() {
-    app()
-}
-
-/**
- * The root component of the desktop application.
- */
-private fun app() {
-    application {
-        PinghTheme {
-            Window(
-                onCloseRequest = ::exitApplication,
-                title = "Pingh",
-                state = WindowState(size = DpSize(240.dp, 426.dp))
-            ) {
-                CurrentPage(client)
-            }
-        }
+    when(model.currentPage.value) {
+        Page.LOGIN -> {}
+        Page.HOME -> HomePage(client)
+        Page.PROFILE -> {}
     }
 }

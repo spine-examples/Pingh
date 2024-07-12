@@ -24,41 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop
+package io.spine.examples.pingh.desktop.navigation
 
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowState
-import androidx.compose.ui.window.application
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import io.spine.examples.pingh.client.DesktopClient
-import io.spine.examples.pingh.desktop.navigation.CurrentPage
 
 /**
- * Enables interaction with the Pingh server.
+ * UI Model for the navigation.
  */
-private val client = DesktopClient()
+public class NavigationModel(private val client: DesktopClient) {
 
-/**
- * Entry point of the desktop application.
- */
-public fun main() {
-    app()
-}
-
-/**
- * The root component of the desktop application.
- */
-private fun app() {
-    application {
-        PinghTheme {
-            Window(
-                onCloseRequest = ::exitApplication,
-                title = "Pingh",
-                state = WindowState(size = DpSize(240.dp, 426.dp))
-            ) {
-                CurrentPage(client)
-            }
-        }
-    }
+    /**
+     * The current application page.
+     */
+    public val currentPage: MutableState<Page> = mutableStateOf(Page.HOME)
 }
