@@ -83,3 +83,9 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation(Pingh.client)
 }
+
+compose.desktop {
+    application {
+        mainClass = "io.spine.examples.pingh.desktop.AppKt"
+    }
+}
