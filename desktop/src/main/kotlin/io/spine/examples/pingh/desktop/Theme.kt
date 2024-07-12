@@ -26,8 +26,11 @@
 
 package io.spine.examples.pingh.desktop
 
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 /**
  * UI theme for the application.
@@ -36,5 +39,20 @@ import androidx.compose.runtime.Composable
  */
 @Composable
 internal fun PinghTheme(content: @Composable () -> Unit): Unit = MaterialTheme(
+    colorScheme = colorScheme,
     content = content
+)
+
+/**
+ * The light colors scheme of the application.
+ */
+@Suppress("MagicNumber") // Colors are defined using RGB components.
+private val colorScheme: ColorScheme = lightColorScheme(
+    primary = Color.White,
+    onPrimary = Color(247, 247, 247),
+    secondary = Color(152, 200, 250),
+    onSecondary = Color(59, 155, 255),
+    background = Color(235, 235, 235),
+    onBackground = Color(213, 213, 213),
+    error = Color(255, 196, 196)
 )
