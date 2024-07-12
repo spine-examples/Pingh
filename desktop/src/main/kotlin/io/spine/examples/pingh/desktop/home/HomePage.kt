@@ -40,7 +40,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +51,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.spine.examples.pingh.client.DesktopClient
+import io.spine.examples.pingh.desktop.component.Avatar
+import io.spine.examples.pingh.github.Username
+import io.spine.examples.pingh.github.buildBy
+import io.spine.net.Url
 
 @Composable
 public fun HomePage(client: DesktopClient) {
@@ -106,19 +109,15 @@ private fun MentionCard() {
             containerColor = MaterialTheme.colorScheme.primary
         )
     ) {
-        Row {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(30.dp)
-                    .border(
-                        width = 2.dp,
-                        color = Color.Transparent,
-                        shape = CircleShape
-                    ).background(MaterialTheme.colorScheme.primary)
-            ) {
-
-            }
+        Row(
+            modifier = Modifier
+                .padding(vertical = 5.dp, horizontal = 10.dp)
+        ) {
+            Avatar(
+                url = Url::class.buildBy("https://avatars.githubusercontent.com/u/160486193?v=4"),
+                username = Username::class.buildBy("MykytaPimonovTD"),
+                size = 40.dp
+            )
             Column {
                 Text("asd")
                 Text("when")
