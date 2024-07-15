@@ -34,17 +34,15 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import java.awt.Cursor
 
 @Composable
 public fun IconButton(
-    icon: ImageVector,
+    icon: BitmapPainter,
     size: Dp,
     onClick: () -> Unit,
     colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
@@ -60,9 +58,9 @@ public fun IconButton(
         colors = colors
     ) {
         Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(size.times(0.8f)),
+            painter = icon,
+            contentDescription = "Text",
+            modifier = Modifier.size(size.times(0.75f)),
             tint = colors.contentColor
         )
     }

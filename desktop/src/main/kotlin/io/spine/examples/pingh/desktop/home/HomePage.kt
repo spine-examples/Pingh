@@ -39,14 +39,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Surface
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.IconButtonColors
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.desktop.component.Avatar
 import io.spine.examples.pingh.desktop.component.IconButton
+import io.spine.examples.pingh.desktop.component.Icons
 import io.spine.examples.pingh.github.buildBy
 import io.spine.net.Url
 
@@ -93,16 +88,18 @@ private fun ToolBar() {
             }
     ) {
         IconButton(
-            Icons.Default.Add,
-            30.dp,
-            { println(2) },
-            colors = IconButtonDefaults.iconButtonColors(
-                contentColor = Color.White
-            )
+            Icons.profile,
+            40.dp,
+            { println(2) }
         )
         Text(
             "Pingh",
             style = MaterialTheme.typography.displayLarge
+        )
+        IconButton(
+            Icons.refresh,
+            40.dp,
+            { println(2) }
         )
     }
 }
@@ -148,7 +145,7 @@ private fun MentionCard() {
             MentionCardText()
             Spacer(Modifier.width(5.dp))
             IconButton(
-                Icons.Default.Edit,
+                Icons.snooze,
                 40.dp,
                 { println(1) }
             )
