@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -45,6 +46,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -74,32 +76,35 @@ private fun ToolBar() {
     Row(
         Modifier
             .fillMaxWidth()
-            .height(40.dp)
-            .padding(bottom = 1.dp)
-            .background(MaterialTheme.colorScheme.secondary)
-            //.shadow()
+            .height(48.dp)
+            .background(MaterialTheme.colorScheme.primary)
             .drawBehind {
                 drawLine(
-                    color = Color.Gray,
+                    color = Color.Black,
                     start = Offset(0f, size.height),
                     end = Offset(size.width, size.height),
                     strokeWidth = 1.dp.toPx()
                 )
             }
+            .then(Modifier.padding(horizontal = 10.dp, vertical = 4.dp)),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
-            Icons.profile,
-            40.dp,
-            { println(2) }
+            icon = Icons.profile,
+            onClick = { println(2) },
+            modifierExtension = { this.size(40.dp) }
         )
+        Spacer(Modifier.width(5.dp))
         Text(
             "Pingh",
-            style = MaterialTheme.typography.displayLarge
+            style = MaterialTheme.typography.displayLarge,
+            modifier = Modifier.width(120.dp)
         )
+        Spacer(Modifier.width(5.dp))
         IconButton(
-            Icons.refresh,
-            40.dp,
-            { println(2) }
+            icon = Icons.refresh,
+            onClick = { println(2) },
+            modifierExtension = { this.size(40.dp) }
         )
     }
 }
@@ -139,15 +144,15 @@ private fun MentionCard() {
         ) {
             Avatar(
                 url = Url::class.buildBy("https://avatars.githubusercontent.com/u/160486193?v=4"),
-                size = 40.dp
+                modifierExtender = { this.size(40.dp) }
             )
             Spacer(Modifier.width(5.dp))
             MentionCardText()
             Spacer(Modifier.width(5.dp))
             IconButton(
-                Icons.snooze,
-                40.dp,
-                { println(1) }
+                icon = Icons.snooze,
+                onClick = { println(1) },
+                modifierExtension = { this.size(40.dp) }
             )
         }
     }

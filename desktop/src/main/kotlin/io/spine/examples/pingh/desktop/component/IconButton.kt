@@ -26,8 +26,9 @@
 
 package io.spine.examples.pingh.desktop.component
 
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
@@ -37,21 +38,23 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.unit.Dp
 import java.awt.Cursor
 
+/**
+ * Displays a round button that contains icon.
+ *
+ * If needed, additional composite modifiers can be set in the `modifierExtension`.
+ */
 @Composable
 public fun IconButton(
     icon: BitmapPainter,
-    size: Dp,
     onClick: () -> Unit,
     colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     modifierExtension: Modifier.() -> Modifier = { this }
 ) {
-    androidx.compose.material3.IconButton(
+    FilledIconButton(
         onClick = onClick,
         modifier = Modifier
-            .size(size)
             .clip(CircleShape)
             .pointerHoverIcon(PointerIcon(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)))
             .modifierExtension(),
@@ -60,7 +63,7 @@ public fun IconButton(
         Icon(
             painter = icon,
             contentDescription = "Text",
-            modifier = Modifier.size(size.times(0.75f)),
+            modifier = Modifier.fillMaxSize(0.75f),
             tint = colors.contentColor
         )
     }

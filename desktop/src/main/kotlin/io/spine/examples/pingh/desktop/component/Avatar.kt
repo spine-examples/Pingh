@@ -26,12 +26,10 @@
 
 package io.spine.examples.pingh.desktop.component
 
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.Dp
 import coil3.compose.AsyncImage
 import io.spine.net.Url
 
@@ -39,18 +37,18 @@ import io.spine.net.Url
  * Displays a round avatar with an image loaded from the specified URL.
  *
  * The image loads asynchronously.
+ *
+ * If needed, additional composite modifiers can be set in the `modifierExtension`.
  */
 @Composable
 public fun Avatar(
     url: Url,
-    size: Dp,
     modifierExtender: Modifier.() -> Modifier = { this }
 ) {
     AsyncImage(
         model = url.spec,
         contentDescription = "Avatar",
         modifier = Modifier
-            .size(size)
             .clip(CircleShape)
             .modifierExtender()
     )

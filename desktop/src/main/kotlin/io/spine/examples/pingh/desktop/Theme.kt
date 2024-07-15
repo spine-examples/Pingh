@@ -101,7 +101,8 @@ private val sanFrancisco = FontFamily(
 private val typography = Typography(
     displayLarge = TextStyle(
         fontFamily = sanFrancisco,
-        fontSize = 24.sp
+        fontSize = 24.sp,
+        fontWeight = FontWeight.SemiBold,
     ),
     bodyLarge = TextStyle(
         fontFamily = sanFrancisco,
