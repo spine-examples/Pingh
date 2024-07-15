@@ -62,7 +62,7 @@ public fun IconButton(
     ) {
         Icon(
             painter = icon,
-            contentDescription = "Text",
+            contentDescription = null,
             modifier = Modifier.fillMaxSize(0.75f),
             tint = colors.contentColor
         )

@@ -26,14 +26,67 @@
 
 package io.spine.examples.pingh.desktop.home
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import io.spine.examples.pingh.client.DesktopClient
+import io.spine.examples.pingh.mentions.MentionId
+import io.spine.examples.pingh.mentions.MentionStatus
+import io.spine.examples.pingh.mentions.MentionView
 
+/**
+ * UI Model for the [HomePage].
+ *
+ * UI Model is a layer between `@Composable` functions and client.
+ */
 public class HomePageModel(private val client: DesktopClient) {
-    private val text = mutableStateOf("")
 
-    public fun text(): MutableState<String> = text
+    /**
+     * User's mentions.
+     */
+    private var mentions: MutableList<MentionView> = client.findUserMentions().toMutableList()
 
-    public fun set(a: String) { text.value = a }
+    /**
+     * Finds mentions of the user by their ID.
+     *
+     * @return List of `MentionViews` sorted by descending time of creation.
+     */
+    public fun mentions(): List<MentionView> = mentions.toList()
+
+    /**
+     * Updates the user's mentions.
+     */
+    public fun updateMentions() {
+        client.updateMentions {
+            // Check updating.
+            mentions = client.findUserMentions().toMutableList()
+        }
+    }
+
+    /**
+     * Marks the mention as snoozed.
+     */
+    public fun markMentionAsSnoozed(id: MentionId) {
+        client.markMentionAsSnoozed(id) {
+            setMentionStatus(id, MentionStatus.SNOOZED)
+        }
+    }
+
+    /**
+     * Marks that the mention is read.
+     */
+    public fun markMentionAsRead(id: MentionId) {
+        client.markMentionAsRead(id) {
+            setMentionStatus(id, MentionStatus.READ)
+        }
+    }
+
+    /**
+     * Sets a new status for a mention by its ID.
+     */
+    private fun setMentionStatus(id: MentionId, status: MentionStatus) {
+        val idInList = mentions.indexOfFirst { it.id == id }
+        val updatedMention = mentions[idInList]
+            .toBuilder()
+            .setStatus(status)
+            .vBuild()
+        mentions[idInList] = updatedMention
+    }
 }

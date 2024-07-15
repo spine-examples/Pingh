@@ -47,7 +47,7 @@ public fun Avatar(
 ) {
     AsyncImage(
         model = url.spec,
-        contentDescription = "Avatar",
+        contentDescription = null,
         modifier = Modifier
             .clip(CircleShape)
             .modifierExtender()

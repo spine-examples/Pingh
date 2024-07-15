@@ -56,9 +56,9 @@ import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.desktop.component.Avatar
 import io.spine.examples.pingh.desktop.component.IconButton
 import io.spine.examples.pingh.desktop.component.Icons
-import io.spine.examples.pingh.github.buildBy
-import io.spine.net.Url
+import io.spine.examples.pingh.mentions.MentionView
 
+// Document.
 @Composable
 public fun HomePage(client: DesktopClient) {
     val model = remember { HomePageModel(client) }
@@ -66,13 +66,21 @@ public fun HomePage(client: DesktopClient) {
     Column(
         Modifier.fillMaxSize()
     ) {
-        ToolBar()
-        MentionCards()
+        try {
+            ToolBar(model)
+            MentionCards(model)
+        } catch (exception: IllegalStateException) {
+            // Session is expired. Go to the `Login` page.
+        }
     }
 }
 
+/**
+ * Displays a menu of tools for navigating to a user profile page or
+ * manually updating mentions.
+ */
 @Composable
-private fun ToolBar() {
+private fun ToolBar(model: HomePageModel) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -91,7 +99,7 @@ private fun ToolBar() {
     ) {
         IconButton(
             icon = Icons.profile,
-            onClick = { println(2) },
+            onClick = {  }, // Go to the `Profile` page.
             modifierExtension = { this.size(40.dp) }
         )
         Spacer(Modifier.width(5.dp))
@@ -103,14 +111,21 @@ private fun ToolBar() {
         Spacer(Modifier.width(5.dp))
         IconButton(
             icon = Icons.refresh,
-            onClick = { println(2) },
+            onClick = { model.updateMentions() },
             modifierExtension = { this.size(40.dp) }
         )
     }
 }
 
+/**
+ * Displays all mentions of the user, with the unread mentions coming first,
+ * then coming snoozed, and in the last read.
+ *
+ * Within each group, the mentions are sorted by time.
+ */
 @Composable
-private fun MentionCards() {
+private fun MentionCards(model: HomePageModel) {
+    // Sort mentions by status.
     val scrollState = rememberScrollState()
     Column(
         Modifier
@@ -119,47 +134,67 @@ private fun MentionCards() {
             .verticalScroll(scrollState)
             .background(MaterialTheme.colorScheme.background),
     ) {
-
-        for (i in 1..10) {
+        for (mention in model.mentions()) {
             Spacer(Modifier.height(20.dp))
-            MentionCard()
+            MentionCard(model, mention)
         }
         Spacer(Modifier.height(20.dp))
     }
 }
 
+/**
+ * Displays all information about a particular mention.
+ *
+ * Depending on the status of the mention, the card design and possible interactions vary.
+ *
+ * - If the mention is unread, it can be read or snooze.
+ *
+ * - If the mention is snoozed, it can only be read.
+ *
+ * - If the mention is read, it can still be opened, but its status isn't changed.
+ */
 @Composable
-private fun MentionCard() {
+private fun MentionCard(model: HomePageModel, mention: MentionView) {
+    // Different when status is snoozed and read.
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp),
         colors = CardDefaults.elevatedCardColors().copy(
             containerColor = MaterialTheme.colorScheme.primary
-        )
+        ),
+        onClick = {
+            model.markMentionAsRead(mention.id)
+        }
     ) {
         Row(
             modifier = Modifier
                 .padding(vertical = 5.dp, horizontal = 10.dp)
         ) {
             Avatar(
-                url = Url::class.buildBy("https://avatars.githubusercontent.com/u/160486193?v=4"),
+                url = mention.whoMentioned.avatarUrl,
                 modifierExtender = { this.size(40.dp) }
             )
             Spacer(Modifier.width(5.dp))
-            MentionCardText()
+            MentionCardText(mention)
             Spacer(Modifier.width(5.dp))
             IconButton(
                 icon = Icons.snooze,
-                onClick = { println(1) },
+                onClick = {
+                    model.markMentionAsSnoozed(mention.id)
+                },
                 modifierExtension = { this.size(40.dp) }
             )
         }
     }
 }
 
+/**
+ * Displays textual information about the mention,
+ * namely who mentioned the user, where and when.
+ */
 @Composable
-private fun MentionCardText() {
+private fun MentionCardText(mention: MentionView) {
     Column(
         modifier = Modifier
             .fillMaxHeight()
@@ -167,12 +202,12 @@ private fun MentionCardText() {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            "amiol/Pingh",
+            "${mention.whoMentioned.username.value}/${mention.title}",
             style = MaterialTheme.typography.bodyLarge,
         )
         Spacer(Modifier.height(2.dp))
         Text(
-            "12:30:23",
+            mention.whenMentioned.toString(), // Create Timestamp extension for displaying time.
             style = MaterialTheme.typography.bodySmall
         )
     }
