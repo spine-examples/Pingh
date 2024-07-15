@@ -27,10 +27,16 @@
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.Typography
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.platform.Font
+import androidx.compose.ui.unit.sp
 
 /**
  * UI theme for the application.
@@ -40,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 @Composable
 internal fun PinghTheme(content: @Composable () -> Unit): Unit = MaterialTheme(
     colorScheme = colorScheme,
+    typography = typography,
     content = content
 )
 
@@ -47,7 +54,7 @@ internal fun PinghTheme(content: @Composable () -> Unit): Unit = MaterialTheme(
  * The light colors scheme of the application.
  */
 @Suppress("MagicNumber") // Colors are defined using RGB components.
-private val colorScheme: ColorScheme = lightColorScheme(
+private val colorScheme = lightColorScheme(
     primary = Color.White,
     onPrimary = Color(247, 247, 247),
     secondary = Color(152, 200, 250),
@@ -55,4 +62,56 @@ private val colorScheme: ColorScheme = lightColorScheme(
     background = Color(235, 235, 235),
     onBackground = Color(213, 213, 213),
     error = Color(255, 196, 196)
+)
+
+/**
+ * Loaded from the resource San Francisco font family.
+ */
+private val sanFrancisco = FontFamily(
+    Font(
+        "fonts/SFUIDisplay-Bold.ttf",
+        FontWeight.Bold,
+        FontStyle.Normal
+    ),
+    Font(
+        "fonts/SFUIDisplay-Semibold.ttf",
+        FontWeight.SemiBold,
+        FontStyle.Normal
+    ),
+    Font(
+        "fonts/SFUIText-Bold.ttf",
+        FontWeight.Bold,
+        FontStyle.Normal
+    ),
+    Font(
+        "fonts/SFUIText-Italic.ttf",
+        FontWeight.Normal,
+        FontStyle.Italic
+    ),
+    Font(
+        "fonts/SFUIText-Regular.ttf",
+        FontWeight.Normal,
+        FontStyle.Normal
+    )
+)
+
+/**
+ * Text styles of the application.
+ */
+private val typography = Typography(
+    displayLarge = TextStyle(
+        fontFamily = sanFrancisco,
+        fontSize = 24.sp
+    ),
+    bodyLarge = TextStyle(
+        fontFamily = sanFrancisco,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.SemiBold
+    ),
+    bodySmall = TextStyle(
+        fontFamily = sanFrancisco,
+        fontSize = 10.sp,
+        fontStyle = FontStyle.Italic,
+        color = Color.Gray
+    )
 )

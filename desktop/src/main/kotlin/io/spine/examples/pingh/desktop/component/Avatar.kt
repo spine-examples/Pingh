@@ -33,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import coil3.compose.AsyncImage
-import io.spine.examples.pingh.github.Username
 import io.spine.net.Url
 
 /**
@@ -44,13 +43,12 @@ import io.spine.net.Url
 @Composable
 public fun Avatar(
     url: Url,
-    username: Username,
     size: Dp,
     modifierExtender: Modifier.() -> Modifier = { this }
 ) {
     AsyncImage(
         model = url.spec,
-        contentDescription = "Avatar of the ${username.value}.",
+        contentDescription = "Avatar",
         modifier = Modifier
             .size(size)
             .clip(CircleShape)

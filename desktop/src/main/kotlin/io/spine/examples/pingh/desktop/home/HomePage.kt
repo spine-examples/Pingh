@@ -27,32 +27,32 @@
 package io.spine.examples.pingh.desktop.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Surface
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.desktop.component.Avatar
-import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
 import io.spine.net.Url
 
@@ -70,13 +70,26 @@ public fun HomePage(client: DesktopClient) {
 
 @Composable
 private fun ToolBar() {
-    Row(
+    Surface(
         Modifier
             .fillMaxWidth()
             .height(40.dp)
+            .padding(bottom = 1.dp)
             .background(MaterialTheme.colorScheme.primary)
+            //.shadow()
+            .drawBehind {
+                drawLine(
+                    color = Color.Gray,
+                    start = Offset(0f, size.height),
+                    end = Offset(size.width, size.height),
+                    strokeWidth = 1.dp.toPx()
+                )
+            }
     ) {
-
+        Text(
+            "Pingh",
+            style = MaterialTheme.typography.displayLarge
+        )
     }
 }
 
@@ -86,16 +99,16 @@ private fun MentionCards() {
     Column(
         Modifier
             .fillMaxSize()
-            .padding(20.dp, 0.dp)
+            .padding(horizontal = 20.dp)
             .verticalScroll(scrollState)
             .background(MaterialTheme.colorScheme.background),
     ) {
 
         for (i in 1..10) {
-            Spacer(Modifier.height(20.dp).fillMaxWidth().background(MaterialTheme.colorScheme.background))
+            Spacer(Modifier.height(20.dp))
             MentionCard()
         }
-        Spacer(Modifier.height(20.dp).background(MaterialTheme.colorScheme.background))
+        Spacer(Modifier.height(20.dp))
     }
 }
 
@@ -115,25 +128,35 @@ private fun MentionCard() {
         ) {
             Avatar(
                 url = Url::class.buildBy("https://avatars.githubusercontent.com/u/160486193?v=4"),
-                username = Username::class.buildBy("MykytaPimonovTD"),
                 size = 40.dp
             )
-            Column {
-                Text("asd")
-                Text("when")
-            }
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(30.dp)
-                    .border(
-                        width = 2.dp,
-                        color = Color.Transparent,
-                        shape = CircleShape
-                    )
-            ) {
-
-            }
+            Spacer(Modifier.width(5.dp))
+            MentionCardText()
+            Spacer(Modifier.width(5.dp))
+            Avatar(
+                url = Url::class.buildBy("https://avatars.githubusercontent.com/u/160486193?v=4"),
+                size = 40.dp
+            )
         }
+    }
+}
+
+@Composable
+private fun MentionCardText() {
+    Column(
+        modifier = Modifier
+            .fillMaxHeight()
+            .width(90.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            "amiol/Pingh",
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        Spacer(Modifier.height(2.dp))
+        Text(
+            "12:30:23",
+            style = MaterialTheme.typography.bodySmall
+        )
     }
 }
