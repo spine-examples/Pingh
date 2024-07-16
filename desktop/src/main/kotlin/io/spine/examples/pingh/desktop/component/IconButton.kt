@@ -42,22 +42,19 @@ import java.awt.Cursor
 
 /**
  * Displays a round button that contains icon.
- *
- * If needed, additional composite modifiers can be set in the `modifierExtension`.
  */
 @Composable
 public fun IconButton(
     icon: BitmapPainter,
     onClick: () -> Unit,
-    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
-    modifierExtension: Modifier.() -> Modifier = { this }
+    modifier: Modifier = Modifier,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors()
 ) {
     FilledIconButton(
         onClick = onClick,
-        modifier = Modifier
+        modifier = modifier
             .clip(CircleShape)
-            .pointerHoverIcon(PointerIcon(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)))
-            .modifierExtension(),
+            .pointerHoverIcon(PointerIcon(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))),
         colors = colors
     ) {
         Icon(

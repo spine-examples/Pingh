@@ -27,11 +27,11 @@
 package io.spine.examples.pingh.desktop
 
 /**
- * Trims the string if it is longer than `maxLength` and adds the `end` string to the end.
+ * Trims the string if it exceeds `maxLength` and appends the `end` string.
  *
- * Note that the length of the `end` string is also taken into account in the maximum length
- * of the output string, so that a maximum of `maxLength - end.length` characters is taken
- * from this string.
+ * The length of the `end` string is included in the maximum length of the
+ * output string. Therefore, a maximum of `maxLength - end.length` characters
+ * are taken from the original string.
  */
 public fun String.truncate(maxLength: Int, end: String = ""): String {
     if (maxLength <= 0) {

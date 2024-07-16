@@ -41,7 +41,7 @@ private val statusOrder = mapOf(
 )
 
 /**
- * List of `MentionsView`
+ * List of `MentionsView`s.
  */
 internal typealias MentionsList = List<MentionView>
 
@@ -61,7 +61,7 @@ internal fun MentionsList.setMentionStatus(id: MentionId, status: MentionStatus)
 
 /**
  * Returns a `MentionsList` sorted such that unread mentions come first,
- * followed by snoozed mentions, and read mentions at the end.
+ * followed by snoozed mentions, and read mentions last.
  *
  * Within each group, mentions are sorted by the time they were made.
  *

@@ -37,19 +37,16 @@ import io.spine.net.Url
  * Displays a round avatar with an image loaded from the specified URL.
  *
  * The image loads asynchronously.
- *
- * If needed, additional composite modifiers can be set in the `modifierExtension`.
  */
 @Composable
 public fun Avatar(
     url: Url,
-    modifierExtender: Modifier.() -> Modifier = { this }
+    modifier: Modifier = Modifier
 ) {
     AsyncImage(
         model = url.spec,
         contentDescription = null,
-        modifier = Modifier
+        modifier = modifier
             .clip(CircleShape)
-            .modifierExtender()
     )
 }

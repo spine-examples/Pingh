@@ -106,7 +106,7 @@ private fun ToolBar(model: HomePageModel) {
         IconButton(
             icon = Icons.profile,
             onClick = { }, // Go to the `Profile` page.
-            modifierExtension = { this.size(40.dp) }
+            modifier = Modifier.size(40.dp)
         )
         Spacer(Modifier.width(5.dp))
         Text(
@@ -120,16 +120,16 @@ private fun ToolBar(model: HomePageModel) {
             onClick = {
                 model.updateMentions()
             },
-            modifierExtension = { this.size(40.dp) }
+            modifier = Modifier.size(40.dp)
         )
     }
 }
 
 /**
- * Displays all mentions of the user, with the unread mentions coming first,
- * then coming snoozed, and in the last read.
+ * Displays all mentions of the user, with unread mentions listed first,
+ * followed by snoozed mentions, and finally read mentions.
  *
- * Within each group, the mentions are sorted by time.
+ * Within each group, mentions are sorted by time.
  */
 @Composable
 private fun MentionCards(model: HomePageModel) {
@@ -156,22 +156,22 @@ private fun MentionCards(model: HomePageModel) {
  *
  * Depending on the status of the mention, the card design and possible interactions vary.
  *
- * - If the mention is unread, it can be read or snooze.
+ * - If the mention is unread, it can be read or snoozed.
  *
  * - If the mention is snoozed, it can only be read.
  *
- * - If the mention is read, it can still be opened, but its status isn't changed.
+ * - If the mention is read, it can still be opened, but its status does not change.
  */
 @Composable
 private fun MentionCard(model: HomePageModel, mention: MentionView) {
     val uriHandler = LocalUriHandler.current
     val mentionIsRead = mention.status == MentionStatus.READ
-    val containerColor: Color = if (mentionIsRead) {
+    val containerColor = if (mentionIsRead) {
         MaterialTheme.colorScheme.onBackground
     } else {
         MaterialTheme.colorScheme.primary
     }
-    val onClick: () -> Unit = {
+    val onClick = {
         uriHandler.openUri(mention.url.spec)
         if (!mentionIsRead) {
             model.markMentionAsRead(mention.id)
@@ -193,7 +193,7 @@ private fun MentionCard(model: HomePageModel, mention: MentionView) {
         ) {
             Avatar(
                 url = mention.whoMentioned.avatarUrl,
-                modifierExtender = { this.size(40.dp) }
+                modifier = Modifier.size(40.dp)
             )
             Spacer(Modifier.width(5.dp))
             MentionCardText(mention)
@@ -205,7 +205,7 @@ private fun MentionCard(model: HomePageModel, mention: MentionView) {
 
 /**
  * Displays textual information about the mention,
- * namely who mentioned the user, where and when.
+ * including details about who mentioned the user, where, and when.
  */
 @Composable
 private fun MentionCardText(mention: MentionView) {
@@ -229,10 +229,10 @@ private fun MentionCardText(mention: MentionView) {
 }
 
 /**
- * Displays the snooze button if the mention is not read, if the mention is snoozed it displays
- * the text with the status of the mention.
+ * Displays the snooze button if the mention is unread. If the mention is snoozed,
+ * it displays the status text of the mention.
  *
- * In all other cases, nothing will be displayed.
+ * Otherwise, nothing is displayed.
  */
 @Composable
 private fun SnoozeButton(model: HomePageModel, mention: MentionView) {
@@ -243,7 +243,7 @@ private fun SnoozeButton(model: HomePageModel, mention: MentionView) {
                 onClick = {
                     model.markMentionAsSnoozed(mention.id)
                 },
-                modifierExtension = { this.size(40.dp) }
+                modifier = Modifier.size(40.dp)
             )
 
         MentionStatus.SNOOZED ->

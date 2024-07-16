@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.sp
 /**
  * UI theme for the application.
  *
- * @see MaterialTheme
+ * @see [MaterialTheme]
  */
 @Composable
 internal fun PinghTheme(content: @Composable () -> Unit): Unit = MaterialTheme(

@@ -41,19 +41,17 @@ import java.lang.Thread.sleep
 public class HomePageModel(private val client: DesktopClient) {
 
     /**
-     * User's mentions.
+     * User mentions.
      */
     private var mentions: MutableState<MentionsList> = mutableStateOf(client.findUserMentions())
 
     /**
      * Returns all user mentions.
-     *
-     * @return List of `MentionViews` sorted by descending time of creation.
      */
     public fun mentions(): MentionsList = mentions.value
 
     /**
-     * Updates the user's mentions.
+     * Updates the user mentions.
      */
     public fun updateMentions() {
         client.updateMentions(
