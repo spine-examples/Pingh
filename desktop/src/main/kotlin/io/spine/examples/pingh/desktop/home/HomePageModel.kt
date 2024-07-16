@@ -46,7 +46,7 @@ public class HomePageModel(private val client: DesktopClient) {
     private var mentions: MutableState<MentionsList> = mutableStateOf(client.findUserMentions())
 
     /**
-     * Finds mentions of the user by their ID.
+     * Returns all user mentions.
      *
      * @return List of `MentionViews` sorted by descending time of creation.
      */

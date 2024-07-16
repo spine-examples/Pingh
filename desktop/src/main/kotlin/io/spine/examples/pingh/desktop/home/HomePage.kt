@@ -63,7 +63,13 @@ import io.spine.examples.pingh.desktop.truncate
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
 
-// Document.
+/**
+ * Displays the 'Home' page in the application.
+ *
+ * This page is the main interface where users can manage their mentions.
+ * Users can snooze and read mentions on this page. Additionally, it is
+ * possible to manually update the list of mentions from the server.
+ */
 @Composable
 public fun HomePage(client: DesktopClient) {
     val model = remember { HomePageModel(client) }
@@ -82,7 +88,7 @@ public fun HomePage(client: DesktopClient) {
 @Composable
 private fun ToolBar(model: HomePageModel) {
     Row(
-        Modifier
+        modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
             .background(MaterialTheme.colorScheme.primary)
@@ -94,7 +100,7 @@ private fun ToolBar(model: HomePageModel) {
                     strokeWidth = 1.dp.toPx()
                 )
             }
-            .then(Modifier.padding(horizontal = 10.dp, vertical = 4.dp)),
+            .padding(horizontal = 10.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
@@ -104,14 +110,16 @@ private fun ToolBar(model: HomePageModel) {
         )
         Spacer(Modifier.width(5.dp))
         Text(
-            "Pingh",
-            style = MaterialTheme.typography.displayLarge,
-            modifier = Modifier.width(120.dp)
+            text = "Pingh",
+            modifier = Modifier.width(120.dp),
+            style = MaterialTheme.typography.displayLarge
         )
         Spacer(Modifier.width(5.dp))
         IconButton(
             icon = Icons.refresh,
-            onClick = { model.updateMentions() },
+            onClick = {
+                model.updateMentions()
+            },
             modifierExtension = { this.size(40.dp) }
         )
     }
@@ -170,13 +178,13 @@ private fun MentionCard(model: HomePageModel, mention: MentionView) {
         }
     }
     ElevatedCard(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp),
         colors = CardDefaults.elevatedCardColors().copy(
             containerColor = containerColor
-        ),
-        onClick = onClick
+        )
     ) {
         Row(
             modifier = Modifier
@@ -208,12 +216,13 @@ private fun MentionCardText(mention: MentionView) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            "${mention.whoMentioned.username.value}/${mention.title}".truncate(27, "..."),
+            text = "${mention.whoMentioned.username.value}/${mention.title}"
+                .truncate(27, "..."),
             style = MaterialTheme.typography.bodyLarge,
         )
         Spacer(Modifier.height(2.dp))
         Text(
-            mention.whenMentioned.toDatetime(),
+            text = mention.whenMentioned.toDatetime(),
             style = MaterialTheme.typography.bodyMedium
         )
     }
