@@ -64,6 +64,14 @@ import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
 
 /**
+ * Maximum length for the title of the mention card.
+ *
+ * If the title exceeds this length, it will be trimmed to fit the card.
+ */
+@Suppress("TopLevelPropertyNaming") // In the project, constants are named using camelCase.
+private const val maxLengthOfMentionCardTitle = 27
+
+/**
  * Displays the 'Home' page in the application.
  *
  * This page is the main interface where users can manage their mentions.
@@ -217,7 +225,7 @@ private fun MentionCardText(mention: MentionView) {
     ) {
         Text(
             text = "${mention.whoMentioned.username.value}/${mention.title}"
-                .truncate(27, "..."),
+                .truncate(maxLengthOfMentionCardTitle, "..."),
             style = MaterialTheme.typography.bodyLarge,
         )
         Spacer(Modifier.height(2.dp))

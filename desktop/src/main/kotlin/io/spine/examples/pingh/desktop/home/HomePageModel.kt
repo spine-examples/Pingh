@@ -40,6 +40,15 @@ import java.lang.Thread.sleep
  */
 public class HomePageModel(private val client: DesktopClient) {
 
+    private companion object {
+        /**
+         * Delay before reading mentions so that the read-side on the server can be updated.
+         *
+         * Time is specified in milliseconds.
+         */
+        private const val delayBeforeReadingMentions = 100L
+    }
+
     /**
      * User mentions.
      */
@@ -56,8 +65,7 @@ public class HomePageModel(private val client: DesktopClient) {
     public fun updateMentions() {
         client.updateMentions(
             onSuccess = {
-                sleep(100) // Makes a small delay before reading mentions
-                // so that the read-side on the server can be updated.
+                sleep(delayBeforeReadingMentions)
                 mentions.value = client.findUserMentions()
             }
         )

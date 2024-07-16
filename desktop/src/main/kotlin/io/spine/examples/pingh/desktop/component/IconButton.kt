@@ -41,6 +41,14 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import java.awt.Cursor
 
 /**
+ * Displays how much of the size of the entire button the icon takes up.
+ * Since the button is circular, the icon should be made smaller so that
+ * the edges are not truncated.
+ */
+@Suppress("TopLevelPropertyNaming") // In the project, constants are named using camelCase.
+private const val iconSizeMultiplier = 0.75f
+
+/**
  * Displays a round button that contains icon.
  */
 @Composable
@@ -60,7 +68,7 @@ public fun IconButton(
         Icon(
             painter = icon,
             contentDescription = null,
-            modifier = Modifier.fillMaxSize(0.75f),
+            modifier = Modifier.fillMaxSize(iconSizeMultiplier),
             tint = colors.contentColor
         )
     }

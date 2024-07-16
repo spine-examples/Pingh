@@ -34,13 +34,9 @@ package io.spine.examples.pingh.desktop
  * are taken from the original string.
  */
 public fun String.truncate(maxLength: Int, end: String = ""): String {
-    if (maxLength <= 0) {
-        throw IllegalArgumentException("String `maxLength` must be greater than zero.")
-    }
-    if (maxLength < end.length) {
-        throw IllegalArgumentException(
-            "The end of the string cannot be longer than the expected string ."
-        )
+    require(maxLength < 0) { "String `maxLength` must be greater than zero." }
+    require(maxLength < end.length) {
+        "The end of the string cannot be longer than the expected string."
     }
     return if (this.length <= maxLength) {
         this
