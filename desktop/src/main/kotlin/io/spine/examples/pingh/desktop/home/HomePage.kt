@@ -59,6 +59,7 @@ import io.spine.examples.pingh.desktop.component.Avatar
 import io.spine.examples.pingh.desktop.component.IconButton
 import io.spine.examples.pingh.desktop.component.Icons
 import io.spine.examples.pingh.desktop.toDatetime
+import io.spine.examples.pingh.desktop.truncate
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
 
@@ -207,7 +208,7 @@ private fun MentionCardText(mention: MentionView) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            "${mention.whoMentioned.username.value}/${mention.title}",
+            "${mention.whoMentioned.username.value}/${mention.title}".truncate(27, "..."),
             style = MaterialTheme.typography.bodyLarge,
         )
         Spacer(Modifier.height(2.dp))
