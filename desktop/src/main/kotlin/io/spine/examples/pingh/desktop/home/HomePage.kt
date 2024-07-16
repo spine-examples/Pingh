@@ -58,6 +58,7 @@ import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.desktop.component.Avatar
 import io.spine.examples.pingh.desktop.component.IconButton
 import io.spine.examples.pingh.desktop.component.Icons
+import io.spine.examples.pingh.desktop.toDatetime
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
 
@@ -178,7 +179,8 @@ private fun MentionCard(model: HomePageModel, mention: MentionView) {
     ) {
         Row(
             modifier = Modifier
-                .padding(vertical = 5.dp, horizontal = 10.dp)
+                .padding(vertical = 3.dp, horizontal = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Avatar(
                 url = mention.whoMentioned.avatarUrl,
@@ -210,7 +212,7 @@ private fun MentionCardText(mention: MentionView) {
         )
         Spacer(Modifier.height(2.dp))
         Text(
-            mention.whenMentioned.toString(), // Create Timestamp extension for displaying time.
+            mention.whenMentioned.toDatetime(),
             style = MaterialTheme.typography.bodyMedium
         )
     }

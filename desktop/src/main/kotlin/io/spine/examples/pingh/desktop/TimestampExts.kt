@@ -24,19 +24,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop.navigation
+package io.spine.examples.pingh.desktop
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import io.spine.examples.pingh.client.DesktopClient
+import com.google.protobuf.Timestamp
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 /**
- * UI Model for the navigation.
+ * A format for time, where the day of the month and the name of the month itself come first,
+ * followed by the hours and minutes.
  */
-public class NavigationModel(private val client: DesktopClient) {
+private val datetimeFormat = DateTimeFormatter.ofPattern("dd MMM HH:mm")
 
-    /**
-     * The current application page.
-     */
-    public val currentPage: MutableState<Page> = mutableStateOf(Page.HOME)
-}
+/**
+ * Converts `Timestamp` to the `dd MMM HH:mm` string.
+ *
+ * Examples:
+ * - `10 May 14:37`
+ * - `05 Sep 04:00`
+ */
+public fun Timestamp.toDatetime(): String =
+    datetimeFormat.format(
+        LocalDateTime.ofEpochSecond(this.seconds, this.nanos, ZoneOffset.UTC)
+    )

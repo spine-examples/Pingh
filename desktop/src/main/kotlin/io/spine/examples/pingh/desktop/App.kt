@@ -32,7 +32,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
 import io.spine.examples.pingh.client.DesktopClient
-import io.spine.examples.pingh.desktop.navigation.CurrentPage
+import io.spine.examples.pingh.desktop.home.HomePage
 
 /**
  * Enables interaction with the Pingh server.
@@ -57,7 +57,7 @@ private fun app() {
                 title = "Pingh",
                 state = WindowState(size = DpSize(240.dp, 426.dp))
             ) {
-                CurrentPage(client)
+                HomePage(client)
             }
         }
     }
