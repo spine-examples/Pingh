@@ -46,4 +46,7 @@ repositories {
     maven {
         url = uri("https://spine.mycloudrepo.io/public/repositories/snapshots")
     }
+    maven {
+        url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven")
+    }
 }
