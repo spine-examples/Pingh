@@ -74,6 +74,6 @@ internal fun MentionsList.sortByStatusAndWhenMentioned(): MentionsList =
         if (statusComparison != 0) {
             statusComparison
         } else {
-            Timestamps.compare(firstMentions.whenMentioned, secondMentions.whenMentioned)
+            Timestamps.compare(secondMentions.whenMentioned, firstMentions.whenMentioned)
         }
     }
