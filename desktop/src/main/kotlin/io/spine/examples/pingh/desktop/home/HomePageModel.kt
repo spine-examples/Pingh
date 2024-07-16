@@ -26,10 +26,12 @@
 
 package io.spine.examples.pingh.desktop.home
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionStatus
-import io.spine.examples.pingh.mentions.MentionView
+import java.lang.Thread.sleep
 
 /**
  * UI Model for the [HomePage].
@@ -41,23 +43,26 @@ public class HomePageModel(private val client: DesktopClient) {
     /**
      * User's mentions.
      */
-    private var mentions: MutableList<MentionView> = client.findUserMentions().toMutableList()
+    private var mentions: MutableState<MentionsList> = mutableStateOf(client.findUserMentions())
 
     /**
      * Finds mentions of the user by their ID.
      *
      * @return List of `MentionViews` sorted by descending time of creation.
      */
-    public fun mentions(): List<MentionView> = mentions.toList()
+    public fun mentions(): MentionsList = mentions.value
 
     /**
      * Updates the user's mentions.
      */
     public fun updateMentions() {
-        client.updateMentions {
-            // Check updating.
-            mentions = client.findUserMentions().toMutableList()
-        }
+        client.updateMentions(
+            onSuccess = {
+                sleep(100) // Makes a small delay before reading mentions
+                // so that the read-side on the server can be updated.
+                mentions.value = client.findUserMentions()
+            }
+        )
     }
 
     /**
@@ -65,7 +70,7 @@ public class HomePageModel(private val client: DesktopClient) {
      */
     public fun markMentionAsSnoozed(id: MentionId) {
         client.markMentionAsSnoozed(id) {
-            setMentionStatus(id, MentionStatus.SNOOZED)
+            mentions.value = mentions.value.setMentionStatus(id, MentionStatus.SNOOZED)
         }
     }
 
@@ -74,19 +79,7 @@ public class HomePageModel(private val client: DesktopClient) {
      */
     public fun markMentionAsRead(id: MentionId) {
         client.markMentionAsRead(id) {
-            setMentionStatus(id, MentionStatus.READ)
+            mentions.value = mentions.value.setMentionStatus(id, MentionStatus.READ)
         }
-    }
-
-    /**
-     * Sets a new status for a mention by its ID.
-     */
-    private fun setMentionStatus(id: MentionId, status: MentionStatus) {
-        val idInList = mentions.indexOfFirst { it.id == id }
-        val updatedMention = mentions[idInList]
-            .toBuilder()
-            .setStatus(status)
-            .vBuild()
-        mentions[idInList] = updatedMention
     }
 }

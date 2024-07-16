@@ -133,7 +133,7 @@ private fun MentionCards(model: HomePageModel) {
             .verticalScroll(scrollState)
             .background(MaterialTheme.colorScheme.background),
     ) {
-        for (mention in model.mentions()) {
+        model.mentions().forEach { mention ->
             Spacer(Modifier.height(20.dp))
             MentionCard(model, mention)
         }
@@ -154,6 +154,7 @@ private fun MentionCards(model: HomePageModel) {
  */
 @Composable
 private fun MentionCard(model: HomePageModel, mention: MentionView) {
+    val uriHandler = LocalUriHandler.current
     val mentionIsRead = mention.status == MentionStatus.READ
     val containerColor: Color = if (mentionIsRead) {
         MaterialTheme.colorScheme.onBackground
@@ -161,8 +162,7 @@ private fun MentionCard(model: HomePageModel, mention: MentionView) {
         MaterialTheme.colorScheme.primary
     }
     val onClick: () -> Unit = {
-        LocalUriHandler.current
-            .openUri(mention.url.spec)
+        uriHandler.openUri(mention.url.spec)
         if (!mentionIsRead) {
             model.markMentionAsRead(mention.id)
         }
