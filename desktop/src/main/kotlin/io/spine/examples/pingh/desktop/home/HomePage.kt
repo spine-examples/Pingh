@@ -65,7 +65,6 @@ import io.spine.examples.pingh.mentions.MentionView
 @Composable
 public fun HomePage(client: DesktopClient) {
     val model = remember { HomePageModel(client) }
-
     Column(
         Modifier.fillMaxSize()
     ) {
@@ -124,7 +123,6 @@ private fun ToolBar(model: HomePageModel) {
  */
 @Composable
 private fun MentionCards(model: HomePageModel) {
-    // Sort mentions by status.
     val scrollState = rememberScrollState()
     Column(
         Modifier
@@ -133,10 +131,12 @@ private fun MentionCards(model: HomePageModel) {
             .verticalScroll(scrollState)
             .background(MaterialTheme.colorScheme.background),
     ) {
-        model.mentions().forEach { mention ->
-            Spacer(Modifier.height(20.dp))
-            MentionCard(model, mention)
-        }
+        model.mentions()
+            .sortByStatusAndWhenMentioned()
+            .forEach { mention ->
+                Spacer(Modifier.height(20.dp))
+                MentionCard(model, mention)
+            }
         Spacer(Modifier.height(20.dp))
     }
 }

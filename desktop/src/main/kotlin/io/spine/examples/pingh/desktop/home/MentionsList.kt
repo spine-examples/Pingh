@@ -26,9 +26,19 @@
 
 package io.spine.examples.pingh.desktop.home
 
+import com.google.protobuf.util.Timestamps
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
+
+/**
+ * Order of statuses for sorting mentions in the [sortByStatusAndWhenMentioned] method.
+ */
+private val statusOrder = mapOf(
+    MentionStatus.UNREAD to 0,
+    MentionStatus.SNOOZED to 1,
+    MentionStatus.READ to 2
+)
 
 /**
  * List of `MentionsView`
@@ -48,3 +58,22 @@ internal fun MentionsList.setMentionStatus(id: MentionId, status: MentionStatus)
     newMentionsList[idInList] = updatedMention
     return newMentionsList
 }
+
+/**
+ * Returns a `MentionsList` sorted such that unread mentions come first,
+ * followed by snoozed mentions, and read mentions at the end.
+ *
+ * Within each group, mentions are sorted by the time they were made.
+ *
+ * @see [statusOrder]
+ */
+internal fun MentionsList.sortByStatusAndWhenMentioned(): MentionsList =
+    this.sortedWith { firstMentions, secondMentions ->
+        val statusComparison = statusOrder[firstMentions.status]!!
+            .compareTo(statusOrder[secondMentions.status]!!)
+        if (statusComparison != 0) {
+            statusComparison
+        } else {
+            Timestamps.compare(firstMentions.whenMentioned, secondMentions.whenMentioned)
+        }
+    }
