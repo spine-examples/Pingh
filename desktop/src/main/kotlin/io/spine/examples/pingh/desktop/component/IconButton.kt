@@ -45,7 +45,6 @@ import java.awt.Cursor
  * Since the button is circular, the icon should be made smaller so that
  * the edges are not truncated.
  */
-@Suppress("TopLevelPropertyNaming") // In the project, constants are named using camelCase.
 private const val iconSizeMultiplier = 0.75f
 
 /**

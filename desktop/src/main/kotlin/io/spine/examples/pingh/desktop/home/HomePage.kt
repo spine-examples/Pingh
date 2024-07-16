@@ -68,7 +68,6 @@ import io.spine.examples.pingh.mentions.MentionView
  *
  * If the title exceeds this length, it will be trimmed to fit the card.
  */
-@Suppress("TopLevelPropertyNaming") // In the project, constants are named using camelCase.
 private const val maxLengthOfMentionCardTitle = 27
 
 /**
