@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CardDefaults
@@ -51,11 +52,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.desktop.component.Avatar
 import io.spine.examples.pingh.desktop.component.IconButton
 import io.spine.examples.pingh.desktop.component.Icons
+import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
 
 // Document.
@@ -66,12 +69,8 @@ public fun HomePage(client: DesktopClient) {
     Column(
         Modifier.fillMaxSize()
     ) {
-        try {
-            ToolBar(model)
-            MentionCards(model)
-        } catch (exception: IllegalStateException) {
-            // Session is expired. Go to the `Login` page.
-        }
+        ToolBar(model)
+        MentionCards(model)
     }
 }
 
@@ -99,7 +98,7 @@ private fun ToolBar(model: HomePageModel) {
     ) {
         IconButton(
             icon = Icons.profile,
-            onClick = {  }, // Go to the `Profile` page.
+            onClick = { }, // Go to the `Profile` page.
             modifierExtension = { this.size(40.dp) }
         )
         Spacer(Modifier.width(5.dp))
@@ -155,17 +154,27 @@ private fun MentionCards(model: HomePageModel) {
  */
 @Composable
 private fun MentionCard(model: HomePageModel, mention: MentionView) {
-    // Different when status is snoozed and read.
+    val mentionIsRead = mention.status == MentionStatus.READ
+    val containerColor: Color = if (mentionIsRead) {
+        MaterialTheme.colorScheme.onBackground
+    } else {
+        MaterialTheme.colorScheme.primary
+    }
+    val onClick: () -> Unit = {
+        LocalUriHandler.current
+            .openUri(mention.url.spec)
+        if (!mentionIsRead) {
+            model.markMentionAsRead(mention.id)
+        }
+    }
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp),
         colors = CardDefaults.elevatedCardColors().copy(
-            containerColor = MaterialTheme.colorScheme.primary
+            containerColor = containerColor
         ),
-        onClick = {
-            model.markMentionAsRead(mention.id)
-        }
+        onClick = onClick
     ) {
         Row(
             modifier = Modifier
@@ -178,13 +187,7 @@ private fun MentionCard(model: HomePageModel, mention: MentionView) {
             Spacer(Modifier.width(5.dp))
             MentionCardText(mention)
             Spacer(Modifier.width(5.dp))
-            IconButton(
-                icon = Icons.snooze,
-                onClick = {
-                    model.markMentionAsSnoozed(mention.id)
-                },
-                modifierExtension = { this.size(40.dp) }
-            )
+            SnoozeButton(model, mention)
         }
     }
 }
@@ -208,7 +211,37 @@ private fun MentionCardText(mention: MentionView) {
         Spacer(Modifier.height(2.dp))
         Text(
             mention.whenMentioned.toString(), // Create Timestamp extension for displaying time.
-            style = MaterialTheme.typography.bodySmall
+            style = MaterialTheme.typography.bodyMedium
         )
+    }
+}
+
+/**
+ * Displays the snooze button if the mention is not read, if the mention is snoozed it displays
+ * the text with the status of the mention.
+ *
+ * In all other cases, nothing will be displayed.
+ */
+@Composable
+private fun SnoozeButton(model: HomePageModel, mention: MentionView) {
+    when (mention.status) {
+        MentionStatus.UNREAD ->
+            IconButton(
+                icon = Icons.snooze,
+                onClick = {
+                    model.markMentionAsSnoozed(mention.id)
+                },
+                modifierExtension = { this.size(40.dp) }
+            )
+
+        MentionStatus.SNOOZED ->
+            Text(
+                text = "Snoozed",
+                modifier = Modifier.size(40.dp)
+                    .wrapContentSize(Alignment.Center),
+                style = MaterialTheme.typography.bodySmall
+            )
+
+        else -> {}
     }
 }
