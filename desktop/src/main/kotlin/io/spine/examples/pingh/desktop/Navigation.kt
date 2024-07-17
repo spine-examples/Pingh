@@ -24,13 +24,52 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop.profile
+package io.spine.examples.pingh.desktop
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import io.spine.examples.pingh.client.DesktopClient
 
+/**
+ * Displays the current page of the application.
+ *
+ * It will be recomposed when the page changes.
+ */
 @Composable
-public fun ProfilePage(client: DesktopClient) {
-    Text("Profile")
+internal fun CurrentPage(client: DesktopClient) {
+    val currentPage = remember { mutableStateOf(
+        if (client.isLoggedIn()) Page.MENTIONS else Page.LOGIN
+    ) }
+    when (currentPage.value) {
+        Page.LOGIN -> LoginPage(
+            client = client,
+            toHomePage = {
+                currentPage.value = Page.MENTIONS
+            }
+        )
+
+        Page.MENTIONS -> MentionsPage(client)
+        Page.PROFILE -> ProfilePage(client)
+    }
+}
+
+/**
+ * Pages in the application.
+ */
+private enum class Page {
+    /**
+     * GitHub account login page.
+     */
+    LOGIN,
+
+    /**
+     * Page displaying user mentions.
+     */
+    MENTIONS,
+
+    /**
+     * Page with user information and account settings.
+     */
+    PROFILE
 }

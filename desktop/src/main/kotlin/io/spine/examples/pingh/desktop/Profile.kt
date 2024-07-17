@@ -24,32 +24,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop.navigation
+package io.spine.examples.pingh.desktop
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import io.spine.examples.pingh.client.DesktopClient
-import io.spine.examples.pingh.desktop.home.HomePage
-import io.spine.examples.pingh.desktop.login.LoginPage
-import io.spine.examples.pingh.desktop.profile.ProfilePage
 
-/**
- * Displays the current page of the application.
- *
- * It will be recomposed when the page changes.
- */
 @Composable
-public fun CurrentPage(client: DesktopClient) {
-    val model = remember { NavigationModel(client) }
-    when (model.currentPage()) {
-        Page.LOGIN -> LoginPage(
-            client = client,
-            toHomePage = {
-                model.changePageOn(Page.HOME)
-            }
-        )
-
-        Page.HOME -> HomePage(client)
-        Page.PROFILE -> ProfilePage(client)
-    }
+internal fun ProfilePage(client: DesktopClient) {
+    Text("Profile")
 }
