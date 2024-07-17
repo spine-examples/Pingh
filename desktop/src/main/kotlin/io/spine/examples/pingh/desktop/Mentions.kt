@@ -168,9 +168,7 @@ private fun MentionCards(state: State) {
  * Depending on the status of the mention, the card design and possible interactions vary.
  *
  * - If the mention is unread, it can be read or snoozed.
- *
  * - If the mention is snoozed, it can only be read.
- *
  * - If the mention is read, it can still be opened, but its status does not change.
  */
 @Composable
@@ -228,9 +226,9 @@ private fun MentionCardText(mention: MentionView) {
     ) {
         Text(
             text = "${mention.whoMentioned.username.value}/${mention.title}",
-            style = MaterialTheme.typography.bodyLarge,
             overflow = TextOverflow.Ellipsis,
-            maxLines = 2
+            maxLines = 2,
+            style = MaterialTheme.typography.bodyLarge
         )
         Spacer(Modifier.height(2.dp))
         Text(
@@ -275,8 +273,6 @@ private fun SnoozeButton(state: State, mention: MentionView) {
 
 /**
  * State of [MentionsPage].
- *
- * This state is a layer between `@Composable` function and `DesktopClient`.
  */
 private class State(private val client: DesktopClient) {
 
