@@ -66,15 +66,6 @@ import io.spine.examples.pingh.mentions.MentionView
 import java.lang.Thread.sleep
 
 /**
- * Order of statuses for sorting mentions in the [sortByStatusAndWhenMentioned] method.
- */
-private val statusOrder = mapOf(
-    MentionStatus.UNREAD to 0,
-    MentionStatus.SNOOZED to 1,
-    MentionStatus.READ to 2
-)
-
-/**
  * Displays the 'Mentions' page in the application.
  *
  * This page is the main interface where users can manage their mentions.
@@ -350,13 +341,10 @@ private fun MentionsList.setMentionStatus(id: MentionId, status: MentionStatus):
  * followed by snoozed mentions, and read mentions last.
  *
  * Within each group, mentions are sorted by the time they were made.
- *
- * @see [statusOrder]
  */
 private fun MentionsList.sortByStatusAndWhenMentioned(): MentionsList =
     this.sortedWith { firstMentions, secondMentions ->
-        val statusComparison = statusOrder[firstMentions.status]!!
-            .compareTo(statusOrder[secondMentions.status]!!)
+        val statusComparison = firstMentions.status.compareTo(secondMentions.status)
         if (statusComparison != 0) {
             statusComparison
         } else {
