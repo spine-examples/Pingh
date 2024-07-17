@@ -88,12 +88,12 @@ private val statusOrder = mapOf(
  */
 @Composable
 internal fun MentionsPage(client: DesktopClient) {
-    val model = remember { State(client) }
+    val state = remember { State(client) }
     Column(
         Modifier.fillMaxSize()
     ) {
-        ToolBar(model)
-        MentionCards(model)
+        ToolBar(state)
+        MentionCards(state)
     }
 }
 
@@ -102,7 +102,7 @@ internal fun MentionsPage(client: DesktopClient) {
  * manually updating mentions.
  */
 @Composable
-private fun ToolBar(model: State) {
+private fun ToolBar(state: State) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -134,7 +134,7 @@ private fun ToolBar(model: State) {
         IconButton(
             icon = Icons.refresh,
             onClick = {
-                model.updateMentions()
+                state.updateMentions()
             },
             modifier = Modifier.size(40.dp)
         )
@@ -148,7 +148,7 @@ private fun ToolBar(model: State) {
  * Within each group, mentions are sorted by time.
  */
 @Composable
-private fun MentionCards(model: State) {
+private fun MentionCards(state: State) {
     val scrollState = rememberScrollState()
     Column(
         Modifier
@@ -157,11 +157,11 @@ private fun MentionCards(model: State) {
             .verticalScroll(scrollState)
             .background(MaterialTheme.colorScheme.background),
     ) {
-        model.mentions()
+        state.mentions()
             .sortByStatusAndWhenMentioned()
             .forEach { mention ->
                 Spacer(Modifier.height(20.dp))
-                MentionCard(model, mention)
+                MentionCard(state, mention)
             }
         Spacer(Modifier.height(20.dp))
     }
@@ -179,7 +179,7 @@ private fun MentionCards(model: State) {
  * - If the mention is read, it can still be opened, but its status does not change.
  */
 @Composable
-private fun MentionCard(model: State, mention: MentionView) {
+private fun MentionCard(state: State, mention: MentionView) {
     val uriHandler = LocalUriHandler.current
     val mentionIsRead = mention.status == MentionStatus.READ
     val containerColor = if (mentionIsRead) {
@@ -190,7 +190,7 @@ private fun MentionCard(model: State, mention: MentionView) {
     val onClick = {
         uriHandler.openUri(mention.url.spec)
         if (!mentionIsRead) {
-            model.markMentionAsRead(mention.id)
+            state.markMentionAsRead(mention.id)
         }
     }
     ElevatedCard(
@@ -214,7 +214,7 @@ private fun MentionCard(model: State, mention: MentionView) {
             Spacer(Modifier.width(5.dp))
             MentionCardText(mention)
             Spacer(Modifier.width(5.dp))
-            SnoozeButton(model, mention)
+            SnoozeButton(state, mention)
         }
     }
 }
@@ -251,13 +251,13 @@ private fun MentionCardText(mention: MentionView) {
  * Otherwise, nothing is displayed.
  */
 @Composable
-private fun SnoozeButton(model: State, mention: MentionView) {
+private fun SnoozeButton(state: State, mention: MentionView) {
     when (mention.status) {
         MentionStatus.UNREAD ->
             IconButton(
                 icon = Icons.snooze,
                 onClick = {
-                    model.markMentionAsSnoozed(mention.id)
+                    state.markMentionAsSnoozed(mention.id)
                 },
                 modifier = Modifier.size(40.dp)
             )
