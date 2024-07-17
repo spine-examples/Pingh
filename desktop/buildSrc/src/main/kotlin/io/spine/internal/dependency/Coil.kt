@@ -39,7 +39,7 @@ public object Coil {
     // but it is currently in the alpha phase.
     // TODO:2024-07-17:mykyta.pimonov: Bump this version from 3.0.0-alpha08 to 3.0.0
     //  upon its release.
-    //  See: https://github.com/spine-examples/Pingh/issues/25
+    //  See: https://github.com/spine-examples/Pingh/issues/25.
     private const val version = "3.0.0-alpha08"
     private const val group = "io.coil-kt.coil3"
 
