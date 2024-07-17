@@ -24,27 +24,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop.component
+package io.spine.examples.pingh.desktop
 
-import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.res.loadImageBitmap
-import androidx.compose.ui.res.useResource
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import coil3.compose.AsyncImage
+import io.spine.net.Url
 
 /**
- * Icons used in the Pingh desktop client.
+ * Displays a round avatar with an image loaded from the specified URL.
  *
- * These icons are [free](https://bit.ly/3Tjmsqg) for personal and commercial
- * use with attribution.
- *
- * Created by [Icon Hubs](https://www.flaticon.com/authors/icon-hubs).
+ * The image loads asynchronously.
  */
-public object Icons {
-    public val snooze: BitmapPainter =
-        BitmapPainter(useResource("icons/snooze.png", ::loadImageBitmap))
-    public val profile: BitmapPainter =
-        BitmapPainter(useResource("icons/profile.png", ::loadImageBitmap))
-    public val refresh: BitmapPainter =
-        BitmapPainter(useResource("icons/refresh.png", ::loadImageBitmap))
-    public val back: BitmapPainter =
-        BitmapPainter(useResource("icons/back.png", ::loadImageBitmap))
+@Composable
+public fun Avatar(
+    url: Url,
+    modifier: Modifier = Modifier
+) {
+    AsyncImage(
+        model = url.spec,
+        contentDescription = null,
+        modifier = modifier
+            .clip(CircleShape)
+    )
 }
