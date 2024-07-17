@@ -27,7 +27,7 @@
 package io.spine.internal.dependency
 
 /**
- * A library for asynchronously loading images from the Internet.
+ * A library for loading images from the Internet asynchronously.
  *
  * @see <a href="https://github.com/coil-kt/coil">Coil GitHub</a>
  * @see <a href="https://coil-kt.github.io/coil/upgrading_to_coil3/#multiplatform">
@@ -35,6 +35,11 @@ package io.spine.internal.dependency
  */
 @Suppress("ConstPropertyName")
 public object Coil {
+    // Compose Multiplatform requires Coil version 3.x for compatibility,
+    // but it is currently in the alpha phase.
+    // TODO:2024-07-17:mykyta.pimonov: Bump this version from 3.0.0-alpha08 to 3.0.0
+    //  upon its release.
+    //  See: https://github.com/spine-examples/Pingh/issues/25.
     private const val version = "3.0.0-alpha08"
     private const val group = "io.coil-kt.coil3"
 

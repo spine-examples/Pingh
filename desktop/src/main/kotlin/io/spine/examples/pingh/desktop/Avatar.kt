@@ -26,21 +26,27 @@
 
 package io.spine.examples.pingh.desktop
 
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import coil3.compose.AsyncImage
+import io.spine.net.Url
+
 /**
- * Trims the string if it exceeds `maxLength` and appends the `end` string.
+ * Displays a round avatar with an image loaded from the specified URL.
  *
- * The length of the `end` string is included in the maximum length of the
- * output string. Therefore, a maximum of `maxLength - end.length` characters
- * are taken from the original string.
+ * The image loads asynchronously.
  */
-public fun String.truncate(maxLength: Int, end: String = ""): String {
-    require(maxLength > 0) { "String `maxLength` must be greater than zero." }
-    require(maxLength > end.length) {
-        "The end of the string cannot be longer than the expected string."
-    }
-    return if (this.length <= maxLength) {
-        this
-    } else {
-        this.substring(0, maxLength - end.length) + end
-    }
+@Composable
+internal fun Avatar(
+    url: Url,
+    modifier: Modifier = Modifier
+) {
+    AsyncImage(
+        model = url.spec,
+        contentDescription = null,
+        modifier = modifier
+            .clip(CircleShape)
+    )
 }

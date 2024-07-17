@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop.home
+package io.spine.examples.pingh.desktop
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -46,6 +46,8 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,38 +55,31 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.google.protobuf.util.Timestamps
 import io.spine.examples.pingh.client.DesktopClient
-import io.spine.examples.pingh.desktop.component.Avatar
-import io.spine.examples.pingh.desktop.component.IconButton
-import io.spine.examples.pingh.desktop.component.Icons
-import io.spine.examples.pingh.desktop.toDatetime
-import io.spine.examples.pingh.desktop.truncate
+import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
+import java.lang.Thread.sleep
 
 /**
- * Maximum length for the title of the mention card.
- *
- * If the title exceeds this length, it will be trimmed to fit the card.
- */
-private const val maxLengthOfMentionCardTitle = 27
-
-/**
- * Displays the 'Home' page in the application.
+ * Displays the 'Mentions' page in the application.
  *
  * This page is the main interface where users can manage their mentions.
  * Users can snooze and read mentions on this page. Additionally, it is
  * possible to manually update the list of mentions from the server.
  */
 @Composable
-public fun HomePage(client: DesktopClient) {
-    val model = remember { HomePageModel(client) }
+internal fun MentionsPage(client: DesktopClient) {
+    val state = remember { State(client) }
     Column(
         Modifier.fillMaxSize()
     ) {
-        ToolBar(model)
-        MentionCards(model)
+        ToolBar(state)
+        MentionCards(state)
     }
 }
 
@@ -93,7 +88,7 @@ public fun HomePage(client: DesktopClient) {
  * manually updating mentions.
  */
 @Composable
-private fun ToolBar(model: HomePageModel) {
+private fun ToolBar(state: State) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -125,7 +120,7 @@ private fun ToolBar(model: HomePageModel) {
         IconButton(
             icon = Icons.refresh,
             onClick = {
-                model.updateMentions()
+                state.updateMentions()
             },
             modifier = Modifier.size(40.dp)
         )
@@ -139,7 +134,7 @@ private fun ToolBar(model: HomePageModel) {
  * Within each group, mentions are sorted by time.
  */
 @Composable
-private fun MentionCards(model: HomePageModel) {
+private fun MentionCards(state: State) {
     val scrollState = rememberScrollState()
     Column(
         Modifier
@@ -148,13 +143,13 @@ private fun MentionCards(model: HomePageModel) {
             .verticalScroll(scrollState)
             .background(MaterialTheme.colorScheme.background),
     ) {
-        model.mentions()
+        state.mentions()
             .sortByStatusAndWhenMentioned()
             .forEach { mention ->
-                Spacer(Modifier.height(20.dp))
-                MentionCard(model, mention)
+                Spacer(Modifier.height(7.dp))
+                MentionCard(state, mention)
             }
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(7.dp))
     }
 }
 
@@ -164,13 +159,11 @@ private fun MentionCards(model: HomePageModel) {
  * Depending on the status of the mention, the card design and possible interactions vary.
  *
  * - If the mention is unread, it can be read or snoozed.
- *
  * - If the mention is snoozed, it can only be read.
- *
  * - If the mention is read, it can still be opened, but its status does not change.
  */
 @Composable
-private fun MentionCard(model: HomePageModel, mention: MentionView) {
+private fun MentionCard(state: State, mention: MentionView) {
     val uriHandler = LocalUriHandler.current
     val mentionIsRead = mention.status == MentionStatus.READ
     val containerColor = if (mentionIsRead) {
@@ -181,7 +174,7 @@ private fun MentionCard(model: HomePageModel, mention: MentionView) {
     val onClick = {
         uriHandler.openUri(mention.url.spec)
         if (!mentionIsRead) {
-            model.markMentionAsRead(mention.id)
+            state.markMentionAsRead(mention.id)
         }
     }
     ElevatedCard(
@@ -205,7 +198,7 @@ private fun MentionCard(model: HomePageModel, mention: MentionView) {
             Spacer(Modifier.width(5.dp))
             MentionCardText(mention)
             Spacer(Modifier.width(5.dp))
-            SnoozeButton(model, mention)
+            SnoozeButton(state, mention)
         }
     }
 }
@@ -223,14 +216,18 @@ private fun MentionCardText(mention: MentionView) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "${mention.whoMentioned.username.value}/${mention.title}"
-                .truncate(maxLengthOfMentionCardTitle, "..."),
-            style = MaterialTheme.typography.bodyLarge,
+            text = "${mention.whoMentioned.username.value}/${mention.title}",
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 2,
+            style = MaterialTheme.typography.bodyLarge
         )
         Spacer(Modifier.height(2.dp))
         Text(
             text = mention.whenMentioned.toDatetime(),
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontStyle = FontStyle.Italic,
+                color = Color.Gray
+            )
         )
     }
 }
@@ -242,13 +239,13 @@ private fun MentionCardText(mention: MentionView) {
  * Otherwise, nothing is displayed.
  */
 @Composable
-private fun SnoozeButton(model: HomePageModel, mention: MentionView) {
+private fun SnoozeButton(state: State, mention: MentionView) {
     when (mention.status) {
         MentionStatus.UNREAD ->
             IconButton(
                 icon = Icons.snooze,
                 onClick = {
-                    model.markMentionAsSnoozed(mention.id)
+                    state.markMentionAsSnoozed(mention.id)
                 },
                 modifier = Modifier.size(40.dp)
             )
@@ -264,3 +261,93 @@ private fun SnoozeButton(model: HomePageModel, mention: MentionView) {
         else -> {}
     }
 }
+
+/**
+ * State of [MentionsPage].
+ */
+private class State(private val client: DesktopClient) {
+
+    private companion object {
+        /**
+         * Delay before reading mentions so that the read-side on the server can be updated.
+         *
+         * Time is specified in milliseconds.
+         */
+        private const val delayBeforeReadingMentions = 100L
+    }
+
+    /**
+     * User mentions.
+     */
+    private var mentions: MutableState<MentionsList> = mutableStateOf(client.findUserMentions())
+
+    /**
+     * Returns all user mentions.
+     */
+    internal fun mentions(): MentionsList = mentions.value
+
+    /**
+     * Updates the user mentions.
+     */
+    internal fun updateMentions() {
+        client.updateMentions(
+            onSuccess = {
+                sleep(delayBeforeReadingMentions)
+                mentions.value = client.findUserMentions()
+            }
+        )
+    }
+
+    /**
+     * Marks the mention as snoozed.
+     */
+    internal fun markMentionAsSnoozed(id: MentionId) {
+        client.markMentionAsSnoozed(id) {
+            mentions.value = mentions.value.setMentionStatus(id, MentionStatus.SNOOZED)
+        }
+    }
+
+    /**
+     * Marks that the mention is read.
+     */
+    internal fun markMentionAsRead(id: MentionId) {
+        client.markMentionAsRead(id) {
+            mentions.value = mentions.value.setMentionStatus(id, MentionStatus.READ)
+        }
+    }
+}
+
+/**
+ * List of `MentionsView`s.
+ */
+private typealias MentionsList = List<MentionView>
+
+/**
+ * Creates a new list by replacing the status of one mention with another.
+ */
+private fun MentionsList.setMentionStatus(id: MentionId, status: MentionStatus): MentionsList {
+    val idInList = this.indexOfFirst { it.id == id }
+    val updatedMention = this[idInList]
+        .toBuilder()
+        .setStatus(status)
+        .vBuild()
+    val newMentionsList = this.toMutableList()
+    newMentionsList[idInList] = updatedMention
+    return newMentionsList
+}
+
+/**
+ * Returns a `MentionsList` sorted such that unread mentions come first,
+ * followed by snoozed mentions, and read mentions last.
+ *
+ * Within each group, mentions are sorted by the time they were made.
+ */
+private fun MentionsList.sortByStatusAndWhenMentioned(): MentionsList =
+    this.sortedWith { firstMentions, secondMentions ->
+        val statusComparison = firstMentions.status.compareTo(secondMentions.status)
+        if (statusComparison != 0) {
+            statusComparison
+        } else {
+            Timestamps.compare(secondMentions.whenMentioned, firstMentions.whenMentioned)
+        }
+    }

@@ -44,7 +44,7 @@ private val datetimeFormat = DateTimeFormatter.ofPattern("dd MMM HH:mm")
  * - `10 May 14:37`
  * - `05 Sep 04:00`
  */
-public fun Timestamp.toDatetime(): String =
+internal fun Timestamp.toDatetime(): String =
     datetimeFormat.format(
         LocalDateTime.ofEpochSecond(this.seconds, this.nanos, ZoneOffset.UTC)
     )
