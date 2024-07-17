@@ -26,9 +26,54 @@
 
 package io.spine.examples.pingh.desktop
 
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.useResource
+import java.awt.Cursor
+
+/**
+ * The proportion of the button's size that the icon occupies.
+ * Since the button is circular, the icon should be scaled down
+ * to avoid truncation at the edges.
+ */
+private const val iconSizeMultiplier = 0.75f
+
+/**
+ * Displays a round button that contains icon.
+ */
+@Composable
+internal fun IconButton(
+    icon: BitmapPainter,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors()
+) {
+    FilledIconButton(
+        onClick = onClick,
+        modifier = modifier
+            .clip(CircleShape)
+            .pointerHoverIcon(PointerIcon(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))),
+        colors = colors
+    ) {
+        Icon(
+            painter = icon,
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(iconSizeMultiplier),
+            tint = colors.contentColor
+        )
+    }
+}
 
 /**
  * Icons used in the Pingh desktop client.
