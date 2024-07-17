@@ -55,6 +55,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import com.google.protobuf.util.Timestamps
 import io.spine.examples.pingh.client.DesktopClient
@@ -239,7 +240,10 @@ private fun MentionCardText(mention: MentionView) {
         Spacer(Modifier.height(2.dp))
         Text(
             text = mention.whenMentioned.toDatetime(),
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontStyle = FontStyle.Italic,
+                color = Color.Gray
+            )
         )
     }
 }

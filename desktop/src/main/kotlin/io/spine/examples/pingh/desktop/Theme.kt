@@ -111,13 +111,10 @@ private val typography = Typography(
     ),
     bodyMedium = TextStyle(
         fontFamily = sanFrancisco,
-        fontSize = 10.sp,
-        fontStyle = FontStyle.Italic,
-        color = Color.Gray
+        fontSize = 10.sp
     ),
     bodySmall = TextStyle(
         fontFamily = sanFrancisco,
-        fontSize = 8.sp,
-        fontWeight = FontWeight.Normal
+        fontSize = 8.sp
     )
 )
