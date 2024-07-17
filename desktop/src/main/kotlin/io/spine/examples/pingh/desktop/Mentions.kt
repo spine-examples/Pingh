@@ -80,15 +80,15 @@ private val statusOrder = mapOf(
 )
 
 /**
- * Displays the 'Home' page in the application.
+ * Displays the 'Mentions' page in the application.
  *
  * This page is the main interface where users can manage their mentions.
  * Users can snooze and read mentions on this page. Additionally, it is
  * possible to manually update the list of mentions from the server.
  */
 @Composable
-internal fun HomePage(client: DesktopClient) {
-    val model = remember { HomePageState(client) }
+internal fun MentionsPage(client: DesktopClient) {
+    val model = remember { State(client) }
     Column(
         Modifier.fillMaxSize()
     ) {
@@ -102,7 +102,7 @@ internal fun HomePage(client: DesktopClient) {
  * manually updating mentions.
  */
 @Composable
-private fun ToolBar(model: HomePageState) {
+private fun ToolBar(model: State) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -148,7 +148,7 @@ private fun ToolBar(model: HomePageState) {
  * Within each group, mentions are sorted by time.
  */
 @Composable
-private fun MentionCards(model: HomePageState) {
+private fun MentionCards(model: State) {
     val scrollState = rememberScrollState()
     Column(
         Modifier
@@ -179,7 +179,7 @@ private fun MentionCards(model: HomePageState) {
  * - If the mention is read, it can still be opened, but its status does not change.
  */
 @Composable
-private fun MentionCard(model: HomePageState, mention: MentionView) {
+private fun MentionCard(model: State, mention: MentionView) {
     val uriHandler = LocalUriHandler.current
     val mentionIsRead = mention.status == MentionStatus.READ
     val containerColor = if (mentionIsRead) {
@@ -251,7 +251,7 @@ private fun MentionCardText(mention: MentionView) {
  * Otherwise, nothing is displayed.
  */
 @Composable
-private fun SnoozeButton(model: HomePageState, mention: MentionView) {
+private fun SnoozeButton(model: State, mention: MentionView) {
     when (mention.status) {
         MentionStatus.UNREAD ->
             IconButton(
@@ -275,11 +275,11 @@ private fun SnoozeButton(model: HomePageState, mention: MentionView) {
 }
 
 /**
- * State of [HomePage].
+ * State of [MentionsPage].
  *
  * This state is a layer between `@Composable` function and `DesktopClient`.
  */
-private class HomePageState(private val client: DesktopClient) {
+private class State(private val client: DesktopClient) {
 
     private companion object {
         /**
