@@ -41,8 +41,14 @@ import io.spine.examples.pingh.desktop.profile.ProfilePage
 @Composable
 public fun CurrentPage(client: DesktopClient) {
     val model = remember { NavigationModel(client) }
-    when(model.currentPage()) {
-        Page.LOGIN -> LoginPage(client)
+    when (model.currentPage()) {
+        Page.LOGIN -> LoginPage(
+            client = client,
+            toHomePage = {
+                model.changePageOn(Page.HOME)
+            }
+        )
+
         Page.HOME -> HomePage(client)
         Page.PROFILE -> ProfilePage(client)
     }
