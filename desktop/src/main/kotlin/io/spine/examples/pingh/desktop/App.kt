@@ -56,7 +56,7 @@ private fun app() {
                 title = "Pingh",
                 state = WindowState(size = DpSize(240.dp, 426.dp))
             ) {
-                MentionsPage(client)
+                CurrentPage(client)
             }
         }
     }
