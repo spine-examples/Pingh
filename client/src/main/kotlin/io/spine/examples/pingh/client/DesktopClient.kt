@@ -281,6 +281,11 @@ public class DesktopClient(
     }
 
     /**
+     * Returns `true` if the user is logged in the Pingh application; otherwise, returns `false`.
+     */
+    public fun isLoggedIn(): Boolean = session != null
+
+    /**
      * Closes the client by shutting down the gRPC connection.
      */
     public fun close() {
