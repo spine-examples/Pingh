@@ -39,7 +39,7 @@ import io.spine.net.Url
  * The image loads asynchronously.
  */
 @Composable
-public fun Avatar(
+internal fun Avatar(
     url: Url,
     modifier: Modifier = Modifier
 ) {

@@ -38,13 +38,13 @@ import androidx.compose.ui.res.useResource
  *
  * Created by [Icon Hubs](https://www.flaticon.com/authors/icon-hubs).
  */
-public object Icons {
-    public val snooze: BitmapPainter =
+internal object Icons {
+    internal val snooze: BitmapPainter =
         BitmapPainter(useResource("icons/snooze.png", ::loadImageBitmap))
-    public val profile: BitmapPainter =
+    internal val profile: BitmapPainter =
         BitmapPainter(useResource("icons/profile.png", ::loadImageBitmap))
-    public val refresh: BitmapPainter =
+    internal val refresh: BitmapPainter =
         BitmapPainter(useResource("icons/refresh.png", ::loadImageBitmap))
-    public val back: BitmapPainter =
+    internal val back: BitmapPainter =
         BitmapPainter(useResource("icons/back.png", ::loadImageBitmap))
 }

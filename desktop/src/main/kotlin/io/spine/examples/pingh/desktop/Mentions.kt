@@ -88,7 +88,7 @@ private val statusOrder = mapOf(
  */
 @Composable
 internal fun HomePage(client: DesktopClient) {
-    val model = remember { HomePageModel(client) }
+    val model = remember { HomePageState(client) }
     Column(
         Modifier.fillMaxSize()
     ) {
@@ -102,7 +102,7 @@ internal fun HomePage(client: DesktopClient) {
  * manually updating mentions.
  */
 @Composable
-private fun ToolBar(model: HomePageModel) {
+private fun ToolBar(model: HomePageState) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -148,7 +148,7 @@ private fun ToolBar(model: HomePageModel) {
  * Within each group, mentions are sorted by time.
  */
 @Composable
-private fun MentionCards(model: HomePageModel) {
+private fun MentionCards(model: HomePageState) {
     val scrollState = rememberScrollState()
     Column(
         Modifier
@@ -179,7 +179,7 @@ private fun MentionCards(model: HomePageModel) {
  * - If the mention is read, it can still be opened, but its status does not change.
  */
 @Composable
-private fun MentionCard(model: HomePageModel, mention: MentionView) {
+private fun MentionCard(model: HomePageState, mention: MentionView) {
     val uriHandler = LocalUriHandler.current
     val mentionIsRead = mention.status == MentionStatus.READ
     val containerColor = if (mentionIsRead) {
@@ -251,7 +251,7 @@ private fun MentionCardText(mention: MentionView) {
  * Otherwise, nothing is displayed.
  */
 @Composable
-private fun SnoozeButton(model: HomePageModel, mention: MentionView) {
+private fun SnoozeButton(model: HomePageState, mention: MentionView) {
     when (mention.status) {
         MentionStatus.UNREAD ->
             IconButton(
@@ -275,11 +275,11 @@ private fun SnoozeButton(model: HomePageModel, mention: MentionView) {
 }
 
 /**
- * UI Model for the [HomePage].
+ * State of [HomePage].
  *
- * UI Model is a layer between `@Composable` functions and client.
+ * This state is a layer between `@Composable` function and `DesktopClient`.
  */
-private class HomePageModel(private val client: DesktopClient) {
+private class HomePageState(private val client: DesktopClient) {
 
     private companion object {
         /**
@@ -298,12 +298,12 @@ private class HomePageModel(private val client: DesktopClient) {
     /**
      * Returns all user mentions.
      */
-    public fun mentions(): MentionsList = mentions.value
+    internal fun mentions(): MentionsList = mentions.value
 
     /**
      * Updates the user mentions.
      */
-    public fun updateMentions() {
+    internal fun updateMentions() {
         client.updateMentions(
             onSuccess = {
                 sleep(delayBeforeReadingMentions)
@@ -315,7 +315,7 @@ private class HomePageModel(private val client: DesktopClient) {
     /**
      * Marks the mention as snoozed.
      */
-    public fun markMentionAsSnoozed(id: MentionId) {
+    internal fun markMentionAsSnoozed(id: MentionId) {
         client.markMentionAsSnoozed(id) {
             mentions.value = mentions.value.setMentionStatus(id, MentionStatus.SNOOZED)
         }
@@ -324,7 +324,7 @@ private class HomePageModel(private val client: DesktopClient) {
     /**
      * Marks that the mention is read.
      */
-    public fun markMentionAsRead(id: MentionId) {
+    internal fun markMentionAsRead(id: MentionId) {
         client.markMentionAsRead(id) {
             mentions.value = mentions.value.setMentionStatus(id, MentionStatus.READ)
         }

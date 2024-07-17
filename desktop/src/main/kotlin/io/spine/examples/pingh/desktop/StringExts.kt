@@ -33,7 +33,7 @@ package io.spine.examples.pingh.desktop
  * output string. Therefore, a maximum of `maxLength - end.length` characters
  * are taken from the original string.
  */
-public fun String.truncate(maxLength: Int, end: String = ""): String {
+internal fun String.truncate(maxLength: Int, end: String = ""): String {
     require(maxLength > 0) { "String `maxLength` must be greater than zero." }
     require(maxLength > end.length) {
         "The end of the string cannot be longer than the expected string."

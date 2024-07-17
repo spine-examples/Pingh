@@ -51,7 +51,7 @@ private const val iconSizeMultiplier = 0.75f
  * Displays a round button that contains icon.
  */
 @Composable
-public fun IconButton(
+internal fun IconButton(
     icon: BitmapPainter,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
