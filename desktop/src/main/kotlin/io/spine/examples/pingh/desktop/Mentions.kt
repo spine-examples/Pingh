@@ -56,6 +56,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.google.protobuf.util.Timestamps
 import io.spine.examples.pingh.client.DesktopClient
@@ -63,13 +64,6 @@ import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
 import java.lang.Thread.sleep
-
-/**
- * Maximum length for the title of the mention card.
- *
- * If the title exceeds this length, it will be trimmed to fit the card.
- */
-private const val maxLengthOfMentionCardTitle = 27
 
 /**
  * Order of statuses for sorting mentions in the [sortByStatusAndWhenMentioned] method.
@@ -233,9 +227,10 @@ private fun MentionCardText(mention: MentionView) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "${mention.whoMentioned.username.value}/${mention.title}"
-                .truncate(maxLengthOfMentionCardTitle, "..."),
+            text = "${mention.whoMentioned.username.value}/${mention.title}",
             style = MaterialTheme.typography.bodyLarge,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 2
         )
         Spacer(Modifier.height(2.dp))
         Text(
