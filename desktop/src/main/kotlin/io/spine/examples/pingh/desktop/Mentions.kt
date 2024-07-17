@@ -146,10 +146,10 @@ private fun MentionCards(state: State) {
         state.mentions()
             .sortByStatusAndWhenMentioned()
             .forEach { mention ->
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(7.dp))
                 MentionCard(state, mention)
             }
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(7.dp))
     }
 }
 
