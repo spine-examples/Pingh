@@ -57,11 +57,11 @@ internal fun PinghTheme(content: @Composable () -> Unit): Unit = MaterialTheme(
 private val colorScheme = lightColorScheme(
     primary = Color.White,
     onPrimary = Color(247, 247, 247),
-    secondary = Color(152, 200, 250),
+    secondary = Color(117, 237, 255),
     onSecondary = Color(59, 155, 255),
     background = Color(235, 235, 235),
     onBackground = Color(213, 213, 213),
-    error = Color(255, 196, 196)
+    error = Color(255, 161, 161)
 )
 
 /**

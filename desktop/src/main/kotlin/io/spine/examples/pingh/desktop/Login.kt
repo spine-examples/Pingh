@@ -65,6 +65,7 @@ internal fun LoginPage(
     toMentionsPage: () -> Unit
 ) {
     val state = remember { UsernameState() }
+    val isError = remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -72,7 +73,10 @@ internal fun LoginPage(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        LoginInput(state)
+        LoginInput(
+            state = state,
+            isError = isError
+        )
         Spacer(Modifier.height(20.dp))
         LoginButton {
             if (state.validate()) {
@@ -80,6 +84,8 @@ internal fun LoginPage(
                 client.logIn(username) {
                     toMentionsPage()
                 }
+            } else {
+                isError.value = true
             }
         }
     }
@@ -95,12 +101,15 @@ internal fun LoginPage(
  */
 @Composable
 private fun LoginInput(
-    state: UsernameState
+    state: UsernameState,
+    isError: MutableState<Boolean>
 ) {
-    val isError = state.wasChanged() && !state.validate()
     OutlinedTextField(
         value = state.username(),
-        onValueChange = { state.set(it) },
+        onValueChange = {
+            state.set(it)
+            isError.value = state.wasChanged() && !state.validate()
+        },
         modifier = Modifier.width(180.dp),
         textStyle = MaterialTheme.typography.bodyLarge.copy(
             fontWeight = FontWeight.Normal
@@ -112,7 +121,7 @@ private fun LoginInput(
             )
         },
         supportingText = {
-            if (isError) {
+            if (isError.value) {
                 Text(
                     text = state.errorMessage(),
                     style = MaterialTheme.typography.bodyMedium.copy(
@@ -121,7 +130,7 @@ private fun LoginInput(
                 )
             }
         },
-        isError = isError,
+        isError = isError.value,
         singleLine = true,
         shape = MaterialTheme.shapes.large,
         colors = TextFieldDefaults.colors(
