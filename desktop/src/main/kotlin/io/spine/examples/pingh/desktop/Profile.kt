@@ -31,6 +31,9 @@ import androidx.compose.runtime.Composable
 import io.spine.examples.pingh.client.DesktopClient
 
 @Composable
-internal fun ProfilePage(client: DesktopClient) {
+internal fun ProfilePage(
+    client: DesktopClient,
+    toMentionsPage: () -> Unit
+) {
     Text("Profile")
 }

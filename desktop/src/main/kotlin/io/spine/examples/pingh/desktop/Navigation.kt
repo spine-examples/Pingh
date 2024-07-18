@@ -38,9 +38,11 @@ import io.spine.examples.pingh.client.DesktopClient
  */
 @Composable
 internal fun CurrentPage(client: DesktopClient) {
-    val currentPage = remember { mutableStateOf(
-        if (client.isLoggedIn()) Page.MENTIONS else Page.LOGIN
-    ) }
+    val currentPage = remember {
+        mutableStateOf(
+            if (client.isLoggedIn()) Page.MENTIONS else Page.LOGIN
+        )
+    }
     when (currentPage.value) {
         Page.LOGIN -> LoginPage(
             client = client,
@@ -49,8 +51,19 @@ internal fun CurrentPage(client: DesktopClient) {
             }
         )
 
-        Page.MENTIONS -> MentionsPage(client)
-        Page.PROFILE -> ProfilePage(client)
+        Page.MENTIONS -> MentionsPage(
+            client = client,
+            toProfilePage = {
+                currentPage.value = Page.PROFILE
+            }
+        )
+
+        Page.PROFILE -> ProfilePage(
+            client = client,
+            toMentionsPage = {
+                currentPage.value = Page.MENTIONS
+            }
+        )
     }
 }
 
