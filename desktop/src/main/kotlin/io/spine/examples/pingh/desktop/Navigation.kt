@@ -44,7 +44,7 @@ internal fun CurrentPage(client: DesktopClient) {
     when (currentPage.value) {
         Page.LOGIN -> LoginPage(
             client = client,
-            toHomePage = {
+            toMentionsPage = {
                 currentPage.value = Page.MENTIONS
             }
         )

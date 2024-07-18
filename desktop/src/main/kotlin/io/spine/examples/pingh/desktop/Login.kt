@@ -46,19 +46,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
 
+/**
+ * Displays a login form.
+ *
+ * If the username is entered correct, user will be [logged in][DesktopClient.logIn] into
+ * the Pingh server and redirected to the [MentionsPage].
+ */
 @Composable
 internal fun LoginPage(
     client: DesktopClient,
-    toHomePage: () -> Unit
+    toMentionsPage: () -> Unit
 ) {
-    val username = remember { mutableStateOf("") }
-
+    val state = remember { UsernameState() }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -66,32 +72,57 @@ internal fun LoginPage(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        LoginInput(username)
+        LoginInput(state)
         Spacer(Modifier.height(20.dp))
         LoginButton {
-            client.logIn(Username::class.buildBy(username.value)) {
-                toHomePage()
+            if (state.validate()) {
+                val username = Username::class.buildBy(state.username())
+                client.logIn(username) {
+                    toMentionsPage()
+                }
             }
         }
     }
 }
 
+/**
+ * Displays a username input field on the login form.
+ *
+ * In addition, it checks the correctness of the entered data. If the username
+ * has been [specified][UsernameState.wasChanged] but is not [valid][UsernameState.validate],
+ * the value is considered incorrect, so the field signals an input error
+ * and shows a hint.
+ */
 @Composable
-private fun LoginInput(username: MutableState<String>) {
+private fun LoginInput(
+    state: UsernameState
+) {
+    val isError = state.wasChanged() && !state.validate()
     OutlinedTextField(
-        value = username.value,
-        onValueChange = { username.value = it },
-        modifier = Modifier
-            .width(180.dp),
+        value = state.username(),
+        onValueChange = { state.set(it) },
+        modifier = Modifier.width(180.dp),
+        textStyle = MaterialTheme.typography.bodyLarge.copy(
+            fontWeight = FontWeight.Normal
+        ),
         label = {
             Text(
                 text = "GitHub username",
                 style = MaterialTheme.typography.bodyMedium
             )
         },
-        textStyle = MaterialTheme.typography.bodyLarge.copy(
-            fontWeight = FontWeight.Normal
-        ),
+        supportingText = {
+            if (isError) {
+                Text(
+                    text = state.errorMessage(),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontStyle = FontStyle.Italic
+                    )
+                )
+            }
+        },
+        isError = isError,
+        singleLine = true,
         shape = MaterialTheme.shapes.large,
         colors = TextFieldDefaults.colors(
             unfocusedContainerColor = MaterialTheme.colorScheme.primary,
@@ -100,35 +131,76 @@ private fun LoginInput(username: MutableState<String>) {
             unfocusedLabelColor = Color.Black,
             focusedLabelColor = Color.Black,
             focusedIndicatorColor = Color.Black
-        ),
-        singleLine = true,
-        /*isError = true,
-        supportingText = {
-            Text(
-                text = "GitHub username",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontStyle = FontStyle.Italic
-                )
-            )
-        }*/
+        )
     )
 }
 
+/**
+ * Displays a `Button` on the login form.
+ */
 @Composable
 private fun LoginButton(onClick: () -> Unit) {
     Button(
         onClick = onClick,
+        modifier = Modifier
+            .width(120.dp)
+            .height(40.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.secondary,
             contentColor = MaterialTheme.colorScheme.primary
-        ),
-        modifier = Modifier
-            .width(120.dp)
-            .height(40.dp)
+        )
     ) {
         Text(
             text = "Login",
             style = MaterialTheme.typography.bodyLarge
         )
+    }
+}
+
+/**
+ * State of GitHub username in the [LoginPage].
+ */
+private class UsernameState {
+
+    /**
+     * Value of the username.
+     */
+    private val username: MutableState<String> = mutableStateOf("")
+
+    /**
+     * Information on whether there has been a change in username state.
+     */
+    private var wasChanged: Boolean = false
+
+    /**
+     * Returns the username value.
+     */
+    internal fun username() = username.value
+
+    /**
+     * Sets a new username value and specifies that this state was changed.
+     */
+    internal fun set(value: String) {
+        if (!wasChanged && value.isNotEmpty()) {
+            wasChanged = true
+        }
+        username.value = value
+    }
+
+    /**
+     * Checks that the username value is not empty.
+     */
+    internal fun validate(): Boolean = username.value.isNotEmpty()
+
+    /**
+     * Returns information on whether there has been a change in username state.
+     */
+    internal fun wasChanged(): Boolean = wasChanged
+
+    /**
+     * Returns the error message if state value is invalid.
+     */
+    internal fun errorMessage(): String = if (validate()) "" else {
+        "Username must be specified."
     }
 }
