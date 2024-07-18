@@ -58,7 +58,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.google.protobuf.util.Timestamps
@@ -82,6 +81,7 @@ internal fun MentionsPage(client: DesktopClient) {
         Modifier.fillMaxSize()
     ) {
         ToolBar(state)
+        Spacer(Modifier.height(0.5.dp))
         MentionCards(state)
     }
 }
@@ -105,7 +105,7 @@ private fun ToolBar(state: MentionsPageState) {
                     strokeWidth = 1.dp.toPx()
                 )
             }
-            .padding(horizontal = 10.dp, vertical = 4.dp),
+            .padding(horizontal = 15.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
@@ -115,7 +115,7 @@ private fun ToolBar(state: MentionsPageState) {
         )
         Spacer(Modifier.width(5.dp))
         Text(
-            text = "Pingh",
+            text = "Recent mentions",
             modifier = Modifier.width(120.dp),
             style = MaterialTheme.typography.displayLarge
         )
@@ -142,17 +142,17 @@ private fun MentionCards(state: MentionsPageState) {
     Column(
         Modifier
             .fillMaxSize()
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = 5.dp)
             .verticalScroll(scrollState)
             .background(MaterialTheme.colorScheme.background),
     ) {
         state.mentions()
             .sortByStatusAndWhenMentioned()
             .forEach { mention ->
-                Spacer(Modifier.height(7.dp))
+                Spacer(Modifier.height(5.dp))
                 MentionCard(state, mention)
             }
-        Spacer(Modifier.height(7.dp))
+        Spacer(Modifier.height(5.dp))
     }
 }
 
@@ -221,7 +221,7 @@ private fun MentionCardText(mention: MentionView, isHovered: State<Boolean>) {
     Column(
         modifier = Modifier
             .fillMaxHeight()
-            .width(90.dp),
+            .width(120.dp),
         verticalArrangement = Arrangement.Center
     ) {
         Text(
@@ -233,10 +233,13 @@ private fun MentionCardText(mention: MentionView, isHovered: State<Boolean>) {
         Spacer(Modifier.height(2.dp))
         Text(
             text = "$time,\nby ${mention.whoMentioned.username.value}",
-            style = MaterialTheme.typography.bodySmall.copy(
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 2,
+            /*style = MaterialTheme.typography.bodySmall.copy(
                 fontStyle = FontStyle.Italic,
                 color = Color.Gray
-            )
+            )*/
+            style = MaterialTheme.typography.bodySmall
         )
     }
 }
