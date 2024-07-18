@@ -44,6 +44,16 @@ private val datetimeFormat = DateTimeFormatter.ofPattern("dd MMM HH:mm")
 private val dateFormat = DateTimeFormatter.ofPattern("dd MMM")
 
 /**
+ * Number of minutes in one hour.
+ */
+private const val minutesPerHour = 60L
+
+/**
+ * Number of hours in one day.
+ */
+private const val hoursPerDay = 24L
+
+/**
  * Converts `Timestamp` to the `dd MMM HH:mm` string.
  *
  * Examples:
@@ -75,9 +85,9 @@ internal fun Timestamp.howMuchTimeHasPassed(): String {
     return when {
         difference.toMinutes() < 1L -> "just now"
         difference.toMinutes() == 1L -> "a minute ago"
-        difference.toMinutes() < 60L -> "${difference.toMinutes()} minutes ago"
+        difference.toMinutes() < minutesPerHour -> "${difference.toMinutes()} minutes ago"
         difference.toHours() == 1L -> "an hour ago"
-        difference.toHours() < 24L -> "${difference.toHours()} hours ago"
+        difference.toHours() < hoursPerDay -> "${difference.toHours()} hours ago"
         difference.toDays() == 1L -> "yesterday"
         else -> dateFormat.format(thisDatetime)
     }
