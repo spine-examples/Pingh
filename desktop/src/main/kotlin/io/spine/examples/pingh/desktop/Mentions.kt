@@ -27,6 +27,8 @@
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -47,6 +49,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -74,7 +77,7 @@ import java.lang.Thread.sleep
  */
 @Composable
 internal fun MentionsPage(client: DesktopClient) {
-    val state = remember { State(client) }
+    val state = remember { MentionsPageState(client) }
     Column(
         Modifier.fillMaxSize()
     ) {
@@ -88,7 +91,7 @@ internal fun MentionsPage(client: DesktopClient) {
  * manually updating mentions.
  */
 @Composable
-private fun ToolBar(state: State) {
+private fun ToolBar(state: MentionsPageState) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -134,7 +137,7 @@ private fun ToolBar(state: State) {
  * Within each group, mentions are sorted by time.
  */
 @Composable
-private fun MentionCards(state: State) {
+private fun MentionCards(state: MentionsPageState) {
     val scrollState = rememberScrollState()
     Column(
         Modifier
@@ -163,8 +166,10 @@ private fun MentionCards(state: State) {
  * - If the mention is read, it can still be opened, but its status does not change.
  */
 @Composable
-private fun MentionCard(state: State, mention: MentionView) {
+private fun MentionCard(state: MentionsPageState, mention: MentionView) {
     val uriHandler = LocalUriHandler.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered = interactionSource.collectIsHoveredAsState()
     val mentionIsRead = mention.status == MentionStatus.READ
     val containerColor = if (mentionIsRead) {
         MaterialTheme.colorScheme.onBackground
@@ -182,6 +187,7 @@ private fun MentionCard(state: State, mention: MentionView) {
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp),
+        interactionSource = interactionSource,
         colors = CardDefaults.elevatedCardColors().copy(
             containerColor = containerColor
         )
@@ -196,7 +202,7 @@ private fun MentionCard(state: State, mention: MentionView) {
                 modifier = Modifier.size(40.dp)
             )
             Spacer(Modifier.width(5.dp))
-            MentionCardText(mention)
+            MentionCardText(mention, isHovered)
             Spacer(Modifier.width(5.dp))
             SnoozeButton(state, mention)
         }
@@ -208,7 +214,10 @@ private fun MentionCard(state: State, mention: MentionView) {
  * including details about who mentioned the user, where, and when.
  */
 @Composable
-private fun MentionCardText(mention: MentionView) {
+private fun MentionCardText(mention: MentionView, isHovered: State<Boolean>) {
+    val time = mention.whenMentioned.run {
+        if (isHovered.value) toDatetime() else howMuchTimeHasPassed()
+    }
     Column(
         modifier = Modifier
             .fillMaxHeight()
@@ -216,15 +225,15 @@ private fun MentionCardText(mention: MentionView) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "${mention.whoMentioned.username.value}/${mention.title}",
+            text = mention.title,
             overflow = TextOverflow.Ellipsis,
-            maxLines = 2,
+            maxLines = 1,
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(Modifier.height(2.dp))
         Text(
-            text = mention.whenMentioned.toDatetime(),
-            style = MaterialTheme.typography.bodyMedium.copy(
+            text = "$time,\nby ${mention.whoMentioned.username.value}",
+            style = MaterialTheme.typography.bodySmall.copy(
                 fontStyle = FontStyle.Italic,
                 color = Color.Gray
             )
@@ -239,7 +248,7 @@ private fun MentionCardText(mention: MentionView) {
  * Otherwise, nothing is displayed.
  */
 @Composable
-private fun SnoozeButton(state: State, mention: MentionView) {
+private fun SnoozeButton(state: MentionsPageState, mention: MentionView) {
     when (mention.status) {
         MentionStatus.UNREAD ->
             IconButton(
@@ -263,9 +272,9 @@ private fun SnoozeButton(state: State, mention: MentionView) {
 }
 
 /**
- * State of [MentionsPage].
+ * MentionsPageState of [MentionsPage].
  */
-private class State(private val client: DesktopClient) {
+private class MentionsPageState(private val client: DesktopClient) {
 
     private companion object {
         /**
