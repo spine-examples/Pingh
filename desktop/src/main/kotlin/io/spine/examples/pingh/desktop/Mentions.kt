@@ -68,7 +68,7 @@ import io.spine.examples.pingh.mentions.MentionView
 import java.lang.Thread.sleep
 
 /**
- * Displays the 'Mentions' page in the application.
+ * Displays the `Mentions` page in the application.
  *
  * This page is the main interface where users can manage their mentions.
  * Users can snooze and read mentions on this page. Additionally, it is
