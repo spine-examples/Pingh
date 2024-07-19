@@ -101,13 +101,11 @@ private val sanFrancisco = FontFamily(
 private val typography = Typography(
     displayLarge = TextStyle(
         fontFamily = sanFrancisco,
-        fontSize = 24.sp,
-        fontWeight = FontWeight.SemiBold,
+        fontSize = 16.sp
     ),
     bodyLarge = TextStyle(
         fontFamily = sanFrancisco,
-        fontSize = 12.sp,
-        fontWeight = FontWeight.SemiBold
+        fontSize = 12.sp
     ),
     bodyMedium = TextStyle(
         fontFamily = sanFrancisco,

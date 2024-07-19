@@ -84,10 +84,10 @@ internal fun IconButton(
  * Created by [Icon Hubs](https://www.flaticon.com/authors/icon-hubs).
  */
 internal object Icons {
+    internal val pingh: BitmapPainter =
+        BitmapPainter(useResource("icons/pingh.png", ::loadImageBitmap))
     internal val snooze: BitmapPainter =
         BitmapPainter(useResource("icons/snooze.png", ::loadImageBitmap))
-    internal val profile: BitmapPainter =
-        BitmapPainter(useResource("icons/profile.png", ::loadImageBitmap))
     internal val refresh: BitmapPainter =
         BitmapPainter(useResource("icons/refresh.png", ::loadImageBitmap))
     internal val back: BitmapPainter =
