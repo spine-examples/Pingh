@@ -105,21 +105,19 @@ private fun ToolBar(state: MentionsPageState) {
                     strokeWidth = 1.dp.toPx()
                 )
             }
-            .padding(horizontal = 15.dp, vertical = 4.dp),
+            .padding(horizontal = 5.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
-            icon = Icons.profile,
+            icon = Icons.pingh,
             onClick = { }, // Go to the `Profile` page.
             modifier = Modifier.size(40.dp)
         )
-        Spacer(Modifier.width(5.dp))
         Text(
             text = "Recent mentions",
-            modifier = Modifier.width(120.dp),
+            modifier = Modifier.width(140.dp),
             style = MaterialTheme.typography.displayLarge
         )
-        Spacer(Modifier.width(5.dp))
         IconButton(
             icon = Icons.refresh,
             onClick = {
@@ -232,13 +230,9 @@ private fun MentionCardText(mention: MentionView, isHovered: State<Boolean>) {
         )
         Spacer(Modifier.height(2.dp))
         Text(
-            text = "$time,\nby ${mention.whoMentioned.username.value}",
+            text = "$time, by ${mention.whoMentioned.username.value}",
             overflow = TextOverflow.Ellipsis,
-            maxLines = 2,
-            /*style = MaterialTheme.typography.bodySmall.copy(
-                fontStyle = FontStyle.Italic,
-                color = Color.Gray
-            )*/
+            maxLines = 1,
             style = MaterialTheme.typography.bodySmall
         )
     }

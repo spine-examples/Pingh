@@ -101,7 +101,7 @@ private val sanFrancisco = FontFamily(
 private val typography = Typography(
     displayLarge = TextStyle(
         fontFamily = sanFrancisco,
-        fontSize = 14.sp
+        fontSize = 16.sp
     ),
     bodyLarge = TextStyle(
         fontFamily = sanFrancisco,
