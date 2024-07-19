@@ -26,13 +26,24 @@
 
 package io.spine.examples.pingh.desktop
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +52,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -48,6 +60,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.github.Username
@@ -73,9 +86,13 @@ internal fun LoginPage(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        LoginInput(
-            state = state,
-            isError = isError
+        Input(
+            value = state.username(),
+            onChange = {
+                state.set(it)
+                isError.value = state.wasChanged() && !state.validate()
+            },
+            isError = isError.value
         )
         Spacer(Modifier.height(20.dp))
         LoginButton {
@@ -110,7 +127,10 @@ private fun LoginInput(
             state.set(it)
             isError.value = state.wasChanged() && !state.validate()
         },
-        modifier = Modifier.width(180.dp),
+        modifier = Modifier
+            .width(180.dp)
+            .height(45.dp)
+            .padding(0.dp),
         textStyle = MaterialTheme.typography.bodyLarge.copy(
             fontWeight = FontWeight.Normal
         ),
@@ -118,6 +138,13 @@ private fun LoginInput(
             Text(
                 text = "GitHub username",
                 style = MaterialTheme.typography.bodyMedium
+            )
+        },
+        placeholder = {
+            Text(
+                text = "jonh-smith",
+                color = Color.Gray,
+                style = MaterialTheme.typography.bodyLarge
             )
         },
         supportingText = {
@@ -161,7 +188,7 @@ private fun LoginButton(onClick: () -> Unit) {
     ) {
         Text(
             text = "Login",
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.displayMedium
         )
     }
 }
@@ -170,6 +197,8 @@ private fun LoginButton(onClick: () -> Unit) {
  * State of GitHub username in the [LoginPage].
  */
 private class UsernameState {
+
+    private val regex = Regex("""[a-zA-Z\d-]+""")
 
     /**
      * Value of the username.
@@ -210,6 +239,151 @@ private class UsernameState {
      * Returns the error message if state value is invalid.
      */
     internal fun errorMessage(): String = if (validate()) "" else {
-        "Username must be specified."
+        "Username must be specified"
+    }
+}
+
+
+@Composable
+public fun Input(
+    value: String,
+    onChange: (String) -> Unit,
+    isError: Boolean
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val borderWidth = if (isFocused) 2.dp else 1.dp
+    val borderColor = when {
+        isError -> MaterialTheme.colorScheme.error
+        isFocused -> MaterialTheme.colorScheme.secondary
+        else -> Color.Black
+    }
+    BasicTextField(
+        value = value,
+        onValueChange = onChange,
+        modifier = Modifier
+            .width(180.dp)
+            .height(52.dp),
+        textStyle = MaterialTheme.typography.bodyLarge,
+        interactionSource = interactionSource,
+        singleLine = true
+    ) { innerTextField ->
+        Box(
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            InnerBox(
+                border = BorderStroke(borderWidth, borderColor)
+            ) {
+                InputContainer(
+                    value = value,
+                    textField = { innerTextField() },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Label(borderColor)
+            Tip(isError)
+        }
+    }
+}
+
+/**
+ * Inner box for all content of the `Input`.
+ */
+@Composable
+private fun InnerBox(
+    border: BorderStroke,
+    content: @Composable RowScope.() -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .width(180.dp)
+            .height(40.dp)
+            .border(
+                border = border,
+                shape = MaterialTheme.shapes.medium
+            )
+            .background(
+                color = MaterialTheme.colorScheme.primary,
+                shape = MaterialTheme.shapes.medium
+            )
+            .padding(
+                horizontal = 10.dp,
+                vertical = 3.dp
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        content = content
+    )
+}
+
+/**
+ * Container for the text field.
+ */
+@Composable
+private fun InputContainer(
+    value: String,
+    textField: @Composable () -> Unit,
+    modifier: Modifier
+) {
+    Box(
+        modifier = modifier.fillMaxWidth(),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        Placeholder(
+            isShown = value.isEmpty(),
+            value = "john-smith"
+        )
+        textField()
+    }
+}
+
+@Composable
+private fun Label(color: Color) {
+    Box(
+        modifier = Modifier
+            .width(90.dp)
+            .height(10.dp)
+            .absoluteOffset(x = 10.dp, y = (-5).dp)
+    ) {
+        Text(
+            text = "GitHub username",
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.primary),
+            textAlign = TextAlign.Center,
+            color = color,
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+
+/**
+ * The placeholder to be shown inside the text field.
+ */
+@Composable
+private fun Placeholder(
+    isShown: Boolean,
+    value: String
+) {
+    if (isShown) {
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+    }
+}
+
+@Composable
+private fun Tip(isShown: Boolean) {
+    if (isShown) {
+        Text(
+            text = "Must be specified",
+            modifier = Modifier
+                .width(90.dp)
+                .height(10.dp)
+                .absoluteOffset(x = 13.dp, y = 42.dp),
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodySmall
+        )
     }
 }
