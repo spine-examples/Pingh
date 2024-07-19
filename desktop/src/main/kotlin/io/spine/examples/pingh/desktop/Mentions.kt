@@ -269,7 +269,7 @@ private fun SnoozeButton(state: MentionsPageState, mention: MentionView) {
 }
 
 /**
- * MentionsPageState of [MentionsPage].
+ * State of [MentionsPage].
  */
 private class MentionsPageState(private val client: DesktopClient) {
 
