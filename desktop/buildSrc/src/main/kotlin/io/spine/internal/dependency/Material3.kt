@@ -24,29 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-plugins {
-    java
-}
+package io.spine.internal.dependency
 
-/**
- * Configures repositories for access to dependencies, including
- * Spine Event Engine.
- */
-repositories {
-    mavenLocal()
-    gradlePluginPortal()
-    mavenCentral()
+// https://m3.material.io/
+public object Material3 {
 
-    maven {
-        url = uri("https://spine.mycloudrepo.io/public/repositories/releases")
-        mavenContent {
-            releasesOnly()
-        }
-    }
-    maven {
-        url = uri("https://spine.mycloudrepo.io/public/repositories/snapshots")
-    }
-    maven {
-        url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven")
+    public object Desktop {
+        private const val version = "1.6.2"
+        public const val lib: String =
+            "org.jetbrains.compose.material3:material3-desktop:${version}"
     }
 }

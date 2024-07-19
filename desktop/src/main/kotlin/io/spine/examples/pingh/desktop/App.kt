@@ -24,29 +24,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-plugins {
-    java
+package io.spine.examples.pingh.desktop
+
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowState
+import androidx.compose.ui.window.application
+import io.spine.examples.pingh.client.DesktopClient
+
+/**
+ * Enables interaction with the Pingh server.
+ */
+private val client = DesktopClient()
+
+/**
+ * Entry point of the desktop application.
+ */
+public fun main() {
+    app()
 }
 
 /**
- * Configures repositories for access to dependencies, including
- * Spine Event Engine.
+ * The root component of the desktop application.
  */
-repositories {
-    mavenLocal()
-    gradlePluginPortal()
-    mavenCentral()
-
-    maven {
-        url = uri("https://spine.mycloudrepo.io/public/repositories/releases")
-        mavenContent {
-            releasesOnly()
+private fun app() {
+    application {
+        PinghTheme {
+            Window(
+                onCloseRequest = ::exitApplication,
+                title = "Pingh",
+                state = WindowState(size = DpSize(240.dp, 426.dp))
+            ) {
+                MentionsPage(client)
+            }
         }
-    }
-    maven {
-        url = uri("https://spine.mycloudrepo.io/public/repositories/snapshots")
-    }
-    maven {
-        url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven")
     }
 }

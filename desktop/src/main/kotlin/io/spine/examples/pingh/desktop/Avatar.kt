@@ -24,29 +24,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-plugins {
-    java
-}
+package io.spine.examples.pingh.desktop
+
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import coil3.compose.AsyncImage
+import io.spine.net.Url
 
 /**
- * Configures repositories for access to dependencies, including
- * Spine Event Engine.
+ * Displays a round avatar with an image loaded from the specified URL.
+ *
+ * The image loads asynchronously.
  */
-repositories {
-    mavenLocal()
-    gradlePluginPortal()
-    mavenCentral()
-
-    maven {
-        url = uri("https://spine.mycloudrepo.io/public/repositories/releases")
-        mavenContent {
-            releasesOnly()
-        }
-    }
-    maven {
-        url = uri("https://spine.mycloudrepo.io/public/repositories/snapshots")
-    }
-    maven {
-        url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven")
-    }
+@Composable
+internal fun Avatar(
+    url: Url,
+    modifier: Modifier = Modifier
+) {
+    AsyncImage(
+        model = url.spec,
+        contentDescription = null,
+        modifier = modifier
+            .clip(CircleShape)
+    )
 }

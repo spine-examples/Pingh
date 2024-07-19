@@ -24,29 +24,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-plugins {
-    java
-}
+package io.spine.internal.dependency
 
 /**
- * Configures repositories for access to dependencies, including
- * Spine Event Engine.
+ * A library for loading images from the Internet asynchronously.
+ *
+ * @see <a href="https://github.com/coil-kt/coil">Coil GitHub</a>
+ * @see <a href="https://coil-kt.github.io/coil/upgrading_to_coil3/#multiplatform">
+ *     Coil with Compose Multiplatform</a>
  */
-repositories {
-    mavenLocal()
-    gradlePluginPortal()
-    mavenCentral()
+@Suppress("ConstPropertyName")
+public object Coil {
+    // Compose Multiplatform requires Coil version 3.x for compatibility,
+    // but it is currently in the alpha phase.
+    // TODO:2024-07-17:mykyta.pimonov: Bump this version from 3.0.0-alpha08 to 3.0.0
+    //  upon its release.
+    //  See: https://github.com/spine-examples/Pingh/issues/25.
+    private const val version = "3.0.0-alpha08"
+    private const val group = "io.coil-kt.coil3"
 
-    maven {
-        url = uri("https://spine.mycloudrepo.io/public/repositories/releases")
-        mavenContent {
-            releasesOnly()
-        }
-    }
-    maven {
-        url = uri("https://spine.mycloudrepo.io/public/repositories/snapshots")
-    }
-    maven {
-        url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven")
-    }
+    public const val lib: String = "$group:coil:$version"
+    public const val networkKtor: String = "$group:coil-network-ktor:$version"
+    public const val compose: String = "$group:coil-compose:$version"
 }

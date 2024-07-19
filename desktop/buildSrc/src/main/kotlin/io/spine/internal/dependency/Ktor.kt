@@ -24,29 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-plugins {
-    java
-}
+package io.spine.internal.dependency
 
-/**
- * Configures repositories for access to dependencies, including
- * Spine Event Engine.
- */
-repositories {
-    mavenLocal()
-    gradlePluginPortal()
-    mavenCentral()
+// https://github.com/ktorio/ktor
+@Suppress("ConstPropertyName")
+public object Ktor {
+    private const val version = "2.3.11"
+    private const val group = "io.ktor"
 
-    maven {
-        url = uri("https://spine.mycloudrepo.io/public/repositories/releases")
-        mavenContent {
-            releasesOnly()
-        }
-    }
-    maven {
-        url = uri("https://spine.mycloudrepo.io/public/repositories/snapshots")
-    }
-    maven {
-        url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven")
+    public object Client {
+        public const val android: String = "$group:ktor-client-android:$version"
     }
 }
