@@ -49,7 +49,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -86,22 +85,18 @@ internal fun LoginPage(
             value = username.value,
             onChange = { value ->
                 username.value = value
-                isError.value = validateUsername(value)
+                isError.value = !validateUsername(value)
             },
             isError = isError.value
         )
         Spacer(Modifier.height(20.dp))
         LoginButton(
-            enabled = username.value.isNotEmpty(),
+            enabled = !isError.value
         ) {
-            if (validateUsername(username.value)) {
-                client.logIn(
-                    Username::class.buildBy(username.value)
-                ) {
-                    toMentionsPage()
-                }
-            } else {
-                isError.value = true
+            client.logIn(
+                Username::class.buildBy(username.value)
+            ) {
+                toMentionsPage()
             }
         }
     }
@@ -282,4 +277,26 @@ private fun LoginButton(
     }
 }
 
-private fun validateUsername(username: String) : Boolean = username.isNotEmpty()
+private fun validateUsername(username: String): Boolean {
+    if (username.length !in 1..39) {
+        return false
+    }
+    var previousWasDash = true
+    for (letter in username) {
+        if (letter == '-') {
+            if (previousWasDash) {
+                return false
+            }
+            previousWasDash = true
+            continue
+        } else if (letter.isAlphanumeric()) {
+            previousWasDash = false
+            continue
+        }
+        return false
+    }
+    return !previousWasDash
+}
+
+private fun Char.isAlphanumeric(): Boolean =
+    this in 'A'..'Z' || this in 'a'..'z' || this.isDigit()
