@@ -57,7 +57,7 @@ internal fun PinghTheme(content: @Composable () -> Unit): Unit = MaterialTheme(
 private val colorScheme = lightColorScheme(
     primary = Color.White,
     onPrimary = Color(247, 247, 247),
-    secondary = Color(117, 237, 255),
+    secondary = Color(162, 215, 245),
     onSecondary = Color(59, 155, 255),
     background = Color(235, 235, 235),
     onBackground = Color(213, 213, 213),
@@ -102,6 +102,10 @@ private val typography = Typography(
     displayLarge = TextStyle(
         fontFamily = sanFrancisco,
         fontSize = 16.sp
+    ),
+    displayMedium = TextStyle(
+        fontFamily = sanFrancisco,
+        fontSize = 14.sp
     ),
     bodyLarge = TextStyle(
         fontFamily = sanFrancisco,

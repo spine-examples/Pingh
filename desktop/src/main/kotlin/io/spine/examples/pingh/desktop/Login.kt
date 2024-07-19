@@ -47,9 +47,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -58,8 +56,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.spine.examples.pingh.client.DesktopClient
@@ -77,7 +73,7 @@ internal fun LoginPage(
     client: DesktopClient,
     toMentionsPage: () -> Unit
 ) {
-    val state = remember { UsernameState() }
+    val username = remember { mutableStateOf("") }
     val isError = remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
@@ -86,19 +82,22 @@ internal fun LoginPage(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Input(
-            value = state.username(),
-            onChange = {
-                state.set(it)
-                isError.value = state.wasChanged() && !state.validate()
+        UsernameInput(
+            value = username.value,
+            onChange = { value ->
+                username.value = value
+                isError.value = validateUsername(value)
             },
             isError = isError.value
         )
         Spacer(Modifier.height(20.dp))
-        LoginButton {
-            if (state.validate()) {
-                val username = Username::class.buildBy(state.username())
-                client.logIn(username) {
+        LoginButton(
+            enabled = username.value.isNotEmpty(),
+        ) {
+            if (validateUsername(username.value)) {
+                client.logIn(
+                    Username::class.buildBy(username.value)
+                ) {
                     toMentionsPage()
                 }
             } else {
@@ -110,142 +109,9 @@ internal fun LoginPage(
 
 /**
  * Displays a username input field on the login form.
- *
- * In addition, it checks the correctness of the entered data. If the username
- * has been [specified][UsernameState.wasChanged] but is not [valid][UsernameState.validate],
- * the value is considered incorrect, so the field signals an input error
- * and shows a hint.
  */
 @Composable
-private fun LoginInput(
-    state: UsernameState,
-    isError: MutableState<Boolean>
-) {
-    OutlinedTextField(
-        value = state.username(),
-        onValueChange = {
-            state.set(it)
-            isError.value = state.wasChanged() && !state.validate()
-        },
-        modifier = Modifier
-            .width(180.dp)
-            .height(45.dp)
-            .padding(0.dp),
-        textStyle = MaterialTheme.typography.bodyLarge.copy(
-            fontWeight = FontWeight.Normal
-        ),
-        label = {
-            Text(
-                text = "GitHub username",
-                style = MaterialTheme.typography.bodyMedium
-            )
-        },
-        placeholder = {
-            Text(
-                text = "jonh-smith",
-                color = Color.Gray,
-                style = MaterialTheme.typography.bodyLarge
-            )
-        },
-        supportingText = {
-            if (isError.value) {
-                Text(
-                    text = state.errorMessage(),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontStyle = FontStyle.Italic
-                    )
-                )
-            }
-        },
-        isError = isError.value,
-        singleLine = true,
-        shape = MaterialTheme.shapes.large,
-        colors = TextFieldDefaults.colors(
-            unfocusedContainerColor = MaterialTheme.colorScheme.primary,
-            focusedContainerColor = MaterialTheme.colorScheme.primary,
-            errorContainerColor = MaterialTheme.colorScheme.primary,
-            unfocusedLabelColor = Color.Black,
-            focusedLabelColor = Color.Black,
-            focusedIndicatorColor = Color.Black
-        )
-    )
-}
-
-/**
- * Displays a `Button` on the login form.
- */
-@Composable
-private fun LoginButton(onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier
-            .width(120.dp)
-            .height(40.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.secondary,
-            contentColor = MaterialTheme.colorScheme.primary
-        )
-    ) {
-        Text(
-            text = "Login",
-            style = MaterialTheme.typography.displayMedium
-        )
-    }
-}
-
-/**
- * State of GitHub username in the [LoginPage].
- */
-private class UsernameState {
-
-    private val regex = Regex("""[a-zA-Z\d-]+""")
-
-    /**
-     * Value of the username.
-     */
-    private val username: MutableState<String> = mutableStateOf("")
-
-    /**
-     * Information on whether there has been a change in username state.
-     */
-    private var wasChanged: Boolean = false
-
-    /**
-     * Returns the username value.
-     */
-    internal fun username() = username.value
-
-    /**
-     * Sets a new username value and specifies that this state was changed.
-     */
-    internal fun set(value: String) {
-        if (!wasChanged && value.isNotEmpty()) {
-            wasChanged = true
-        }
-        username.value = value
-    }
-
-    /**
-     * Checks that the username value is not empty.
-     */
-    internal fun validate(): Boolean = username.value.isNotEmpty()
-
-    /**
-     * Returns information on whether there has been a change in username state.
-     */
-    internal fun wasChanged(): Boolean = wasChanged
-
-    /**
-     * Returns the error message if state value is invalid.
-     */
-    internal fun errorMessage(): String = if (validate()) "" else {
-        "Username must be specified"
-    }
-}
-
-
-@Composable
-public fun Input(
+private fun UsernameInput(
     value: String,
     onChange: (String) -> Unit,
     isError: Boolean
@@ -276,18 +142,18 @@ public fun Input(
             ) {
                 InputContainer(
                     value = value,
-                    textField = { innerTextField() },
+                    textField = innerTextField,
                     modifier = Modifier.weight(1f)
                 )
             }
             Label(borderColor)
-            Tip(isError)
+            ErrorMesage(isError)
         }
     }
 }
 
 /**
- * Inner box for all content of the `Input`.
+ * Inner box for the text input design.
  */
 @Composable
 private fun InnerBox(
@@ -328,14 +194,14 @@ private fun InputContainer(
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.CenterStart,
     ) {
-        Placeholder(
-            isShown = value.isEmpty(),
-            value = "john-smith"
-        )
+        Placeholder(value.isEmpty())
         textField()
     }
 }
 
+/**
+ * The label which placed on the top border of the text field.
+ */
 @Composable
 private fun Label(color: Color) {
     Box(
@@ -349,41 +215,71 @@ private fun Label(color: Color) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.primary),
-            textAlign = TextAlign.Center,
             color = color,
+            textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyMedium
         )
     }
 }
 
 /**
- * The placeholder to be shown inside the text field.
+ * The placeholder which placed inside the text field.
  */
 @Composable
 private fun Placeholder(
-    isShown: Boolean,
-    value: String
+    isShown: Boolean
 ) {
     if (isShown) {
         Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground
+            text = "john-smith",
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 }
 
+/**
+ * The error message which is placed below the text field.
+ */
 @Composable
-private fun Tip(isShown: Boolean) {
+private fun ErrorMesage(isShown: Boolean) {
     if (isShown) {
         Text(
             text = "Must be specified",
             modifier = Modifier
                 .width(90.dp)
                 .height(10.dp)
-                .absoluteOffset(x = 13.dp, y = 42.dp),
+                .absoluteOffset(x = 15.dp, y = 42.dp),
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.bodySmall
         )
     }
 }
+
+/**
+ * Displays a `Button` on the login form.
+ */
+@Composable
+private fun LoginButton(
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .width(120.dp)
+            .height(40.dp),
+        enabled = enabled,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.secondary,
+            contentColor = MaterialTheme.colorScheme.primary
+        )
+    ) {
+        Text(
+            text = "Login",
+            style = MaterialTheme.typography.displayMedium
+        )
+    }
+}
+
+private fun validateUsername(username: String) : Boolean = username.isNotEmpty()
