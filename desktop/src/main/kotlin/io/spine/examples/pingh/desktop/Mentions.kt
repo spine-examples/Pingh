@@ -75,12 +75,15 @@ import java.lang.Thread.sleep
  * possible to manually update the list of mentions from the server.
  */
 @Composable
-internal fun MentionsPage(client: DesktopClient) {
+internal fun MentionsPage(
+    client: DesktopClient,
+    toProfilePage: () -> Unit
+) {
     val state = remember { MentionsPageState(client) }
     Column(
         Modifier.fillMaxSize()
     ) {
-        ToolBar(state)
+        ToolBar(state, toProfilePage)
         Spacer(Modifier.height(0.5.dp))
         MentionCards(state)
     }
@@ -91,7 +94,10 @@ internal fun MentionsPage(client: DesktopClient) {
  * manually updating mentions.
  */
 @Composable
-private fun ToolBar(state: MentionsPageState) {
+private fun ToolBar(
+    state: MentionsPageState,
+    toProfilePage: () -> Unit
+    ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -110,7 +116,7 @@ private fun ToolBar(state: MentionsPageState) {
     ) {
         IconButton(
             icon = Icons.pingh,
-            onClick = { }, // Go to the `Profile` page.
+            onClick = toProfilePage,
             modifier = Modifier.size(40.dp)
         )
         Text(
