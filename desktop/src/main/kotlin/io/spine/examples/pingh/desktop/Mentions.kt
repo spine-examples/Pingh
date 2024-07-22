@@ -77,27 +77,27 @@ import java.lang.Thread.sleep
 @Composable
 internal fun MentionsPage(
     client: DesktopClient,
-    toProfilePage: () -> Unit
+    toSettingsPage: () -> Unit
 ) {
     val state = remember { MentionsPageState(client) }
     Column(
         Modifier.fillMaxSize()
     ) {
-        ToolBar(state, toProfilePage)
+        ToolBar(state, toSettingsPage)
         Spacer(Modifier.height(0.5.dp))
         MentionCards(state)
     }
 }
 
 /**
- * Displays a menu of tools for navigating to a user profile page or
+ * Displays a menu of tools for navigating to a account settings page or
  * manually updating mentions.
  */
 @Composable
 private fun ToolBar(
     state: MentionsPageState,
-    toProfilePage: () -> Unit
-    ) {
+    toSettingsPage: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -116,7 +116,7 @@ private fun ToolBar(
     ) {
         IconButton(
             icon = Icons.pingh,
-            onClick = toProfilePage,
+            onClick = toSettingsPage,
             modifier = Modifier.size(40.dp)
         )
         Text(

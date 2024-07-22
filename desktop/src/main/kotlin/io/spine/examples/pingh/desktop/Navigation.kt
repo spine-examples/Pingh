@@ -53,15 +53,18 @@ internal fun CurrentPage(client: DesktopClient) {
 
         Page.MENTIONS -> MentionsPage(
             client = client,
-            toProfilePage = {
-                currentPage.value = Page.PROFILE
+            toSettingsPage = {
+                currentPage.value = Page.SETTINGS
             }
         )
 
-        Page.PROFILE -> ProfilePage(
+        Page.SETTINGS -> SettingsPage(
             client = client,
             toMentionsPage = {
                 currentPage.value = Page.MENTIONS
+            },
+            toLoginPage = {
+                currentPage.value = Page.LOGIN
             }
         )
     }
@@ -82,7 +85,7 @@ private enum class Page {
     MENTIONS,
 
     /**
-     * Page with user information and account settings.
+     * Page with account settings.
      */
-    PROFILE
+    SETTINGS
 }
