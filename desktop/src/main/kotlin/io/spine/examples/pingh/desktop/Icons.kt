@@ -92,4 +92,6 @@ internal object Icons {
         BitmapPainter(useResource("icons/refresh.png", ::loadImageBitmap))
     internal val back: BitmapPainter =
         BitmapPainter(useResource("icons/back.png", ::loadImageBitmap))
+    internal val logout: BitmapPainter =
+        BitmapPainter(useResource("icons/logout.png", ::loadImageBitmap))
 }
