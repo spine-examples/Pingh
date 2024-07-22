@@ -24,7 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-@file:Suppress("TooManyFunctions") //
+@file:Suppress("TooManyFunctions") // Using Compose requires many functions
+// to render the UI.
 
 package io.spine.examples.pingh.desktop
 
@@ -51,6 +52,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,8 +73,9 @@ private const val maxLengthOfUsername = 39
 /**
  * Displays a login form.
  *
- * If the username is entered correct, user will be [logged in][DesktopClient.logIn] into
+ * If the `Username` is entered correct, user will be [logged in][DesktopClient.logIn] into
  * the Pingh server and redirected to the [MentionsPage].
+ * [LoginButton] is not enable while the entered `Username` is invalid.
  */
 @Composable
 internal fun LoginPage(
@@ -91,7 +94,7 @@ internal fun LoginPage(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         UsernameInput(
-            value = username.value.value,
+            value = username.stringValue,
             onChange = { value ->
                 username.value = Username::class.buildWithoutValidationBy(value)
                 isError.value = !username.value.validate()
@@ -300,6 +303,12 @@ private fun KClass<Username>.buildWithoutValidationBy(value: String) =
         .buildPartial()
 
 /**
+ * Returns the `Username` value saved in the `MutableState`.
+ */
+private val MutableState<Username>.stringValue: String
+    get() = this.value.value
+
+/**
  * Returns `true` if the `Username` is valid according to GitHub criteria; otherwise, returns `false`.
  *
  * A valid GitHub username must:
@@ -311,22 +320,29 @@ private fun KClass<Username>.buildWithoutValidationBy(value: String) =
  * @see <a href="https://docs.github.com/en/enterprise-server@3.9/admin/managing-iam/iam-configuration-reference/username-considerations-for-external-authentication">
  *     Username considerations for external authentication</a>
  */
+@Suppress("ReturnCount") // To preserve the integrity of the algorithm,
+// the number of `return` is exceeded.
 private fun Username.validate(): Boolean {
     if (this.value.length !in 1..maxLengthOfUsername) {
         return false
     }
     var previous = '-'
     this.value.forEach { current ->
-        if (previous == '-' && current == '-') {
-            return false
-        }
-        if (!current.isAlphanumeric() && current != '-') {
+        if (current.validateGiven(previous)) {
             return false
         }
         previous = current
     }
     return previous != '-'
 }
+
+/**
+ * Returns `true` if this character is alphanumeric or
+ * if it is a dash and `previous` is not a dash. Otherwise, returns `false`.
+ */
+private fun Char.validateGiven(previous: Char): Boolean =
+    previous == '-' && this == '-'
+            || !this.isAlphanumeric() && this != '-'
 
 /**
  * Returns `true` if the character is a digit or an English letter in any case;
