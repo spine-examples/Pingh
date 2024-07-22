@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("TooManyFunctions") //
+
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.foundation.BorderStroke
@@ -59,7 +61,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.buildBy
+import kotlin.reflect.KClass
+
+/**
+ * Max length of a GitHub username.
+ */
+private const val maxLengthOfUsername = 39
 
 /**
  * Displays a login form.
@@ -72,7 +79,9 @@ internal fun LoginPage(
     client: DesktopClient,
     toMentionsPage: () -> Unit
 ) {
-    val username = remember { mutableStateOf("") }
+    val username = remember {
+        mutableStateOf(Username::class.buildWithoutValidationBy(""))
+    }
     val isError = remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
@@ -82,10 +91,10 @@ internal fun LoginPage(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         UsernameInput(
-            value = username.value,
+            value = username.value.value,
             onChange = { value ->
-                username.value = value
-                isError.value = !validateUsername(value)
+                username.value = Username::class.buildWithoutValidationBy(value)
+                isError.value = !username.value.validate()
             },
             isError = isError.value
         )
@@ -93,9 +102,7 @@ internal fun LoginPage(
         LoginButton(
             enabled = !isError.value
         ) {
-            client.logIn(
-                Username::class.buildBy(username.value)
-            ) {
+            client.logIn(username.value) {
                 toMentionsPage()
             }
         }
@@ -240,10 +247,11 @@ private fun Placeholder(
 private fun ErrorMesage(isShown: Boolean) {
     if (isShown) {
         Text(
-            text = "Must be specified",
+            text = "Must consist of alphanumeric characters and dashes, " +
+                    "without consecutive dashes or dashes at the beginning or end.",
             modifier = Modifier
-                .width(90.dp)
-                .height(10.dp)
+                .width(155.dp)
+                .height(30.dp)
                 .absoluteOffset(x = 15.dp, y = 42.dp),
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.bodySmall
@@ -277,26 +285,52 @@ private fun LoginButton(
     }
 }
 
-private fun validateUsername(username: String): Boolean {
-    if (username.length !in 1..39) {
+/**
+ * Creates a new `Username` with the specified value without validation.
+ *
+ * The `Username` value cannot be empty. However, if the login field is empty,
+ * the `Username` will also be empty. To avoid exceptions during building,
+ * the `buildPartial` method is used, which does not check the `Username` value.
+ *
+ * Before sending this `Username` to the server, ensure to [validate] the value.
+ */
+private fun KClass<Username>.buildWithoutValidationBy(value: String) =
+    Username.newBuilder()
+        .setValue(value)
+        .buildPartial()
+
+/**
+ * Returns `true` if the `Username` is valid according to GitHub criteria; otherwise, returns `false`.
+ *
+ * A valid GitHub username must:
+ *
+ * - Consist of alphanumeric characters and dashes (`'-'`);
+ * - Not have consecutive dashes or dashes at the beginning or end;
+ * - Not exceed 39 characters.
+ *
+ * @see <a href="https://docs.github.com/en/enterprise-server@3.9/admin/managing-iam/iam-configuration-reference/username-considerations-for-external-authentication">
+ *     Username considerations for external authentication</a>
+ */
+private fun Username.validate(): Boolean {
+    if (this.value.length !in 1..maxLengthOfUsername) {
         return false
     }
-    var previousWasDash = true
-    for (letter in username) {
-        if (letter == '-') {
-            if (previousWasDash) {
-                return false
-            }
-            previousWasDash = true
-            continue
-        } else if (letter.isAlphanumeric()) {
-            previousWasDash = false
-            continue
+    var previous = '-'
+    this.value.forEach { current ->
+        if (previous == '-' && current == '-') {
+            return false
         }
-        return false
+        if (!current.isAlphanumeric() && current != '-') {
+            return false
+        }
+        previous = current
     }
-    return !previousWasDash
+    return previous != '-'
 }
 
+/**
+ * Returns `true` if the character is a digit or an English letter in any case;
+ * otherwise, returns `false`.
+ */
 private fun Char.isAlphanumeric(): Boolean =
     this in 'A'..'Z' || this in 'a'..'z' || this.isDigit()
