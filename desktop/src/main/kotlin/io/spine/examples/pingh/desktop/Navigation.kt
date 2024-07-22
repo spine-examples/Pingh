@@ -43,6 +43,7 @@ internal fun CurrentPage(client: DesktopClient) {
             if (client.isLoggedIn()) Page.MENTIONS else Page.LOGIN
         )
     }
+    val settings = remember { SettingsState() }
     when (currentPage.value) {
         Page.LOGIN -> LoginPage(
             client = client,
@@ -60,6 +61,7 @@ internal fun CurrentPage(client: DesktopClient) {
 
         Page.SETTINGS -> SettingsPage(
             client = client,
+            state = settings,
             toMentionsPage = {
                 currentPage.value = Page.MENTIONS
             },

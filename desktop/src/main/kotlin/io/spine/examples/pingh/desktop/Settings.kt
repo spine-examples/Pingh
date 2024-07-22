@@ -26,15 +26,134 @@
 
 package io.spine.examples.pingh.desktop
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import io.spine.examples.pingh.client.DesktopClient
 
 @Composable
 internal fun SettingsPage(
     client: DesktopClient,
+    state: SettingsState,
     toMentionsPage: () -> Unit,
     toLoginPage: () -> Unit
 ) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .background(MaterialTheme.colorScheme.primary),
+    ) {
+        Header(toMentionsPage)
+        Settings(state)
+        LogoutButton(client, toLoginPage)
+    }
+}
 
+@Composable
+private fun Header(
+    toMentionsPage: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .background(MaterialTheme.colorScheme.primary)
+            .padding(vertical = 4.dp, horizontal = 5.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(
+            icon = Icons.back,
+            onClick = toMentionsPage,
+            modifier = Modifier.size(40.dp)
+        )
+        Text(
+            text = "Settings",
+            modifier = Modifier.width(140.dp),
+            style = MaterialTheme.typography.displayLarge
+        )
+    }
+}
+
+@Composable
+private fun Settings(state: SettingsState) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(280.dp)
+    ) {  }
+}
+
+@Composable
+private fun LogoutButton(
+    client: DesktopClient,
+    toLoginPage: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(68.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        OutlinedButton(
+            onClick = {
+                client.logOut {
+                    toLoginPage()
+                }
+            },
+            modifier = Modifier
+                .width(220.dp)
+                .height(48.dp),
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.error),
+            shape = MaterialTheme.shapes.extraSmall,
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = MaterialTheme.colorScheme.error,
+                containerColor = MaterialTheme.colorScheme.primary
+            )
+        ) {
+            Icon(
+                painter = Icons.logout,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.error
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = "Logout",
+                style = MaterialTheme.typography.displayLarge
+            )
+        }
+    }
+}
+
+internal class SettingsState {
+
+    private var enableDndMode = false
+
+    internal fun isEnableDndMode(): Boolean = enableDndMode
+
+    internal fun turnOnDndMode() {
+        enableDndMode = true
+    }
+
+    internal fun turnOffDndMode() {
+        enableDndMode = false
+    }
 }
