@@ -61,6 +61,7 @@ private val colorScheme = lightColorScheme(
     onSecondary = Color(59, 155, 255),
     background = Color(235, 235, 235),
     onBackground = Color(213, 213, 213),
+    surface = Color(40, 40, 40),
     error = Color(255, 161, 161),
     errorContainer = Color(255, 232, 232)
 )
@@ -107,6 +108,10 @@ private val typography = Typography(
     displayMedium = TextStyle(
         fontFamily = sanFrancisco,
         fontSize = 14.sp
+    ),
+    displaySmall = TextStyle(
+        fontFamily = sanFrancisco,
+        fontSize = 12.sp
     ),
     bodyLarge = TextStyle(
         fontFamily = sanFrancisco,

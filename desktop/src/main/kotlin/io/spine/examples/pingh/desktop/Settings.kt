@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -46,8 +47,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -63,6 +68,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -75,6 +81,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.github.Username
@@ -89,10 +96,25 @@ internal fun SettingsPage(
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary),
+            .background(MaterialTheme.colorScheme.background),
     ) {
         Header(toMentionsPage)
-        Settings(client, state)
+        Box(
+            modifier = Modifier.fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(5.dp),
+        ) {
+            Card(
+                modifier = Modifier.fillMaxSize(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.surface
+                )
+            ) {
+                Spacer(Modifier.height(5.dp))
+                Settings(client, state)
+            }
+        }
     }
 }
 
@@ -104,18 +126,22 @@ private fun Header(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
-            .background(MaterialTheme.colorScheme.primary)
             .padding(vertical = 4.dp, horizontal = 5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
             icon = Icons.back,
             onClick = toMentionsPage,
-            modifier = Modifier.size(40.dp)
+            modifier = Modifier.size(30.dp),
+            colors = IconButtonDefaults.iconButtonColors(
+                contentColor = MaterialTheme.colorScheme.surface
+            )
         )
+        Spacer(Modifier.width(10.dp))
         Text(
             text = "Settings",
             modifier = Modifier.width(140.dp),
+            color = MaterialTheme.colorScheme.surface,
             style = MaterialTheme.typography.displayLarge
         )
     }
@@ -129,9 +155,9 @@ private fun Settings(client: DesktopClient, state: SettingsState) {
             .height(280.dp)
     ) {
         Profile(client)
-        Delimiter()
+        Spacer(Modifier.height(15.dp))
         SnoozeTimeOption(state)
-        Spacer(Modifier.height(2.dp))
+        Spacer(Modifier.height(15.dp))
         DndOption(state)
     }
 }
@@ -167,22 +193,11 @@ private fun Profile(client: DesktopClient) {
     }
 }
 
-@Composable
-private fun Delimiter() {
-    HorizontalDivider(
-        modifier = Modifier.padding(
-            horizontal = 10.dp,
-            vertical = 10.dp
-        ),
-        color = MaterialTheme.colorScheme.onBackground
-    )
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CustomButtons() {
     var selectedIndex by remember { mutableStateOf(1) }
-    val options = listOf("half hour", "2 hours", "a day")
+    val options = listOf("30 mins", "2 hours", "1 day")
 
     Row(
         modifier = Modifier.selectableGroup(),
@@ -194,7 +209,7 @@ private fun CustomButtons() {
                 selected = index == selectedIndex,
                 onClick = { selectedIndex = index },
                 shape = SegmentedButtonDefaults.itemShape(index, options.size),
-                modifier = Modifier.width(52.dp).height(20.dp)
+                modifier = Modifier.width(48.dp).height(20.dp)
             ) {
                 Text(
                     text = label,
@@ -219,7 +234,7 @@ private fun ButC(
     else MaterialTheme.colorScheme.primary
     val contentColor = if (selected)
         MaterialTheme.colorScheme.primary
-    else Color.Black
+    else MaterialTheme.colorScheme.surface
     val border =
         BorderStroke(1.dp, if (selected) containerColor else MaterialTheme.colorScheme.onBackground)
 
@@ -244,102 +259,74 @@ private fun ButC(
 
 @Composable
 private fun SnoozeTimeOption(state: SettingsState) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(28.dp)
-            .padding(horizontal = 10.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Option(
+        title = "Snooze time",
+        description = "Time after which the notification is repeated.",
+        titleWight = 68.dp
     ) {
-        Text(
-            text = "Snooze time:",
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Spacer(Modifier.width(5.dp))
         CustomButtons()
     }
 }
 
 @Composable
 private fun DndOption(state: SettingsState) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(28.dp)
-            .padding(horizontal = 4.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Option(
+        title = "Do not disturb",
+        description = "Turn off notifications for new mentions or snooze expirations.",
+        titleWight = 174.dp
     ) {
         Switch(
             checked = state.isEnableDndMode(),
             onCheckedChange = state::setDndMode,
             modifier = Modifier
-                .scale(0.5f)
-                .width(36.dp),
+                .scale(0.6f)
+                .width(36.dp)
+                .height(20.dp),
             colors = SwitchDefaults.colors(
-                uncheckedThumbColor = MaterialTheme.colorScheme.onBackground,
+                uncheckedThumbColor = MaterialTheme.colorScheme.surface.copy(
+                    alpha = 0.6f
+                ),
                 checkedThumbColor = MaterialTheme.colorScheme.primary,
-                uncheckedBorderColor = MaterialTheme.colorScheme.onBackground,
-                checkedBorderColor = Color.Unspecified,
+                uncheckedBorderColor = MaterialTheme.colorScheme.surface.copy(
+                    alpha = 0.6f
+                ),
+                checkedBorderColor = MaterialTheme.colorScheme.secondary,
                 uncheckedTrackColor = MaterialTheme.colorScheme.primary,
                 checkedTrackColor = MaterialTheme.colorScheme.secondary
             )
-        )
-        Text(
-            text = "Do not disturb",
-            modifier = Modifier.width(160.dp),
-            style = MaterialTheme.typography.bodyMedium
         )
     }
 }
 
 @Composable
-private fun CustomSwitch(
-    state: MutableState<Boolean>
+private fun Option(
+    title: String,
+    description: String,
+    titleWight: Dp,
+    control: @Composable () -> Unit
 ) {
-    val height = 16.dp
-    val width = 26.dp
-    val gapBetweenThumbAndTrackEdge = 4.dp
-    val thumbRadius = (height / 2) - gapBetweenThumbAndTrackEdge
-    val animationPosition = animateFloatAsState(
-        targetValue = if (state.value)
-            with(LocalDensity.current) { (width - thumbRadius - gapBetweenThumbAndTrackEdge).toPx() }
-        else
-            with(LocalDensity.current) {
-                (thumbRadius + gapBetweenThumbAndTrackEdge).toPx()
-            }
-    )
-    val color1 = MaterialTheme.colorScheme.secondary
-    val color2 = MaterialTheme.colorScheme.primary
-    val color3 = MaterialTheme.colorScheme.onBackground
-    Canvas(
+    Column(
         modifier = Modifier
-            .width(width)
-            .height(height)
-            .scale(2f)
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = {
-                        state.value = !state.value
-                    }
-                )
-            }
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp)
     ) {
-        drawRoundRect(
-            color = if (state.value) color1 else color2,
-            cornerRadius = CornerRadius(
-                x = 10.dp.toPx(),
-                y = 10.dp.toPx()
-            ),
-            style = Stroke(width = 2.dp.toPx())
-        )
-
-        drawCircle(
-            color = if (state.value) color2 else color3,
-            radius = thumbRadius.toPx(),
-            center = Offset(
-                x = animationPosition.value,
-                y = size.height / 2
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                modifier = Modifier.width(titleWight),
+                style = MaterialTheme.typography.bodyMedium
             )
+            control()
+        }
+        Spacer(Modifier.height(5.dp))
+        Text(
+            text = description,
+            modifier = Modifier.width(170.dp),
+            color = Color(150, 150, 150),
+            style = MaterialTheme.typography.bodySmall
         )
     }
 }
@@ -360,7 +347,7 @@ private fun LogOutButton(
         shape = MaterialTheme.shapes.medium,
         contentPadding = PaddingValues(0.dp),
         colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = Color.Black,
+            contentColor = MaterialTheme.colorScheme.surface,
             containerColor = MaterialTheme.colorScheme.primary
         )
     ) {
@@ -372,12 +359,5 @@ private fun LogOutButton(
 }
 
 internal class SettingsState {
-
-    private var enableDndMode: MutableState<Boolean> = mutableStateOf(false)
-
-    internal fun isEnableDndMode(): Boolean = enableDndMode.value
-
-    internal fun setDndMode(value: Boolean) {
-        enableDndMode.value = value
-    }
+    internal var enableDndMode: MutableState<Boolean> = mutableStateOf(false)
 }
