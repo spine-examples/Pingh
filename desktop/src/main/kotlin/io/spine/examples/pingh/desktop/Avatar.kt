@@ -26,11 +26,25 @@
 
 package io.spine.examples.pingh.desktop
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import io.spine.examples.pingh.github.Username
 import io.spine.net.Url
 
 /**
@@ -49,4 +63,42 @@ internal fun Avatar(
         modifier = modifier
             .clip(CircleShape)
     )
+}
+
+@Composable
+internal fun Avatar(
+    name: Username,
+    size: Dp,
+    modifier: Modifier = Modifier
+) {
+    val gradient = listOf(
+        MaterialTheme.colorScheme.secondary,
+        MaterialTheme.colorScheme.onSecondary
+    )
+    Box(
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            modifier = modifier
+                .size(size)
+                .clip(CircleShape),
+            contentScale = ContentScale.Crop,
+            contentDescription = null,
+            painter = object : Painter() {
+                override val intrinsicSize: Size = Size(size.value, size.value)
+                override fun DrawScope.onDraw() {
+                    drawRect(
+                        brush = Brush.linearGradient(gradient),
+                        size = Size(size.value * 2, size.value * 2)
+                    )
+                }
+            }
+        )
+        Text(
+            text = if(name.value.isNotEmpty()) name.value[0].toString() else "",
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = (size.value / 2).sp,
+            style = MaterialTheme.typography.displayLarge
+        )
+    }
 }
