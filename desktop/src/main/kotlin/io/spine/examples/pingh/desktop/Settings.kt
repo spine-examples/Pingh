@@ -24,21 +24,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("TooManyFunctions") // Using Compose requires many functions to render the UI.
+
 package io.spine.examples.pingh.desktop
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -50,8 +47,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -62,30 +57,24 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.google.protobuf.Duration
 import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
+import io.spine.protobuf.Durations2.hours
+import io.spine.protobuf.Durations2.minutes
 
 @Composable
 internal fun SettingsPage(
@@ -112,7 +101,7 @@ internal fun SettingsPage(
                 )
             ) {
                 Spacer(Modifier.height(5.dp))
-                Settings(client, state)
+                Settings(client, state, toLoginPage)
             }
         }
     }
@@ -148,13 +137,17 @@ private fun Header(
 }
 
 @Composable
-private fun Settings(client: DesktopClient, state: SettingsState) {
+private fun Settings(
+    client: DesktopClient,
+    state: SettingsState,
+    toLoginPage: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .height(280.dp)
     ) {
-        Profile(client)
+        Profile(client, toLoginPage)
         Spacer(Modifier.height(15.dp))
         SnoozeTimeOption(state)
         Spacer(Modifier.height(15.dp))
@@ -163,7 +156,10 @@ private fun Settings(client: DesktopClient, state: SettingsState) {
 }
 
 @Composable
-private fun Profile(client: DesktopClient) {
+private fun Profile(
+    client: DesktopClient,
+    toLoginPage: () -> Unit
+) {
     val username = Username::class.buildBy("MykytaPimonovTD")
     Row(
         modifier = Modifier
@@ -188,31 +184,28 @@ private fun Profile(client: DesktopClient) {
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(Modifier.height(5.dp))
-            LogOutButton(client, {})
+            LogOutButton(client, toLoginPage)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CustomButtons() {
-    var selectedIndex by remember { mutableStateOf(1) }
-    val options = listOf("30 mins", "2 hours", "1 day")
-
+private fun CustomButtons(state: SettingsState) {
+    val snoozeTimes = SnoozeTime.entries
     Row(
         modifier = Modifier.selectableGroup(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy((-1).dp)
     ) {
-        options.forEachIndexed { index, label ->
+        snoozeTimes.forEachIndexed { index, snoozeTime ->
             ButC(
-                selected = index == selectedIndex,
-                onClick = { selectedIndex = index },
-                shape = SegmentedButtonDefaults.itemShape(index, options.size),
-                modifier = Modifier.width(48.dp).height(20.dp)
+                selected = snoozeTime == state.snoozeTimeOption.value,
+                onClick = { state.snoozeTimeOption.value = snoozeTime },
+                shape = SegmentedButtonDefaults.itemShape(index, snoozeTimes.size)
             ) {
                 Text(
-                    text = label,
+                    text = snoozeTime.label,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -225,8 +218,6 @@ private fun ButC(
     selected: Boolean,
     onClick: () -> Unit,
     shape: Shape,
-    modifier: Modifier = Modifier,
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     label: @Composable () -> Unit
 ) {
     val containerColor = if (selected)
@@ -239,14 +230,16 @@ private fun ButC(
         BorderStroke(1.dp, if (selected) containerColor else MaterialTheme.colorScheme.onBackground)
 
     Surface(
-        modifier = modifier.semantics { role = Role.RadioButton },
+        modifier = Modifier
+            .width(48.dp)
+            .height(20.dp)
+            .semantics { role = Role.RadioButton },
         selected = selected,
         onClick = onClick,
         shape = shape,
         color = containerColor,
         contentColor = contentColor,
-        border = border,
-        interactionSource = interactionSource
+        border = border
     ) {
         Box(
             contentAlignment = Alignment.Center,
@@ -264,7 +257,7 @@ private fun SnoozeTimeOption(state: SettingsState) {
         description = "Time after which the notification is repeated.",
         titleWight = 68.dp
     ) {
-        CustomButtons()
+        CustomButtons(state)
     }
 }
 
@@ -276,8 +269,10 @@ private fun DndOption(state: SettingsState) {
         titleWight = 174.dp
     ) {
         Switch(
-            checked = state.isEnableDndMode(),
-            onCheckedChange = state::setDndMode,
+            checked = state.enableDndMode.value,
+            onCheckedChange = {
+                state.enableDndMode.value = it
+            },
             modifier = Modifier
                 .scale(0.6f)
                 .width(36.dp)
@@ -358,6 +353,42 @@ private fun LogOutButton(
     }
 }
 
+/**
+ *
+ */
 internal class SettingsState {
+
+    /**
+     *
+     */
     internal var enableDndMode: MutableState<Boolean> = mutableStateOf(false)
+
+    /**
+     *
+     */
+    internal var snoozeTimeOption: MutableState<SnoozeTime> = mutableStateOf(SnoozeTime.TWO_HOURS)
+}
+
+/**
+ * Possible value of snooze time.
+ */
+internal enum class SnoozeTime(
+    val label: String,
+    val value: Duration
+) {
+
+    /**
+     *
+     */
+    THIRTY_MINUTES("30 mins", minutes(30)),
+
+    /**
+     *
+     */
+    TWO_HOURS("2 hours", hours(2)),
+
+    /**
+     *
+     */
+    ONE_DAY("1 day", hours(24))
 }

@@ -24,8 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-@file:Suppress("TooManyFunctions") // Using Compose requires many functions
-// to render the UI.
+@file:Suppress("TooManyFunctions") // Using Compose requires many functions to render the UI.
 
 package io.spine.examples.pingh.desktop
 
