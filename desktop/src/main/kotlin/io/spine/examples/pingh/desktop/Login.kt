@@ -37,7 +37,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
@@ -70,10 +69,10 @@ import kotlin.reflect.KClass
 private const val maxLengthOfUsername = 39
 
 /**
- * Displays the login form.
+ * Displays a login form.
  *
  * If the `Username` is entered correct, user will be [logged in][DesktopClient.logIn] into
- * the Pingh server and redirected to the [MentionsPage].
+ * the Pingh application and redirected to the [MentionsPage].
  * [LogInButton] is not enable while the entered `Username` is invalid.
  */
 @Composable
@@ -145,15 +144,11 @@ private fun UsernameInput(
         Box(
             Modifier.fillMaxSize()
         ) {
-            InnerBox(
+            InputContainer(
+                value = value,
+                textField = innerTextField,
                 border = BorderStroke(borderWidth, borderColor)
-            ) {
-                InputContainer(
-                    value = value,
-                    textField = innerTextField,
-                    modifier = Modifier.weight(1f)
-                )
-            }
+            )
             Label(borderColor)
             ErrorMesage(isError)
         }
@@ -161,12 +156,13 @@ private fun UsernameInput(
 }
 
 /**
- * Displays the inner box for the text input design.
+ * Displays a container for the text field.
  */
 @Composable
-private fun InnerBox(
-    border: BorderStroke,
-    content: @Composable RowScope.() -> Unit
+private fun InputContainer(
+    value: String,
+    textField: @Composable () -> Unit,
+    border: BorderStroke
 ) {
     Row(
         modifier = Modifier
@@ -178,31 +174,22 @@ private fun InnerBox(
                 shape = MaterialTheme.shapes.medium
             )
             .padding(horizontal = 10.dp, vertical = 3.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        content = content
-    )
-}
-
-/**
- * Displays container for the text field.
- */
-@Composable
-private fun InputContainer(
-    value: String,
-    textField: @Composable () -> Unit,
-    modifier: Modifier
-) {
-    Box(
-        modifier = modifier.fillMaxWidth(),
-        contentAlignment = Alignment.CenterStart,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Placeholder(value.isEmpty())
-        textField()
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            Placeholder(value.isEmpty())
+            textField()
+        }
     }
 }
 
 /**
- * Displays the label which placed on the top border of the text field.
+ * Displays a label which placed on the top border of the text field.
  */
 @Composable
 private fun Label(color: Color) {
@@ -225,12 +212,10 @@ private fun Label(color: Color) {
 }
 
 /**
- * Displays the placeholder which placed inside the text field.
+ * Displays a placeholder which placed inside the text field.
  */
 @Composable
-private fun Placeholder(
-    isShown: Boolean
-) {
+private fun Placeholder(isShown: Boolean) {
     if (isShown) {
         Text(
             text = "john-smith",
@@ -241,7 +226,7 @@ private fun Placeholder(
 }
 
 /**
- * Displays the error message which is placed below the text field.
+ * Displays an error message which is placed below the text field.
  */
 @Composable
 private fun ErrorMesage(isShown: Boolean) {
@@ -260,7 +245,7 @@ private fun ErrorMesage(isShown: Boolean) {
 }
 
 /**
- * Displays a `Button` on the login form.
+ * Displays a button on the login form.
  */
 @Composable
 private fun LogInButton(
@@ -279,7 +264,7 @@ private fun LogInButton(
         )
     ) {
         Text(
-            text = "Login",
+            text = "Log in",
             style = MaterialTheme.typography.displayMedium
         )
     }

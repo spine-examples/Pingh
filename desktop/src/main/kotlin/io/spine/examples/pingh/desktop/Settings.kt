@@ -76,7 +76,7 @@ import io.spine.protobuf.Durations2.hours
 import io.spine.protobuf.Durations2.minutes
 
 /**
- * Displays the application settings.
+ * Displays a application settings.
  *
  * All changes are saved automatically and applied immediately.
  */
@@ -102,7 +102,7 @@ internal fun SettingsPage(
 }
 
 /**
- * Displays the header of the `Settings` page.
+ * Displays a header of the `Settings` page.
  *
  * Includes a button to return to the `Mentions` page.
  */
@@ -136,7 +136,7 @@ private fun SettingsHeader(
 }
 
 /**
- * Displays the container for settings.
+ * Displays a container for settings.
  */
 @Composable
 private fun SettingsBox(
@@ -193,7 +193,7 @@ private fun Profile(
 }
 
 /**
- * Displays the username and a button to log out of the account.
+ * Displays a username and a button to log out of the account.
  */
 @Composable
 private fun ProfileControl(
@@ -223,7 +223,7 @@ private fun ProfileControl(
 }
 
 /**
- * Displays the `button` to log out of the account.
+ * Displays a button to log out of the account.
  */
 @Composable
 private fun LogOutButton(
@@ -370,10 +370,16 @@ private fun SegmentedButton(
     shape: Shape,
     label: @Composable () -> Unit
 ) {
-    val containerColor = if (selected) MaterialTheme.colorScheme.primary else
+    val containerColor = if (selected) {
+        MaterialTheme.colorScheme.primary
+    } else {
         MaterialTheme.colorScheme.secondary
-    val contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else
+    }
+    val contentColor = if (selected) {
+        MaterialTheme.colorScheme.onPrimary
+    } else {
         MaterialTheme.colorScheme.onSecondary
+    }
     val border = BorderStroke(
         1.dp,
         if (selected) containerColor else MaterialTheme.colorScheme.onBackground

@@ -99,7 +99,7 @@ internal fun Avatar(
             }
         )
         Text(
-            text = if(name.value.isNotEmpty()) name.value[0].toString() else "",
+            text = if (name.value.isNotEmpty()) name.value[0].toString() else "",
             color = MaterialTheme.colorScheme.onPrimary,
             fontSize = (size.value / 2).sp,
             style = MaterialTheme.typography.displayLarge
