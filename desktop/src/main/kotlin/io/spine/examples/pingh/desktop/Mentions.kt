@@ -99,12 +99,12 @@ private fun ToolBar(
     state: MentionsPageState,
     toSettingsPage: () -> Unit
 ) {
-    val contentColor = MaterialTheme.colorScheme.surface
+    val contentColor = MaterialTheme.colorScheme.onSecondary
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
-            .background(MaterialTheme.colorScheme.primary)
+            .background(MaterialTheme.colorScheme.secondary)
             .drawBehind {
                 drawLine(
                     color = contentColor,
@@ -194,7 +194,7 @@ private fun MentionCard(
     val containerColor = if (mentionIsRead) {
         MaterialTheme.colorScheme.onBackground
     } else {
-        MaterialTheme.colorScheme.primary
+        MaterialTheme.colorScheme.secondary
     }
     val onClick = {
         uriHandler.openUri(mention.url.spec)
@@ -210,7 +210,7 @@ private fun MentionCard(
         interactionSource = interactionSource,
         colors = CardDefaults.elevatedCardColors(
             containerColor = containerColor,
-            contentColor = MaterialTheme.colorScheme.surface
+            contentColor = MaterialTheme.colorScheme.onSecondary
         )
     ) {
         Row(
@@ -282,7 +282,7 @@ private fun SnoozeButton(
                 },
                 modifier = Modifier.size(40.dp),
                 colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = MaterialTheme.colorScheme.surface
+                    contentColor = MaterialTheme.colorScheme.onSecondary
                 )
             )
 

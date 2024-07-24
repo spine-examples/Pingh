@@ -122,14 +122,14 @@ private fun SettingsHeader(
             onClick = toMentionsPage,
             modifier = Modifier.size(30.dp),
             colors = IconButtonDefaults.iconButtonColors(
-                contentColor = MaterialTheme.colorScheme.surface
+                contentColor = MaterialTheme.colorScheme.onSecondary
             )
         )
         Spacer(Modifier.width(10.dp))
         Text(
             text = "Settings",
             modifier = Modifier.width(140.dp),
-            color = MaterialTheme.colorScheme.surface,
+            color = MaterialTheme.colorScheme.onSecondary,
             style = MaterialTheme.typography.displayLarge
         )
     }
@@ -151,8 +151,8 @@ private fun SettingsBox(
         Card(
             modifier = Modifier.fillMaxSize(),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.surface
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary
             )
         ) {
             Column(
@@ -233,8 +233,8 @@ private fun LogOutButton(
         onClick = onClick,
         modifier = Modifier.height(20.dp),
         colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.secondary,
+            contentColor = MaterialTheme.colorScheme.onSecondary
         ),
         shape = MaterialTheme.shapes.medium,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground),
@@ -284,16 +284,12 @@ private fun DndOption(
                 .width(36.dp)
                 .height(20.dp),
             colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colorScheme.primary,
-                checkedTrackColor = MaterialTheme.colorScheme.secondary,
-                checkedBorderColor = MaterialTheme.colorScheme.secondary,
-                uncheckedThumbColor = MaterialTheme.colorScheme.surface.copy(
-                    alpha = 0.6f
-                ),
-                uncheckedTrackColor = MaterialTheme.colorScheme.primary,
-                uncheckedBorderColor = MaterialTheme.colorScheme.surface.copy(
-                    alpha = 0.6f
-                )
+                checkedThumbColor = MaterialTheme.colorScheme.secondary,
+                checkedTrackColor = MaterialTheme.colorScheme.primary,
+                checkedBorderColor = MaterialTheme.colorScheme.primary,
+                uncheckedThumbColor = MaterialTheme.colorScheme.tertiary,
+                uncheckedTrackColor = MaterialTheme.colorScheme.secondary,
+                uncheckedBorderColor = MaterialTheme.colorScheme.tertiary
             )
         )
     }
@@ -329,7 +325,7 @@ private fun Option(
         Text(
             text = description,
             modifier = Modifier.width(170.dp),
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.tertiary,
             style = MaterialTheme.typography.bodySmall
         )
     }
@@ -374,10 +370,10 @@ private fun SegmentedButton(
     shape: Shape,
     label: @Composable () -> Unit
 ) {
-    val containerColor = if (selected) MaterialTheme.colorScheme.secondary else
-        MaterialTheme.colorScheme.primary
-    val contentColor = if (selected) MaterialTheme.colorScheme.primary else
-        MaterialTheme.colorScheme.surface
+    val containerColor = if (selected) MaterialTheme.colorScheme.primary else
+        MaterialTheme.colorScheme.secondary
+    val contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else
+        MaterialTheme.colorScheme.onSecondary
     val border = BorderStroke(
         1.dp,
         if (selected) containerColor else MaterialTheme.colorScheme.onBackground

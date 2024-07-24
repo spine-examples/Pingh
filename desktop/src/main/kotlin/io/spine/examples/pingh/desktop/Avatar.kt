@@ -65,6 +65,10 @@ internal fun Avatar(
     )
 }
 
+/**
+ * Displays a round avatar with the first letter of the provided name
+ * on a gradient background.
+ */
 @Composable
 internal fun Avatar(
     name: Username,
@@ -72,8 +76,8 @@ internal fun Avatar(
     modifier: Modifier = Modifier
 ) {
     val gradient = listOf(
-        MaterialTheme.colorScheme.secondary,
-        MaterialTheme.colorScheme.onSecondary
+        MaterialTheme.colorScheme.primary,
+        MaterialTheme.colorScheme.primaryContainer
     )
     Box(
         contentAlignment = Alignment.Center
@@ -96,7 +100,7 @@ internal fun Avatar(
         )
         Text(
             text = if(name.value.isNotEmpty()) name.value[0].toString() else "",
-            color = MaterialTheme.colorScheme.primary,
+            color = MaterialTheme.colorScheme.onPrimary,
             fontSize = (size.value / 2).sp,
             style = MaterialTheme.typography.displayLarge
         )

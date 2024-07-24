@@ -89,7 +89,7 @@ internal fun LoginPage(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary),
+            .background(MaterialTheme.colorScheme.secondary),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -127,8 +127,8 @@ private fun UsernameInput(
     val borderWidth = if (isFocused) 2.dp else 1.dp
     val borderColor = when {
         isError -> MaterialTheme.colorScheme.error
-        isFocused -> MaterialTheme.colorScheme.secondary
-        else -> MaterialTheme.colorScheme.surface
+        isFocused -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.onSecondary
     }
     BasicTextField(
         value = value,
@@ -137,7 +137,7 @@ private fun UsernameInput(
             .width(180.dp)
             .height(52.dp),
         textStyle = MaterialTheme.typography.bodyLarge.copy(
-            color = MaterialTheme.colorScheme.surface
+            color = MaterialTheme.colorScheme.onSecondary
         ),
         interactionSource = interactionSource,
         singleLine = true
@@ -174,7 +174,7 @@ private fun InnerBox(
             .height(40.dp)
             .border(border = border, shape = MaterialTheme.shapes.medium)
             .background(
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.secondary,
                 shape = MaterialTheme.shapes.medium
             )
             .padding(horizontal = 10.dp, vertical = 3.dp),
@@ -216,7 +216,7 @@ private fun Label(color: Color) {
             text = "GitHub username",
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.primary),
+                .background(MaterialTheme.colorScheme.secondary),
             color = color,
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyMedium
@@ -274,8 +274,8 @@ private fun LogInButton(
             .height(40.dp),
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.secondary,
-            contentColor = MaterialTheme.colorScheme.primary
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
         )
     ) {
         Text(
