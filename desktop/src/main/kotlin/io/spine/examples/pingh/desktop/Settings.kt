@@ -62,7 +62,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -266,7 +265,10 @@ private fun SnoozeTimeOption(state: SettingsState) {
  * Displays a setting option for toggling 'Do not disturb' mode.
  */
 @Composable
-private fun DndOption(state: SettingsState) {
+private fun DndOption(
+    state: SettingsState,
+    switchScale: Float = 0.6f
+) {
     Option(
         title = "Do not disturb",
         description = "Turn off notifications for new mentions or snooze expirations.",
@@ -278,7 +280,7 @@ private fun DndOption(state: SettingsState) {
                 state.enabledDndMode.value = it
             },
             modifier = Modifier
-                .scale(0.6f)
+                .scale(switchScale)
                 .width(36.dp)
                 .height(20.dp),
             colors = SwitchDefaults.colors(
@@ -327,7 +329,7 @@ private fun Option(
         Text(
             text = description,
             modifier = Modifier.width(170.dp),
-            color = Color(150, 150, 150),
+            color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.bodySmall
         )
     }
@@ -423,6 +425,7 @@ internal class SettingsState {
 /**
  * Time after which the notification about the new mention is repeated.
  */
+@Suppress("MagicNumber") // The durations are specified using numbers.
 internal enum class SnoozeTime(
     internal val label: String,
     internal val value: Duration

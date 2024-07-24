@@ -85,6 +85,7 @@ internal fun LoginPage(
         mutableStateOf(Username::class.buildWithoutValidationBy(""))
     }
     val isError = remember { mutableStateOf(false) }
+    val wasChanged = remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -97,12 +98,13 @@ internal fun LoginPage(
             onChange = { value ->
                 username.value = Username::class.buildWithoutValidationBy(value)
                 isError.value = !username.value.validate()
+                wasChanged.value = true
             },
             isError = isError.value
         )
         Spacer(Modifier.height(20.dp))
         LogInButton(
-            enabled = !isError.value
+            enabled = wasChanged.value && !isError.value
         ) {
             client.logIn(username.value) {
                 toMentionsPage()

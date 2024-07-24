@@ -62,6 +62,7 @@ private val colorScheme = lightColorScheme(
     background = Color(235, 235, 235),
     onBackground = Color(213, 213, 213),
     surface = Color(40, 40, 40),
+    onSurface = Color(150, 150, 150),
     error = Color(255, 161, 161),
     errorContainer = Color(255, 232, 232)
 )
