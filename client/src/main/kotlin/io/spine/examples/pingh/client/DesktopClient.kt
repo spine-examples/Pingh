@@ -62,6 +62,7 @@ import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.protobuf.Durations2
+import java.util.Optional
 import java.util.UUID
 import kotlin.reflect.KClass
 
@@ -101,6 +102,13 @@ public class DesktopClient(
             .setValue(UUID.randomUUID().toString())
             .vBuild()
     }
+
+    /**
+     * If the user is logged in to the Pingh application, it is `Username` wrapped
+     * in an `Optional`; otherwise, it is an empty `Optional`.
+     */
+    public val nameOfAuthenticatedUser: Optional<Username>
+        get() = Optional.ofNullable(session?.username)
 
     /**
      * Logs the user in and remembers the session ID.
@@ -279,11 +287,6 @@ public class DesktopClient(
         client.subscriptions()
             .cancel(subscription)
     }
-
-    /**
-     * Returns `true` if the user is logged in the Pingh application; otherwise, returns `false`.
-     */
-    public fun isLoggedIn(): Boolean = session != null
 
     /**
      * Closes the client by shutting down the gRPC connection.
