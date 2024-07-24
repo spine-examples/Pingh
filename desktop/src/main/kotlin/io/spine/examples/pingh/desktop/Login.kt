@@ -50,10 +50,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -80,11 +80,11 @@ internal fun LoginPage(
     client: DesktopClient,
     toMentionsPage: () -> Unit
 ) {
-    val username = remember {
+    var username by remember {
         mutableStateOf(Username::class.buildWithoutValidationBy(""))
     }
-    val isError = remember { mutableStateOf(false) }
-    val wasChanged = remember { mutableStateOf(false) }
+    var isError by remember { mutableStateOf(false) }
+    var wasChanged by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -93,19 +93,19 @@ internal fun LoginPage(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         UsernameInput(
-            value = username.stringValue,
+            value = username.value,
             onChange = { value ->
-                username.value = Username::class.buildWithoutValidationBy(value)
-                isError.value = !username.value.validate()
-                wasChanged.value = true
+                username = Username::class.buildWithoutValidationBy(value)
+                isError = !username.validate()
+                wasChanged = true
             },
-            isError = isError.value
+            isError = isError
         )
         Spacer(Modifier.height(20.dp))
         LogInButton(
-            enabled = wasChanged.value && !isError.value
+            enabled = wasChanged && !isError
         ) {
-            client.logIn(username.value) {
+            client.logIn(username) {
                 toMentionsPage()
             }
         }
@@ -283,12 +283,6 @@ private fun KClass<Username>.buildWithoutValidationBy(value: String) =
     Username.newBuilder()
         .setValue(value)
         .buildPartial()
-
-/**
- * Returns the `Username` value saved in the `MutableState`.
- */
-private val MutableState<Username>.stringValue: String
-    get() = this.value.value
 
 /**
  * Returns `true` if the `Username` is valid according to GitHub criteria; otherwise, returns `false`.
