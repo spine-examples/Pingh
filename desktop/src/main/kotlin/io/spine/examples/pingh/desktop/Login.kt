@@ -70,11 +70,11 @@ import kotlin.reflect.KClass
 private const val maxLengthOfUsername = 39
 
 /**
- * Displays a login form.
+ * Displays the login form.
  *
  * If the `Username` is entered correct, user will be [logged in][DesktopClient.logIn] into
  * the Pingh server and redirected to the [MentionsPage].
- * [LoginButton] is not enable while the entered `Username` is invalid.
+ * [LogInButton] is not enable while the entered `Username` is invalid.
  */
 @Composable
 internal fun LoginPage(
@@ -101,7 +101,7 @@ internal fun LoginPage(
             isError = isError.value
         )
         Spacer(Modifier.height(20.dp))
-        LoginButton(
+        LogInButton(
             enabled = !isError.value
         ) {
             client.logIn(username.value) {
@@ -139,7 +139,7 @@ private fun UsernameInput(
         singleLine = true
     ) { innerTextField ->
         Box(
-            modifier = Modifier.fillMaxSize(),
+            Modifier.fillMaxSize()
         ) {
             InnerBox(
                 border = BorderStroke(borderWidth, borderColor)
@@ -157,7 +157,7 @@ private fun UsernameInput(
 }
 
 /**
- * Inner box for the text input design.
+ * Displays the inner box for the text input design.
  */
 @Composable
 private fun InnerBox(
@@ -168,25 +168,19 @@ private fun InnerBox(
         modifier = Modifier
             .width(180.dp)
             .height(40.dp)
-            .border(
-                border = border,
-                shape = MaterialTheme.shapes.medium
-            )
+            .border(border = border, shape = MaterialTheme.shapes.medium)
             .background(
                 color = MaterialTheme.colorScheme.primary,
                 shape = MaterialTheme.shapes.medium
             )
-            .padding(
-                horizontal = 10.dp,
-                vertical = 3.dp
-            ),
+            .padding(horizontal = 10.dp, vertical = 3.dp),
         verticalAlignment = Alignment.CenterVertically,
         content = content
     )
 }
 
 /**
- * Container for the text field.
+ * Displays container for the text field.
  */
 @Composable
 private fun InputContainer(
@@ -204,7 +198,7 @@ private fun InputContainer(
 }
 
 /**
- * The label which placed on the top border of the text field.
+ * Displays the label which placed on the top border of the text field.
  */
 @Composable
 private fun Label(color: Color) {
@@ -227,7 +221,7 @@ private fun Label(color: Color) {
 }
 
 /**
- * The placeholder which placed inside the text field.
+ * Displays the placeholder which placed inside the text field.
  */
 @Composable
 private fun Placeholder(
@@ -243,7 +237,7 @@ private fun Placeholder(
 }
 
 /**
- * The error message which is placed below the text field.
+ * Displays the error message which is placed below the text field.
  */
 @Composable
 private fun ErrorMesage(isShown: Boolean) {
@@ -265,7 +259,7 @@ private fun ErrorMesage(isShown: Boolean) {
  * Displays a `Button` on the login form.
  */
 @Composable
-private fun LoginButton(
+private fun LogInButton(
     enabled: Boolean,
     onClick: () -> Unit
 ) {

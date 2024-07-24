@@ -33,6 +33,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -76,6 +77,11 @@ import io.spine.examples.pingh.github.buildBy
 import io.spine.protobuf.Durations2.hours
 import io.spine.protobuf.Durations2.minutes
 
+/**
+ * Displays the application settings.
+ *
+ * All changes are saved automatically and applied immediately.
+ */
 @Composable
 internal fun SettingsPage(
     client: DesktopClient,
@@ -84,38 +90,33 @@ internal fun SettingsPage(
     toLoginPage: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize()
+        Modifier
+            .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        Header(toMentionsPage)
-        Box(
-            modifier = Modifier.fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(5.dp),
-        ) {
-            Card(
-                modifier = Modifier.fillMaxSize(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.surface
-                )
-            ) {
-                Spacer(Modifier.height(5.dp))
-                Settings(client, state, toLoginPage)
-            }
+        SettingsHeader(toMentionsPage)
+        SettingsBox {
+            Profile(client, toLoginPage)
+            SnoozeTimeOption(state)
+            DndOption(state)
         }
     }
 }
 
+/**
+ * Displays the header of the `Settings` page.
+ *
+ * Includes a button to return to the `Mentions` page.
+ */
 @Composable
-private fun Header(
+private fun SettingsHeader(
     toMentionsPage: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
-            .padding(vertical = 4.dp, horizontal = 5.dp),
+            .padding(horizontal = 5.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
@@ -136,25 +137,40 @@ private fun Header(
     }
 }
 
+/**
+ * Displays the container for settings.
+ */
 @Composable
-private fun Settings(
-    client: DesktopClient,
-    state: SettingsState,
-    toLoginPage: () -> Unit
+private fun SettingsBox(
+    content: @Composable ColumnScope.() -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(280.dp)
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(5.dp),
     ) {
-        Profile(client, toLoginPage)
-        Spacer(Modifier.height(15.dp))
-        SnoozeTimeOption(state)
-        Spacer(Modifier.height(15.dp))
-        DndOption(state)
+        Card(
+            modifier = Modifier.fillMaxSize(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.surface
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 5.dp),
+                verticalArrangement = Arrangement.spacedBy(15.dp),
+                content = content
+            )
+        }
     }
 }
 
+/**
+ * Displays user information and provides an option to log out of the account.
+ */
 @Composable
 private fun Profile(
     client: DesktopClient,
@@ -165,7 +181,7 @@ private fun Profile(
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp)
-            .padding(vertical = 4.dp, horizontal = 10.dp),
+            .padding(horizontal = 10.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Avatar(
@@ -173,83 +189,68 @@ private fun Profile(
             size = 52.dp
         )
         Spacer(Modifier.width(8.dp))
-        Column(
-            modifier = Modifier.fillMaxSize().padding(top = 4.dp),
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = username.value,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Spacer(Modifier.height(5.dp))
-            LogOutButton(client, toLoginPage)
-        }
+        ProfileControl(client, toLoginPage, username)
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Displays the username and a button to log out of the account.
+ */
 @Composable
-private fun CustomButtons(state: SettingsState) {
-    val snoozeTimes = SnoozeTime.entries
-    Row(
-        modifier = Modifier.selectableGroup(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy((-1).dp)
+private fun ProfileControl(
+    client: DesktopClient,
+    toLoginPage: () -> Unit,
+    username: Username
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 4.dp),
+        verticalArrangement = Arrangement.Center
     ) {
-        snoozeTimes.forEachIndexed { index, snoozeTime ->
-            ButC(
-                selected = snoozeTime == state.snoozeTimeOption.value,
-                onClick = { state.snoozeTimeOption.value = snoozeTime },
-                shape = SegmentedButtonDefaults.itemShape(index, snoozeTimes.size)
-            ) {
-                Text(
-                    text = snoozeTime.label,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+        Text(
+            text = username.value,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Spacer(Modifier.height(5.dp))
+        LogOutButton {
+            client.logOut {
+                toLoginPage()
             }
         }
     }
 }
 
+/**
+ * Displays the `button` to log out of the account.
+ */
 @Composable
-private fun ButC(
-    selected: Boolean,
-    onClick: () -> Unit,
-    shape: Shape,
-    label: @Composable () -> Unit
+private fun LogOutButton(
+    onClick: () -> Unit
 ) {
-    val containerColor = if (selected)
-        MaterialTheme.colorScheme.secondary
-    else MaterialTheme.colorScheme.primary
-    val contentColor = if (selected)
-        MaterialTheme.colorScheme.primary
-    else MaterialTheme.colorScheme.surface
-    val border =
-        BorderStroke(1.dp, if (selected) containerColor else MaterialTheme.colorScheme.onBackground)
-
-    Surface(
-        modifier = Modifier
-            .width(48.dp)
-            .height(20.dp)
-            .semantics { role = Role.RadioButton },
-        selected = selected,
+    OutlinedButton(
         onClick = onClick,
-        shape = shape,
-        color = containerColor,
-        contentColor = contentColor,
-        border = border
+        modifier = Modifier.height(20.dp),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.surface
+        ),
+        shape = MaterialTheme.shapes.medium,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground),
+        contentPadding = PaddingValues(0.dp),
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize().padding(0.dp)
-        ) {
-            label()
-        }
+        Text(
+            text = "Log out",
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 
+/**
+ * Displays a setting option for specifying the snooze time.
+ */
 @Composable
 private fun SnoozeTimeOption(state: SettingsState) {
     Option(
@@ -257,10 +258,13 @@ private fun SnoozeTimeOption(state: SettingsState) {
         description = "Time after which the notification is repeated.",
         titleWight = 68.dp
     ) {
-        CustomButtons(state)
+        SnoozeTimeSegmentedButtonRow(state)
     }
 }
 
+/**
+ * Displays a setting option for toggling 'Do not disturb' mode.
+ */
 @Composable
 private fun DndOption(state: SettingsState) {
     Option(
@@ -269,30 +273,33 @@ private fun DndOption(state: SettingsState) {
         titleWight = 174.dp
     ) {
         Switch(
-            checked = state.enableDndMode.value,
+            checked = state.enabledDndMode.value,
             onCheckedChange = {
-                state.enableDndMode.value = it
+                state.enabledDndMode.value = it
             },
             modifier = Modifier
                 .scale(0.6f)
                 .width(36.dp)
                 .height(20.dp),
             colors = SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                checkedTrackColor = MaterialTheme.colorScheme.secondary,
+                checkedBorderColor = MaterialTheme.colorScheme.secondary,
                 uncheckedThumbColor = MaterialTheme.colorScheme.surface.copy(
                     alpha = 0.6f
                 ),
-                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                uncheckedTrackColor = MaterialTheme.colorScheme.primary,
                 uncheckedBorderColor = MaterialTheme.colorScheme.surface.copy(
                     alpha = 0.6f
-                ),
-                checkedBorderColor = MaterialTheme.colorScheme.secondary,
-                uncheckedTrackColor = MaterialTheme.colorScheme.primary,
-                checkedTrackColor = MaterialTheme.colorScheme.secondary
+                )
             )
         )
     }
 }
 
+/**
+ * Displays a setting option that contains a title, description, and a control element.
+ */
 @Composable
 private fun Option(
     title: String,
@@ -301,7 +308,7 @@ private fun Option(
     control: @Composable () -> Unit
 ) {
     Column(
-        modifier = Modifier
+        Modifier
             .fillMaxWidth()
             .padding(horizontal = 10.dp)
     ) {
@@ -326,69 +333,112 @@ private fun Option(
     }
 }
 
+/**
+ * Displays a row of segmented buttons that allow specifying the snooze time value.
+ */
 @Composable
-private fun LogOutButton(
-    client: DesktopClient,
-    toLoginPage: () -> Unit
-) {
-    OutlinedButton(
-        onClick = {
-            client.logOut {
-                toLoginPage()
-            }
-        },
-        modifier = Modifier.height(20.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground),
-        shape = MaterialTheme.shapes.medium,
-        contentPadding = PaddingValues(0.dp),
-        colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = MaterialTheme.colorScheme.surface,
-            containerColor = MaterialTheme.colorScheme.primary
-        )
+@OptIn(ExperimentalMaterial3Api::class) // Required for `SegmentedButtonDefaults.itemShape()`.
+private fun SnoozeTimeSegmentedButtonRow(state: SettingsState) {
+    val snoozeTimeOptions = SnoozeTime.entries
+    Row(
+        modifier = Modifier.selectableGroup(),
+        horizontalArrangement = Arrangement.spacedBy((-1).dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "Log out",
-            style = MaterialTheme.typography.bodyMedium
-        )
+        snoozeTimeOptions.forEachIndexed { index, snoozeTime ->
+            SegmentedButton(
+                selected = snoozeTime == state.snoozeTime.value,
+                onClick = {
+                    state.snoozeTime.value = snoozeTime
+                },
+                shape = SegmentedButtonDefaults.itemShape(index, snoozeTimeOptions.size)
+            ) {
+                Text(
+                    text = snoozeTime.label,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
     }
 }
 
 /**
- *
+ * Displays a button from the [SnoozeTimeSegmentedButtonRow].
+ */
+@Composable
+private fun SegmentedButton(
+    selected: Boolean,
+    onClick: () -> Unit,
+    shape: Shape,
+    label: @Composable () -> Unit
+) {
+    val containerColor = if (selected) MaterialTheme.colorScheme.secondary else
+        MaterialTheme.colorScheme.primary
+    val contentColor = if (selected) MaterialTheme.colorScheme.primary else
+        MaterialTheme.colorScheme.surface
+    val border = BorderStroke(
+        1.dp,
+        if (selected) containerColor else MaterialTheme.colorScheme.onBackground
+    )
+    Surface(
+        selected = selected,
+        onClick = onClick,
+        modifier = Modifier
+            .width(48.dp)
+            .height(20.dp)
+            .semantics { role = Role.RadioButton },
+        shape = shape,
+        color = containerColor,
+        contentColor = contentColor,
+        border = border
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(0.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            label()
+        }
+    }
+}
+
+/**
+ * State of user settings.
  */
 internal class SettingsState {
 
     /**
-     *
+     * If `true`, the user is not notified about new mentions and snooze expirations.
+     * If `false`, the user receives notifications.
      */
-    internal var enableDndMode: MutableState<Boolean> = mutableStateOf(false)
+    internal var enabledDndMode: MutableState<Boolean> = mutableStateOf(false)
 
     /**
-     *
+     * The interval after which the new mention notification is repeated.
      */
-    internal var snoozeTimeOption: MutableState<SnoozeTime> = mutableStateOf(SnoozeTime.TWO_HOURS)
+    internal var snoozeTime: MutableState<SnoozeTime> = mutableStateOf(SnoozeTime.TWO_HOURS)
 }
 
 /**
- * Possible value of snooze time.
+ * Time after which the notification about the new mention is repeated.
  */
 internal enum class SnoozeTime(
-    val label: String,
-    val value: Duration
+    internal val label: String,
+    internal val value: Duration
 ) {
-
     /**
-     *
+     * The interval is 30 minutes in duration.
      */
     THIRTY_MINUTES("30 mins", minutes(30)),
 
     /**
-     *
+     * The interval is 2 hours in duration.
      */
     TWO_HOURS("2 hours", hours(2)),
 
     /**
-     *
+     * The interval is one day in duration.
      */
     ONE_DAY("1 day", hours(24))
 }
