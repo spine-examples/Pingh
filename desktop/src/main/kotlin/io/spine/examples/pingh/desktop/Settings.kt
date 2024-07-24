@@ -73,7 +73,6 @@ import androidx.compose.ui.unit.dp
 import com.google.protobuf.Duration
 import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.buildBy
 import io.spine.protobuf.Durations2.hours
 import io.spine.protobuf.Durations2.minutes
 
@@ -176,7 +175,8 @@ private fun Profile(
     client: DesktopClient,
     toLoginPage: () -> Unit
 ) {
-    val username = Username::class.buildBy("MykytaPimonovTD")
+    val username = client.nameOfAuthenticatedUser
+        .orElseThrow { IllegalStateException("User is not logged in.") }
     Row(
         modifier = Modifier
             .fillMaxWidth()

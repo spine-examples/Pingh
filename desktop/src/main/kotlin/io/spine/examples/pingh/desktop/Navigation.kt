@@ -40,7 +40,7 @@ import io.spine.examples.pingh.client.DesktopClient
 internal fun CurrentPage(client: DesktopClient) {
     val currentPage = remember {
         mutableStateOf(
-            if (client.isLoggedIn()) Page.MENTIONS else Page.LOGIN
+            if (client.nameOfAuthenticatedUser.isPresent) Page.MENTIONS else Page.LOGIN
         )
     }
     val settings = remember { SettingsState() }
@@ -54,6 +54,7 @@ internal fun CurrentPage(client: DesktopClient) {
 
         Page.MENTIONS -> MentionsPage(
             client = client,
+            settings = settings,
             toSettingsPage = {
                 currentPage.value = Page.SETTINGS
             }

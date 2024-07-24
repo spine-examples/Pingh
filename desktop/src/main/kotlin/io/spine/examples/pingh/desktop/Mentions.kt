@@ -77,6 +77,7 @@ import java.lang.Thread.sleep
 @Composable
 internal fun MentionsPage(
     client: DesktopClient,
+    settings: SettingsState,
     toSettingsPage: () -> Unit
 ) {
     val state = remember { MentionsPageState(client) }
@@ -85,7 +86,7 @@ internal fun MentionsPage(
     ) {
         ToolBar(state, toSettingsPage)
         Spacer(Modifier.height(0.5.dp))
-        MentionCards(state)
+        MentionCards(state, settings.snoozeTime.value)
     }
 }
 
@@ -141,7 +142,10 @@ private fun ToolBar(
  * Within each group, mentions are sorted by time.
  */
 @Composable
-private fun MentionCards(state: MentionsPageState) {
+private fun MentionCards(
+    state: MentionsPageState,
+    snoozeTime: SnoozeTime
+) {
     val scrollState = rememberScrollState()
     Column(
         Modifier
@@ -154,7 +158,7 @@ private fun MentionCards(state: MentionsPageState) {
             .sortByStatusAndWhenMentioned()
             .forEach { mention ->
                 Spacer(Modifier.height(5.dp))
-                MentionCard(state, mention)
+                MentionCard(state, mention, snoozeTime)
             }
         Spacer(Modifier.height(5.dp))
     }
@@ -170,7 +174,11 @@ private fun MentionCards(state: MentionsPageState) {
  * - If the mention is read, it can still be opened, but its status does not change.
  */
 @Composable
-private fun MentionCard(state: MentionsPageState, mention: MentionView) {
+private fun MentionCard(
+    state: MentionsPageState,
+    mention: MentionView,
+    snoozeTime: SnoozeTime
+) {
     val uriHandler = LocalUriHandler.current
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered = interactionSource.collectIsHoveredAsState()
@@ -208,7 +216,7 @@ private fun MentionCard(state: MentionsPageState, mention: MentionView) {
             Spacer(Modifier.width(5.dp))
             MentionCardText(mention, isHovered)
             Spacer(Modifier.width(5.dp))
-            SnoozeButton(state, mention)
+            SnoozeButton(state, mention, snoozeTime)
         }
     }
 }
@@ -251,13 +259,17 @@ private fun MentionCardText(mention: MentionView, isHovered: State<Boolean>) {
  * Otherwise, nothing is displayed.
  */
 @Composable
-private fun SnoozeButton(state: MentionsPageState, mention: MentionView) {
+private fun SnoozeButton(
+    state: MentionsPageState,
+    mention: MentionView,
+    snoozeTime: SnoozeTime
+) {
     when (mention.status) {
         MentionStatus.UNREAD ->
             IconButton(
                 icon = Icons.snooze,
                 onClick = {
-                    state.markMentionAsSnoozed(mention.id)
+                    state.markMentionAsSnoozed(mention.id, snoozeTime)
                 },
                 modifier = Modifier.size(40.dp)
             )
@@ -313,8 +325,8 @@ private class MentionsPageState(private val client: DesktopClient) {
     /**
      * Marks the mention as snoozed.
      */
-    internal fun markMentionAsSnoozed(id: MentionId) {
-        client.markMentionAsSnoozed(id) {
+    internal fun markMentionAsSnoozed(id: MentionId, snoozeTime: SnoozeTime) {
+        client.markMentionAsSnoozed(id, snoozeTime.value) {
             mentions.value = mentions.value.setMentionStatus(id, MentionStatus.SNOOZED)
         }
     }
