@@ -45,6 +45,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -56,7 +57,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -99,6 +99,7 @@ private fun ToolBar(
     state: MentionsPageState,
     toSettingsPage: () -> Unit
 ) {
+    val contentColor = MaterialTheme.colorScheme.surface
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -106,7 +107,7 @@ private fun ToolBar(
             .background(MaterialTheme.colorScheme.primary)
             .drawBehind {
                 drawLine(
-                    color = Color.Black,
+                    color = contentColor,
                     start = Offset(0f, size.height),
                     end = Offset(size.width, size.height),
                     strokeWidth = 1.dp.toPx()
@@ -118,11 +119,15 @@ private fun ToolBar(
         IconButton(
             icon = Icons.pingh,
             onClick = toSettingsPage,
-            modifier = Modifier.size(40.dp)
+            modifier = Modifier.size(40.dp),
+            colors = IconButtonDefaults.iconButtonColors(
+                contentColor = contentColor
+            )
         )
         Text(
             text = "Recent mentions",
             modifier = Modifier.width(140.dp),
+            color = contentColor,
             style = MaterialTheme.typography.displayLarge
         )
         IconButton(
@@ -130,7 +135,10 @@ private fun ToolBar(
             onClick = {
                 state.updateMentions()
             },
-            modifier = Modifier.size(40.dp)
+            modifier = Modifier.size(40.dp),
+            colors = IconButtonDefaults.iconButtonColors(
+                contentColor = contentColor
+            )
         )
     }
 }
@@ -200,8 +208,9 @@ private fun MentionCard(
             .fillMaxWidth()
             .height(50.dp),
         interactionSource = interactionSource,
-        colors = CardDefaults.elevatedCardColors().copy(
-            containerColor = containerColor
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = containerColor,
+            contentColor = MaterialTheme.colorScheme.surface
         )
     ) {
         Row(
@@ -271,7 +280,10 @@ private fun SnoozeButton(
                 onClick = {
                     state.markMentionAsSnoozed(mention.id, snoozeTime)
                 },
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(40.dp),
+                colors = IconButtonDefaults.iconButtonColors(
+                    contentColor = MaterialTheme.colorScheme.surface
+                )
             )
 
         MentionStatus.SNOOZED ->

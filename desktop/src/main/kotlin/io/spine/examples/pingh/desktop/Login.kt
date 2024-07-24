@@ -128,7 +128,7 @@ private fun UsernameInput(
     val borderColor = when {
         isError -> MaterialTheme.colorScheme.error
         isFocused -> MaterialTheme.colorScheme.secondary
-        else -> Color.Black
+        else -> MaterialTheme.colorScheme.surface
     }
     BasicTextField(
         value = value,
@@ -136,7 +136,9 @@ private fun UsernameInput(
         modifier = Modifier
             .width(180.dp)
             .height(52.dp),
-        textStyle = MaterialTheme.typography.bodyLarge,
+        textStyle = MaterialTheme.typography.bodyLarge.copy(
+            color = MaterialTheme.colorScheme.surface
+        ),
         interactionSource = interactionSource,
         singleLine = true
     ) { innerTextField ->
