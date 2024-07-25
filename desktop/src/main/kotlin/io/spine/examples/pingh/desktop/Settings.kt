@@ -79,6 +79,11 @@ import io.spine.protobuf.Durations2.minutes
  * Displays a application settings.
  *
  * All changes are saved automatically and applied immediately.
+ *
+ * @param client enables interaction with the Pingh server.
+ * @param state the state of the application settings.
+ * @param toMentionsPage the navigation to the 'Mentions' page.
+ * @param toLoginPage the navigation to the 'Login' page.
  */
 @Composable
 internal fun SettingsPage(
@@ -105,6 +110,8 @@ internal fun SettingsPage(
  * Displays a header of the `Settings` page.
  *
  * Includes a button to return to the `Mentions` page.
+ *
+ * @param toMentionsPage the navigation to the 'Mentions' page.
  */
 @Composable
 private fun SettingsHeader(
@@ -137,6 +144,8 @@ private fun SettingsHeader(
 
 /**
  * Displays a container for settings.
+ *
+ * @param content the composable function that displays settings options.
  */
 @Composable
 private fun SettingsBox(
@@ -168,6 +177,9 @@ private fun SettingsBox(
 
 /**
  * Displays user information and provides an option to log out of the account.
+ *
+ * @param client enables interaction with the Pingh server.
+ * @param toLoginPage the navigation to the 'Login' page.
  */
 @Composable
 private fun Profile(
@@ -194,6 +206,10 @@ private fun Profile(
 
 /**
  * Displays a username and a button to log out of the account.
+ *
+ * @param client enables interaction with the Pingh server.
+ * @param toLoginPage the navigation to the 'Login' page.
+ * @param username the name of the user to whom the current session belongs.
  */
 @Composable
 private fun ProfileControl(
@@ -224,6 +240,8 @@ private fun ProfileControl(
 
 /**
  * Displays a button to log out of the account.
+ *
+ * @param onClick called when this button is clicked.
  */
 @Composable
 private fun LogOutButton(
@@ -249,6 +267,8 @@ private fun LogOutButton(
 
 /**
  * Displays a setting option for specifying the snooze time.
+ *
+ * @param state the state of the application settings.
  */
 @Composable
 private fun SnoozeTimeOption(state: SettingsState) {
@@ -263,6 +283,9 @@ private fun SnoozeTimeOption(state: SettingsState) {
 
 /**
  * Displays a setting option for toggling 'Do not disturb' mode.
+ *
+ * @param state the state of the application settings.
+ * @param switchScale the multiplier to scale switch along the horizontal and vertical axis.
  */
 @Composable
 private fun DndOption(
@@ -297,6 +320,11 @@ private fun DndOption(
 
 /**
  * Displays a setting option that contains a title, description, and a control element.
+ *
+ * @param title the string with the name of the option.
+ * @param description the string with the description of the option.
+ * @param titleWight the width that the title occupies.
+ * @param control the composable function that displays control element of this option.
  */
 @Composable
 private fun Option(
@@ -333,6 +361,8 @@ private fun Option(
 
 /**
  * Displays a row of segmented buttons that allow specifying the snooze time value.
+ *
+ * @param state the state of the application settings.
  */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class) // Required for `SegmentedButtonDefaults.itemShape()`.
@@ -362,6 +392,11 @@ private fun SnoozeTimeSegmentedButtonRow(state: SettingsState) {
 
 /**
  * Displays a button from the [SnoozeTimeSegmentedButtonRow].
+ *
+ * @param selected whether this button is selected.
+ * @param onClick called when this button is clicked.
+ * @param shape the shape of this button.
+ * @param label the composable function that displays the label of this button.
  */
 @Composable
 private fun SegmentedButton(
@@ -408,7 +443,7 @@ private fun SegmentedButton(
 }
 
 /**
- * State of user settings.
+ * State of application settings.
  */
 internal class SettingsState {
 
@@ -426,6 +461,9 @@ internal class SettingsState {
 
 /**
  * Time after which the notification about the new mention is repeated.
+ *
+ * @param label the text corresponding to this interval.
+ * @param value the duration corresponding to this interval.
  */
 @Suppress("MagicNumber") // The durations are specified using numbers.
 internal enum class SnoozeTime(

@@ -73,6 +73,10 @@ import java.lang.Thread.sleep
  * This page is the main interface where users can manage their mentions.
  * Users can snooze and read mentions on this page. Additionally, it is
  * possible to manually update the list of mentions from the server.
+ *
+ * @param client enables interaction with the Pingh server.
+ * @param settings the state of application settings.
+ * @param toSettingsPage the navigation to the 'Settings' page.
  */
 @Composable
 internal fun MentionsPage(
@@ -93,6 +97,9 @@ internal fun MentionsPage(
 /**
  * Displays a menu of tools for navigating to a account settings page or
  * manually updating mentions.
+ *
+ * @param state the state of the `MentionsPage`.
+ * @param toSettingsPage the navigation to the 'Settings' page.
  */
 @Composable
 private fun ToolBar(
@@ -148,6 +155,9 @@ private fun ToolBar(
  * followed by snoozed mentions, and finally read mentions.
  *
  * Within each group, mentions are sorted by time.
+ *
+ * @param state the state of the `MentionsPage`.
+ * @param snoozeTime the interval after which the notification is repeated.
  */
 @Composable
 private fun MentionCards(
@@ -180,6 +190,10 @@ private fun MentionCards(
  * - If the mention is unread, it can be read or snoozed.
  * - If the mention is snoozed, it can only be read.
  * - If the mention is read, it can still be opened, but its status does not change.
+ *
+ * @param state the state of the `MentionsPage`.
+ * @param mention the mention whose information is displayed.
+ * @param snoozeTime the interval after which the notification is repeated.
  */
 @Composable
 private fun MentionCard(
@@ -233,9 +247,15 @@ private fun MentionCard(
 /**
  * Displays textual information about the mention,
  * including details about who mentioned the user, where, and when.
+ *
+ * @param mention the mention whose information is displayed.
+ * @param isHovered indicates whether the mouse is over the mention card.
  */
 @Composable
-private fun MentionCardText(mention: MentionView, isHovered: State<Boolean>) {
+private fun MentionCardText(
+    mention: MentionView,
+    isHovered: State<Boolean>
+) {
     val time = mention.whenMentioned.run {
         if (isHovered.value) toDatetime() else howMuchTimeHasPassed()
     }
@@ -266,6 +286,10 @@ private fun MentionCardText(mention: MentionView, isHovered: State<Boolean>) {
  * it displays the status text of the mention.
  *
  * Otherwise, nothing is displayed.
+ *
+ * @param state the state of the `MentionsPage`.
+ * @param mention the mention whose information is displayed.
+ * @param snoozeTime the interval after which the notification is repeated.
  */
 @Composable
 private fun SnoozeButton(
@@ -300,6 +324,8 @@ private fun SnoozeButton(
 
 /**
  * State of [MentionsPage].
+ *
+ * @param client enables interaction with the Pingh server.
  */
 private class MentionsPageState(private val client: DesktopClient) {
 
@@ -336,6 +362,9 @@ private class MentionsPageState(private val client: DesktopClient) {
 
     /**
      * Marks the mention as snoozed.
+     *
+     * @param id the identifier of the mention that is marked as snoozed.
+     * @param snoozeTime the interval after which the notification is repeated.
      */
     internal fun markMentionAsSnoozed(id: MentionId, snoozeTime: SnoozeTime) {
         client.markMentionAsSnoozed(id, snoozeTime.value) {
@@ -345,6 +374,8 @@ private class MentionsPageState(private val client: DesktopClient) {
 
     /**
      * Marks that the mention is read.
+     *
+     * @param id the identifier of the mention that is marked as read.
      */
     internal fun markMentionAsRead(id: MentionId) {
         client.markMentionAsRead(id) {
@@ -360,8 +391,14 @@ private typealias MentionsList = List<MentionView>
 
 /**
  * Creates a new list by replacing the status of one mention with another.
+ *
+ * @param id the identifier of the mention to which the status is changed.
+ * @param status new status of the mention.
  */
-private fun MentionsList.setMentionStatus(id: MentionId, status: MentionStatus): MentionsList {
+private fun MentionsList.setMentionStatus(
+    id: MentionId,
+    status: MentionStatus
+): MentionsList {
     val idInList = this.indexOfFirst { it.id == id }
     val updatedMention = this[idInList]
         .toBuilder()

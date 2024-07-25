@@ -70,6 +70,9 @@ import io.spine.examples.pingh.github.buildBy
  * If the `Username` is entered correct, user will be [logged in][DesktopClient.logIn] into
  * the Pingh application and redirected to the [MentionsPage].
  * [LoginButton] is not enable while the entered `Username` is invalid.
+ *
+ * @param client enables interaction with the Pingh server.
+ * @param toMentionsPage the navigation to the 'Mentions' page.
  */
 @Composable
 internal fun LoginPage(
@@ -153,6 +156,10 @@ private fun ApplicationInfo() {
 
 /**
  * Displays a username input field on the login form.
+ *
+ * @param value the current value of the input field.
+ * @param onChange called when input value is changed.
+ * @param isError indicates if the input's current value is in error.
  */
 @Composable
 private fun UsernameInput(
@@ -196,6 +203,10 @@ private fun UsernameInput(
 
 /**
  * Displays a container for the text field.
+ *
+ * @param value the current value of the input field.
+ * @param textField the composable function that displays the content of an input field.
+ * @param border the border of this input.
  */
 @Composable
 private fun InputContainer(
@@ -229,6 +240,8 @@ private fun InputContainer(
 
 /**
  * Displays a label which placed on the top border of the text field.
+ *
+ * @param color the color of this label.
  */
 @Composable
 private fun Label(color: Color) {
@@ -252,6 +265,8 @@ private fun Label(color: Color) {
 
 /**
  * Displays a placeholder which placed inside the text field.
+ *
+ * @param isShown indicates whether the placeholder is displayed.
  */
 @Composable
 private fun Placeholder(isShown: Boolean) {
@@ -266,6 +281,8 @@ private fun Placeholder(isShown: Boolean) {
 
 /**
  * Displays an error message which is placed below the text field.
+ *
+ * @param isShown indicates whether the error message is displayed.
  */
 @Composable
 private fun ErrorMesage(isShown: Boolean) {
@@ -284,6 +301,10 @@ private fun ErrorMesage(isShown: Boolean) {
 
 /**
  * Displays a button on the login form.
+ *
+ * @param enabled controls the enabled state of this button.
+ * If `false`, the button cannot be pressed.
+ * @param onClick called when this button is clicked.
  */
 @Composable
 private fun LoginButton(
