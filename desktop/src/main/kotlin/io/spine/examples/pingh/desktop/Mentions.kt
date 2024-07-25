@@ -75,7 +75,7 @@ import java.lang.Thread.sleep
  * possible to manually update the list of mentions from the server.
  *
  * @param client enables interaction with the Pingh server.
- * @param settings the state of application settings.
+ * @param settings the state of the application settings.
  * @param toSettingsPage the navigation to the 'Settings' page.
  */
 @Composable
@@ -95,7 +95,7 @@ internal fun MentionsPage(
 }
 
 /**
- * Displays a menu of tools for navigating to a account settings page or
+ * Displays a menu of tools for navigating to a application settings page or
  * manually updating mentions.
  *
  * @param state the state of the `MentionsPage`.
