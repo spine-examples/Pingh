@@ -50,6 +50,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,6 +64,7 @@ import androidx.compose.ui.unit.sp
 import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
+import io.spine.examples.pingh.github.validateUsernameValue
 
 /**
  * Displays a login form.
@@ -80,8 +82,8 @@ internal fun LoginPage(
     toMentionsPage: () -> Unit
 ) {
     var username by remember { mutableStateOf("") }
-    var isError by remember { mutableStateOf(false) }
     var wasChanged by remember { mutableStateOf(false) }
+    val isError = remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -95,14 +97,13 @@ internal fun LoginPage(
             value = username,
             onChange = { value ->
                 username = value
-                isError = !username.isValidUsernameValue()
                 wasChanged = true
             },
             isError = isError
         )
         Spacer(Modifier.height(10.dp))
         LoginButton(
-            enabled = wasChanged && !isError
+            enabled = wasChanged && !isError.value
         ) {
             client.logIn(
                 Username::class.buildBy(username)
@@ -165,19 +166,22 @@ private fun ApplicationInfo() {
 private fun UsernameInput(
     value: String,
     onChange: (String) -> Unit,
-    isError: Boolean
+    isError: MutableState<Boolean>
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     val borderWidth = if (isFocused) 2.dp else 1.dp
     val borderColor = when {
-        isError -> MaterialTheme.colorScheme.error
+        isError.value -> MaterialTheme.colorScheme.error
         isFocused -> MaterialTheme.colorScheme.primary
         else -> MaterialTheme.colorScheme.tertiary
     }
     BasicTextField(
         value = value,
-        onValueChange = onChange,
+        onValueChange = { changedValue ->
+            onChange(changedValue)
+            isError.value = !validateUsernameValue(changedValue)
+        },
         modifier = Modifier
             .width(180.dp)
             .height(52.dp),
@@ -196,7 +200,7 @@ private fun UsernameInput(
                 border = BorderStroke(borderWidth, borderColor)
             )
             Label(borderColor)
-            ErrorMesage(isError)
+            ErrorMesage(isError.value)
         }
     }
 }

@@ -390,9 +390,9 @@ private class MentionsPageState(private val client: DesktopClient) {
 private typealias MentionsList = List<MentionView>
 
 /**
- * Creates a new list by replacing the status of one mention with another.
+ * Updates the status of the mention with the specified identifier to the new status.
  *
- * @param id the identifier of the mention to which the status is changed.
+ * @param id the identifier of the mention which the status was changed.
  * @param status new status of the mention.
  */
 private fun MentionsList.setMentionStatus(
