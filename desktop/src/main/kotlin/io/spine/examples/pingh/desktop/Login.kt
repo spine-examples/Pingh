@@ -64,7 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.github.Username
-import kotlin.reflect.KClass
+import io.spine.examples.pingh.github.buildBy
 
 /**
  * Displays a login form.
@@ -78,9 +78,7 @@ internal fun LoginPage(
     client: DesktopClient,
     toMentionsPage: () -> Unit
 ) {
-    var username by remember {
-        mutableStateOf(Username::class.buildWithoutValidationBy(""))
-    }
+    var username by remember { mutableStateOf("") }
     var isError by remember { mutableStateOf(false) }
     var wasChanged by remember { mutableStateOf(false) }
     Column(
@@ -93,10 +91,10 @@ internal fun LoginPage(
         ApplicationInfo()
         Spacer(Modifier.height(35.dp))
         UsernameInput(
-            value = username.value,
+            value = username,
             onChange = { value ->
-                username = Username::class.buildWithoutValidationBy(value)
-                isError = !username.value.isValidUsernameValue()
+                username = value
+                isError = !username.isValidUsernameValue()
                 wasChanged = true
             },
             isError = isError
@@ -105,7 +103,9 @@ internal fun LoginPage(
         LogInButton(
             enabled = wasChanged && !isError
         ) {
-            client.logIn(username) {
+            client.logIn(
+                Username::class.buildBy(username)
+            ) {
                 toMentionsPage()
             }
         }
@@ -309,17 +309,3 @@ private fun LogInButton(
         )
     }
 }
-
-/**
- * Creates a new `Username` with the specified value without validation.
- *
- * The `Username` value cannot be empty. However, if the login field is empty,
- * the `Username` will also be empty. To avoid exceptions during building,
- * the `buildPartial` method is used, which does not check the `Username` value.
- *
- * Before sending this `Username` to the server, ensure to [validate] the value.
- */
-private fun KClass<Username>.buildWithoutValidationBy(value: String) =
-    Username.newBuilder()
-        .setValue(value)
-        .buildPartial()
