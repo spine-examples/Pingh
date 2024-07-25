@@ -67,11 +67,6 @@ import io.spine.examples.pingh.github.Username
 import kotlin.reflect.KClass
 
 /**
- * Max length of a GitHub username.
- */
-private const val maxLengthOfUsername = 39
-
-/**
  * Displays a login form.
  *
  * If the `Username` is entered correct, user will be [logged in][DesktopClient.logIn] into
@@ -101,7 +96,7 @@ internal fun LoginPage(
             value = username.value,
             onChange = { value ->
                 username = Username::class.buildWithoutValidationBy(value)
-                isError = !username.validate()
+                isError = !username.value.isValidUsernameValue()
                 wasChanged = true
             },
             isError = isError
@@ -328,46 +323,3 @@ private fun KClass<Username>.buildWithoutValidationBy(value: String) =
     Username.newBuilder()
         .setValue(value)
         .buildPartial()
-
-/**
- * Returns `true` if the `Username` is valid according to GitHub criteria; otherwise, returns `false`.
- *
- * A valid GitHub username must:
- *
- * - Consist of alphanumeric characters and dashes (`'-'`);
- * - Not have consecutive dashes or dashes at the beginning or end;
- * - Not exceed 39 characters.
- *
- * @see <a href="https://docs.github.com/en/enterprise-server@3.9/admin/managing-iam/iam-configuration-reference/username-considerations-for-external-authentication">
- *     Username considerations for external authentication</a>
- */
-@Suppress("ReturnCount") // To preserve the integrity of the algorithm,
-// the number of `return` is exceeded.
-private fun Username.validate(): Boolean {
-    if (this.value.length !in 1..maxLengthOfUsername) {
-        return false
-    }
-    var previous = '-'
-    this.value.forEach { current ->
-        if (current.validateGiven(previous)) {
-            return false
-        }
-        previous = current
-    }
-    return previous != '-'
-}
-
-/**
- * Returns `true` if this character is alphanumeric or
- * if it is a dash and `previous` is not a dash. Otherwise, returns `false`.
- */
-private fun Char.validateGiven(previous: Char): Boolean =
-    previous == '-' && this == '-'
-            || !this.isAlphanumeric() && this != '-'
-
-/**
- * Returns `true` if the character is a digit or an English letter in any case;
- * otherwise, returns `false`.
- */
-private fun Char.isAlphanumeric(): Boolean =
-    this in 'A'..'Z' || this in 'a'..'z' || this.isDigit()
