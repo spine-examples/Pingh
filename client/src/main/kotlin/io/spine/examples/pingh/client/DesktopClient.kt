@@ -62,7 +62,6 @@ import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.protobuf.Durations2
-import java.util.Optional
 import java.util.UUID
 import kotlin.reflect.KClass
 
@@ -88,7 +87,12 @@ public class DesktopClient(
 
     private val client: Client
     private val user: UserId
-    private var session: SessionId? = null
+
+    /**
+     * Current user session.
+     */
+    public var session: UserSession? = null
+        private set
 
     init {
         val channel = ManagedChannelBuilder
@@ -104,13 +108,6 @@ public class DesktopClient(
     }
 
     /**
-     * If the user is logged in to the Pingh application, it is `Username` wrapped
-     * in an `Optional`; otherwise, it is an empty `Optional`.
-     */
-    public val nameOfAuthenticatedUser: Optional<Username>
-        get() = Optional.ofNullable(session?.username)
-
-    /**
      * Logs the user in and remembers the session ID.
      */
     public fun logIn(
@@ -121,7 +118,7 @@ public class DesktopClient(
             SessionId::class.buildBy(username)
         )
         observeEventOnce(command.id, UserLoggedIn::class) { event ->
-            this.session = command.id
+            this.session = UserSession(command.id)
             onSuccess(event)
         }
         send(command)
@@ -134,7 +131,7 @@ public class DesktopClient(
         onSuccess: (event: UserLoggedOut) -> Unit = {}
     ) {
         checkNotNull(session) { "The user has not been logged in." }
-        val command = LogUserOut::class.buildBy(session!!)
+        val command = LogUserOut::class.buildBy(session!!.id)
         observeEventOnce(command.id, UserLoggedOut::class) { event ->
             this.session = null
             onSuccess(event)

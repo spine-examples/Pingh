@@ -174,8 +174,8 @@ private fun Profile(
     client: DesktopClient,
     toLoginPage: () -> Unit
 ) {
-    val username = client.nameOfAuthenticatedUser
-        .orElseThrow { IllegalStateException("User is not logged in.") }
+    val username = client.session?.username
+    checkNotNull(username) { "User is not logged in." }
     Row(
         modifier = Modifier
             .fillMaxWidth()

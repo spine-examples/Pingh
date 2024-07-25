@@ -24,8 +24,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-@file:Suppress("TooManyFunctions") // Using Compose requires many functions to render the UI.
-
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.foundation.BorderStroke
@@ -71,7 +69,7 @@ import io.spine.examples.pingh.github.buildBy
  *
  * If the `Username` is entered correct, user will be [logged in][DesktopClient.logIn] into
  * the Pingh application and redirected to the [MentionsPage].
- * [LogInButton] is not enable while the entered `Username` is invalid.
+ * [LoginButton] is not enable while the entered `Username` is invalid.
  */
 @Composable
 internal fun LoginPage(
@@ -100,7 +98,7 @@ internal fun LoginPage(
             isError = isError
         )
         Spacer(Modifier.height(10.dp))
-        LogInButton(
+        LoginButton(
             enabled = wasChanged && !isError
         ) {
             client.logIn(
@@ -288,7 +286,7 @@ private fun ErrorMesage(isShown: Boolean) {
  * Displays a button on the login form.
  */
 @Composable
-private fun LogInButton(
+private fun LoginButton(
     enabled: Boolean,
     onClick: () -> Unit
 ) {
@@ -304,7 +302,7 @@ private fun LogInButton(
         )
     ) {
         Text(
-            text = "Log in",
+            text = "Login",
             style = MaterialTheme.typography.displayMedium
         )
     }
