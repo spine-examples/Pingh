@@ -43,10 +43,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,6 +61,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.github.Username
 import kotlin.reflect.KClass
@@ -92,6 +95,8 @@ internal fun LoginPage(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        ApplicationInfo()
+        Spacer(Modifier.height(35.dp))
         UsernameInput(
             value = username.value,
             onChange = { value ->
@@ -101,7 +106,7 @@ internal fun LoginPage(
             },
             isError = isError
         )
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(10.dp))
         LogInButton(
             enabled = wasChanged && !isError
         ) {
@@ -109,6 +114,47 @@ internal fun LoginPage(
                 toMentionsPage()
             }
         }
+    }
+}
+
+/**
+ * Displays application information, including the name, icon, and a description explaining
+ * why the application uses authentication via GitHub.
+ */
+@Composable
+private fun ApplicationInfo() {
+    Column(
+        modifier = Modifier.padding(horizontal = 30.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = Icons.pingh,
+                contentDescription = null,
+                modifier = Modifier.size(40.dp),
+                tint = MaterialTheme.colorScheme.onSecondary
+            )
+            Spacer(Modifier.width(10.dp))
+            Text(
+                text = "Pingh",
+                modifier = Modifier.width(100.dp),
+                color = MaterialTheme.colorScheme.onSecondary,
+                fontSize = 26.sp,
+                style = MaterialTheme.typography.displayLarge
+            )
+        }
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = "Pingh is a GitHub app that looks up mentions on behalf of the user. " +
+                    "It requires authentication via GitHub.",
+            modifier = Modifier.width(180.dp),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 
@@ -127,7 +173,7 @@ private fun UsernameInput(
     val borderColor = when {
         isError -> MaterialTheme.colorScheme.error
         isFocused -> MaterialTheme.colorScheme.primary
-        else -> MaterialTheme.colorScheme.onSecondary
+        else -> MaterialTheme.colorScheme.tertiary
     }
     BasicTextField(
         value = value,
@@ -232,12 +278,11 @@ private fun Placeholder(isShown: Boolean) {
 private fun ErrorMesage(isShown: Boolean) {
     if (isShown) {
         Text(
-            text = "Must consist of alphanumeric characters and dashes, " +
-                    "without consecutive dashes or dashes at the beginning or end.",
+            text = "Enter a valid GitHub username.",
             modifier = Modifier
                 .width(155.dp)
                 .height(30.dp)
-                .absoluteOffset(x = 15.dp, y = 42.dp),
+                .absoluteOffset(x = 15.dp, y = 44.dp),
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.bodySmall
         )
@@ -255,7 +300,7 @@ private fun LogInButton(
     Button(
         onClick = onClick,
         modifier = Modifier
-            .width(120.dp)
+            .width(180.dp)
             .height(40.dp),
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(
