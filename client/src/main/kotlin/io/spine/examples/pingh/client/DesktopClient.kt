@@ -87,7 +87,12 @@ public class DesktopClient(
 
     private val client: Client
     private val user: UserId
-    private var session: SessionId? = null
+
+    /**
+     * Current user session.
+     */
+    public var session: UserSession? = null
+        private set
 
     init {
         val channel = ManagedChannelBuilder
@@ -113,7 +118,7 @@ public class DesktopClient(
             SessionId::class.buildBy(username)
         )
         observeEventOnce(command.id, UserLoggedIn::class) { event ->
-            this.session = command.id
+            this.session = UserSession(command.id)
             onSuccess(event)
         }
         send(command)
@@ -126,7 +131,7 @@ public class DesktopClient(
         onSuccess: (event: UserLoggedOut) -> Unit = {}
     ) {
         checkNotNull(session) { "The user has not been logged in." }
-        val command = LogUserOut::class.buildBy(session!!)
+        val command = LogUserOut::class.buildBy(session!!.id)
         observeEventOnce(command.id, UserLoggedOut::class) { event ->
             this.session = null
             onSuccess(event)

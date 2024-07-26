@@ -24,40 +24,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop
+package io.spine.examples.pingh.client
 
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowState
-import androidx.compose.ui.window.application
-import io.spine.examples.pingh.client.DesktopClient
+import io.spine.examples.pingh.github.Username
+import io.spine.examples.pingh.sessions.SessionId
 
 /**
- * Enables interaction with the Pingh server.
+ * Information about the current user session.
+ *
+ * @param id the identifier of the user session on the Pingh server.
  */
-private val client = DesktopClient()
-
-/**
- * Entry point of the desktop application.
- */
-public fun main() {
-    app()
-}
-
-/**
- * The root component of the desktop application.
- */
-private fun app() {
-    application {
-        PinghTheme {
-            Window(
-                onCloseRequest = ::exitApplication,
-                title = "Pingh",
-                state = WindowState(size = DpSize(240.dp, 426.dp))
-            ) {
-                CurrentPage(client)
-            }
-        }
-    }
+public class UserSession(
+    internal val id: SessionId
+) {
+    /**
+     * Name of the user to which this session belongs.
+     */
+    public val username: Username = id.username
 }

@@ -26,17 +26,34 @@
 
 package io.spine.examples.pingh.desktop
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import io.spine.examples.pingh.github.Username
 import io.spine.net.Url
 
 /**
  * Displays a round avatar with an image loaded from the specified URL.
  *
  * The image loads asynchronously.
+ *
+ * @param url the URL of the avatar image.
+ * @param modifier the modifier to be applied to this avatar.
  */
 @Composable
 internal fun Avatar(
@@ -49,4 +66,50 @@ internal fun Avatar(
         modifier = modifier
             .clip(CircleShape)
     )
+}
+
+/**
+ * Displays a round avatar with the first letter of the provided name
+ * on a gradient background.
+ *
+ * @param name the name to write it first letter on the avatar.
+ * @param size the width and height of the avatar.
+ * @param modifier the modifier to be applied to this avatar.
+ */
+@Composable
+internal fun Avatar(
+    name: Username,
+    size: Dp,
+    modifier: Modifier = Modifier
+) {
+    val gradient = listOf(
+        MaterialTheme.colorScheme.primary,
+        MaterialTheme.colorScheme.primaryContainer
+    )
+    Box(
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            modifier = modifier
+                .size(size)
+                .clip(CircleShape),
+            contentScale = ContentScale.Crop,
+            contentDescription = null,
+            painter = object : Painter() {
+                override val intrinsicSize: Size = Size(size.value, size.value)
+                override fun DrawScope.onDraw() {
+                    drawRect(
+                        brush = Brush.linearGradient(gradient),
+                        size = Size(size.value * 2, size.value * 2)
+                    )
+                }
+            }
+        )
+        Text(
+            text = if (name.value.isNotEmpty()) name.value[0].toString() else "",
+            color = MaterialTheme.colorScheme.onPrimary,
+            fontSize = (size.value / 2).sp,
+            style = MaterialTheme.typography.displayLarge
+        )
+    }
 }

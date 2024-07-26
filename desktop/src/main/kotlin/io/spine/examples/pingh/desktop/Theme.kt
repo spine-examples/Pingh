@@ -55,13 +55,15 @@ internal fun PinghTheme(content: @Composable () -> Unit): Unit = MaterialTheme(
  */
 @Suppress("MagicNumber") // Colors are defined using RGB components.
 private val colorScheme = lightColorScheme(
-    primary = Color.White,
-    onPrimary = Color(247, 247, 247),
-    secondary = Color(152, 200, 250),
-    onSecondary = Color(59, 155, 255),
+    primary = Color(162, 215, 245),
+    onPrimary = Color.White,
+    primaryContainer = Color(59, 155, 255),
+    secondary = Color.White,
+    onSecondary = Color(40, 40, 40),
+    tertiary = Color(150, 150, 150),
     background = Color(235, 235, 235),
     onBackground = Color(213, 213, 213),
-    error = Color(255, 196, 196)
+    error = Color(255, 161, 161)
 )
 
 /**
@@ -102,6 +104,14 @@ private val typography = Typography(
     displayLarge = TextStyle(
         fontFamily = sanFrancisco,
         fontSize = 16.sp
+    ),
+    displayMedium = TextStyle(
+        fontFamily = sanFrancisco,
+        fontSize = 14.sp
+    ),
+    displaySmall = TextStyle(
+        fontFamily = sanFrancisco,
+        fontSize = 12.sp
     ),
     bodyLarge = TextStyle(
         fontFamily = sanFrancisco,

@@ -24,40 +24,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop
+package io.spine.examples.pingh.github
 
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowState
-import androidx.compose.ui.window.application
-import io.spine.examples.pingh.client.DesktopClient
+import io.spine.validate.Validate
 
 /**
- * Enables interaction with the Pingh server.
+ * Returns `true` if the specified value is the valid `Username` value;
+ * otherwise, returns `false`.
+ *
+ * @see [Username]
  */
-private val client = DesktopClient()
-
-/**
- * Entry point of the desktop application.
- */
-public fun main() {
-    app()
-}
-
-/**
- * The root component of the desktop application.
- */
-private fun app() {
-    application {
-        PinghTheme {
-            Window(
-                onCloseRequest = ::exitApplication,
-                title = "Pingh",
-                state = WindowState(size = DpSize(240.dp, 426.dp))
-            ) {
-                CurrentPage(client)
-            }
-        }
-    }
+public fun validateUsernameValue(value: String): Boolean {
+    val unvalidatedUsername = Username.newBuilder()
+        .setValue(value)
+        .buildPartial()
+    return Validate
+        .violationsOf(unvalidatedUsername)
+        .isEmpty()
 }

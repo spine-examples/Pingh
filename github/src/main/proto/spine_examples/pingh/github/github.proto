@@ -41,7 +41,13 @@ import "spine_examples/pingh/github/identifiers.proto";
 // The username used in the GitHub account.
 message Username {
 
-    string value = 1 [(required) = true];
+    // A valid GitHub username must:
+    //
+    // - Consist of alphanumeric characters and dashes ('-');
+    // - Not have consecutive dashes or dashes at the beginning or end.
+    //
+    string value = 1 [(required) = true,
+        (pattern).regex = "^[a-zA-Z\\d](?:-(?=[a-zA-Z\\d])|[a-zA-Z\\d])*$"];
 }
 
 // The token issued by GitHub after authentication.

@@ -45,6 +45,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -56,7 +57,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -73,33 +73,48 @@ import java.lang.Thread.sleep
  * This page is the main interface where users can manage their mentions.
  * Users can snooze and read mentions on this page. Additionally, it is
  * possible to manually update the list of mentions from the server.
+ *
+ * @param client enables interaction with the Pingh server.
+ * @param settings the state of the application settings.
+ * @param toSettingsPage the navigation to the 'Settings' page.
  */
 @Composable
-internal fun MentionsPage(client: DesktopClient) {
+internal fun MentionsPage(
+    client: DesktopClient,
+    settings: SettingsState,
+    toSettingsPage: () -> Unit
+) {
     val state = remember { MentionsPageState(client) }
     Column(
         Modifier.fillMaxSize()
     ) {
-        ToolBar(state)
+        ToolBar(state, toSettingsPage)
         Spacer(Modifier.height(0.5.dp))
-        MentionCards(state)
+        MentionCards(state, settings.snoozeTime.value)
     }
 }
 
 /**
- * Displays a menu of tools for navigating to a user profile page or
+ * Displays a menu of tools for navigating to a application settings page or
  * manually updating mentions.
+ *
+ * @param state the state of the `MentionsPage`.
+ * @param toSettingsPage the navigation to the 'Settings' page.
  */
 @Composable
-private fun ToolBar(state: MentionsPageState) {
+private fun ToolBar(
+    state: MentionsPageState,
+    toSettingsPage: () -> Unit
+) {
+    val contentColor = MaterialTheme.colorScheme.onSecondary
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
-            .background(MaterialTheme.colorScheme.primary)
+            .background(MaterialTheme.colorScheme.secondary)
             .drawBehind {
                 drawLine(
-                    color = Color.Black,
+                    color = contentColor,
                     start = Offset(0f, size.height),
                     end = Offset(size.width, size.height),
                     strokeWidth = 1.dp.toPx()
@@ -110,12 +125,16 @@ private fun ToolBar(state: MentionsPageState) {
     ) {
         IconButton(
             icon = Icons.pingh,
-            onClick = { }, // Go to the `Profile` page.
-            modifier = Modifier.size(40.dp)
+            onClick = toSettingsPage,
+            modifier = Modifier.size(40.dp),
+            colors = IconButtonDefaults.iconButtonColors(
+                contentColor = contentColor
+            )
         )
         Text(
             text = "Recent mentions",
             modifier = Modifier.width(140.dp),
+            color = contentColor,
             style = MaterialTheme.typography.displayLarge
         )
         IconButton(
@@ -123,7 +142,10 @@ private fun ToolBar(state: MentionsPageState) {
             onClick = {
                 state.updateMentions()
             },
-            modifier = Modifier.size(40.dp)
+            modifier = Modifier.size(40.dp),
+            colors = IconButtonDefaults.iconButtonColors(
+                contentColor = contentColor
+            )
         )
     }
 }
@@ -133,9 +155,15 @@ private fun ToolBar(state: MentionsPageState) {
  * followed by snoozed mentions, and finally read mentions.
  *
  * Within each group, mentions are sorted by time.
+ *
+ * @param state the state of the `MentionsPage`.
+ * @param snoozeTime the interval after which the notification is repeated.
  */
 @Composable
-private fun MentionCards(state: MentionsPageState) {
+private fun MentionCards(
+    state: MentionsPageState,
+    snoozeTime: SnoozeTime
+) {
     val scrollState = rememberScrollState()
     Column(
         Modifier
@@ -148,7 +176,7 @@ private fun MentionCards(state: MentionsPageState) {
             .sortByStatusAndWhenMentioned()
             .forEach { mention ->
                 Spacer(Modifier.height(5.dp))
-                MentionCard(state, mention)
+                MentionCard(state, mention, snoozeTime)
             }
         Spacer(Modifier.height(5.dp))
     }
@@ -162,9 +190,17 @@ private fun MentionCards(state: MentionsPageState) {
  * - If the mention is unread, it can be read or snoozed.
  * - If the mention is snoozed, it can only be read.
  * - If the mention is read, it can still be opened, but its status does not change.
+ *
+ * @param state the state of the `MentionsPage`.
+ * @param mention the mention whose information is displayed.
+ * @param snoozeTime the interval after which the notification is repeated.
  */
 @Composable
-private fun MentionCard(state: MentionsPageState, mention: MentionView) {
+private fun MentionCard(
+    state: MentionsPageState,
+    mention: MentionView,
+    snoozeTime: SnoozeTime
+) {
     val uriHandler = LocalUriHandler.current
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered = interactionSource.collectIsHoveredAsState()
@@ -172,7 +208,7 @@ private fun MentionCard(state: MentionsPageState, mention: MentionView) {
     val containerColor = if (mentionIsRead) {
         MaterialTheme.colorScheme.onBackground
     } else {
-        MaterialTheme.colorScheme.primary
+        MaterialTheme.colorScheme.secondary
     }
     val onClick = {
         uriHandler.openUri(mention.url.spec)
@@ -186,8 +222,9 @@ private fun MentionCard(state: MentionsPageState, mention: MentionView) {
             .fillMaxWidth()
             .height(50.dp),
         interactionSource = interactionSource,
-        colors = CardDefaults.elevatedCardColors().copy(
-            containerColor = containerColor
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = containerColor,
+            contentColor = MaterialTheme.colorScheme.onSecondary
         )
     ) {
         Row(
@@ -202,7 +239,7 @@ private fun MentionCard(state: MentionsPageState, mention: MentionView) {
             Spacer(Modifier.width(5.dp))
             MentionCardText(mention, isHovered)
             Spacer(Modifier.width(5.dp))
-            SnoozeButton(state, mention)
+            SnoozeButton(state, mention, snoozeTime)
         }
     }
 }
@@ -210,9 +247,15 @@ private fun MentionCard(state: MentionsPageState, mention: MentionView) {
 /**
  * Displays textual information about the mention,
  * including details about who mentioned the user, where, and when.
+ *
+ * @param mention the mention whose information is displayed.
+ * @param isHovered indicates whether the mouse is over the mention card.
  */
 @Composable
-private fun MentionCardText(mention: MentionView, isHovered: State<Boolean>) {
+private fun MentionCardText(
+    mention: MentionView,
+    isHovered: State<Boolean>
+) {
     val time = mention.whenMentioned.run {
         if (isHovered.value) toDatetime() else howMuchTimeHasPassed()
     }
@@ -243,17 +286,28 @@ private fun MentionCardText(mention: MentionView, isHovered: State<Boolean>) {
  * it displays the status text of the mention.
  *
  * Otherwise, nothing is displayed.
+ *
+ * @param state the state of the `MentionsPage`.
+ * @param mention the mention whose information is displayed.
+ * @param snoozeTime the interval after which the notification is repeated.
  */
 @Composable
-private fun SnoozeButton(state: MentionsPageState, mention: MentionView) {
+private fun SnoozeButton(
+    state: MentionsPageState,
+    mention: MentionView,
+    snoozeTime: SnoozeTime
+) {
     when (mention.status) {
         MentionStatus.UNREAD ->
             IconButton(
                 icon = Icons.snooze,
                 onClick = {
-                    state.markMentionAsSnoozed(mention.id)
+                    state.markMentionAsSnoozed(mention.id, snoozeTime)
                 },
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(40.dp),
+                colors = IconButtonDefaults.iconButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                )
             )
 
         MentionStatus.SNOOZED ->
@@ -270,6 +324,8 @@ private fun SnoozeButton(state: MentionsPageState, mention: MentionView) {
 
 /**
  * State of [MentionsPage].
+ *
+ * @param client enables interaction with the Pingh server.
  */
 private class MentionsPageState(private val client: DesktopClient) {
 
@@ -306,15 +362,20 @@ private class MentionsPageState(private val client: DesktopClient) {
 
     /**
      * Marks the mention as snoozed.
+     *
+     * @param id the identifier of the mention that is marked as snoozed.
+     * @param snoozeTime the interval after which the notification is repeated.
      */
-    internal fun markMentionAsSnoozed(id: MentionId) {
-        client.markMentionAsSnoozed(id) {
+    internal fun markMentionAsSnoozed(id: MentionId, snoozeTime: SnoozeTime) {
+        client.markMentionAsSnoozed(id, snoozeTime.value) {
             mentions.value = mentions.value.setMentionStatus(id, MentionStatus.SNOOZED)
         }
     }
 
     /**
      * Marks that the mention is read.
+     *
+     * @param id the identifier of the mention that is marked as read.
      */
     internal fun markMentionAsRead(id: MentionId) {
         client.markMentionAsRead(id) {
@@ -329,9 +390,15 @@ private class MentionsPageState(private val client: DesktopClient) {
 private typealias MentionsList = List<MentionView>
 
 /**
- * Creates a new list by replacing the status of one mention with another.
+ * Updates the status of the mention with the specified identifier to the new status.
+ *
+ * @param id the identifier of the mention which the status was changed.
+ * @param status new status of the mention.
  */
-private fun MentionsList.setMentionStatus(id: MentionId, status: MentionStatus): MentionsList {
+private fun MentionsList.setMentionStatus(
+    id: MentionId,
+    status: MentionStatus
+): MentionsList {
     val idInList = this.indexOfFirst { it.id == id }
     val updatedMention = this[idInList]
         .toBuilder()
