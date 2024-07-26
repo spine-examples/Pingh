@@ -87,3 +87,27 @@ message Mention {
     // The URL of the GitHub item where the user was mentioned.
     spine.net.Url url = 5 [(required) = true];
 }
+
+// The verification code that displays so that the user can enter the code in a browser.
+//
+// It is used to allow the user to confirm login to the Pingh application via GitHub.
+//
+message UserCode {
+
+    // A valid GitHub user code consist of 8 alphanumeric characters with a hyphen in the middle.
+    string value = 1 [(required) = true, (pattern).regex = "^[a-zA-Z\\d]{4}-[a-zA-Z\\d]{4}$"];
+}
+
+// A verification code that is used to verify the device.
+message DeviceCode {
+
+    // A valid GitHub device code is 40 characters long.
+    string value = 1 [(required) = true, (pattern).regex = "^[a-zA-Z\\d]{40}$"];
+}
+
+// The token to renew the `PersonalAccessToken` when it expires.
+message RefreshToken {
+
+    // A valid GitHub refresh token starts with 'ghr_'.
+    string value = 1 [(required) = true, (pattern).regex = "^ghr_.+$"];
+}

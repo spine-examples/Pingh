@@ -121,3 +121,33 @@ public fun KClass<Mention>.buildFromFragment(
         url = Url::class.buildBy(fragment.htmlUrl)
         vBuild()
     }
+
+/**
+ * Creates a new `DeviceCode` with the specified string value.
+ */
+public fun KClass<DeviceCode>.buildBy(value: String): DeviceCode =
+    DeviceCode.newBuilder()
+        .setValue(value)
+        .vBuild()
+
+/**
+ * Creates a new `UserCode` with the specified string value.
+ */
+public fun KClass<UserCode>.buildBy(value: String): UserCode =
+    UserCode.newBuilder()
+        .setValue(value)
+        .vBuild()
+
+/**
+ * Creates a new `RefreshToken` with the specified string value.
+ */
+public fun KClass<RefreshToken>.buildBy(value: String): RefreshToken =
+    RefreshToken.newBuilder()
+        .setValue(value)
+        .vBuild()
+
+/**
+ * Returns an 8-character code string, excluding the dash in the middle.
+ */
+public val UserCode.content: String
+    get() = this.value.replace("-", "")
