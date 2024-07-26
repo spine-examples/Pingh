@@ -307,7 +307,7 @@ private fun ErrorMesage(isShown: Boolean) {
  * Displays a button on the login form.
  *
  * @param enabled controls the enabled state of this button.
- * If `false`, the button cannot be pressed.
+ *                If `false`, the button cannot be pressed.
  * @param onClick called when this button is clicked.
  */
 @Composable

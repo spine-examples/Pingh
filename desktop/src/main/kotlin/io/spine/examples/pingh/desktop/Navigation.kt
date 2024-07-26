@@ -34,8 +34,6 @@ import io.spine.examples.pingh.client.DesktopClient
 /**
  * Displays the current page of the application.
  *
- * It will be recomposed when the page changes.
- *
  * @param client enables interaction with the Pingh server.
  */
 @Composable
