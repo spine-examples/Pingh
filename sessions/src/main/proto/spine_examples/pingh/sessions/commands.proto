@@ -37,10 +37,18 @@ option java_multiple_files = true;
 import "spine_examples/pingh/sessions/identifiers.proto";
 import "spine_examples/pingh/github/github.proto";
 
-// Tells to log user in.
+// Tells to start the login process for a Pingh app via GitHub.
 message LogUserIn {
 
     // The ID of user session.
+    SessionId id = 1;
+}
+
+// Tells to check whether the user has completed the login process
+// on GitHub and entered their user code.
+message VerifyUserLoginToGitHub {
+
+    // The ID of the user session.
     SessionId id = 1;
 }
 

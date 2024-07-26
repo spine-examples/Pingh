@@ -37,6 +37,19 @@ option java_multiple_files = true;
 import "spine_examples/pingh/sessions/identifiers.proto";
 import "spine_examples/pingh/github/github.proto";
 
+// User code received.
+//
+// To continue the login process, the user must enter this code on the GitHub page.
+//
+message UserCodeReceived {
+
+    // The ID of user session.
+    SessionId id = 1;
+
+    // The code a user needs to enter on GitHub to confirm login to the Pingh app.
+    spine_examples.pingh.github.UserCode user_code = 2 [(required) = true];
+}
+
 // The user logged in.
 message UserLoggedIn {
 
@@ -45,6 +58,14 @@ message UserLoggedIn {
 
     // The GitHub token obtained as a result of logging in.
     spine_examples.pingh.github.PersonalAccessToken token = 2 [(required) = true];
+}
+
+// The user has not yet entered their user code on GitHub,
+// so logging into the Pingh app is not complete.
+message UserIsNotLoggedIntoGitHub {
+
+    // The ID of user session.
+    SessionId id = 1;
 }
 
 // The user logged out.

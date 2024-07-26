@@ -36,14 +36,36 @@ option java_multiple_files = true;
 
 import "spine_examples/pingh/sessions/identifiers.proto";
 import "spine_examples/pingh/github/github.proto";
+import "google/protobuf/timestamp.proto";
 
 // The process of session existence.
 //
-// It starts with the user's login and ends with the user's login out.
+// Manages the user's login process to the Pingh app. First, the user code and device code
+// are requested. Then, the user code is provided to the user for entry on GitHub.
+// Finally, it verifies the user code using the device code and obtains `PersonalAccessToken`.
 //
 message UserSession {
     option (entity) = { kind: PROCESS_MANAGER };
 
     // The ID of user session.
     SessionId id = 1;
+
+    // The device code used to verify user login on GitHub.
+    //
+    // If this field is specified, the login process starts and
+    // waits for the user to enter their code.
+    //
+    spine_examples.pingh.github.DeviceCode device_code = 2;
+
+    // The expiration time of the `PersonalAccessToken` received at login.
+    //
+    // This field is specified if the user is logged in.
+    //
+    google.protobuf.Timestamp when_access_token_expires = 3;
+
+    // The token used to renew the `PersonalAccessToken` when it expires.
+    //
+    // This field is specified if the user is logged in.
+    //
+    spine_examples.pingh.github.RefreshToken refresh_token = 4;
 }
