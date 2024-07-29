@@ -34,6 +34,7 @@ import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.examples.pingh.sessions.given.buildBy
 import io.spine.examples.pingh.sessions.given.buildWithoutToken
 import io.spine.examples.pingh.sessions.given.generate
+import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.server.BoundedContextBuilder
 import io.spine.testing.server.EventSubject
 import io.spine.testing.server.blackbox.ContextAwareTest
@@ -46,7 +47,7 @@ import org.junit.jupiter.api.Test
 public class SessionsContextSpec : ContextAwareTest() {
 
     protected override fun contextBuilder(): BoundedContextBuilder =
-        newSessionsContext()
+        newSessionsContext(PredefinedGitHubAuthenticationResponses())
 
     @Nested
     public inner class `handle 'LogUserIn' command, and` {

@@ -31,6 +31,7 @@ import io.spine.examples.pingh.clock.IntervalClock
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.newMentionsContext
 import io.spine.examples.pingh.sessions.newSessionsContext
+import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.server.Server
 import kotlin.time.Duration.Companion.milliseconds
 import org.junit.jupiter.api.AfterEach
@@ -76,7 +77,7 @@ internal abstract class IntegrationTest {
          */
         private fun createServer(port: Int): Server =
             Server.atPort(port)
-                .add(newSessionsContext())
+                .add(newSessionsContext(PredefinedGitHubAuthenticationResponses()))
                 .add(newMentionsContext(PredefinedGitHubResponses()))
                 .build()
     }

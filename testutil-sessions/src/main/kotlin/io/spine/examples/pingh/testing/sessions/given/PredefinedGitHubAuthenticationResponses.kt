@@ -24,14 +24,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "Pingh"
-include(
-    "clock",
-    "github",
-    "sessions",
-    "mentions",
-    "testutil-mentions",
-    "testutil-sessions",
-    "server",
-    "client"
-)
+package io.spine.examples.pingh.testing.sessions.given
+
+import io.spine.examples.pingh.github.DeviceCode
+import io.spine.examples.pingh.github.rest.AccessTokenResponse
+import io.spine.examples.pingh.github.rest.AuthenticationCodesResponse
+import io.spine.examples.pingh.sessions.GitHubAuthenticationService
+
+public class PredefinedGitHubAuthenticationResponses : GitHubAuthenticationService{
+
+    override fun requestAuthenticationCodes(): AuthenticationCodesResponse {
+        TODO("Not yet implemented")
+    }
+
+    override fun requestAccessToken(deviceCode: DeviceCode): AccessTokenResponse {
+        TODO("Not yet implemented")
+    }
+}
