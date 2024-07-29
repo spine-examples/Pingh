@@ -36,6 +36,7 @@ option java_multiple_files = true;
 
 import "spine_examples/pingh/github/github.proto";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
 import "spine/net/url.proto";
 
 // Response from GitHub API containing authentication codes required for login.
@@ -49,6 +50,10 @@ message AuthenticationCodesResponse {
 
     // The URL where users need to enter their `user_code`.
     spine.net.Url verification_url = 3 [(required) = true];
+
+    // The minimum duration that must pass before the user can make a new access token request
+    // to complete the device authentication.
+    google.protobuf.Duration interval = 4 [(required) = true];
 }
 
 // Response from the GitHub API containing an `PersonalAccessToken`,

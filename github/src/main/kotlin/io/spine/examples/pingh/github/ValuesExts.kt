@@ -169,6 +169,7 @@ public fun KClass<AuthenticationCodesResponse>.buildFromFragment(
         deviceCode = DeviceCode::class.buildBy(fragment.deviceCode)
         userCode = UserCode::class.buildBy(fragment.userCode)
         verificationUrl = Url::class.buildBy(fragment.verificationUri)
+        interval = seconds(fragment.interval)
         vBuild()
     }
 

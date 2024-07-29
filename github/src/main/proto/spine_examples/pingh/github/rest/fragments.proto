@@ -152,6 +152,10 @@ message AuthenticationCodesFragment {
 
     // The URL where users need to enter their `user_code`.
     string verification_uri = 3 [(required) = true, json_name = "verification_uri"];
+
+    // The minimum number of seconds required before the next request
+    // to generate an access token.
+    int64 interval = 4 [(required) = true];
 }
 
 // The GitHub API response received when obtaining access token.
