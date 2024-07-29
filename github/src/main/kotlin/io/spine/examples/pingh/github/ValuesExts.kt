@@ -27,9 +27,15 @@
 package io.spine.examples.pingh.github
 
 import com.google.protobuf.util.Timestamps
+import io.spine.base.Time.currentTime
+import io.spine.examples.pingh.github.rest.AccessTokenFragment
+import io.spine.examples.pingh.github.rest.AccessTokenResponse
+import io.spine.examples.pingh.github.rest.AuthenticationCodesFragment
+import io.spine.examples.pingh.github.rest.AuthenticationCodesResponse
 import io.spine.examples.pingh.github.rest.CommentFragment
 import io.spine.examples.pingh.github.rest.IssueOrPullRequestFragment
 import io.spine.net.Url
+import io.spine.protobuf.Durations2.seconds
 import kotlin.reflect.KClass
 
 /**
@@ -151,3 +157,31 @@ public fun KClass<RefreshToken>.buildBy(value: String): RefreshToken =
  */
 public val UserCode.content: String
     get() = this.value.replace("-", "")
+
+/**
+ * Creates a new `AuthenticationCodesResponse` with the data specified
+ * in the `AuthenticationCodesFragment`.
+ */
+public fun KClass<AuthenticationCodesResponse>.buildFromFragment(
+    fragment: AuthenticationCodesFragment
+): AuthenticationCodesResponse =
+    with(AuthenticationCodesResponse.newBuilder()) {
+        deviceCode = DeviceCode::class.buildBy(fragment.deviceCode)
+        userCode = UserCode::class.buildBy(fragment.userCode)
+        verificationUrl = Url::class.buildBy(fragment.verificationUri)
+        vBuild()
+    }
+
+/**
+ * Creates a new `AccessTokenResponse` with the data specified
+ * in the `AccessTokenFragment`.
+ */
+public fun KClass<AccessTokenResponse>.buildFromFragment(
+    fragment: AccessTokenFragment
+): AccessTokenResponse =
+    with(AccessTokenResponse.newBuilder()) {
+        accessToken = PersonalAccessToken::class.buildBy(fragment.accessToken)
+        whenExpires = Timestamps.add(currentTime(), seconds(fragment.expiresIn))
+        refreshToken = RefreshToken::class.buildBy(fragment.refreshToken)
+        vBuild()
+    }

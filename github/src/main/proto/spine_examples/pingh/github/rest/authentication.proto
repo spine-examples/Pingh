@@ -1,0 +1,66 @@
+/*
+ * Copyright 2024, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+syntax = "proto3";
+
+package spine_examples.pingh.github.rest;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.pingh.spine.io";
+option java_package = "io.spine.examples.pingh.github.rest";
+option java_outer_classname = "AuthenticationProto";
+option java_multiple_files = true;
+
+import "spine_examples/pingh/github/github.proto";
+import "google/protobuf/timestamp.proto";
+import "spine/net/url.proto";
+
+// Response from GitHub API containing authentication codes required for login.
+message AuthenticationCodesResponse {
+
+    // The verification code that is used to verify the device.
+    DeviceCode device_code = 1 [(required) = true];
+
+    // The verification code that displays so that the user can enter the code in a browser.
+    UserCode user_code = 2 [(required) = true];
+
+    // The URL where users need to enter their `user_code`.
+    spine.net.Url verification_url = 3 [(required) = true];
+}
+
+// Response from the GitHub API containing an `PersonalAccessToken`,
+// as well as a token to refresh the `PersonalAccessToken`.
+message AccessTokenResponse {
+
+    // The user access token.
+    PersonalAccessToken access_token = 1 [(required) = true];
+
+    // The time when `access_token` expires.
+    google.protobuf.Timestamp when_expires = 2 [(required) = true];
+
+    // The refresh token.
+    RefreshToken refresh_token = 3 [(required) = true];
+}
