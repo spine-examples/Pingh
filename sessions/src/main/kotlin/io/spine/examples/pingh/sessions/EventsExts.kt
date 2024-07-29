@@ -26,21 +26,32 @@
 
 package io.spine.examples.pingh.sessions
 
+import com.google.protobuf.Duration
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
+import io.spine.net.Url
 import kotlin.reflect.KClass
 
 /**
- * Creates a new `UserTokenReceived` event with the specified ID of the session and `UserCode`.
+ * Creates a new `UserTokenReceived` event with the specified ID of the session, the `UserCode`,
+ * the URL where users need to enter their `UserCode`, and the minimum duration
+ * that must pass before user can make a new access token request.
  */
-public fun KClass<UserCodeReceived>.buildBy(id: SessionId, userCode: UserCode): UserCodeReceived =
+public fun KClass<UserCodeReceived>.buildBy(
+    id: SessionId,
+    userCode: UserCode,
+    verificationUrl: Url,
+    interval: Duration
+): UserCodeReceived =
     UserCodeReceived.newBuilder()
         .setId(id)
         .setUserCode(userCode)
+        .setVerificationUrl(verificationUrl)
+        .setInterval(interval)
         .vBuild()
 
 /**

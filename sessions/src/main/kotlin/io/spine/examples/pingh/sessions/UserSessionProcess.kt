@@ -26,11 +26,10 @@
 
 package io.spine.examples.pingh.sessions
 
-import io.spine.examples.pingh.github.PersonalAccessToken
-import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
+import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
@@ -53,27 +52,48 @@ public class UserSessionProcess :
     private lateinit var authenticationService: GitHubAuthenticationService
 
     /**
-     * Emits event when a user logs in.
+     * Requests user and device codes from GitHub for authentication.
+     *
+     * The device code is stored in the entity, while the user code is included
+     * in the emitted `UserCodeReceived` event. This event also provides information
+     * on where to enter the code and the timeout duration between entry attempts.
      */
     @Assign
-    internal fun handle(command: LogUserIn): UserLoggedIn {
-        initState(command)
-        return UserLoggedIn::class.buildBy(
+    internal fun handle(command: LogUserIn): UserCodeReceived {
+        val codes = authenticationService.requestAuthenticationCodes()
+        with(builder()) {
+            deviceCode = codes.deviceCode
+        }
+        return UserCodeReceived::class.buildBy(
             command.id,
-            PersonalAccessToken::class.buildBy("token")
+            codes.userCode,
+            codes.verificationUrl,
+            codes.interval
         )
     }
 
-    private fun initState(command: LogUserIn) {
-        builder().setId(command.id)
-    }
-
+    /**
+     * Requests access tokens from GitHub using the device code.
+     *
+     * If the user has already entered the user code issued with the device code, the login
+     * is considered successful, and the `UserLoggedIn` event is emitted. Otherwise,
+     * the `UserIsNotLoggedIntoGitHub` event is emitted.
+     */
     @Assign
     internal fun handle(
         command: VerifyUserLoginToGitHub
     ): EitherOf2<UserLoggedIn, UserIsNotLoggedIntoGitHub> {
-
-        return EitherOf2.withA()
+        val tokens = try {
+            authenticationService.requestAccessToken(state().deviceCode)
+        } catch (exception: CannotObtainAccessToken) {
+            return EitherOf2.withB(UserIsNotLoggedIntoGitHub::class.buildBy(command.id))
+        }
+        with(builder()) {
+            refreshToken = tokens.refreshToken
+            whenAccessTokenExpires = tokens.whenExpires
+            clearDeviceCode()
+        }
+        return EitherOf2.withA(UserLoggedIn::class.buildBy(command.id, tokens.accessToken))
     }
 
     /**

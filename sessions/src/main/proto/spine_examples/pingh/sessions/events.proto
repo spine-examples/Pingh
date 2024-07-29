@@ -36,6 +36,8 @@ option java_multiple_files = true;
 
 import "spine_examples/pingh/sessions/identifiers.proto";
 import "spine_examples/pingh/github/github.proto";
+import "spine/net/url.proto";
+import "google/protobuf/duration.proto";
 
 // User code received.
 //
@@ -48,6 +50,12 @@ message UserCodeReceived {
 
     // The code a user needs to enter on GitHub to confirm login to the Pingh app.
     spine_examples.pingh.github.UserCode user_code = 2 [(required) = true];
+
+    // The URL where users need to enter their `user_code`.
+    spine.net.Url verification_url = 3 [(required) = true];
+
+    // The minimum duration that must pass before user can make a new access token request.
+    google.protobuf.Duration interval = 4 [(required) = true];
 }
 
 // The user logged in.
