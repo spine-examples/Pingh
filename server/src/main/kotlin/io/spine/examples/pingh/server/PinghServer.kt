@@ -36,7 +36,15 @@ import io.spine.server.delivery.Delivery
 import io.spine.server.storage.memory.InMemoryStorageFactory
 import io.spine.server.transport.memory.InMemoryTransportFactory
 import io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT
+import io.spine.examples.pingh.sessions.GitHubAuthenticationServiceImpl
 import io.spine.examples.pingh.sessions.newSessionsContext
+
+/**
+ * The client ID for the Pingh GitHub App.
+ */
+// TODO:2024-07-29:mykyta.pimonov: Add a key load from Google Secret Manager
+//  after deployment to Google Cloud..
+private val clientId = ""
 
 /**
  * The entry point of the server application.
@@ -58,7 +66,7 @@ private fun createServer(): Server {
     configureEnvironment()
     return Server
         .atPort(DEFAULT_CLIENT_SERVICE_PORT)
-        .add(newSessionsContext())
+        .add(newSessionsContext(GitHubAuthenticationServiceImpl(clientId, CIO.create())))
         .add(newMentionsContext(GitHubClientServiceImpl(CIO.create())))
         .build()
 }
