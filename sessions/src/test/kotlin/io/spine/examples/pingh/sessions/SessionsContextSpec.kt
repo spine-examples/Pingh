@@ -26,79 +26,130 @@
 
 package io.spine.examples.pingh.sessions
 
-import io.spine.base.EventMessage
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
+import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
+import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.examples.pingh.sessions.given.buildBy
-import io.spine.examples.pingh.sessions.given.buildWithoutToken
+import io.spine.examples.pingh.sessions.given.expectedUserCodeReceivedEvent
+import io.spine.examples.pingh.sessions.given.expectedUserLoggedInEvent
+import io.spine.examples.pingh.sessions.given.expectedUserSessionWithDeviceCode
+import io.spine.examples.pingh.sessions.given.expectedUserSessionWithRefreshToken
 import io.spine.examples.pingh.sessions.given.generate
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.server.BoundedContextBuilder
-import io.spine.testing.server.EventSubject
 import io.spine.testing.server.blackbox.ContextAwareTest
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 @DisplayName("Sessions Context should")
-public class SessionsContextSpec : ContextAwareTest() {
+internal class SessionsContextSpec : ContextAwareTest() {
+
+    private val authenticationService = PredefinedGitHubAuthenticationResponses()
 
     protected override fun contextBuilder(): BoundedContextBuilder =
-        newSessionsContext(PredefinedGitHubAuthenticationResponses())
+        newSessionsContext(authenticationService)
+
+    @AfterEach
+    internal fun cleanAuthenticationService() {
+        authenticationService.clean()
+    }
 
     @Nested
-    public inner class `handle 'LogUserIn' command, and` {
+    internal inner class `handle 'LogUserIn' command, and` {
 
         private lateinit var sessionId: SessionId
 
         @BeforeEach
-        public fun sendCommand() {
+        internal fun sendCommand() {
             sessionId = SessionId::class.generate()
             val command = LogUserIn::class.buildBy(sessionId)
             context().receivesCommand(command)
         }
 
         @Test
-        public fun `emit 'UserLoggedIn' event`() {
-            val expected = UserLoggedIn::class.buildWithoutToken(sessionId)
-            val events = assertEvents(UserLoggedIn::class.java)
-            events.hasSize(1)
-            events.message(0)
-                .comparingExpectedFieldsOnly()
-                .isEqualTo(expected)
+        internal fun `emit 'UserCodeReceived' event`() {
+            val expected = expectedUserCodeReceivedEvent(sessionId)
+            context().assertEvent(expected)
         }
 
         @Test
-        public fun `update 'UserSession' entity`() {
-            val expected = UserSession::class.buildBy(sessionId)
+        internal fun `set device code in 'UserSession' entity`() {
+            val expected = expectedUserSessionWithDeviceCode(sessionId)
             context().assertState(sessionId, expected)
         }
     }
 
     @Nested
-    public inner class `handle 'LogUserOut' command, and` {
+    internal inner class `handle 'VerifyUserLoginToGitHub' command, and` {
 
         private lateinit var sessionId: SessionId
 
         @BeforeEach
-        public fun sendCommand() {
+        internal fun genereteId() {
             sessionId = SessionId::class.generate()
-            context()
-                .receivesCommand(LogUserIn::class.buildBy(sessionId))
-                .receivesCommand(LogUserOut::class.buildBy(sessionId))
         }
 
         @Test
-        public fun `emit 'UserLoggedOut' event`() {
+        internal fun `emit 'UserIsNotLoggedIntoGitHub' if user code has not been entered`() {
+            sendCommand()
+            val expected = UserIsNotLoggedIntoGitHub::class.buildBy(sessionId)
+            context().assertEvent(expected)
+            context().assertEvents()
+                .withType(UserLoggedIn::class.java)
+                .hasSize(0)
+        }
+
+        @Test
+        internal fun `emit 'UserLoggedIn' if user code has been entered`() {
+            authenticationService.enterUserCode()
+            sendCommand()
+            val expected = expectedUserLoggedInEvent(sessionId)
+            context().assertEvent(expected)
+            context().assertEvents()
+                .withType(UserIsNotLoggedIntoGitHub::class.java)
+                .hasSize(0)
+        }
+
+        @Test
+        internal fun `set refresh token in 'UserSession' entity if user code has been entered`() {
+            authenticationService.enterUserCode()
+            sendCommand()
+            val expected = expectedUserSessionWithRefreshToken(sessionId)
+            context().assertState(sessionId, expected)
+        }
+
+        private fun sendCommand() {
+            val command = VerifyUserLoginToGitHub::class.buildBy(sessionId)
+            context().receivesCommand(command)
+        }
+    }
+
+    @Nested
+    internal inner class `handle 'LogUserOut' command, and` {
+
+        private lateinit var sessionId: SessionId
+
+        @BeforeEach
+        internal fun sendCommand() {
+            sessionId = SessionId::class.generate()
+            logIn(sessionId)
+            context().receivesCommand(LogUserOut::class.buildBy(sessionId))
+        }
+
+        @Test
+        internal fun `emit 'UserLoggedOut' event`() {
             val expected = UserLoggedOut::class.buildBy(sessionId)
             context().assertEvent(expected)
         }
 
         @Test
-        public fun `delete 'UserSession' entity`() {
+        internal fun `delete 'UserSession' entity`() {
             context().assertEntity(sessionId, UserSessionProcess::class.java)
                 .deletedFlag()
                 .isTrue()
@@ -106,12 +157,11 @@ public class SessionsContextSpec : ContextAwareTest() {
     }
 
     @Test
-    public fun `support simultaneous sessions`() {
+    internal fun `support simultaneous sessions`() {
         val firstSession = SessionId::class.generate()
         val secondSession = SessionId::class.buildBy(firstSession.username)
-        context()
-            .receivesCommand(LogUserIn::class.buildBy(firstSession))
-            .receivesCommand(LogUserIn::class.buildBy(secondSession))
+        logIn(firstSession)
+        logIn(secondSession)
 
         val firstExpected = UserSession::class.buildBy(firstSession)
         val secondExpected = UserSession::class.buildBy(secondSession)
@@ -120,13 +170,12 @@ public class SessionsContextSpec : ContextAwareTest() {
     }
 
     @Test
-    public fun `create new session when user logs in again`() {
+    internal fun `create new session when user logs in again`() {
         val firstSession = SessionId::class.generate()
         val secondSession = SessionId::class.buildBy(firstSession.username)
-        context()
-            .receivesCommand(LogUserIn::class.buildBy(firstSession))
-            .receivesCommand(LogUserOut::class.buildBy(firstSession))
-            .receivesCommand(LogUserIn::class.buildBy(secondSession))
+        logIn(firstSession)
+        context().receivesCommand(LogUserOut::class.buildBy(firstSession))
+        logIn(secondSession)
 
         val secondExpected = UserSession::class.buildBy(secondSession)
         context().assertEntity(firstSession, UserSessionProcess::class.java)
@@ -135,10 +184,9 @@ public class SessionsContextSpec : ContextAwareTest() {
         context().assertState(secondSession, secondExpected)
     }
 
-    /**
-     * Checks for events of the provided type emitted by the bounded context under the test.
-     */
-    private fun <T : EventMessage> assertEvents(eventClass: Class<T>): EventSubject =
-        context().assertEvents()
-            .withType(eventClass)
+    private fun logIn(id: SessionId) {
+        context().receivesCommand(LogUserIn::class.buildBy(id))
+        authenticationService.enterUserCode()
+        context().receivesCommand(VerifyUserLoginToGitHub::class.buildBy(id))
+    }
 }
