@@ -26,8 +26,8 @@
 
 package io.spine.examples.pingh.sessions
 
-import io.ktor.client.*
-import io.ktor.client.engine.*
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.HttpClientEngine
 import io.spine.examples.pingh.github.DeviceCode
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.AuthenticationCodesResponse

@@ -74,5 +74,6 @@ dependencies {
     implementation(Ktor.Client.core)
 
     testImplementation(project(":testutil-mentions"))
+    testImplementation(project(":testutil-sessions"))
     testImplementation(Ktor.Client.mock)
 }

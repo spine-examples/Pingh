@@ -45,6 +45,7 @@ import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.Mention
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
+import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.server.BoundedContextBuilder
 import io.spine.testing.TestValues.randomString
 import io.spine.testing.server.blackbox.BlackBoxContext
@@ -70,7 +71,8 @@ public class GitHubClientSpec : ContextAwareTest() {
     public fun prepareSessionsContextAndEmitEvent() {
         gitHubClientService.unfreeze()
         gitHubClientService.setDefaultResponseStatusCode()
-        sessionContext = BlackBoxContext.from(newSessionsContext())
+        sessionContext = BlackBoxContext
+            .from(newSessionsContext(PredefinedGitHubAuthenticationResponses()))
         val username = Username::class.buildBy(randomString())
         gitHubClientId = GitHubClientId::class.buildBy(username)
         emitUserLoggedInEventInSessionsContext()

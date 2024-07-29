@@ -44,7 +44,7 @@ import io.spine.examples.pingh.sessions.newSessionsContext
  */
 // TODO:2024-07-29:mykyta.pimonov: Load a key from Google Secret Manager
 //  after deployment to Google Cloud.
-private val clientId = ""
+private const val clientId = ""
 
 /**
  * The entry point of the server application.
