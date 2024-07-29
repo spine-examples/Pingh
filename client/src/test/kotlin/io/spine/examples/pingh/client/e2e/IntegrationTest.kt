@@ -46,6 +46,7 @@ internal abstract class IntegrationTest {
 
     private val port = 4242
     private val address = "localhost"
+    private val authenticationService = PredefinedGitHubAuthenticationResponses()
     private lateinit var clock: IntervalClock
     private lateinit var server: Server
     private lateinit var client: DesktopClient
@@ -54,13 +55,14 @@ internal abstract class IntegrationTest {
     internal fun runServer() {
         clock = IntervalClock(100.milliseconds)
         clock.start()
-        server = createServer(port)
+        server = createServer(port, authenticationService)
         server.start()
         client = DesktopClient(address, port)
     }
 
     @AfterEach
     internal fun shutdownServer() {
+        authenticationService.clean()
         client.close()
         clock.stop()
         server.shutdown()
@@ -71,13 +73,23 @@ internal abstract class IntegrationTest {
      */
     protected fun client(): DesktopClient = client
 
+    /**
+     * Marks that the user has entered their user code.
+     */
+    protected fun enterUserCode() {
+        authenticationService.enterUserCode()
+    }
+
     private companion object {
         /**
          * Creates a new test Pingh `Server`.
          */
-        private fun createServer(port: Int): Server =
+        private fun createServer(
+            port: Int,
+            authenticationService: PredefinedGitHubAuthenticationResponses
+        ): Server =
             Server.atPort(port)
-                .add(newSessionsContext(PredefinedGitHubAuthenticationResponses()))
+                .add(newSessionsContext(authenticationService))
                 .add(newMentionsContext(PredefinedGitHubResponses()))
                 .build()
     }

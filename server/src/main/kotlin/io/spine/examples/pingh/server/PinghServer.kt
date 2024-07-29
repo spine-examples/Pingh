@@ -42,8 +42,8 @@ import io.spine.examples.pingh.sessions.newSessionsContext
 /**
  * The client ID for the Pingh GitHub App.
  */
-// TODO:2024-07-29:mykyta.pimonov: Add a key load from Google Secret Manager
-//  after deployment to Google Cloud..
+// TODO:2024-07-29:mykyta.pimonov: Load a key from Google Secret Manager
+//  after deployment to Google Cloud.
 private val clientId = ""
 
 /**

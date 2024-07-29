@@ -92,6 +92,14 @@ public class DesktopClient(
     private val user: UserId
 
     /**
+     * Indicates whether the user is logged in.
+     *
+     * Note that even an unlogged user has a session. Therefore, always verify
+     * the user's login status before performing any actions.
+     */
+    private var isLoggedIn = false
+
+    /**
      * Current user session.
      */
     public var session: UserSession? = null
@@ -141,7 +149,10 @@ public class DesktopClient(
         observeCommandOutcome(
             command.id,
             UserLoggedIn::class,
-            onSuccess,
+            { event ->
+                isLoggedIn = true
+                onSuccess(event)
+            },
             UserIsNotLoggedIntoGitHub::class,
             onFail
         )
@@ -154,9 +165,10 @@ public class DesktopClient(
     public fun logOut(
         onSuccess: (event: UserLoggedOut) -> Unit = {}
     ) {
-        checkNotNull(session) { "The user has not been logged in." }
+        check(isLoggedIn) { "The user has not been logged in." }
         val command = LogUserOut::class.buildBy(session!!.id)
         observeEventOnce(command.id, UserLoggedOut::class) { event ->
+            this.isLoggedIn = false
             this.session = null
             onSuccess(event)
         }
@@ -170,7 +182,7 @@ public class DesktopClient(
         onSuccess: (event: MentionsUpdateFromGitHubCompleted) -> Unit = {},
         onFail: (event: RequestMentionsFromGitHubFailed) -> Unit = {}
     ) {
-        checkNotNull(session) { "The user has not been logged in." }
+        check(isLoggedIn) { "The user has not been logged in." }
         val command = UpdateMentionsFromGitHub::class.buildBy(
             GitHubClientId::class.buildBy(session!!.username)
         )
@@ -190,7 +202,7 @@ public class DesktopClient(
      * @return List of `MentionView`s sorted by descending time of creation.
      */
     public fun findUserMentions(): List<MentionView> {
-        checkNotNull(session) { "The user has not been logged in." }
+        check(isLoggedIn) { "The user has not been logged in." }
         val userMentions = clientRequest()
             .select(UserMentions::class.java)
             .byId(UserMentionsId::class.buildBy(session!!.username))
@@ -213,6 +225,7 @@ public class DesktopClient(
         snoozeTime: Duration = defaultSnoozeTime,
         onSuccess: (event: MentionSnoozed) -> Unit = {}
     ) {
+        check(isLoggedIn) { "The user has not been logged in." }
         val command = SnoozeMention::class.buildBy(id, currentTime().add(snoozeTime))
         observeEventOnce(command.id, MentionSnoozed::class, onSuccess)
         send(command)
@@ -221,7 +234,11 @@ public class DesktopClient(
     /**
      * Marks that the mention is read.
      */
-    public fun markMentionAsRead(id: MentionId, onSuccess: (event: MentionRead) -> Unit = {}) {
+    public fun markMentionAsRead(
+        id: MentionId,
+        onSuccess: (event: MentionRead) -> Unit = {}
+    ) {
+        check(isLoggedIn) { "The user has not been logged in." }
         val command = MarkMentionAsRead::class.buildBy(id)
         observeEventOnce(command.id, MentionRead::class, onSuccess)
         send(command)

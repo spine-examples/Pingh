@@ -65,6 +65,8 @@ internal class PersonalInteractionTest : IntegrationTest() {
     @BeforeEach
     internal fun logInAndUpdateMentions() {
         client().logIn(username)
+        enterUserCode()
+        client().verifyLoginToGitHub()
         client().updateMentions()
         actual = client().findUserMentions()
         expected = expectedMentionsList(username)
@@ -137,13 +139,22 @@ internal class PersonalInteractionTest : IntegrationTest() {
             shouldThrow<IllegalStateException> {
                 client().findUserMentions()
             }
-            client().logIn(username) {
-                actual = client().findUserMentions()
-                actual shouldBe expected
-                future.complete(null)
-            }
+            logInAgainAndCheckMentions(future)
         }
         future.get(5, TimeUnit.SECONDS)
+    }
+
+    private fun logInAgainAndCheckMentions(future: CompletableFuture<Void>) {
+        client().logIn(username) {
+            enterUserCode()
+            client().verifyLoginToGitHub(
+                onSuccess = {
+                    actual = client().findUserMentions()
+                    actual shouldBe expected
+                    future.complete(null)
+                }
+            )
+        }
     }
 
     private fun snoozeRandomMention(snoozeTime: Duration = hours(2)): MentionId {
