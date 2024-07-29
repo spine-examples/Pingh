@@ -23,26 +23,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine_examples.pingh.sessions;
+package io.spine.examples.pingh.sessions
 
-import "spine/options.proto";
+/**
+ * GitHub did not issue an access token for the user.
+ *
+ * @param errorName the name of the issue that caused the token not to be issued.
+ * @see <a href="https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app#using-the-device-flow-to-generate-a-user-access-token">
+ *     Problems that can occur</a>
+ */
+public class CannotObtainAccessToken(
+    public val errorName: String
+) : Exception() {
 
-option (type_url_prefix) = "type.pingh.spine.io";
-option java_package = "io.spine.examples.pingh.sessions.rejection";
-option java_multiple_files = false;
-
-import "spine_examples/pingh/sessions/identifiers.proto";
-import "spine_examples/pingh/github/github.proto";
-
-// Cannot log in because authentication on the GitHub side failed.
-//
-// Emitted when a user enters an incorrect login or
-// authentication code from GitHub.
-//
-message CannotLogUserIn {
-
-    // The ID of the session in which the login failed.
-    SessionId id = 1 [(required) = true];
+    public companion object {
+        private const val serialVersionUID: Long = -93148501036759551L
+    }
 }
