@@ -59,6 +59,9 @@ import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.buildBy
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
+import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
+import io.spine.examples.pingh.sessions.event.UserCodeReceived
+import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.protobuf.Durations2
@@ -108,19 +111,40 @@ public class DesktopClient(
     }
 
     /**
-     * Logs the user in and remembers the session ID.
+     * Starts the session and the login process.
+     *
+     * Remembers the session ID.
      */
     public fun logIn(
         username: Username,
-        onSuccess: (event: UserLoggedIn) -> Unit = {}
+        onSuccess: (event: UserCodeReceived) -> Unit = {}
     ) {
         val command = LogUserIn::class.buildBy(
             SessionId::class.buildBy(username)
         )
-        observeEventOnce(command.id, UserLoggedIn::class) { event ->
+        observeEventOnce(command.id, UserCodeReceived::class) { event ->
             this.session = UserSession(command.id)
             onSuccess(event)
         }
+        send(command)
+    }
+
+    /**
+     * Checks if the login process has been completed on GitHub.
+     */
+    public fun verifyLoginToGitHub(
+        onSuccess: (event: UserLoggedIn) -> Unit = {},
+        onFail: (event: UserIsNotLoggedIntoGitHub) -> Unit = {}
+    ) {
+        checkNotNull(session) { "Login process must be started." }
+        val command = VerifyUserLoginToGitHub::class.buildBy(session!!.id)
+        observeCommandOutcome(
+            command.id,
+            UserLoggedIn::class,
+            onSuccess,
+            UserIsNotLoggedIntoGitHub::class,
+            onFail
+        )
         send(command)
     }
 
