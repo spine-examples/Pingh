@@ -26,26 +26,19 @@
 
 package io.spine.examples.pingh.sessions
 
-import io.spine.server.BoundedContext
-import io.spine.server.BoundedContextBuilder
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
+import io.spine.server.procman.ProcessManagerRepository
 
 /**
- * Name of the Sessions [BoundedContext].
+ * Manages instances of `UserSession`.
  */
-public const val NAME: String = "Sessions"
+internal class UserSessionRepository(
+    private val authenticationService: GitHubAuthenticationService
+) : ProcessManagerRepository<SessionId, UserSessionProcess, UserSession>() {
 
-/**
- * Configures Sessions [BoundedContext] with repositories.
- *
- * The returned builder instance is already configured to serve the entities which belong
- * to this context.
- *
- * It is expected that the business scenarios of the created context require access
- * to the GitHub API. Therefore, an instance of GitHub authentication server is required
- * as a parameter.
- */
-public fun newSessionsContext(
-    authenticationService: GitHubAuthenticationService
-): BoundedContextBuilder =
-    BoundedContext.singleTenant(NAME)
-        .add(UserSessionRepository(authenticationService))
+    @OverridingMethodsMustInvokeSuper
+    protected override fun configure(processManager: UserSessionProcess) {
+        super.configure(processManager)
+        processManager.inject(authenticationService)
+    }
+}

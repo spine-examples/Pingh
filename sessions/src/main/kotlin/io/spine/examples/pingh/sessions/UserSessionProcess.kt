@@ -30,16 +30,27 @@ import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
+import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
+import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.server.command.Assign
 import io.spine.server.procman.ProcessManager
+import io.spine.server.tuple.EitherOf2
 
 /**
  * Coordinates session management, that is, user login and logout.
  */
 public class UserSessionProcess :
     ProcessManager<SessionId, UserSession, UserSession.Builder>() {
+
+    /**
+     * Service for generating access tokens via GitHub.
+     *
+     * It is expected this field is set by calling [inject]
+     * right after the instance creation.
+     */
+    private lateinit var authenticationService: GitHubAuthenticationService
 
     /**
      * Emits event when a user logs in.
@@ -57,6 +68,14 @@ public class UserSessionProcess :
         builder().setId(command.id)
     }
 
+    @Assign
+    internal fun handle(
+        command: VerifyUserLoginToGitHub
+    ): EitherOf2<UserLoggedIn, UserIsNotLoggedIntoGitHub> {
+
+        return EitherOf2.withA()
+    }
+
     /**
      * Emits event when a user logs out.
      */
@@ -64,5 +83,15 @@ public class UserSessionProcess :
     internal fun handle(command: LogUserOut): UserLoggedOut {
         deleted = true
         return UserLoggedOut::class.buildBy(command.id)
+    }
+
+    /**
+     * Supplies this instance of the process with a service for generating access tokens via GitHub.
+     *
+     * It is expected this method is called right after the creation of the process instance.
+     * Otherwise, the process will not be able to function properly.
+     */
+    internal fun inject(authenticationService: GitHubAuthenticationService) {
+        this.authenticationService = authenticationService
     }
 }
