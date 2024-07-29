@@ -27,9 +27,21 @@
 package io.spine.examples.pingh.sessions
 
 import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.UserCode
+import io.spine.examples.pingh.sessions.event.UserCodeReceived
+import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import kotlin.reflect.KClass
+
+/**
+ * Creates a new `UserTokenReceived` event with the specified ID of the session and `UserCode`.
+ */
+public fun KClass<UserCodeReceived>.buildBy(id: SessionId, userCode: UserCode): UserCodeReceived =
+    UserCodeReceived.newBuilder()
+        .setId(id)
+        .setUserCode(userCode)
+        .vBuild()
 
 /**
  * Creates a new `UserLoggedIn` event with the specified ID of the session
@@ -39,6 +51,14 @@ public fun KClass<UserLoggedIn>.buildBy(id: SessionId, token: PersonalAccessToke
     UserLoggedIn.newBuilder()
         .setId(id)
         .setToken(token)
+        .vBuild()
+
+/**
+ * Creates a new `UserIsNotLoggedIntoGitHub` event with the specified ID of the session.
+ */
+public fun KClass<UserIsNotLoggedIntoGitHub>.buildBy(id: SessionId): UserIsNotLoggedIntoGitHub =
+    UserIsNotLoggedIntoGitHub.newBuilder()
+        .setId(id)
         .vBuild()
 
 /**

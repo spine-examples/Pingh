@@ -28,6 +28,7 @@ package io.spine.examples.pingh.sessions
 
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
+import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
 import kotlin.reflect.KClass
 
 /**
@@ -35,6 +36,14 @@ import kotlin.reflect.KClass
  */
 public fun KClass<LogUserIn>.buildBy(id: SessionId): LogUserIn =
     LogUserIn.newBuilder()
+        .setId(id)
+        .vBuild()
+
+/**
+ * Creates a new `VerifyUserLoginToGitHub` command with the specified ID of the session.
+ */
+public fun KClass<VerifyUserLoginToGitHub>.buildBy(id: SessionId): VerifyUserLoginToGitHub =
+    VerifyUserLoginToGitHub.newBuilder()
         .setId(id)
         .vBuild()
 
