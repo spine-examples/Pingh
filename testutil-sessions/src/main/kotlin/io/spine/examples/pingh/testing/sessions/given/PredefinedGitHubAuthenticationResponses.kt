@@ -29,15 +29,55 @@ package io.spine.examples.pingh.testing.sessions.given
 import io.spine.examples.pingh.github.DeviceCode
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.AuthenticationCodesResponse
+import io.spine.examples.pingh.sessions.CannotObtainAccessToken
 import io.spine.examples.pingh.sessions.GitHubAuthenticationService
+import kotlin.jvm.Throws
 
-public class PredefinedGitHubAuthenticationResponses : GitHubAuthenticationService{
+/**
+ * Implementation of `GitHubAuthenticationService` that get responses
+ * from JSON files in the resource folder.
+ *
+ * Uses exclusively for testing.
+ */
+public class PredefinedGitHubAuthenticationResponses : GitHubAuthenticationService {
 
-    override fun requestAuthenticationCodes(): AuthenticationCodesResponse {
-        TODO("Not yet implemented")
+    /**
+     * Whether the user has entered their user code.
+     */
+    private var isUserCodeEntered = false
+
+    /**
+     * Returns `AuthenticationCodesResponse` retrieved from a JSON file in the resource folder.
+     */
+    public override fun requestAuthenticationCodes(): AuthenticationCodesResponse =
+        predefinedAuthenticationCodes()
+
+    /**
+     * Returns the `AccessTokenResponse` retrieved from a JSON file in the resource folder
+     * if the user has entered their user code. Otherwise, throws
+     * a `CannotObtainAccessToken` exception.
+     */
+    @Throws(CannotObtainAccessToken::class)
+    public override fun requestAccessToken(deviceCode: DeviceCode): AccessTokenResponse =
+        if (isUserCodeEntered) {
+            predefinedAccessTokenResponse()
+        } else {
+            throw CannotObtainAccessToken("authorization_pending")
+        }
+
+    /**
+     * Marks that the user has entered their user code.
+     */
+    public fun enterUserCode() {
+        isUserCodeEntered = true
     }
 
-    override fun requestAccessToken(deviceCode: DeviceCode): AccessTokenResponse {
-        TODO("Not yet implemented")
+    /**
+     * Reset the instance to its initial state.
+     *
+     * Marks that the user has not entered their user code.
+     */
+    public fun clean() {
+        isUserCodeEntered = false
     }
 }
