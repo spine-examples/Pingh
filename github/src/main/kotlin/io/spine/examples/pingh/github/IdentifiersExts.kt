@@ -29,9 +29,17 @@ package io.spine.examples.pingh.github
 import kotlin.reflect.KClass
 
 /**
- * Creates a new [NodeId] with the specified string value.
+ * Creates a new `NodeId` with the specified string value.
  */
 public fun KClass<NodeId>.buildBy(value: String): NodeId =
     NodeId.newBuilder()
+        .setValue(value)
+        .vBuild()
+
+/**
+ * Creates a new `ClientId` with the specified string value.
+ */
+public fun KClass<ClientId>.buildBy(value: String): ClientId =
+    ClientId.newBuilder()
         .setValue(value)
         .vBuild()
