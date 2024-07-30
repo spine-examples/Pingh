@@ -83,6 +83,7 @@ import io.spine.examples.pingh.github.validateUsernameValue
 import io.spine.net.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -395,12 +396,23 @@ private fun VerificationPage(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        VerificationTitle()
+        Spacer(Modifier.height(10.dp))
         VerificationText(verificationInfo.verificationUrl)
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(30.dp))
         UserCodeField(verificationInfo.userCode)
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(20.dp))
         VerificationButton(client, verificationInfo.interval, toMentionsPage)
     }
+}
+
+@Composable
+private fun VerificationTitle() {
+    Text(
+        text = "Verify your account",
+        fontSize = 18.sp,
+        style = MaterialTheme.typography.displayLarge
+    )
 }
 
 @Composable
@@ -409,7 +421,7 @@ private fun VerificationText(
     verificationUrl: Url
 ) {
     val urlHandler = LocalUriHandler.current
-    val text = "Go to GitHub and enter this code there."
+    val text = "To complete the login, visit GitHub and enter the following code."
     val startPosition = text.indexOf("GitHub")
     val endPosition = startPosition + "GitHub".length
     val annotatedString = buildAnnotatedString {
@@ -430,7 +442,10 @@ private fun VerificationText(
     }
     ClickableText(
         text = annotatedString,
-        style = MaterialTheme.typography.bodyLarge,
+        modifier = Modifier.width(200.dp),
+        style = MaterialTheme.typography.bodyMedium.copy(
+            textAlign = TextAlign.Center
+        ),
         onClick = { offset ->
             annotatedString
                 .getUrlAnnotations(offset, offset)
@@ -525,6 +540,27 @@ private fun VerificationButton(
             style = MaterialTheme.typography.displayMedium
         )
     }
+    ErrorMessage(
+        enabled = !enabled.value,
+        interval = interval
+    )
+}
+
+@Composable
+private fun ErrorMessage(
+    enabled: Boolean,
+    interval: Duration
+) {
+    if (enabled) {
+        Text(
+            text = "User code not entered. Wait ${interval.seconds} seconds before retrying.",
+            modifier = Modifier
+                .width(180.dp)
+                .padding(top = 3.dp),
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
 }
 
 private fun makeButtonEnable(
@@ -532,7 +568,7 @@ private fun makeButtonEnable(
     enabled: MutableState<Boolean>
 ) =
     CoroutineScope(Dispatchers.IO).launch {
-        Thread.sleep(interval.seconds * 1000)
+        delay(interval.seconds * 1000)
         enabled.value = true
     }
 
