@@ -30,7 +30,10 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.request.post
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.URLBuilder
+import io.spine.examples.pingh.github.ClientId
 import io.spine.examples.pingh.github.DeviceCode
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.AuthenticationCodesResponse
@@ -45,7 +48,7 @@ import kotlinx.coroutines.runBlocking
  * @param clientId the client ID for the Pingh GitHub App.
  */
 public class GitHubAuthenticationServiceImpl(
-    private val clientId: String,
+    private val clientId: ClientId,
     engine: HttpClientEngine
 ): GitHubAuthenticationService {
 
@@ -59,14 +62,10 @@ public class GitHubAuthenticationServiceImpl(
      */
     public override fun requestAuthenticationCodes(): AuthenticationCodesResponse =
         runBlocking {
-            val response = client.post("https://github.com/login/device/code") {
-                url {
-                    parameters.append("client_id", clientId)
-                }
-                headers.apply {
-                    append("Accept", "application/vnd.github+json")
-                }
-            }
+            val response = GitHubAuthenticationRequest
+                .post("https://github.com/login/device/code")
+                .with(clientId)
+                .requestOnBehalfOf(client)
             parseAuthenticationCodesResponse(response.body())
         }
 
@@ -76,29 +75,32 @@ public class GitHubAuthenticationServiceImpl(
      * To receive the token, the user must enter the user code issued
      * along with the specified device code.
      *
+     * If an error occurs, GitHub sends an error message with a `200 OK` status,
+     * similar to a successful request. Therefore, the content of the response body
+     * should also be checked to ensure the request was successful.
+     *
      * @throws CannotObtainAccessToken if GitHub returns an error response
      *                                 when trying to get an access token.
      */
     @Throws(CannotObtainAccessToken::class)
     public override fun requestAccessToken(deviceCode: DeviceCode): AccessTokenResponse =
         runBlocking {
-            val response = client.post("https://github.com/login/oauth/access_token") {
-                url {
-                    parameters.apply {
-                        append("client_id", clientId)
-                        append("device_code", deviceCode.value)
-                        append("grant_type", "urn:ietf:params:oauth:grant-type:device_code")
-                    }
-                    headers.apply {
-                        append("Accept", "application/vnd.github+json")
-                    }
-                }
-            }
+            val response = GitHubAuthenticationRequest
+                .post("https://github.com/login/oauth/access_token")
+                .with(clientId)
+                .with(deviceCode)
+                .withGrandType()
+                .requestOnBehalfOf(client)
             val body = response.body<String>()
             checkError(response.status, body)
             parseAccessTokenResponse(body)
         }
 
+    /**
+     * Throws an `CannotObtainAccessToken` exception if the response status is not `200 OK` or
+     * if the response body contains an error message.
+     */
+    @Throws(CannotObtainAccessToken::class)
     private fun checkError(status: HttpStatusCode, body: String) {
         if (status != HttpStatusCode.OK) {
             throw CannotObtainAccessToken("Something went wrong.")
@@ -106,6 +108,85 @@ public class GitHubAuthenticationServiceImpl(
         val possibleErrorMessage = Json.fromJson(body, ErrorResponse::class.java)
         if (possibleErrorMessage.error.isNotEmpty()) {
             throw CannotObtainAccessToken(possibleErrorMessage.error)
+        }
+    }
+
+    /**
+     * Builder for creating and sending authentication request on GitHub.
+     */
+    private class GitHubAuthenticationRequest private constructor(private val url: String) {
+
+        public companion object {
+            /**
+             * Creates builder and sets the request URL.
+             */
+            public fun post(url: String): GitHubAuthenticationRequest =
+                GitHubAuthenticationRequest(url)
+        }
+
+        /**
+         * The client ID for the Pingh GitHub App.
+         */
+        private var clientId: ClientId? = null
+
+        /**
+         * The verification code that is used to verify the device.
+         */
+        private var deviceCode: DeviceCode? = null
+
+        /**
+         * Indicates whether the grant type parameter is added to the query.
+         */
+        private var isGrantTypeIncluded: Boolean = false
+
+        /**
+         * Sets the client ID for the Pingh GitHub App.
+         */
+        public fun with(clientId: ClientId): GitHubAuthenticationRequest {
+            this.clientId = clientId
+            return this
+        }
+
+        /**
+         * Sets the verification code that is used to verify the device.
+         */
+        public fun with(deviceCode: DeviceCode): GitHubAuthenticationRequest {
+            this.deviceCode = deviceCode
+            return this
+        }
+
+        /**
+         * Specifies that the grant type parameter is added to the query.
+         */
+        public fun withGrandType(): GitHubAuthenticationRequest {
+            isGrantTypeIncluded = true
+            return this
+        }
+
+        /**
+         * Creates and sends request with specified data.
+         *
+         * @throws IllegalArgumentException client ID request data is not specified.
+         */
+        public suspend fun requestOnBehalfOf(client: HttpClient): HttpResponse {
+            checkNotNull(clientId) { "Client ID must be set." }
+            return client.post(url) {
+                url.configureParameters()
+                headers.append("Accept", "application/vnd.github+json")
+            }
+        }
+
+        /**
+         * Configures request parameters.
+         */
+        private fun URLBuilder.configureParameters() {
+            parameters.append("client_id", clientId!!.value)
+            if (deviceCode != null) {
+                parameters.append("device_code", deviceCode!!.value)
+            }
+            if (isGrantTypeIncluded) {
+                parameters.append("grant_type", "urn:ietf:params:oauth:grant-type:device_code")
+            }
         }
     }
 }
