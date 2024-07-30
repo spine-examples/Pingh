@@ -170,3 +170,11 @@ message AccessTokenFragment {
     // The refresh token.
     string refresh_token = 3 [(required) = true, json_name = "refresh_token"];
 }
+
+// The response from the GitHub API indicating that the requested action
+// could not be performed due to an error.
+message ErrorResponse {
+
+    // The name of the error.
+    string error = 1;
+}
