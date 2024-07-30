@@ -61,25 +61,58 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.protobuf.Duration
 import io.spine.examples.pingh.client.DesktopClient
+import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.github.validateUsernameValue
+import io.spine.net.Url
 
 /**
- * Displays a login form.
+ * Displays the page with the current login step.
  *
- * If the `Username` is entered correct, user will be [logged in][DesktopClient.logIn] into
- * the Pingh application and redirected to the [MentionsPage].
- * [LoginButton] is not enable while the entered `Username` is invalid.
- *
- * @param client enables interaction with the Pingh server.
- * @param toMentionsPage the navigation to the 'Mentions' page.
+ * Initially, the user must enter their `Username`, after which they will receive
+ * a code that must be entered into GitHub. After entering the code, the user needs
+ * to confirm the login on the application page.
  */
 @Composable
 internal fun LoginPage(
     client: DesktopClient,
     toMentionsPage: () -> Unit
+) {
+    var state by remember { mutableStateOf(LoginState.USERNAME_ENTERING) }
+    var verificationInfo: VerificationInfo? = null
+    when (state) {
+        LoginState.USERNAME_ENTERING -> UsernameEnteringPage(
+            client = client
+        ) { userCode, verificationUrl, interval ->
+            state = LoginState.VERIFICATION
+            verificationInfo = VerificationInfo(userCode, verificationUrl, interval)
+        }
+
+        LoginState.VERIFICATION -> VerificationPage(
+            client = client,
+            verificationInfo = verificationInfo!!,
+            toMentionsPage = toMentionsPage
+        )
+    }
+}
+
+/**
+ * Displays a login form.
+ *
+ * If the `Username` is entered correctly, the user will receive the `UserCode` and
+ * be redirected to the login verification page.
+ * [LoginButton] is not enable while the entered `Username` is invalid.
+ *
+ * @param client enables interaction with the Pingh server.
+ * @param toVerifyingPage the navigation to the 'Login verification' page.
+ */
+@Composable
+private fun UsernameEnteringPage(
+    client: DesktopClient,
+    toVerifyingPage: (userCode: UserCode, verificationUrl: Url, interval: Duration) -> Unit
 ) {
     var username by remember { mutableStateOf("") }
     var wasChanged by remember { mutableStateOf(false) }
@@ -107,8 +140,8 @@ internal fun LoginPage(
         ) {
             client.logIn(
                 Username::class.buildBy(username)
-            ) {
-                toMentionsPage()
+            ) { event ->
+                toVerifyingPage(event.userCode, event.verificationUrl, event.interval)
             }
         }
     }
@@ -331,4 +364,45 @@ private fun LoginButton(
             style = MaterialTheme.typography.displayMedium
         )
     }
+}
+
+@Composable
+private fun VerificationPage(
+    client: DesktopClient,
+    verificationInfo: VerificationInfo,
+    toMentionsPage: () -> Unit
+) {
+
+}
+
+/**
+ * Information required to verify login .
+ *
+ * @param userCode the verification code that displays so that
+ *                 the user can enter the code in a browser.
+ * @param verificationUrl the URL where users need to enter their `userCode`.
+ * @param interval the minimum duration that must pass before user can make
+ *                 a new access token request.
+ */
+private class VerificationInfo(
+    internal val userCode: UserCode,
+    internal val verificationUrl: Url,
+    internal val interval: Duration
+)
+
+/**
+ * State of login process.
+ */
+private enum class LoginState {
+
+    /**
+     * Initial state where the user enters their `Username` and receives a `UserCode`.
+     */
+    USERNAME_ENTERING,
+
+    /**
+     * The final step where the user enters their `UserCode` into GitHub and
+     * completes the login process in the Pingh app.
+     */
+    VERIFICATION
 }
