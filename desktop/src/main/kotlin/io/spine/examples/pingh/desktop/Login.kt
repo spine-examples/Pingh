@@ -29,6 +29,8 @@ package io.spine.examples.pingh.desktop
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -44,6 +46,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -58,7 +61,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.UrlAnnotation
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.protobuf.Duration
@@ -68,6 +81,9 @@ import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.github.validateUsernameValue
 import io.spine.net.Url
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Displays the page with the current login step.
@@ -82,13 +98,13 @@ internal fun LoginPage(
     toMentionsPage: () -> Unit
 ) {
     var state by remember { mutableStateOf(LoginState.USERNAME_ENTERING) }
-    var verificationInfo: VerificationInfo? = null
+    var verificationInfo by remember { mutableStateOf<VerificationInfo?>(null) }
     when (state) {
         LoginState.USERNAME_ENTERING -> UsernameEnteringPage(
             client = client
         ) { userCode, verificationUrl, interval ->
-            state = LoginState.VERIFICATION
             verificationInfo = VerificationInfo(userCode, verificationUrl, interval)
+            state = LoginState.VERIFICATION
         }
 
         LoginState.VERIFICATION -> VerificationPage(
@@ -372,8 +388,153 @@ private fun VerificationPage(
     verificationInfo: VerificationInfo,
     toMentionsPage: () -> Unit
 ) {
-
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.secondary),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        VerificationText(verificationInfo.verificationUrl)
+        Spacer(Modifier.height(10.dp))
+        UserCodeField(verificationInfo.userCode)
+        Spacer(Modifier.height(10.dp))
+        VerificationButton(client, verificationInfo.interval, toMentionsPage)
+    }
 }
+
+@Composable
+@OptIn(ExperimentalTextApi::class) // Required for `UrlAnnotation`.
+private fun VerificationText(
+    verificationUrl: Url
+) {
+    val urlHandler = LocalUriHandler.current
+    val text = "Go to GitHub and enter this code there."
+    val startPosition = text.indexOf("GitHub")
+    val endPosition = startPosition + "GitHub".length
+    val annotatedString = buildAnnotatedString {
+        append(text)
+        addStyle(
+            style = SpanStyle(
+                color = MaterialTheme.colorScheme.primary,
+                textDecoration = TextDecoration.Underline
+            ),
+            start = startPosition,
+            end = endPosition
+        )
+        addUrlAnnotation(
+            urlAnnotation = UrlAnnotation(verificationUrl.spec),
+            start = startPosition,
+            end = endPosition
+        )
+    }
+    ClickableText(
+        text = annotatedString,
+        style = MaterialTheme.typography.bodyLarge,
+        onClick = { offset ->
+            annotatedString
+                .getUrlAnnotations(offset, offset)
+                .firstOrNull()?.let { annotation ->
+                    urlHandler.openUri(annotation.item.url)
+                }
+        }
+    )
+}
+
+@Composable
+private fun UserCodeField(
+    userCode: UserCode
+) {
+    val clipboardManager = LocalClipboardManager.current
+    val interactionSource = remember { MutableInteractionSource() }
+    Row(
+        modifier = Modifier
+            .pointerHoverIcon(PointerIcon.Hand)
+            .hoverable(interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) {
+                clipboardManager.setText(AnnotatedString(userCode.value))
+            },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(3.dp, Alignment.CenterHorizontally)
+    ) {
+        userCode.value.forEach { lexeme ->
+            if (lexeme == '-') {
+                UsecCodeChar(lexeme)
+            } else {
+                Box(
+                    modifier = Modifier
+                        .width(22.dp)
+                        .height(30.dp)
+                        .border(
+                            color = MaterialTheme.colorScheme.onBackground,
+                            width = 1.dp,
+                            shape = MaterialTheme.shapes.extraSmall
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    UsecCodeChar(lexeme)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun UsecCodeChar(lexeme: Char) {
+    Text(
+        text = lexeme.toString(),
+        color = MaterialTheme.colorScheme.onSecondary,
+        fontSize = 18.sp,
+        style = MaterialTheme.typography.displayLarge
+    )
+}
+
+@Composable
+private fun VerificationButton(
+    client: DesktopClient,
+    interval: Duration,
+    toMentionsPage: () -> Unit
+) {
+    val enabled = remember { mutableStateOf(true) }
+    Button(
+        onClick = {
+            client.verifyLoginToGitHub(
+                onSuccess = {
+                    toMentionsPage()
+                },
+                onFail = {
+                    enabled.value = false
+                    makeButtonEnable(interval, enabled)
+                }
+            )
+        },
+        modifier = Modifier
+            .width(210.dp)
+            .height(32.dp),
+        enabled = enabled.value,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        )
+    ) {
+        Text(
+            text = "Verify login",
+            style = MaterialTheme.typography.displayMedium
+        )
+    }
+}
+
+private fun makeButtonEnable(
+    interval: Duration,
+    enabled: MutableState<Boolean>
+) =
+    CoroutineScope(Dispatchers.IO).launch {
+        Thread.sleep(interval.seconds * 1000)
+        enabled.value = true
+    }
 
 /**
  * Information required to verify login .

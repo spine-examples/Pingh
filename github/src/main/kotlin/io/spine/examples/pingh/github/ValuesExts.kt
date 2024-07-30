@@ -153,12 +153,6 @@ public fun KClass<RefreshToken>.buildBy(value: String): RefreshToken =
         .vBuild()
 
 /**
- * Returns an 8-character code string, excluding the dash in the middle.
- */
-public val UserCode.content: String
-    get() = this.value.replace("-", "")
-
-/**
  * Creates a new `AuthenticationCodesResponse` with the data specified
  * in the `AuthenticationCodesFragment`.
  */
