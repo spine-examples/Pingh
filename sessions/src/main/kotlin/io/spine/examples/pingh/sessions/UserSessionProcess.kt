@@ -68,6 +68,7 @@ public class UserSessionProcess :
             command.id,
             codes.userCode,
             codes.verificationUrl,
+            codes.whenExpires,
             codes.interval
         )
     }
@@ -106,7 +107,8 @@ public class UserSessionProcess :
     }
 
     /**
-     * Supplies this instance of the process with a service for generating access tokens via GitHub.
+     * Supplies this instance of the process with a service for generating verification codes
+     * and access tokens via GitHub.
      *
      * It is expected this method is called right after the creation of the process instance.
      * Otherwise, the process will not be able to function properly.

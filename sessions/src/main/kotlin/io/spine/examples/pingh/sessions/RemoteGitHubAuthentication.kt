@@ -62,10 +62,10 @@ public class RemoteGitHubAuthentication(
      */
     public override fun requestVerificationCodes(): VerificationCodesResponse =
         runBlocking {
-            val response = GitHubAuthenticationRequest
-                .post("https://github.com/login/device/code")
+            val response = client
+                .authenticationRequest("https://github.com/login/device/code")
                 .with(clientId)
-                .requestOnBehalfOf(client)
+                .post()
             parseVerificationCodesResponse(response.body())
         }
 
@@ -85,12 +85,12 @@ public class RemoteGitHubAuthentication(
     @Throws(CannotObtainAccessToken::class)
     public override fun requestAccessToken(deviceCode: DeviceCode): AccessTokenResponse =
         runBlocking {
-            val response = GitHubAuthenticationRequest
-                .post("https://github.com/login/oauth/access_token")
+            val response = client
+                .authenticationRequest("https://github.com/login/oauth/access_token")
                 .with(clientId)
                 .with(deviceCode)
-                .withGrandType()
-                .requestOnBehalfOf(client)
+                .includeGrantType()
+                .post()
             val body = response.body<String>()
             checkError(response.status, body)
             parseAccessTokenResponse(body)
@@ -110,83 +110,84 @@ public class RemoteGitHubAuthentication(
             throw CannotObtainAccessToken(possibleErrorMessage.error)
         }
     }
+}
+
+/**
+ * Creates authentication request builder and sets the request URL.
+ */
+private fun HttpClient.authenticationRequest(url: String): AuthenticationRequestBuilder =
+    AuthenticationRequestBuilder(this, url)
+
+/**
+ * Builder for creating and sending authentication request on GitHub.
+ */
+private class AuthenticationRequestBuilder internal constructor(
+    private val client: HttpClient,
+    private val url: String
+) {
 
     /**
-     * Builder for creating and sending authentication request on GitHub.
+     * The client ID for the Pingh GitHub App.
      */
-    private class GitHubAuthenticationRequest private constructor(private val url: String) {
+    private var clientId: ClientId? = null
 
-        public companion object {
-            /**
-             * Creates builder and sets the request URL.
-             */
-            public fun post(url: String): GitHubAuthenticationRequest =
-                GitHubAuthenticationRequest(url)
+    /**
+     * The verification code that is used to verify the device.
+     */
+    private var deviceCode: DeviceCode? = null
+
+    /**
+     * Indicates whether the grant type parameter is added to the query.
+     */
+    private var isGrantTypeIncluded: Boolean = false
+
+    /**
+     * Sets the client ID for the Pingh GitHub App.
+     */
+    internal fun with(clientId: ClientId): AuthenticationRequestBuilder {
+        this.clientId = clientId
+        return this
+    }
+
+    /**
+     * Sets the verification code that is used to verify the device.
+     */
+    internal fun with(deviceCode: DeviceCode): AuthenticationRequestBuilder {
+        this.deviceCode = deviceCode
+        return this
+    }
+
+    /**
+     * Specifies that the grant type parameter is added to the query.
+     */
+    internal fun includeGrantType(): AuthenticationRequestBuilder {
+        isGrantTypeIncluded = true
+        return this
+    }
+
+    /**
+     * Creates and sends request with specified data.
+     *
+     * @throws IllegalArgumentException client ID request data is not specified.
+     */
+    internal suspend fun post(): HttpResponse {
+        checkNotNull(clientId) { "Client ID must be set." }
+        return client.post(url) {
+            url.configureParameters()
+            headers.append("Accept", "application/vnd.github+json")
         }
+    }
 
-        /**
-         * The client ID for the Pingh GitHub App.
-         */
-        private var clientId: ClientId? = null
-
-        /**
-         * The verification code that is used to verify the device.
-         */
-        private var deviceCode: DeviceCode? = null
-
-        /**
-         * Indicates whether the grant type parameter is added to the query.
-         */
-        private var isGrantTypeIncluded: Boolean = false
-
-        /**
-         * Sets the client ID for the Pingh GitHub App.
-         */
-        public fun with(clientId: ClientId): GitHubAuthenticationRequest {
-            this.clientId = clientId
-            return this
+    /**
+     * Configures request parameters.
+     */
+    private fun URLBuilder.configureParameters() {
+        parameters.append("client_id", clientId!!.value)
+        if (deviceCode != null) {
+            parameters.append("device_code", deviceCode!!.value)
         }
-
-        /**
-         * Sets the verification code that is used to verify the device.
-         */
-        public fun with(deviceCode: DeviceCode): GitHubAuthenticationRequest {
-            this.deviceCode = deviceCode
-            return this
-        }
-
-        /**
-         * Specifies that the grant type parameter is added to the query.
-         */
-        public fun withGrandType(): GitHubAuthenticationRequest {
-            isGrantTypeIncluded = true
-            return this
-        }
-
-        /**
-         * Creates and sends request with specified data.
-         *
-         * @throws IllegalArgumentException client ID request data is not specified.
-         */
-        public suspend fun requestOnBehalfOf(client: HttpClient): HttpResponse {
-            checkNotNull(clientId) { "Client ID must be set." }
-            return client.post(url) {
-                url.configureParameters()
-                headers.append("Accept", "application/vnd.github+json")
-            }
-        }
-
-        /**
-         * Configures request parameters.
-         */
-        private fun URLBuilder.configureParameters() {
-            parameters.append("client_id", clientId!!.value)
-            if (deviceCode != null) {
-                parameters.append("device_code", deviceCode!!.value)
-            }
-            if (isGrantTypeIncluded) {
-                parameters.append("grant_type", "urn:ietf:params:oauth:grant-type:device_code")
-            }
+        if (isGrantTypeIncluded) {
+            parameters.append("grant_type", "urn:ietf:params:oauth:grant-type:device_code")
         }
     }
 }
