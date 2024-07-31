@@ -25,7 +25,6 @@
  */
 
 import io.spine.internal.BuildSettings
-import io.spine.internal.dependency.JavaX
 
 plugins {
     kotlin("jvm")
@@ -49,8 +48,4 @@ kotlin {
         languageVersion.set(BuildSettings.javaVersion)
     }
     explicitApi()
-}
-
-dependencies {
-    implementation(JavaX.annotations)
 }
