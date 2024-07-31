@@ -98,4 +98,6 @@ internal object Icons {
         BitmapPainter(useResource("icons/refresh.png", ::loadImageBitmap))
     internal val back: BitmapPainter =
         BitmapPainter(useResource("icons/back.png", ::loadImageBitmap))
+    internal val copy: BitmapPainter =
+        BitmapPainter(useResource("icons/copy.png", ::loadImageBitmap))
 }
