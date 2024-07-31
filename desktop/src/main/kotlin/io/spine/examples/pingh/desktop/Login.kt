@@ -37,25 +37,24 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -65,17 +64,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.ExperimentalTextApi
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.UrlAnnotation
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.protobuf.Duration
@@ -87,6 +82,7 @@ import io.spine.examples.pingh.github.validateUsernameValue
 import io.spine.net.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -425,28 +421,32 @@ private fun UserCodeField(
     userCode: UserCode
 ) {
     val clipboardManager = LocalClipboardManager.current
-    val interactionSource = remember { MutableInteractionSource() }
-    SelectionContainer {
-        Row(
-            modifier = Modifier
-                .hoverable(interactionSource)
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null
-                ) {
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        SelectionContainer {
+            Text(
+                text = userCode.value,
+                color = MaterialTheme.colorScheme.onSecondary,
+                letterSpacing = TextUnit(3f, TextUnitType.Sp),
+                fontSize = 24.sp,
+                style = MaterialTheme.typography.displayLarge
+            )
+        }
+        Box(
+            modifier = Modifier.offset(x = 91.dp, y = 2.5.dp)
+        ) {
+            IconButton(
+                icon = Icons.copy,
+                onClick = {
                     clipboardManager.setText(AnnotatedString(userCode.value))
                 },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(3.dp, Alignment.CenterHorizontally)
-        ) {
-            userCode.value.forEach { lexeme ->
-                Text(
-                    text = lexeme.toString(),
-                    color = MaterialTheme.colorScheme.onSecondary,
-                    fontSize = 24.sp,
-                    style = MaterialTheme.typography.displayLarge
+                modifier = Modifier.size(24.dp),
+                colors = IconButtonDefaults.iconButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                 )
-            }
+            )
         }
     }
 }
@@ -515,7 +515,9 @@ private fun SubmitButton(
                 },
                 onFail = {
                     enabled.value = false
-                    makeButtonEnable(interval, enabled)
+                    makeJobWithDelay(interval) {
+                        enabled.value = true
+                    }
                 }
             )
         },
@@ -557,13 +559,13 @@ private fun ErrorMessage(
     }
 }
 
-private fun makeButtonEnable(
-    interval: Duration,
-    enabled: MutableState<Boolean>
-) =
+private fun makeJobWithDelay(
+    delayDuration: Duration,
+    jobAction: () -> Unit
+): Job =
     CoroutineScope(Dispatchers.IO).launch {
-        delay(interval.seconds * 1000)
-        enabled.value = true
+        delay(delayDuration.seconds * 1000)
+        jobAction()
     }
 
 /**
