@@ -310,9 +310,9 @@ private fun DndOption(
                 checkedThumbColor = MaterialTheme.colorScheme.secondary,
                 checkedTrackColor = MaterialTheme.colorScheme.primary,
                 checkedBorderColor = MaterialTheme.colorScheme.primary,
-                uncheckedThumbColor = MaterialTheme.colorScheme.tertiary,
+                uncheckedThumbColor = MaterialTheme.colorScheme.secondaryContainer,
                 uncheckedTrackColor = MaterialTheme.colorScheme.secondary,
-                uncheckedBorderColor = MaterialTheme.colorScheme.tertiary
+                uncheckedBorderColor = MaterialTheme.colorScheme.secondaryContainer
             )
         )
     }
@@ -353,7 +353,7 @@ private fun Option(
         Text(
             text = description,
             modifier = Modifier.width(170.dp),
-            color = MaterialTheme.colorScheme.tertiary,
+            color = MaterialTheme.colorScheme.secondaryContainer,
             style = MaterialTheme.typography.bodySmall
         )
     }

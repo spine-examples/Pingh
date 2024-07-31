@@ -33,9 +33,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.absoluteOffset
@@ -47,11 +49,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -199,6 +203,7 @@ private fun ApplicationInfo() {
             text = "Pingh is a GitHub app that looks up mentions on behalf of the user. " +
                     "It requires authentication via GitHub.",
             modifier = Modifier.width(180.dp),
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyMedium
         )
@@ -224,7 +229,7 @@ private fun UsernameInput(
     val borderColor = when {
         isError.value -> MaterialTheme.colorScheme.error
         isFocused -> MaterialTheme.colorScheme.primary
-        else -> MaterialTheme.colorScheme.tertiary
+        else -> MaterialTheme.colorScheme.secondaryContainer
     }
     BasicTextField(
         value = value,
@@ -397,62 +402,21 @@ private fun VerificationPage(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         VerificationTitle()
+        Spacer(Modifier.height(15.dp))
+        UserCodeField(verificationInfo.userCode)
         Spacer(Modifier.height(10.dp))
         VerificationText(verificationInfo.verificationUrl)
-        Spacer(Modifier.height(30.dp))
-        UserCodeField(verificationInfo.userCode)
         Spacer(Modifier.height(20.dp))
-        VerificationButton(client, verificationInfo.interval, toMentionsPage)
+        SubmitButton(client, verificationInfo.interval, toMentionsPage)
     }
 }
 
 @Composable
 private fun VerificationTitle() {
     Text(
-        text = "Verify your account",
+        text = "Verify your login",
         fontSize = 18.sp,
         style = MaterialTheme.typography.displayLarge
-    )
-}
-
-@Composable
-@OptIn(ExperimentalTextApi::class) // Required for `UrlAnnotation`.
-private fun VerificationText(
-    verificationUrl: Url
-) {
-    val urlHandler = LocalUriHandler.current
-    val text = "To complete the login, visit GitHub and enter the following code."
-    val startPosition = text.indexOf("GitHub")
-    val endPosition = startPosition + "GitHub".length
-    val annotatedString = buildAnnotatedString {
-        append(text)
-        addStyle(
-            style = SpanStyle(
-                color = MaterialTheme.colorScheme.primary,
-                textDecoration = TextDecoration.Underline
-            ),
-            start = startPosition,
-            end = endPosition
-        )
-        addUrlAnnotation(
-            urlAnnotation = UrlAnnotation(verificationUrl.spec),
-            start = startPosition,
-            end = endPosition
-        )
-    }
-    ClickableText(
-        text = annotatedString,
-        modifier = Modifier.width(200.dp),
-        style = MaterialTheme.typography.bodyMedium.copy(
-            textAlign = TextAlign.Center
-        ),
-        onClick = { offset ->
-            annotatedString
-                .getUrlAnnotations(offset, offset)
-                .firstOrNull()?.let { annotation ->
-                    urlHandler.openUri(annotation.item.url)
-                }
-        }
     )
 }
 
@@ -462,53 +426,82 @@ private fun UserCodeField(
 ) {
     val clipboardManager = LocalClipboardManager.current
     val interactionSource = remember { MutableInteractionSource() }
-    Row(
-        modifier = Modifier
-            .pointerHoverIcon(PointerIcon.Hand)
-            .hoverable(interactionSource)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null
-            ) {
-                clipboardManager.setText(AnnotatedString(userCode.value))
-            },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(3.dp, Alignment.CenterHorizontally)
-    ) {
-        userCode.value.forEach { lexeme ->
-            if (lexeme == '-') {
-                UsecCodeChar(lexeme)
-            } else {
-                Box(
-                    modifier = Modifier
-                        .width(22.dp)
-                        .height(30.dp)
-                        .border(
-                            color = MaterialTheme.colorScheme.onBackground,
-                            width = 1.dp,
-                            shape = MaterialTheme.shapes.extraSmall
-                        ),
-                    contentAlignment = Alignment.Center
+    SelectionContainer {
+        Row(
+            modifier = Modifier
+                .hoverable(interactionSource)
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null
                 ) {
-                    UsecCodeChar(lexeme)
-                }
+                    clipboardManager.setText(AnnotatedString(userCode.value))
+                },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(3.dp, Alignment.CenterHorizontally)
+        ) {
+            userCode.value.forEach { lexeme ->
+                Text(
+                    text = lexeme.toString(),
+                    color = MaterialTheme.colorScheme.onSecondary,
+                    fontSize = 24.sp,
+                    style = MaterialTheme.typography.displayLarge
+                )
             }
         }
     }
 }
 
 @Composable
-private fun UsecCodeChar(lexeme: Char) {
+private fun VerificationText(
+    verificationUrl: Url
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Enter this code at",
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Spacer(Modifier.height(3.dp))
+        VerificationUrlButton(verificationUrl)
+        Spacer(Modifier.height(3.dp))
+        Text(
+            text = "The code is valid for 5 minutes.",
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+@Composable
+private fun VerificationUrlButton(url: Url) {
+    val uriHandler = LocalUriHandler.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
     Text(
-        text = lexeme.toString(),
-        color = MaterialTheme.colorScheme.onSecondary,
-        fontSize = 18.sp,
-        style = MaterialTheme.typography.displayLarge
+        text = url.spec,
+        modifier = Modifier
+            .hoverable(interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) {
+                uriHandler.openUri(url.spec)
+            },
+        color = MaterialTheme.colorScheme.tertiary,
+        textDecoration = if (isHovered) {
+            TextDecoration.Underline
+        } else {
+            TextDecoration.None
+        },
+        style = MaterialTheme.typography.bodyLarge
     )
 }
 
 @Composable
-private fun VerificationButton(
+private fun SubmitButton(
     client: DesktopClient,
     interval: Duration,
     toMentionsPage: () -> Unit
@@ -536,7 +529,7 @@ private fun VerificationButton(
         )
     ) {
         Text(
-            text = "Verify login",
+            text = "I have entered the code",
             style = MaterialTheme.typography.displayMedium
         )
     }
@@ -553,7 +546,8 @@ private fun ErrorMessage(
 ) {
     if (enabled) {
         Text(
-            text = "User code not entered. Wait ${interval.seconds} seconds before retrying.",
+            text = "User code has not been entered. " +
+                    "Wait ${interval.seconds} seconds before retrying.",
             modifier = Modifier
                 .width(180.dp)
                 .padding(top = 3.dp),
