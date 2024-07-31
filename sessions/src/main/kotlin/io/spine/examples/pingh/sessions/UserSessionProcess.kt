@@ -49,7 +49,7 @@ public class UserSessionProcess :
      * It is expected this field is set by calling [inject]
      * right after the instance creation.
      */
-    private lateinit var authenticationService: GitHubAuthenticationService
+    private lateinit var authenticationService: GitHubAuthentication
 
     /**
      * Requests user and device codes from GitHub for authentication.
@@ -111,7 +111,7 @@ public class UserSessionProcess :
      * It is expected this method is called right after the creation of the process instance.
      * Otherwise, the process will not be able to function properly.
      */
-    internal fun inject(authenticationService: GitHubAuthenticationService) {
+    internal fun inject(authenticationService: GitHubAuthentication) {
         this.authenticationService = authenticationService
     }
 }

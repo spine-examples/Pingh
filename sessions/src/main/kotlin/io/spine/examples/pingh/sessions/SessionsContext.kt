@@ -45,7 +45,7 @@ public const val NAME: String = "Sessions"
  * as a parameter.
  */
 public fun newSessionsContext(
-    authenticationService: GitHubAuthenticationService
+    authenticationService: GitHubAuthentication
 ): BoundedContextBuilder =
     BoundedContext.singleTenant(NAME)
         .add(UserSessionRepository(authenticationService))

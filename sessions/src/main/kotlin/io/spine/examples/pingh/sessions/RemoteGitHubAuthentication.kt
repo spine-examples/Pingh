@@ -43,14 +43,14 @@ import kotlin.jvm.Throws
 import kotlinx.coroutines.runBlocking
 
 /**
- * Using the GitHub API generates access tokens for the user.
+ * Using the GitHub REST API generates access tokens for the user.
  *
  * @param clientId the client ID for the Pingh GitHub App.
  */
-public class GitHubAuthenticationServiceImpl(
+public class RemoteGitHubAuthentication(
     private val clientId: ClientId,
     engine: HttpClientEngine
-): GitHubAuthenticationService {
+): GitHubAuthentication {
 
     /**
      * HTTP client on behalf of which requests is made.

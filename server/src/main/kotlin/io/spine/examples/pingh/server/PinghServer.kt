@@ -38,7 +38,7 @@ import io.spine.server.transport.memory.InMemoryTransportFactory
 import io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT
 import io.spine.examples.pingh.github.ClientId
 import io.spine.examples.pingh.github.buildBy
-import io.spine.examples.pingh.sessions.GitHubAuthenticationServiceImpl
+import io.spine.examples.pingh.sessions.RemoteGitHubAuthentication
 import io.spine.examples.pingh.sessions.newSessionsContext
 
 /**
@@ -68,7 +68,7 @@ private fun createServer(): Server {
     configureEnvironment()
     return Server
         .atPort(DEFAULT_CLIENT_SERVICE_PORT)
-        .add(newSessionsContext(GitHubAuthenticationServiceImpl(clientId, CIO.create())))
+        .add(newSessionsContext(RemoteGitHubAuthentication(clientId, CIO.create())))
         .add(newMentionsContext(GitHubClientServiceImpl(CIO.create())))
         .build()
 }

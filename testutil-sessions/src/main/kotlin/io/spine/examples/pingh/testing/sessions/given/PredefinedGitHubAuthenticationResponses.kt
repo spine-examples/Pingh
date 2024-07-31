@@ -30,16 +30,16 @@ import io.spine.examples.pingh.github.DeviceCode
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.AuthenticationCodesResponse
 import io.spine.examples.pingh.sessions.CannotObtainAccessToken
-import io.spine.examples.pingh.sessions.GitHubAuthenticationService
+import io.spine.examples.pingh.sessions.GitHubAuthentication
 import kotlin.jvm.Throws
 
 /**
- * Implementation of `GitHubAuthenticationService` that get responses
+ * Implementation of `GitHubAuthentication` that get responses
  * from JSON files in the resource folder.
  *
  * Uses exclusively for testing.
  */
-public class PredefinedGitHubAuthenticationResponses : GitHubAuthenticationService {
+public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
 
     /**
      * Whether the user has entered their user code.

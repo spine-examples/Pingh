@@ -33,7 +33,7 @@ import io.spine.server.procman.ProcessManagerRepository
  * Manages instances of `UserSession`.
  */
 internal class UserSessionRepository(
-    private val authenticationService: GitHubAuthenticationService
+    private val authenticationService: GitHubAuthentication
 ) : ProcessManagerRepository<SessionId, UserSessionProcess, UserSession>() {
 
     @OverridingMethodsMustInvokeSuper

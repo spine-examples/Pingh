@@ -35,7 +35,7 @@ import kotlin.jvm.Throws
 /**
  * Allows to access GitHub authentication API.
  */
-public interface GitHubAuthenticationService {
+public interface GitHubAuthentication {
 
     /**
      * Requests the [UserCode] and [DeviceCode] required for authentication.
