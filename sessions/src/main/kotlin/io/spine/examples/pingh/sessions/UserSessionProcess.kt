@@ -60,7 +60,7 @@ public class UserSessionProcess :
      */
     @Assign
     internal fun handle(command: LogUserIn): UserCodeReceived {
-        val codes = authenticationService.requestAuthenticationCodes()
+        val codes = authenticationService.requestVerificationCodes()
         with(builder()) {
             deviceCode = codes.deviceCode
         }

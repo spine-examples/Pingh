@@ -141,24 +141,28 @@ message CommentsResponse {
     repeated CommentFragment item = 1 [(validate) = true];
 }
 
-// The GitHub API response received when obtaining authentication codes.
-message AuthenticationCodesFragment {
+// The GitHub REST API response received when obtaining verification codes.
+message VerificationCodesFragment {
 
-    // Device confirmation code.
+    // Device verification code.
     string device_code = 1 [(required) = true, json_name = "device_code"];
 
-    // User confirmation code.
+    // User verification code.
     string user_code = 2 [(required) = true, json_name = "user_code"];
 
     // The URL where users need to enter their `user_code`.
     string verification_uri = 3 [(required) = true, json_name = "verification_uri"];
 
+    // The number of seconds before the `device_code` and `user_code` expire.
+    int64 expires_in = 4 [(required) = true, json_name = "expires_in"];
+
     // The minimum number of seconds required before the next request
     // to generate an access token.
-    int64 interval = 4 [(required) = true];
+    //
+    int64 interval = 5 [(required) = true];
 }
 
-// The GitHub API response received when obtaining access token.
+// The GitHub REST API response received when obtaining access token.
 message AccessTokenFragment {
 
     // The user access token.
@@ -171,8 +175,9 @@ message AccessTokenFragment {
     string refresh_token = 3 [(required) = true, json_name = "refresh_token"];
 }
 
-// The response from the GitHub API indicating that the requested action
+// The response from the GitHub REST API indicating that the requested action
 // could not be performed due to an error.
+//
 message ErrorResponse {
 
     // The name of the error.

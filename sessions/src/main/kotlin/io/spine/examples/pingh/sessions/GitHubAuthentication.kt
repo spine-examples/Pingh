@@ -29,7 +29,7 @@ package io.spine.examples.pingh.sessions
 import io.spine.examples.pingh.github.DeviceCode
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
-import io.spine.examples.pingh.github.rest.AuthenticationCodesResponse
+import io.spine.examples.pingh.github.rest.VerificationCodesResponse
 import kotlin.jvm.Throws
 
 /**
@@ -38,9 +38,9 @@ import kotlin.jvm.Throws
 public interface GitHubAuthentication {
 
     /**
-     * Requests the [UserCode] and [DeviceCode] required for authentication.
+     * Requests the [UserCode] and [DeviceCode] required for verification.
      */
-    public fun requestAuthenticationCodes(): AuthenticationCodesResponse
+    public fun requestVerificationCodes(): VerificationCodesResponse
 
     /**
      * Requests an access token for the user using the `DeviceCode`.

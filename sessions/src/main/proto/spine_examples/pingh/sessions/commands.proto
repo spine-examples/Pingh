@@ -35,7 +35,7 @@ option java_outer_classname = "CommandsProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/sessions/identifiers.proto";
-import "spine_examples/pingh/github/github.proto";
+import "spine_examples/pingh/github/values.proto";
 
 // Tells to start the login process for a Pingh app via GitHub.
 message LogUserIn {

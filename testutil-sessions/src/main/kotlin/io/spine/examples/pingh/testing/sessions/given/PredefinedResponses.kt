@@ -27,20 +27,20 @@
 package io.spine.examples.pingh.testing.sessions.given
 
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
-import io.spine.examples.pingh.github.rest.AuthenticationCodesResponse
+import io.spine.examples.pingh.github.rest.VerificationCodesResponse
 import io.spine.examples.pingh.sessions.parseAccessTokenResponse
-import io.spine.examples.pingh.sessions.parseAuthenticationCodesResponse
+import io.spine.examples.pingh.sessions.parseVerificationCodesResponse
 
 /**
  * Returns the response provided by [PredefinedGitHubAuthenticationResponses]
- * upon successful execution of the request for generate authentication codes.
+ * upon successful execution of the request for generate verification codes.
  */
-public fun predefinedAuthenticationCodes(): AuthenticationCodesResponse {
+public fun predefinedVerificationCodes(): VerificationCodesResponse {
     val jsonFile = PredefinedGitHubAuthenticationResponses::class.java
         .getResource("/github-responses/authentication-codes-response.json")
     checkNotNull(jsonFile)
     val json = jsonFile.readText()
-    return parseAuthenticationCodesResponse(json)
+    return parseVerificationCodesResponse(json)
 }
 
 /**

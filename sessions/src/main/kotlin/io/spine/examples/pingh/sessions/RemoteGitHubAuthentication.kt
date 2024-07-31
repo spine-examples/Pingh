@@ -36,8 +36,8 @@ import io.ktor.http.URLBuilder
 import io.spine.examples.pingh.github.ClientId
 import io.spine.examples.pingh.github.DeviceCode
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
-import io.spine.examples.pingh.github.rest.AuthenticationCodesResponse
 import io.spine.examples.pingh.github.rest.ErrorResponse
+import io.spine.examples.pingh.github.rest.VerificationCodesResponse
 import io.spine.json.Json
 import kotlin.jvm.Throws
 import kotlinx.coroutines.runBlocking
@@ -58,19 +58,19 @@ public class RemoteGitHubAuthentication(
     private val client = HttpClient(engine)
 
     /**
-     * Requests the GitHub API the user and device codes to authenticate the user.
+     * Requests the GitHub REST API the user and device codes to authenticate the user.
      */
-    public override fun requestAuthenticationCodes(): AuthenticationCodesResponse =
+    public override fun requestVerificationCodes(): VerificationCodesResponse =
         runBlocking {
             val response = GitHubAuthenticationRequest
                 .post("https://github.com/login/device/code")
                 .with(clientId)
                 .requestOnBehalfOf(client)
-            parseAuthenticationCodesResponse(response.body())
+            parseVerificationCodesResponse(response.body())
         }
 
     /**
-     * Requests the GitHub API the user's access token.
+     * Requests the GitHub REST API the user's access token.
      *
      * To receive the token, the user must enter the user code issued
      * along with the specified device code.

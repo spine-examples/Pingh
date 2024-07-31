@@ -28,7 +28,7 @@ package io.spine.examples.pingh.testing.sessions.given
 
 import io.spine.examples.pingh.github.DeviceCode
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
-import io.spine.examples.pingh.github.rest.AuthenticationCodesResponse
+import io.spine.examples.pingh.github.rest.VerificationCodesResponse
 import io.spine.examples.pingh.sessions.CannotObtainAccessToken
 import io.spine.examples.pingh.sessions.GitHubAuthentication
 import kotlin.jvm.Throws
@@ -47,10 +47,10 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
     private var isUserCodeEntered = false
 
     /**
-     * Returns `AuthenticationCodesResponse` retrieved from a JSON file in the resource folder.
+     * Returns `VerificationCodesResponse` retrieved from a JSON file in the resource folder.
      */
-    public override fun requestAuthenticationCodes(): AuthenticationCodesResponse =
-        predefinedAuthenticationCodes()
+    public override fun requestVerificationCodes(): VerificationCodesResponse =
+        predefinedVerificationCodes()
 
     /**
      * Returns the `AccessTokenResponse` retrieved from a JSON file in the resource folder

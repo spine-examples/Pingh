@@ -35,7 +35,7 @@ option java_outer_classname = "UserSessionProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/sessions/identifiers.proto";
-import "spine_examples/pingh/github/github.proto";
+import "spine_examples/pingh/github/values.proto";
 import "google/protobuf/timestamp.proto";
 
 // The process of session existence.

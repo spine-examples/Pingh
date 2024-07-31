@@ -36,7 +36,7 @@ import io.spine.examples.pingh.sessions.buildBy
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.testing.sessions.given.predefinedAccessTokenResponse
-import io.spine.examples.pingh.testing.sessions.given.predefinedAuthenticationCodes
+import io.spine.examples.pingh.testing.sessions.given.predefinedVerificationCodes
 import io.spine.testing.TestValues.randomString
 import kotlin.reflect.KClass
 
@@ -73,7 +73,7 @@ internal fun KClass<UserSession>.buildBy(
  * from the predefined GitHub response.
  */
 internal fun expectedUserSessionWithDeviceCode(id: SessionId): UserSession =
-    with(predefinedAuthenticationCodes()) {
+    with(predefinedVerificationCodes()) {
         UserSession::class.buildBy(id, deviceCode)
     }
 
@@ -91,7 +91,7 @@ internal fun expectedUserSessionWithRefreshToken(id: SessionId): UserSession =
  * data from the predefined GitHub response.
  */
 internal fun expectedUserCodeReceivedEvent(id: SessionId): UserCodeReceived =
-    with(predefinedAuthenticationCodes()) {
+    with(predefinedVerificationCodes()) {
         UserCodeReceived::class.buildBy(id, userCode, verificationUrl, interval)
     }
 

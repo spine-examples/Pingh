@@ -35,9 +35,10 @@ option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/sessions/identifiers.proto";
-import "spine_examples/pingh/github/github.proto";
+import "spine_examples/pingh/github/values.proto";
 import "spine/net/url.proto";
 import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
 
 // User code received.
 //
@@ -54,8 +55,11 @@ message UserCodeReceived {
     // The URL where users need to enter their `user_code`.
     spine.net.Url verification_url = 3 [(required) = true];
 
+    // The time after which the `user_code` expires.
+    google.protobuf.Timestamp when_expires = 4 [(required) = true];
+
     // The minimum duration that must pass before user can make a new access token request.
-    google.protobuf.Duration interval = 4 [(required) = true];
+    google.protobuf.Duration interval = 5 [(required) = true];
 }
 
 // The user logged in.
