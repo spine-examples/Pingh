@@ -92,7 +92,7 @@ internal fun expectedUserSessionWithRefreshToken(id: SessionId): UserSession =
  */
 internal fun expectedUserCodeReceivedEvent(id: SessionId): UserCodeReceived =
     with(predefinedVerificationCodes()) {
-        UserCodeReceived::class.buildBy(id, userCode, verificationUrl, interval)
+        UserCodeReceived::class.buildBy(id, userCode, verificationUrl, expiresIn, interval)
     }
 
 /**

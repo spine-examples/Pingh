@@ -163,7 +163,7 @@ public fun KClass<VerificationCodesResponse>.buildFromFragment(
         deviceCode = DeviceCode::class.buildBy(fragment.deviceCode)
         userCode = UserCode::class.buildBy(fragment.userCode)
         verificationUrl = Url::class.buildBy(fragment.verificationUri)
-        whenExpires = Timestamps.add(currentTime(), seconds(fragment.expiresIn))
+        expiresIn = seconds(fragment.expiresIn)
         interval = seconds(fragment.interval)
         vBuild()
     }

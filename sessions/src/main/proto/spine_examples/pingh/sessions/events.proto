@@ -55,8 +55,8 @@ message UserCodeReceived {
     // The URL where users need to enter their `user_code`.
     spine.net.Url verification_url = 3 [(required) = true];
 
-    // The time after which the `user_code` expires.
-    google.protobuf.Timestamp when_expires = 4 [(required) = true];
+    // The duration after which the `user_code` expires.
+    google.protobuf.Duration expires_in = 4 [(required) = true];
 
     // The minimum duration that must pass before user can make a new access token request.
     google.protobuf.Duration interval = 5 [(required) = true];

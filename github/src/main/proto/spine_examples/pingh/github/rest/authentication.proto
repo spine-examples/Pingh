@@ -51,8 +51,8 @@ message VerificationCodesResponse {
     // The URL where users need to enter their `user_code`.
     spine.net.Url verification_url = 3 [(required) = true];
 
-    // Time for the token to expire.
-    google.protobuf.Timestamp when_expires = 4 [(required) = true];
+    // The duration after which the `device_code` and `user_code` expire.
+    google.protobuf.Duration expires_in = 4 [(required) = true];
 
     // The minimum duration that must pass before the user can make a new access token request
     // to complete the device authentication.

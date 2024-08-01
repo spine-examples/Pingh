@@ -68,7 +68,7 @@ public class UserSessionProcess :
             command.id,
             codes.userCode,
             codes.verificationUrl,
-            codes.whenExpires,
+            codes.expiresIn,
             codes.interval
         )
     }
