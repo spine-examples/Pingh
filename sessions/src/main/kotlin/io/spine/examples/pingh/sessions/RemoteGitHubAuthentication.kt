@@ -58,7 +58,7 @@ public class RemoteGitHubAuthentication(
     private val client = HttpClient(engine)
 
     /**
-     * Requests the GitHub REST API the user and device codes to authenticate the user.
+     * Requests the user and device codes from the GitHub REST API to authenticate the user.
      */
     public override fun requestVerificationCodes(): VerificationCodesResponse =
         runBlocking {
@@ -168,7 +168,7 @@ private class AuthenticationRequestBuilder internal constructor(
     /**
      * Creates and sends request with specified data.
      *
-     * @throws IllegalArgumentException client ID request data is not specified.
+     * @throws IllegalArgumentException if the client ID request data is not specified.
      */
     internal suspend fun post(): HttpResponse {
         checkNotNull(clientId) { "Client ID must be set." }

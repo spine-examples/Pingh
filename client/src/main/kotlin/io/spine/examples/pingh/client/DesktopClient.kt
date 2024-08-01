@@ -121,7 +121,7 @@ public class DesktopClient(
     /**
      * Starts the session and the login process.
      *
-     * Remembers the session ID.
+     * Sets the session ID.
      */
     public fun logIn(
         username: Username,
@@ -168,8 +168,8 @@ public class DesktopClient(
         check(isLoggedIn) { "The user has not been logged in." }
         val command = LogUserOut::class.buildBy(session!!.id)
         observeEventOnce(command.id, UserLoggedOut::class) { event ->
-            this.isLoggedIn = false
-            this.session = null
+            isLoggedIn = false
+            session = null
             onSuccess(event)
         }
         send(command)

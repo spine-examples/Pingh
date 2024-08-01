@@ -42,7 +42,8 @@ import "google/protobuf/timestamp.proto";
 
 // User code received.
 //
-// To continue the login process, the user must enter this code on the GitHub page.
+// To continue the login process, the user must enter this code
+// on the verification GitHub page.
 //
 message UserCodeReceived {
 

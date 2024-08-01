@@ -109,7 +109,7 @@ internal fun LoginPage(
 ) {
     var state by remember { mutableStateOf(LoginState.USERNAME_ENTERING) }
     var verificationInfo by remember { mutableStateOf<VerificationInfo?>(null) }
-    val toVerificationPage = fun(info: VerificationInfo) {
+    val toVerificationPage = { info: VerificationInfo ->
         verificationInfo = info
         state = LoginState.VERIFICATION
     }
@@ -136,7 +136,7 @@ internal fun LoginPage(
  * [LoginButton] is not enable while the entered `Username` is invalid.
  *
  * @param client enables interaction with the Pingh server.
- * @param toVerificationPage the navigation to the 'Login verification' page.
+ * @param toVerificationPage the navigation to the 'Login Verification' page.
  */
 @Composable
 private fun UsernameEnteringPage(
@@ -398,12 +398,13 @@ private fun LoginButton(
 /**
  * Displays a login verification page.
  *
- * Displays the user code and instructions for completing the verification process.
- * If verification is successful, the user will receive tokens and be redirected
- * to the `Mentions` page. Otherwise, another attempt will be needed.
+ * Displays the user code and provides instructions for completing the verification process.
+ * Upon successful verification, the user will receive tokens and be redirected
+ * to the `Mentions` page. If verification fails, the user will need to try again.
  *
  * If the user code expires before verification is complete, the process must be restarted.
- * In this case, the user code cannot be copied, and the instructions and button disappear.
+ * In this case, the user code cannot be copied, and the instructions and button
+ * will not be displayed.
  *
  * @param client enables interaction with the Pingh server.
  * @param verificationInfo the information required to verify login.
@@ -417,15 +418,15 @@ private fun VerificationPage(
     toMentionsPage: () -> Unit,
     changeVerificationInfo: (info: VerificationInfo) -> Unit
 ) {
-    var isExpired by remember { mutableStateOf(false) }
+    var isUserCodeExpired by remember { mutableStateOf(false) }
     val expirationObservationJob = makeJobWithDelay(verificationInfo.expiresIn) {
-        isExpired = true
+        isUserCodeExpired = true
     }
     val isButtonEnabled = remember { mutableStateOf(true) }
     val reloadVerificationPage = {
         val name = verificationInfo.username
         client.logIn(name) { event ->
-            isExpired = false
+            isUserCodeExpired = false
             isButtonEnabled.value = true
             expirationObservationJob.cancel()
             changeVerificationInfo(VerificationInfo::class.buildBy(name, event))
@@ -442,10 +443,10 @@ private fun VerificationPage(
         Spacer(Modifier.height(15.dp))
         UserCodeField(
             userCode = verificationInfo.userCode,
-            isExpired = isExpired
+            isExpired = isUserCodeExpired
         )
         Spacer(Modifier.height(10.dp))
-        if (isExpired) {
+        if (isUserCodeExpired) {
             Spacer(Modifier.height(5.dp))
             CodeExpiredErrorMessage(reloadVerificationPage)
         } else {
@@ -469,7 +470,7 @@ private fun VerificationPage(
 }
 
 /**
- * Displays a title of the `Login verification` page.
+ * Displays a title of the login verification page.
  */
 @Composable
 private fun VerificationTitle() {
@@ -625,7 +626,7 @@ private fun VerificationUrlButton(url: Url) {
  *                 a new access token request.
  * @param enabled controls the enabled state of this button.
  *                If `false`, the button cannot be pressed.
- * @param onSuccess called if this is clicked and login is verified.
+ * @param onSuccess called if this button is clicked and login is verified.
  * @param onClickToRestartLink called when clickable part of error message is clicked.
  */
 @Composable
@@ -719,7 +720,7 @@ private fun ClickableErrorMessage(
     modifier: Modifier = Modifier
 ) {
     require(text.contains(clickablePartOfText)) {
-        "The `clickablePartOfText` must be a substring of the `text`"
+        "The `clickablePartOfText` must be a substring of the `text`."
     }
     val startPosition = text.indexOf(clickablePartOfText)
     val endPosition = startPosition + clickablePartOfText.length
@@ -762,7 +763,7 @@ private fun makeJobWithDelay(
     delayDuration: Duration,
     jobAction: () -> Unit
 ): Job =
-    CoroutineScope(Dispatchers.IO).launch {
+    CoroutineScope(Dispatchers.Default).launch {
         delay(delayDuration.milliseconds)
         jobAction()
     }
@@ -773,7 +774,7 @@ private fun makeJobWithDelay(
  * @param username the name of the user that who is being verified.
  * @param userCode the verification code that displays so that
  *                 the user can enter the code in a browser.
- * @param verificationUrl the URL where users need to enter their `userCode`.
+ * @param verificationUrl the URL of the GitHub page where user needs to enter their `userCode`.
  * @param expiresIn the duration after which the `userCode` expires.
  * @param interval the minimum duration that must pass before user can make
  *                 a new access token request.

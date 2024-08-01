@@ -30,6 +30,7 @@ import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.clock.IntervalClock
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.newMentionsContext
+import io.spine.examples.pingh.sessions.GitHubAuthentication
 import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.server.Server
@@ -86,7 +87,7 @@ internal abstract class IntegrationTest {
          */
         private fun createServer(
             port: Int,
-            authenticationService: PredefinedGitHubAuthenticationResponses
+            authenticationService: GitHubAuthentication
         ): Server =
             Server.atPort(port)
                 .add(newSessionsContext(authenticationService))
