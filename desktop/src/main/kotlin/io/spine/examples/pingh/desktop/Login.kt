@@ -48,6 +48,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -67,10 +68,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.protobuf.Duration
@@ -79,7 +80,10 @@ import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.github.validateUsernameValue
+import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.net.Url
+import io.spine.protobuf.Durations2.toMinutes
+import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -100,18 +104,21 @@ internal fun LoginPage(
 ) {
     var state by remember { mutableStateOf(LoginState.USERNAME_ENTERING) }
     var verificationInfo by remember { mutableStateOf<VerificationInfo?>(null) }
+    val toVerificationPage = fun(info: VerificationInfo) {
+        verificationInfo = info
+        state = LoginState.VERIFICATION
+    }
     when (state) {
         LoginState.USERNAME_ENTERING -> UsernameEnteringPage(
-            client = client
-        ) { userCode, verificationUrl, interval ->
-            verificationInfo = VerificationInfo(userCode, verificationUrl, interval)
-            state = LoginState.VERIFICATION
-        }
+            client = client,
+            toVerificationPage = toVerificationPage
+        )
 
         LoginState.VERIFICATION -> VerificationPage(
             client = client,
             verificationInfo = verificationInfo!!,
-            toMentionsPage = toMentionsPage
+            toMentionsPage = toMentionsPage,
+            changeVerificationInfo = toVerificationPage
         )
     }
 }
@@ -124,12 +131,12 @@ internal fun LoginPage(
  * [LoginButton] is not enable while the entered `Username` is invalid.
  *
  * @param client enables interaction with the Pingh server.
- * @param toVerifyingPage the navigation to the 'Login verification' page.
+ * @param toVerificationPage the navigation to the 'Login verification' page.
  */
 @Composable
 private fun UsernameEnteringPage(
     client: DesktopClient,
-    toVerifyingPage: (userCode: UserCode, verificationUrl: Url, interval: Duration) -> Unit
+    toVerificationPage: (info: VerificationInfo) -> Unit
 ) {
     var username by remember { mutableStateOf("") }
     var wasChanged by remember { mutableStateOf(false) }
@@ -155,10 +162,9 @@ private fun UsernameEnteringPage(
         LoginButton(
             enabled = wasChanged && !isError.value
         ) {
-            client.logIn(
-                Username::class.buildBy(username)
-            ) { event ->
-                toVerifyingPage(event.userCode, event.verificationUrl, event.interval)
+            val name = Username::class.buildBy(username)
+            client.logIn(name) { event ->
+                toVerificationPage(VerificationInfo::class.buildBy(name, event))
             }
         }
     }
@@ -388,8 +394,23 @@ private fun LoginButton(
 private fun VerificationPage(
     client: DesktopClient,
     verificationInfo: VerificationInfo,
-    toMentionsPage: () -> Unit
+    toMentionsPage: () -> Unit,
+    changeVerificationInfo: (info: VerificationInfo) -> Unit
 ) {
+    var isExpired by remember { mutableStateOf(false) }
+    val expirationObservationJob = makeJobWithDelay(verificationInfo.expiresIn) {
+        isExpired = true
+    }
+    val isButtonEnabled = remember { mutableStateOf(true) }
+    val reloadVerificationPage = {
+        val name = verificationInfo.username
+        client.logIn(name) { event ->
+            isExpired = false
+            isButtonEnabled.value = true
+            expirationObservationJob.cancel()
+            changeVerificationInfo(VerificationInfo::class.buildBy(name, event))
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -399,11 +420,30 @@ private fun VerificationPage(
     ) {
         VerificationTitle()
         Spacer(Modifier.height(15.dp))
-        UserCodeField(verificationInfo.userCode)
+        UserCodeField(
+            userCode = verificationInfo.userCode,
+            isExpired = isExpired
+        )
         Spacer(Modifier.height(10.dp))
-        VerificationText(verificationInfo.verificationUrl)
-        Spacer(Modifier.height(20.dp))
-        SubmitButton(client, verificationInfo.interval, toMentionsPage)
+        if (isExpired) {
+            CodeExpiredErrorMessage(reloadVerificationPage)
+        } else {
+            VerificationText(
+                verificationUrl = verificationInfo.verificationUrl,
+                expiresIn = verificationInfo.expiresIn
+            )
+            Spacer(Modifier.height(20.dp))
+            SubmitButton(
+                client = client,
+                interval = verificationInfo.interval,
+                enabled = isButtonEnabled,
+                toMentionsPage = toMentionsPage,
+                stopExpirationObservationJob = {
+                    expirationObservationJob.cancel()
+                },
+                onClickToRestartLink = reloadVerificationPage
+            )
+        }
     }
 }
 
@@ -418,9 +458,14 @@ private fun VerificationTitle() {
 
 @Composable
 private fun UserCodeField(
-    userCode: UserCode
+    userCode: UserCode,
+    isExpired: Boolean
 ) {
-    val clipboardManager = LocalClipboardManager.current
+    val color = if (isExpired) {
+        MaterialTheme.colorScheme.onBackground
+    } else {
+        MaterialTheme.colorScheme.onSecondary
+    }
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
@@ -428,32 +473,52 @@ private fun UserCodeField(
         SelectionContainer {
             Text(
                 text = userCode.value,
-                color = MaterialTheme.colorScheme.onSecondary,
-                letterSpacing = TextUnit(3f, TextUnitType.Sp),
+                color = color,
                 fontSize = 24.sp,
+                letterSpacing = 3.sp,
                 style = MaterialTheme.typography.displayLarge
             )
         }
-        Box(
-            modifier = Modifier.offset(x = 91.dp, y = 2.5.dp)
-        ) {
-            IconButton(
-                icon = Icons.copy,
-                onClick = {
-                    clipboardManager.setText(AnnotatedString(userCode.value))
-                },
-                modifier = Modifier.size(24.dp),
-                colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-            )
+        if (!isExpired) {
+            CopyToClipboardIcon(userCode)
         }
     }
 }
 
 @Composable
+private fun CopyToClipboardIcon(
+    userCode: UserCode
+) {
+    val clipboardManager = LocalClipboardManager.current
+    Box(
+        modifier = Modifier.offset(x = 91.dp, y = 2.5.dp)
+    ) {
+        IconButton(
+            icon = Icons.copy,
+            onClick = {
+                clipboardManager.setText(AnnotatedString(userCode.value))
+            },
+            modifier = Modifier.size(24.dp),
+            colors = IconButtonDefaults.iconButtonColors(
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+        )
+    }
+}
+
+@Composable
+private fun CodeExpiredErrorMessage(onClick: () -> Unit) {
+    ClickableErrorMessage(
+        text = "The code has expired, please start over.",
+        clickablePartOfText = "start over",
+        onClick = onClick
+    )
+}
+
+@Composable
 private fun VerificationText(
-    verificationUrl: Url
+    verificationUrl: Url,
+    expiresIn: Duration
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -468,7 +533,7 @@ private fun VerificationText(
         VerificationUrlButton(verificationUrl)
         Spacer(Modifier.height(3.dp))
         Text(
-            text = "The code is valid for 5 minutes.",
+            text = "The code is valid for ${toMinutes(expiresIn)} minutes.",
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             style = MaterialTheme.typography.bodyLarge
         )
@@ -480,6 +545,11 @@ private fun VerificationUrlButton(url: Url) {
     val uriHandler = LocalUriHandler.current
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
+    val decoration = if (isHovered) {
+        TextDecoration.Underline
+    } else {
+        TextDecoration.None
+    }
     Text(
         text = url.spec,
         modifier = Modifier
@@ -491,11 +561,7 @@ private fun VerificationUrlButton(url: Url) {
                 uriHandler.openUri(url.spec)
             },
         color = MaterialTheme.colorScheme.tertiary,
-        textDecoration = if (isHovered) {
-            TextDecoration.Underline
-        } else {
-            TextDecoration.None
-        },
+        textDecoration = decoration,
         style = MaterialTheme.typography.bodyLarge
     )
 }
@@ -504,58 +570,115 @@ private fun VerificationUrlButton(url: Url) {
 private fun SubmitButton(
     client: DesktopClient,
     interval: Duration,
-    toMentionsPage: () -> Unit
+    enabled: MutableState<Boolean>,
+    toMentionsPage: () -> Unit,
+    stopExpirationObservationJob: () -> Unit,
+    onClickToRestartLink: () -> Unit
 ) {
-    val enabled = remember { mutableStateOf(true) }
-    Button(
-        onClick = {
-            client.verifyLoginToGitHub(
-                onSuccess = {
-                    toMentionsPage()
-                },
-                onFail = {
-                    enabled.value = false
-                    makeJobWithDelay(interval) {
-                        enabled.value = true
-                    }
+    val onClick = {
+        client.verifyLoginToGitHub(
+            onSuccess = {
+                toMentionsPage()
+                stopExpirationObservationJob()
+            },
+            onFail = {
+                enabled.value = false
+                makeJobWithDelay(interval) {
+                    enabled.value = true
                 }
-            )
-        },
+            }
+        )
+    }
+    Box(
         modifier = Modifier
             .width(210.dp)
             .height(32.dp),
-        enabled = enabled.value,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
-        )
+        contentAlignment = Alignment.TopCenter
     ) {
-        Text(
-            text = "I have entered the code",
-            style = MaterialTheme.typography.displayMedium
+        Button(
+            onClick = onClick,
+            modifier = Modifier.fillMaxSize(),
+            enabled = enabled.value,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            )
+        ) {
+            Text(
+                text = "I have entered the code",
+                style = MaterialTheme.typography.displayMedium
+            )
+        }
+        NoResponseErrorMessage(
+            enabled = !enabled.value,
+            interval = interval,
+            onClickToRestartLink = onClickToRestartLink
         )
     }
-    ErrorMessage(
-        enabled = !enabled.value,
-        interval = interval
-    )
 }
 
 @Composable
-private fun ErrorMessage(
+private fun NoResponseErrorMessage(
     enabled: Boolean,
-    interval: Duration
+    interval: Duration,
+    onClickToRestartLink: () -> Unit
 ) {
     if (enabled) {
-        Text(
-            text = "User code has not been entered. " +
-                    "Wait ${interval.seconds} seconds before retrying.",
+        ClickableErrorMessage(
+            text = """
+                No response from GitHub yet.
+                Try again in ${interval.seconds} seconds, or start over.
+            """.trimIndent(),
+            clickablePartOfText = "start over",
+            onClick = onClickToRestartLink,
             modifier = Modifier
                 .width(180.dp)
-                .padding(top = 3.dp),
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodyMedium
+                .offset(y = 35.dp)
         )
+    }
+}
+
+@Composable
+private fun ClickableErrorMessage(
+    text: String,
+    clickablePartOfText: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    require(text.contains(clickablePartOfText)) {
+        "The `clickablePartOfText` must be a substring of the `text`"
+    }
+    val startPosition = text.indexOf(clickablePartOfText)
+    val endPosition = startPosition + clickablePartOfText.length
+    val annotatedString = buildAnnotatedString {
+        append(text)
+        addStringAnnotation(
+            tag = "Action",
+            annotation = clickablePartOfText,
+            start = startPosition,
+            end = endPosition
+        )
+        addStyle(
+            style = SpanStyle(
+                color = MaterialTheme.colorScheme.tertiary,
+                textDecoration = TextDecoration.Underline
+            ),
+            start = startPosition,
+            end = endPosition
+        )
+    }
+    ClickableText(
+        text = annotatedString,
+        modifier = modifier,
+        style = MaterialTheme.typography.bodyMedium.copy(
+            color = MaterialTheme.colorScheme.error
+        )
+    ) { offset ->
+        annotatedString
+            .getStringAnnotations(offset, offset)
+            .firstOrNull()?.let {
+                onClick()
+            }
     }
 }
 
@@ -571,17 +694,33 @@ private fun makeJobWithDelay(
 /**
  * Information required to verify login .
  *
+ * @param username the name of the user that who is being verified.
  * @param userCode the verification code that displays so that
  *                 the user can enter the code in a browser.
  * @param verificationUrl the URL where users need to enter their `userCode`.
+ * @param expiresIn the duration after which the `userCode` expires.
  * @param interval the minimum duration that must pass before user can make
  *                 a new access token request.
  */
 private class VerificationInfo(
+    internal val username: Username,
     internal val userCode: UserCode,
     internal val verificationUrl: Url,
+    internal val expiresIn: Duration,
     internal val interval: Duration
 )
+
+private fun KClass<VerificationInfo>.buildBy(
+    username: Username,
+    event: UserCodeReceived
+): VerificationInfo =
+    VerificationInfo(
+        username,
+        event.userCode,
+        event.verificationUrl,
+        event.expiresIn,
+        event.interval
+    )
 
 /**
  * State of login process.
