@@ -55,14 +55,13 @@ internal fun PinghTheme(content: @Composable () -> Unit): Unit = MaterialTheme(
  */
 @Suppress("MagicNumber") // Colors are defined using RGB components.
 private val colorScheme = lightColorScheme(
-    primary = Color(162, 215, 245),
+    primary = Color(9, 105, 218),
     onPrimary = Color.White,
     primaryContainer = Color(59, 155, 255),
     secondary = Color.White,
     onSecondary = Color(40, 40, 40),
     secondaryContainer = Color(150, 150, 150),
     onSecondaryContainer = Color(80, 80, 80),
-    tertiary = Color(9, 105, 218),
     background = Color(235, 235, 235),
     onBackground = Color(213, 213, 213),
     error = Color(255, 161, 161)

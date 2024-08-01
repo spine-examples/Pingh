@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("TooManyFunctions") // Using Compose requires many functions to render the UI.
+
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.foundation.BorderStroke
@@ -91,11 +93,19 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
+ * Number of milliseconds in one second.
+ */
+private const val millisecondsPerSecond = 1000
+
+/**
  * Displays the page with the current login step.
  *
  * Initially, the user must enter their `Username`, after which they will receive
  * a code that must be entered into GitHub. After entering the code, the user needs
  * to confirm the login on the application page.
+ *
+ * @param client enables interaction with the Pingh server.
+ * @param toMentionsPage the navigation to the 'Mentions' page.
  */
 @Composable
 internal fun LoginPage(
@@ -390,6 +400,21 @@ private fun LoginButton(
     }
 }
 
+/**
+ * Displays a login verification page.
+ *
+ * Displays the user code and instructions for completing the verification process.
+ * If verification is successful, the user will receive tokens and be redirected
+ * to the `Mentions` page. Otherwise, another attempt will be needed.
+ *
+ * If the user code expires before verification is complete, the process must be restarted.
+ * In this case, the user code cannot be copied, and the instructions and button disappear.
+ *
+ * @param client enables interaction with the Pingh server.
+ * @param verificationInfo the information required to verify login.
+ * @param toMentionsPage the navigation to the 'Mentions' page.
+ * @param changeVerificationInfo sets a new value for `VerificationInfo` to recompose the page.
+ */
 @Composable
 private fun VerificationPage(
     client: DesktopClient,
@@ -437,9 +462,9 @@ private fun VerificationPage(
                 client = client,
                 interval = verificationInfo.interval,
                 enabled = isButtonEnabled,
-                toMentionsPage = toMentionsPage,
-                stopExpirationObservationJob = {
+                onSuccess = {
                     expirationObservationJob.cancel()
+                    toMentionsPage()
                 },
                 onClickToRestartLink = reloadVerificationPage
             )
@@ -447,6 +472,9 @@ private fun VerificationPage(
     }
 }
 
+/**
+ * Displays a title of the `Login verification` page.
+ */
 @Composable
 private fun VerificationTitle() {
     Text(
@@ -456,6 +484,12 @@ private fun VerificationTitle() {
     )
 }
 
+/**
+ * Displays the user code with an option to copy it.
+ *
+ * @param userCode the verification code to be displayed.
+ * @param isExpired whether `userCode` is expired.
+ */
 @Composable
 private fun UserCodeField(
     userCode: UserCode,
@@ -485,6 +519,11 @@ private fun UserCodeField(
     }
 }
 
+/**
+ * Displays an icon to copy the specified `UserCode` to the clipboard.
+ *
+ * @param userCode the `UserCode` to copy.
+ */
 @Composable
 private fun CopyToClipboardIcon(
     userCode: UserCode
@@ -506,6 +545,11 @@ private fun CopyToClipboardIcon(
     }
 }
 
+/**
+ * Displays an error message indicating that the `UserCode` has expired.
+ *
+ * @param onClick called when clickable part of message is clicked.
+ */
 @Composable
 private fun CodeExpiredErrorMessage(onClick: () -> Unit) {
     ClickableErrorMessage(
@@ -515,6 +559,12 @@ private fun CodeExpiredErrorMessage(onClick: () -> Unit) {
     )
 }
 
+/**
+ * Displays instructions for login verification.
+ *
+ * @param verificationUrl the URL of the GitHub verification page.
+ * @param expiresIn the duration after which the `userCode` expires.
+ */
 @Composable
 private fun VerificationText(
     verificationUrl: Url,
@@ -540,6 +590,11 @@ private fun VerificationText(
     }
 }
 
+/**
+ * Displays a URL of the GitHub verification page.
+ *
+ * @param url the URL of the GitHub verification page.
+ */
 @Composable
 private fun VerificationUrlButton(url: Url) {
     val uriHandler = LocalUriHandler.current
@@ -560,26 +615,35 @@ private fun VerificationUrlButton(url: Url) {
             ) {
                 uriHandler.openUri(url.spec)
             },
-        color = MaterialTheme.colorScheme.tertiary,
+        color = MaterialTheme.colorScheme.primary,
         textDecoration = decoration,
         style = MaterialTheme.typography.bodyLarge
     )
 }
 
+/**
+ * Displays a button to confirm verification.
+ *
+ * @param client enables interaction with the Pingh server.
+ * @param interval the minimum duration that must pass before user can make
+ *                 a new access token request.
+ * @param enabled controls the enabled state of this button.
+ *                If `false`, the button cannot be pressed.
+ * @param onSuccess called if this is clicked and login is verified.
+ * @param onClickToRestartLink called when clickable part of error message is clicked.
+ */
 @Composable
 private fun SubmitButton(
     client: DesktopClient,
     interval: Duration,
     enabled: MutableState<Boolean>,
-    toMentionsPage: () -> Unit,
-    stopExpirationObservationJob: () -> Unit,
+    onSuccess: () -> Unit,
     onClickToRestartLink: () -> Unit
 ) {
     val onClick = {
         client.verifyLoginToGitHub(
             onSuccess = {
-                toMentionsPage()
-                stopExpirationObservationJob()
+                onSuccess()
             },
             onFail = {
                 enabled.value = false
@@ -609,35 +673,48 @@ private fun SubmitButton(
                 style = MaterialTheme.typography.displayMedium
             )
         }
-        NoResponseErrorMessage(
-            enabled = !enabled.value,
-            interval = interval,
-            onClickToRestartLink = onClickToRestartLink
-        )
+        if (!enabled.value) {
+            NoResponseErrorMessage(
+                interval = interval,
+                onClickToRestartLink = onClickToRestartLink
+            )
+        }
     }
 }
 
+/**
+ * Displays an error message indicating that GitHub could not verify the login.
+ *
+ * @param interval the duration after which user can try to verify again.
+ * @param onClickToRestartLink called when clickable part of message is clicked.
+ */
 @Composable
 private fun NoResponseErrorMessage(
-    enabled: Boolean,
     interval: Duration,
     onClickToRestartLink: () -> Unit
 ) {
-    if (enabled) {
-        ClickableErrorMessage(
-            text = """
+    ClickableErrorMessage(
+        text = """
                 No response from GitHub yet.
                 Try again in ${interval.seconds} seconds, or start over.
             """.trimIndent(),
-            clickablePartOfText = "start over",
-            onClick = onClickToRestartLink,
-            modifier = Modifier
-                .width(180.dp)
-                .offset(y = 35.dp)
-        )
-    }
+        clickablePartOfText = "start over",
+        onClick = onClickToRestartLink,
+        modifier = Modifier
+            .width(180.dp)
+            .offset(y = 35.dp)
+    )
 }
 
+/**
+ * Displays an error message, part of the text of which is a clickable link.
+ *
+ * @param text the error text.
+ * @param clickablePartOfText The substring of `text` that is a link.
+ * @param onClick called when `clickablePartOfText` is clicked.
+ * @param modifier the modifier to be applied to this error message.
+ * @throws IllegalArgumentException if `clickablePartOfText` is not substring of the `text`.
+ */
 @Composable
 private fun ClickableErrorMessage(
     text: String,
@@ -660,7 +737,7 @@ private fun ClickableErrorMessage(
         )
         addStyle(
             style = SpanStyle(
-                color = MaterialTheme.colorScheme.tertiary,
+                color = MaterialTheme.colorScheme.primary,
                 textDecoration = TextDecoration.Underline
             ),
             start = startPosition,
@@ -682,17 +759,20 @@ private fun ClickableErrorMessage(
     }
 }
 
+/**
+ * Asynchronously performs work with a delay.
+ */
 private fun makeJobWithDelay(
     delayDuration: Duration,
     jobAction: () -> Unit
 ): Job =
     CoroutineScope(Dispatchers.IO).launch {
-        delay(delayDuration.seconds * 1000)
+        delay(delayDuration.seconds * millisecondsPerSecond)
         jobAction()
     }
 
 /**
- * Information required to verify login .
+ * Information required to verify login.
  *
  * @param username the name of the user that who is being verified.
  * @param userCode the verification code that displays so that
@@ -710,6 +790,10 @@ private class VerificationInfo(
     internal val interval: Duration
 )
 
+/**
+ * Creates a new `VerificationInfo` with the specified `Username`
+ * and the data from the `UserCodeReceived` event.
+ */
 private fun KClass<VerificationInfo>.buildBy(
     username: Username,
     event: UserCodeReceived
