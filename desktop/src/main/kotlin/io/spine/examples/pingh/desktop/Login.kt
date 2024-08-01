@@ -93,11 +93,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * Number of milliseconds in one second.
- */
-private const val millisecondsPerSecond = 1000
-
-/**
  * Displays the page with the current login step.
  *
  * Initially, the user must enter their `Username`, after which they will receive
@@ -451,6 +446,7 @@ private fun VerificationPage(
         )
         Spacer(Modifier.height(10.dp))
         if (isExpired) {
+            Spacer(Modifier.height(5.dp))
             CodeExpiredErrorMessage(reloadVerificationPage)
         } else {
             VerificationText(
@@ -767,7 +763,7 @@ private fun makeJobWithDelay(
     jobAction: () -> Unit
 ): Job =
     CoroutineScope(Dispatchers.IO).launch {
-        delay(delayDuration.seconds * millisecondsPerSecond)
+        delay(delayDuration.milliseconds)
         jobAction()
     }
 
