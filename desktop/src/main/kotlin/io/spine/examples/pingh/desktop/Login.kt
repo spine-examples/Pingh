@@ -169,7 +169,7 @@ private fun UsernameEnteringPage(
         ) {
             val name = Username::class.buildBy(username)
             client.logIn(name) { event ->
-                toVerificationPage(VerificationInfo::class.buildBy(name, event))
+                toVerificationPage(VerificationInfo::class.of(name, event))
             }
         }
     }
@@ -429,7 +429,7 @@ private fun VerificationPage(
             isUserCodeExpired = false
             isButtonEnabled.value = true
             expirationObservationJob.cancel()
-            changeVerificationInfo(VerificationInfo::class.buildBy(name, event))
+            changeVerificationInfo(VerificationInfo::class.of(name, event))
         }
     }
     Column(
@@ -505,7 +505,7 @@ private fun UserCodeField(
             Text(
                 text = userCode.value,
                 color = color,
-                fontSize = 24.sp,
+                fontSize = 28.sp,
                 letterSpacing = 3.sp,
                 style = MaterialTheme.typography.displayLarge
             )
@@ -527,14 +527,14 @@ private fun CopyToClipboardIcon(
 ) {
     val clipboardManager = LocalClipboardManager.current
     Box(
-        modifier = Modifier.offset(x = 91.dp, y = 2.5.dp)
+        modifier = Modifier.offset(x = 100.dp)
     ) {
         IconButton(
             icon = Icons.copy,
             onClick = {
                 clipboardManager.setText(AnnotatedString(userCode.value))
             },
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(30.dp),
             colors = IconButtonDefaults.iconButtonColors(
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer
             )
@@ -699,7 +699,7 @@ private fun NoResponseErrorMessage(
         onClick = onClickToRestartLink,
         modifier = Modifier
             .width(180.dp)
-            .offset(y = 35.dp)
+            .offset(y = 40.dp)
     )
 }
 
@@ -745,7 +745,8 @@ private fun ClickableErrorMessage(
         text = annotatedString,
         modifier = modifier,
         style = MaterialTheme.typography.bodyMedium.copy(
-            color = MaterialTheme.colorScheme.error
+            color = MaterialTheme.colorScheme.error,
+            textAlign = TextAlign.Center
         )
     ) { offset ->
         annotatedString
@@ -791,7 +792,7 @@ private class VerificationInfo(
  * Creates a new `VerificationInfo` with the specified `Username`
  * and the data from the `UserCodeReceived` event.
  */
-private fun KClass<VerificationInfo>.buildBy(
+private fun KClass<VerificationInfo>.of(
     username: Username,
     event: UserCodeReceived
 ): VerificationInfo =
