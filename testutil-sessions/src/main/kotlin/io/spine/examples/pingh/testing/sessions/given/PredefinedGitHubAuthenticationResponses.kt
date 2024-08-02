@@ -67,6 +67,8 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
 
     /**
      * Marks that the user has entered their user code.
+     *
+     * After calling this method, the login verification will be successful.
      */
     public fun enterUserCode() {
         isUserCodeEntered = true

@@ -34,7 +34,7 @@ import com.google.protobuf.Duration
 private const val millisecondsPerSecond = 1000
 
 /**
- * The duration in milliseconds.
+ * The value of this duration expressed as a `Long` number of milliseconds.
  */
-internal val Duration.milliseconds: Long
+internal val Duration.inWholeMilliseconds: Long
     get() = seconds * millisecondsPerSecond

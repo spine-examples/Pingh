@@ -37,7 +37,7 @@ import io.spine.server.storage.memory.InMemoryStorageFactory
 import io.spine.server.transport.memory.InMemoryTransportFactory
 import io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT
 import io.spine.examples.pingh.github.ClientId
-import io.spine.examples.pingh.github.buildBy
+import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.sessions.RemoteGitHubAuthentication
 import io.spine.examples.pingh.sessions.newSessionsContext
 
@@ -46,7 +46,7 @@ import io.spine.examples.pingh.sessions.newSessionsContext
  */
 // TODO:2024-07-29:mykyta.pimonov: Load a key from the Google Secret Manager
 //  after deployment to the Google Cloud.
-private val clientId = ClientId::class.buildBy("client_id")
+private val clientId = ClientId::class.of("client_id")
 
 /**
  * The entry point of the server application.

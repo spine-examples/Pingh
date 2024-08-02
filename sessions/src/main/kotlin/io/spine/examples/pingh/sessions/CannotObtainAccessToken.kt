@@ -30,8 +30,7 @@ package io.spine.examples.pingh.sessions
  * GitHub did not issue an access token for the user.
  *
  * @param errorName the name of the issue that caused the token not to be issued.
- * @see <a href="https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app#using-the-device-flow-to-generate-a-user-access-token">
- *     Problems that can occur</a>
+ * @see <a href="https://shorturl.at/nsfby">Problems that can occur</a>
  */
 public class CannotObtainAccessToken(
     public val errorName: String

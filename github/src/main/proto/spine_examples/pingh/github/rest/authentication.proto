@@ -40,6 +40,9 @@ import "google/protobuf/duration.proto";
 import "spine/net/url.proto";
 
 // Response from GitHub REST API containing verification codes required for login.
+//
+// See: https://shorturl.at/oZzSJ.
+//
 message VerificationCodesResponse {
 
     // The verification code that is used to verify the device.
@@ -48,7 +51,9 @@ message VerificationCodesResponse {
     // The verification code that displays so that the user can enter the code in a browser.
     UserCode user_code = 2 [(required) = true];
 
-    // The URL where users need to enter their `user_code`.
+    // The URL of the GitHub resource, where users will be entering the verification code
+    // in scope of the device login flow.
+    //
     spine.net.Url verification_url = 3 [(required) = true];
 
     // The duration after which the `device_code` and `user_code` expire.
@@ -63,6 +68,8 @@ message VerificationCodesResponse {
 // Response from the GitHub REST API containing an `PersonalAccessToken`,
 // as well as a token to refresh the `PersonalAccessToken`.
 //
+// See: https://shorturl.at/22cwb.
+//
 message AccessTokenResponse {
 
     // The user access token.
@@ -71,6 +78,6 @@ message AccessTokenResponse {
     // The time when `access_token` expires.
     google.protobuf.Timestamp when_expires = 2 [(required) = true];
 
-    // The refresh token.
+    // The token to renew the `access_token` when it expires.
     RefreshToken refresh_token = 3 [(required) = true];
 }

@@ -39,7 +39,7 @@ public fun KClass<NodeId>.buildBy(value: String): NodeId =
 /**
  * Creates a new `ClientId` with the specified string value.
  */
-public fun KClass<ClientId>.buildBy(value: String): ClientId =
+public fun KClass<ClientId>.of(value: String): ClientId =
     ClientId.newBuilder()
         .setValue(value)
         .vBuild()

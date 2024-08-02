@@ -169,7 +169,7 @@ private fun UsernameEnteringPage(
         ) {
             val name = Username::class.buildBy(username)
             client.logIn(name) { event ->
-                toVerificationPage(VerificationInfo::class.of(name, event))
+                toVerificationPage(VerificationInfo::class.buildBy(name, event))
             }
         }
     }
@@ -429,7 +429,7 @@ private fun VerificationPage(
             isUserCodeExpired = false
             isButtonEnabled.value = true
             expirationObservationJob.cancel()
-            changeVerificationInfo(VerificationInfo::class.of(name, event))
+            changeVerificationInfo(VerificationInfo::class.buildBy(name, event))
         }
     }
     Column(
@@ -765,7 +765,7 @@ private fun makeJobWithDelay(
     jobAction: () -> Unit
 ): Job =
     CoroutineScope(Dispatchers.Default).launch {
-        delay(delayDuration.milliseconds)
+        delay(delayDuration.inWholeMilliseconds)
         jobAction()
     }
 
@@ -792,7 +792,7 @@ private class VerificationInfo(
  * Creates a new `VerificationInfo` with the specified `Username`
  * and the data from the `UserCodeReceived` event.
  */
-private fun KClass<VerificationInfo>.of(
+private fun KClass<VerificationInfo>.buildBy(
     username: Username,
     event: UserCodeReceived
 ): VerificationInfo =

@@ -142,6 +142,9 @@ message CommentsResponse {
 }
 
 // The GitHub REST API response received when obtaining verification codes.
+//
+// See: https://shorturl.at/oZzSJ.
+//
 message VerificationCodesFragment {
 
     // Device verification code.
@@ -150,7 +153,9 @@ message VerificationCodesFragment {
     // User verification code.
     string user_code = 2 [(required) = true, json_name = "user_code"];
 
-    // The URL where users need to enter their `user_code`.
+    // The URL of the GitHub resource, where users will be entering the verification code
+    // in scope of the device login flow.
+    //
     string verification_uri = 3 [(required) = true, json_name = "verification_uri"];
 
     // The number of seconds before the `device_code` and `user_code` expire.
@@ -163,6 +168,9 @@ message VerificationCodesFragment {
 }
 
 // The GitHub REST API response received when obtaining access token.
+//
+// See: https://shorturl.at/22cwb.
+//
 message AccessTokenFragment {
 
     // The user access token.
