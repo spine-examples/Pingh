@@ -59,10 +59,7 @@ import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.buildBy
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
-import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
-import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
-import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.protobuf.Durations2
 import java.util.UUID
@@ -121,12 +118,14 @@ public class DesktopClient(
     /**
      * Starts the session and the login process.
      *
-     * Sets the session ID.
+     * Sets the user session.
+     *
+     * @return the verification step of the login process.
      */
     public fun logIn(
         username: Username,
         onSuccess: (event: UserCodeReceived) -> Unit = {}
-    ) {
+    ): VerifyLogin {
         val command = LogUserIn::class.buildBy(
             SessionId::class.buildBy(username)
         )
@@ -135,28 +134,7 @@ public class DesktopClient(
             onSuccess(event)
         }
         send(command)
-    }
-
-    /**
-     * Checks if the login process has been completed on GitHub.
-     */
-    public fun verifyLoginToGitHub(
-        onSuccess: (event: UserLoggedIn) -> Unit = {},
-        onFail: (event: UserIsNotLoggedIntoGitHub) -> Unit = {}
-    ) {
-        checkNotNull(session) { "Login process must be started." }
-        val command = VerifyUserLoginToGitHub::class.buildBy(session!!.id)
-        observeCommandOutcome(
-            command.id,
-            UserLoggedIn::class,
-            { event ->
-                isLoggedIn = true
-                onSuccess(event)
-            },
-            UserIsNotLoggedIntoGitHub::class,
-            onFail
-        )
-        send(command)
+        return VerifyLogin(this)
     }
 
     /**
@@ -247,7 +225,7 @@ public class DesktopClient(
     /**
      * Sends a command to the server on behalf of the user.
      */
-    private fun send(command: CommandMessage) {
+    internal fun send(command: CommandMessage) {
         clientRequest()
             .command(command)
             .postAndForget()
@@ -269,7 +247,7 @@ public class DesktopClient(
      *
      * When a success or failure event is emitted, subscriptions are cancelled.
      */
-    private fun <S : EventMessage, F : EventMessage> observeCommandOutcome(
+    internal fun <S : EventMessage, F : EventMessage> observeCommandOutcome(
         id: Message,
         successType: KClass<S>,
         onSuccess: (event: S) -> Unit,
