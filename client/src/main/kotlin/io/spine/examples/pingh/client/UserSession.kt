@@ -41,4 +41,12 @@ public class UserSession(
      * Name of the user to which this session belongs.
      */
     public val username: Username = id.username
+
+    /**
+     * Indicates whether the user is logged in.
+     *
+     * Note that even an unlogged user has a session. Therefore, always verify
+     * the user's login status before performing any actions.
+     */
+    internal var isLoggedIn: Boolean = false
 }

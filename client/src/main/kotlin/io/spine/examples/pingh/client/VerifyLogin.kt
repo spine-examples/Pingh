@@ -49,7 +49,10 @@ public class VerifyLogin internal constructor(
         client.observeCommandOutcome(
             command.id,
             UserLoggedIn::class,
-            onSuccess,
+            { event ->
+                client.session!!.isLoggedIn = true
+                onSuccess(event)
+            },
             UserIsNotLoggedIntoGitHub::class,
             onFail
         )

@@ -89,14 +89,6 @@ public class DesktopClient(
     private val user: UserId
 
     /**
-     * Indicates whether the user is logged in.
-     *
-     * Note that even an unlogged user has a session. Therefore, always verify
-     * the user's login status before performing any actions.
-     */
-    private var isLoggedIn = false
-
-    /**
      * Current user session.
      */
     public var session: UserSession? = null
@@ -143,10 +135,9 @@ public class DesktopClient(
     public fun logOut(
         onSuccess: (event: UserLoggedOut) -> Unit = {}
     ) {
-        check(isLoggedIn) { "The user has not been logged in." }
+        ensureLoggedIn()
         val command = LogUserOut::class.buildBy(session!!.id)
         observeEventOnce(command.id, UserLoggedOut::class) { event ->
-            isLoggedIn = false
             session = null
             onSuccess(event)
         }
@@ -160,7 +151,7 @@ public class DesktopClient(
         onSuccess: (event: MentionsUpdateFromGitHubCompleted) -> Unit = {},
         onFail: (event: RequestMentionsFromGitHubFailed) -> Unit = {}
     ) {
-        check(isLoggedIn) { "The user has not been logged in." }
+        ensureLoggedIn()
         val command = UpdateMentionsFromGitHub::class.buildBy(
             GitHubClientId::class.buildBy(session!!.username)
         )
@@ -180,7 +171,7 @@ public class DesktopClient(
      * @return List of `MentionView`s sorted by descending time of creation.
      */
     public fun findUserMentions(): List<MentionView> {
-        check(isLoggedIn) { "The user has not been logged in." }
+        ensureLoggedIn()
         val userMentions = clientRequest()
             .select(UserMentions::class.java)
             .byId(UserMentionsId::class.buildBy(session!!.username))
@@ -203,7 +194,7 @@ public class DesktopClient(
         snoozeTime: Duration = defaultSnoozeTime,
         onSuccess: (event: MentionSnoozed) -> Unit = {}
     ) {
-        check(isLoggedIn) { "The user has not been logged in." }
+        ensureLoggedIn()
         val command = SnoozeMention::class.buildBy(id, currentTime().add(snoozeTime))
         observeEventOnce(command.id, MentionSnoozed::class, onSuccess)
         send(command)
@@ -216,7 +207,7 @@ public class DesktopClient(
         id: MentionId,
         onSuccess: (event: MentionRead) -> Unit = {}
     ) {
-        check(isLoggedIn) { "The user has not been logged in." }
+        ensureLoggedIn()
         val command = MarkMentionAsRead::class.buildBy(id)
         observeEventOnce(command.id, MentionRead::class, onSuccess)
         send(command)
@@ -302,6 +293,13 @@ public class DesktopClient(
     private fun stopObservation(subscription: Subscription) {
         client.subscriptions()
             .cancel(subscription)
+    }
+
+    /**
+     * Throws `IllegalStateException` exception if the user is not logged in.
+     */
+    private fun ensureLoggedIn() {
+        check(session != null && session!!.isLoggedIn) { "The user is not logged in." }
     }
 
     /**
