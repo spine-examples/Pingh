@@ -90,10 +90,11 @@ dependencies {
     implementation(Coil.compose)
     implementation(Ktor.Client.android)
     implementation(Pingh.client)
+    implementation("io.spine:spine-client:1.9.0")
 }
 
 compose.desktop {
     application {
-        mainClass = "io.spine.examples.pingh.desktop.AppKt"
+        mainClass = "io.spine.examples.pingh.desktop.MainKt"
     }
 }

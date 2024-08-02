@@ -26,65 +26,31 @@
 
 package io.spine.examples.pingh.desktop
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import io.spine.examples.pingh.client.DesktopClient
 
-/**
- * Displays the current page of the application.
- *
- * @param application
- */
-@Composable
-internal fun CurrentPage(application: PinghApplication) {
-    val currentPage = remember {
-        mutableStateOf(
-            if (application.isLoggedIn()) Page.MENTIONS else Page.LOGIN
-        )
-    }
-    when (currentPage.value) {
-        Page.LOGIN -> LoginPage(
-            loginFlow = application.startLoginFlow(),
-            toMentionsPage = {
-                currentPage.value = Page.MENTIONS
-            }
-        )
-
-        Page.MENTIONS -> MentionsPage(
-            flow = application.startMentionsFlow(),
-            toSettingsPage = {
-                currentPage.value = Page.SETTINGS
-            }
-        )
-
-        Page.SETTINGS -> SettingsPage(
-            flow = application.startSettingsFlow(),
-            toMentionsPage = {
-                currentPage.value = Page.MENTIONS
-            },
-            toLoginPage = {
-                currentPage.value = Page.LOGIN
-            }
-        )
-    }
-}
-
-/**
- * Pages in the application.
- */
-private enum class Page {
-    /**
-     * GitHub account login page.
-     */
-    LOGIN,
+internal class PinghApplication {
 
     /**
-     * Page displaying user mentions.
+     * Enables interaction with the Pingh server.
      */
-    MENTIONS,
+    private val client = DesktopClient()
 
     /**
-     * Page with account settings.
+     * State of application settings.
      */
-    SETTINGS
+    private val settings = SettingsState()
+
+    /**
+     *
+     */
+    private val session = mutableStateOf<UserSession?>(null)
+
+    internal fun isLoggedIn(): Boolean = session.value != null
+
+    internal fun startLoginFlow(): LoginFlow = LoginFlow(client, session)
+
+    internal fun startMentionsFlow(): MentionsFlow = MentionsFlow(client, session, settings)
+
+    internal fun startSettingsFlow(): SettingsFlow = SettingsFlow(client, session, settings)
 }

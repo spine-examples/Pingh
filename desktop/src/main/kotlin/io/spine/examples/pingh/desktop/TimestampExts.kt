@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.desktop
 
 import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Timestamps
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -98,3 +99,9 @@ internal fun Timestamp.howMuchTimeHasPassed(): String {
  */
 private fun Timestamp.toLocalDateTime(): LocalDateTime =
     LocalDateTime.ofEpochSecond(this.seconds, this.nanos, ZoneOffset.UTC)
+
+/**
+ * Adds a duration to this timestamp.
+ */
+internal fun Timestamp.add(duration: com.google.protobuf.Duration): Timestamp =
+    Timestamps.add(this, duration)

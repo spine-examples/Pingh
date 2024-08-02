@@ -98,12 +98,12 @@ import kotlinx.coroutines.launch
  * a code that must be entered into GitHub. After entering the code, the user needs
  * to confirm the login on the application page.
  *
- * @param client enables interaction with the Pingh server.
+ * @param loginFlow
  * @param toMentionsPage the navigation to the 'Mentions' page.
  */
 @Composable
 internal fun LoginPage(
-    client: DesktopClient,
+    loginFlow: LoginFlow,
     toMentionsPage: () -> Unit
 ) {
     var state by remember { mutableStateOf(LoginState.USERNAME_ENTERING) }
@@ -114,12 +114,12 @@ internal fun LoginPage(
     }
     when (state) {
         LoginState.USERNAME_ENTERING -> UsernameEnteringPage(
-            client = client,
+            loginFlow = loginFlow,
             toVerificationPage = toVerificationPage
         )
 
         LoginState.VERIFICATION -> VerificationPage(
-            client = client,
+            loginFlow = loginFlow,
             verificationInfo = verificationInfo!!,
             toMentionsPage = toMentionsPage,
             changeVerificationInfo = toVerificationPage
@@ -134,12 +134,12 @@ internal fun LoginPage(
  * be redirected to the login verification page.
  * [LoginButton] is not enable while the entered `Username` is invalid.
  *
- * @param client enables interaction with the Pingh server.
+ * @param loginFlow
  * @param toVerificationPage the navigation to the 'Login Verification' page.
  */
 @Composable
 private fun UsernameEnteringPage(
-    client: DesktopClient,
+    loginFlow: LoginFlow,
     toVerificationPage: (info: VerificationInfo) -> Unit
 ) {
     var username by remember { mutableStateOf("") }
@@ -167,7 +167,7 @@ private fun UsernameEnteringPage(
             enabled = wasChanged && !isError.value
         ) {
             val name = Username::class.buildBy(username)
-            client.logIn(name) { event ->
+            loginFlow.requestUserCode(name) { event ->
                 toVerificationPage(VerificationInfo(name, event))
             }
         }
@@ -405,14 +405,14 @@ private fun LoginButton(
  * In this case, the user code cannot be copied, and the instructions and button
  * will not be displayed.
  *
- * @param client enables interaction with the Pingh server.
+ * @param loginFlow
  * @param verificationInfo the information required to verify login.
  * @param toMentionsPage the navigation to the 'Mentions' page.
  * @param changeVerificationInfo sets a new value for `VerificationInfo` to recompose the page.
  */
 @Composable
 private fun VerificationPage(
-    client: DesktopClient,
+    loginFlow: LoginFlow,
     verificationInfo: VerificationInfo,
     toMentionsPage: () -> Unit,
     changeVerificationInfo: (info: VerificationInfo) -> Unit
@@ -424,7 +424,7 @@ private fun VerificationPage(
     val isButtonEnabled = remember { mutableStateOf(true) }
     val reloadVerificationPage = {
         val name = verificationInfo.username
-        client.logIn(name) { event ->
+        loginFlow.requestUserCode(name) { event ->
             isUserCodeExpired = false
             isButtonEnabled.value = true
             expirationObservationJob.cancel()
@@ -455,7 +455,7 @@ private fun VerificationPage(
             )
             Spacer(Modifier.height(20.dp))
             SubmitButton(
-                client = client,
+                loginFlow = loginFlow,
                 interval = verificationInfo.interval,
                 enabled = isButtonEnabled,
                 onSuccess = {
@@ -620,7 +620,7 @@ private fun VerificationUrlButton(url: Url) {
 /**
  * Displays a button to confirm verification.
  *
- * @param client enables interaction with the Pingh server.
+ * @param loginFlow
  * @param interval the minimum duration that must pass before user can make
  *                 a new access token request.
  * @param enabled controls the enabled state of this button.
@@ -630,14 +630,14 @@ private fun VerificationUrlButton(url: Url) {
  */
 @Composable
 private fun SubmitButton(
-    client: DesktopClient,
+    loginFlow: LoginFlow,
     interval: Duration,
     enabled: MutableState<Boolean>,
     onSuccess: () -> Unit,
     onClickToRestartLink: () -> Unit
 ) {
     val onClick = {
-        client.verifyLoginToGitHub(
+        loginFlow.verify(
             onSuccess = {
                 onSuccess()
             },

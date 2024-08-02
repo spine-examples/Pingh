@@ -24,13 +24,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.client
+package io.spine.examples.pingh.desktop
 
-import com.google.protobuf.Timestamp
-import com.google.protobuf.Duration
-import com.google.protobuf.util.Timestamps
+import io.spine.examples.pingh.github.Username
+import io.spine.examples.pingh.sessions.SessionId
 
 /**
- * Adds a duration to this timestamp.
+ * Information about the current user session.
  */
-public fun Timestamp.add(duration: Duration): Timestamp = Timestamps.add(this, duration)
+internal class UserSession(
+    internal val id: SessionId
+) {
+
+    internal val username: Username
+        get() = id.username
+}

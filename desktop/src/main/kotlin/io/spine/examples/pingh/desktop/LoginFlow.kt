@@ -24,38 +24,59 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.client
+package io.spine.examples.pingh.desktop
 
+import androidx.compose.runtime.MutableState
+import io.spine.examples.pingh.client.DesktopClient
+import io.spine.examples.pingh.github.Username
+import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.buildBy
+import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
+import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 
-/**
- * The part of the user login process that verifies the user's login to GitHub.
- */
-public class VerifyLogin internal constructor(
-    private val client: DesktopClient
+internal class LoginFlow(
+    private val client: DesktopClient,
+    private val session: MutableState<UserSession?>
 ) {
+
+    /**
+     * Starts the login process and requests `UserCode`.
+     */
+    internal fun requestUserCode(
+        username: Username,
+        onSuccess: (event: UserCodeReceived) -> Unit = {}
+    ) {
+        val command = LogUserIn::class.buildBy(
+            SessionId::class.buildBy(username)
+        )
+        client.observeEventOnce(command.id, UserCodeReceived::class) { event ->
+            session.value = UserSession(command.id)
+            onSuccess(event)
+        }
+        client.send(command)
+    }
 
     /**
      * Checks whether the user has completed the login on GitHub and entered their user code.
      */
-    public fun execute(
+    internal fun verify(
         onSuccess: (event: UserLoggedIn) -> Unit = {},
         onFail: (event: UserIsNotLoggedIntoGitHub) -> Unit = {}
     ) {
-        val command = VerifyUserLoginToGitHub::class.buildBy(client.session!!.id)
+        check(session.value != null) {
+            "Initially it is necessary to start the login process by requesting a user code."
+        }
+        val command = VerifyUserLoginToGitHub::class.buildBy(session.value!!.id)
         client.observeCommandOutcome(
             command.id,
             UserLoggedIn::class,
-            { event ->
-                client.session!!.isLoggedIn = true
-                onSuccess(event)
-            },
+            onSuccess,
             UserIsNotLoggedIntoGitHub::class,
             onFail
         )
-       client.send(command)
+        client.send(command)
     }
 }
