@@ -85,7 +85,6 @@ import io.spine.examples.pingh.github.validateUsernameValue
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.net.Url
 import io.spine.protobuf.Durations2.toMinutes
-import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -169,7 +168,7 @@ private fun UsernameEnteringPage(
         ) {
             val name = Username::class.buildBy(username)
             client.logIn(name) { event ->
-                toVerificationPage(VerificationInfo::class.buildBy(name, event))
+                toVerificationPage(VerificationInfo(name, event))
             }
         }
     }
@@ -429,7 +428,7 @@ private fun VerificationPage(
             isUserCodeExpired = false
             isButtonEnabled.value = true
             expirationObservationJob.cancel()
-            changeVerificationInfo(VerificationInfo::class.buildBy(name, event))
+            changeVerificationInfo(VerificationInfo(name, event))
         }
     }
     Column(
@@ -786,23 +785,18 @@ private class VerificationInfo(
     internal val verificationUrl: Url,
     internal val expiresIn: Duration,
     internal val interval: Duration
-)
-
-/**
- * Creates a new `VerificationInfo` with the specified `Username`
- * and the data from the `UserCodeReceived` event.
- */
-private fun KClass<VerificationInfo>.buildBy(
-    username: Username,
-    event: UserCodeReceived
-): VerificationInfo =
-    VerificationInfo(
+) {
+    internal constructor(
+        username: Username,
+        event: UserCodeReceived
+    ) : this(
         username,
         event.userCode,
         event.verificationUrl,
         event.expiresIn,
         event.interval
     )
+}
 
 /**
  * State of login process.
