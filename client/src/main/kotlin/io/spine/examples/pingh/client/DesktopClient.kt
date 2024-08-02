@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.client
 
-import com.google.protobuf.Duration
 import com.google.protobuf.Message
 import io.grpc.ManagedChannelBuilder
 import io.spine.base.CommandMessage
@@ -34,35 +33,11 @@ import io.spine.base.EntityState
 import io.spine.base.EventMessage
 import io.spine.base.EventMessageField
 import io.spine.base.Field
-import io.spine.base.Time.currentTime
 import io.spine.client.Client
 import io.spine.client.ClientRequest
 import io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT
 import io.spine.client.EventFilter.eq
 import io.spine.client.Subscription
-import io.spine.core.UserId
-import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.mentions.GitHubClientId
-import io.spine.examples.pingh.mentions.MentionId
-import io.spine.examples.pingh.mentions.MentionView
-import io.spine.examples.pingh.mentions.UserMentions
-import io.spine.examples.pingh.mentions.UserMentionsId
-import io.spine.examples.pingh.mentions.buildBy
-import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
-import io.spine.examples.pingh.mentions.command.SnoozeMention
-import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
-import io.spine.examples.pingh.mentions.event.MentionRead
-import io.spine.examples.pingh.mentions.event.MentionSnoozed
-import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
-import io.spine.examples.pingh.mentions.event.RequestMentionsFromGitHubFailed
-import io.spine.examples.pingh.sessions.SessionId
-import io.spine.examples.pingh.sessions.buildBy
-import io.spine.examples.pingh.sessions.command.LogUserIn
-import io.spine.examples.pingh.sessions.command.LogUserOut
-import io.spine.examples.pingh.sessions.event.UserCodeReceived
-import io.spine.examples.pingh.sessions.event.UserLoggedOut
-import io.spine.protobuf.Durations2
-import java.util.UUID
 import kotlin.reflect.KClass
 
 /**
@@ -77,22 +52,7 @@ public class DesktopClient(
     address: String = "localhost",
     port: Int = DEFAULT_CLIENT_SERVICE_PORT
 ) {
-
-    private companion object {
-        /**
-         * The default snooze time of mention.
-         */
-        private val defaultSnoozeTime = Durations2.hours(2)
-    }
-
     private val client: Client
-    private val user: UserId
-
-    /**
-     * Current user session.
-     */
-    public var session: UserSession? = null
-        private set
 
     init {
         val channel = ManagedChannelBuilder
@@ -102,143 +62,35 @@ public class DesktopClient(
         client = Client
             .usingChannel(channel)
             .build()
-        user = UserId.newBuilder()
-            .setValue(UUID.randomUUID().toString())
-            .vBuild()
-    }
-
-    /**
-     * Starts the session and the login process.
-     *
-     * Sets the user session.
-     *
-     * @return the verification step of the login process.
-     */
-    public fun logIn(
-        username: Username,
-        onSuccess: (event: UserCodeReceived) -> Unit = {}
-    ): VerifyLogin {
-        val command = LogUserIn::class.buildBy(
-            SessionId::class.buildBy(username)
-        )
-        observeEventOnce(command.id, UserCodeReceived::class) { event ->
-            this.session = UserSession(command.id)
-            onSuccess(event)
-        }
-        send(command)
-        return VerifyLogin(this)
-    }
-
-    /**
-     * Logs the user out, cancels all subscriptions and clears the session ID.
-     */
-    public fun logOut(
-        onSuccess: (event: UserLoggedOut) -> Unit = {}
-    ) {
-        ensureLoggedIn()
-        val command = LogUserOut::class.buildBy(session!!.id)
-        observeEventOnce(command.id, UserLoggedOut::class) { event ->
-            session = null
-            onSuccess(event)
-        }
-        send(command)
-    }
-
-    /**
-     * Updates the user's mentions.
-     */
-    public fun updateMentions(
-        onSuccess: (event: MentionsUpdateFromGitHubCompleted) -> Unit = {},
-        onFail: (event: RequestMentionsFromGitHubFailed) -> Unit = {}
-    ) {
-        ensureLoggedIn()
-        val command = UpdateMentionsFromGitHub::class.buildBy(
-            GitHubClientId::class.buildBy(session!!.username)
-        )
-        observeCommandOutcome(
-            command.id,
-            MentionsUpdateFromGitHubCompleted::class,
-            onSuccess,
-            RequestMentionsFromGitHubFailed::class,
-            onFail
-        )
-        send(command)
-    }
-
-    /**
-     * Finds mentions of the user by their ID.
-     *
-     * @return List of `MentionView`s sorted by descending time of creation.
-     */
-    public fun findUserMentions(): List<MentionView> {
-        ensureLoggedIn()
-        val userMentions = clientRequest()
-            .select(UserMentions::class.java)
-            .byId(UserMentionsId::class.buildBy(session!!.username))
-            .run()
-        if (userMentions.size == 0) {
-            return listOf()
-        }
-        return userMentions[0]
-            .mentionList
-            .sortedByDescending { mention -> mention.whenMentioned.seconds }
-    }
-
-    /**
-     * Marks the mention as snoozed.
-     *
-     * If snooze time is not specified, the mention will snooze the [defaultSnoozeTime].
-     */
-    public fun markMentionAsSnoozed(
-        id: MentionId,
-        snoozeTime: Duration = defaultSnoozeTime,
-        onSuccess: (event: MentionSnoozed) -> Unit = {}
-    ) {
-        ensureLoggedIn()
-        val command = SnoozeMention::class.buildBy(id, currentTime().add(snoozeTime))
-        observeEventOnce(command.id, MentionSnoozed::class, onSuccess)
-        send(command)
-    }
-
-    /**
-     * Marks that the mention is read.
-     */
-    public fun markMentionAsRead(
-        id: MentionId,
-        onSuccess: (event: MentionRead) -> Unit = {}
-    ) {
-        ensureLoggedIn()
-        val command = MarkMentionAsRead::class.buildBy(id)
-        observeEventOnce(command.id, MentionRead::class, onSuccess)
-        send(command)
     }
 
     /**
      * Sends a command to the server on behalf of the user.
      */
-    internal fun send(command: CommandMessage) {
+    public fun send(command: CommandMessage) {
         clientRequest()
             .command(command)
             .postAndForget()
     }
 
     /**
-     * Provides `ClientRequest` on behalf of logged-in user if it exists,
-     * or as guest if it doesn't.
+     * Reads records from the projection with the specified ID.
      */
-    private fun clientRequest(): ClientRequest {
-        if (session == null) {
-            return client.asGuest()
-        }
-        return client.onBehalfOf(user)
-    }
+    public fun <I : Message, E : EntityState> readById(
+        id: I,
+        type: KClass<E>
+    ): List<E> =
+        clientRequest()
+            .select(type.java)
+            .byId(id)
+            .run()
 
     /**
      * Observes the outcome of the command.
      *
      * When a success or failure event is emitted, subscriptions are cancelled.
      */
-    internal fun <S : EventMessage, F : EventMessage> observeCommandOutcome(
+    public fun <S : EventMessage, F : EventMessage> observeCommandOutcome(
         id: Message,
         successType: KClass<S>,
         onSuccess: (event: S) -> Unit,
@@ -259,7 +111,7 @@ public class DesktopClient(
     /**
      * Observes the provided event with the specified ID.
      */
-    private fun <E : EventMessage> observeEvent(
+    public fun <E : EventMessage> observeEvent(
         id: Message,
         type: KClass<E>,
         onEmit: (event: E) -> Unit
@@ -274,7 +126,7 @@ public class DesktopClient(
      * Subscribes to the event of the provided type and cancels itself after
      * the observer has worked.
      */
-    private fun <E : EventMessage> observeEventOnce(
+    public fun <E : EventMessage> observeEventOnce(
         id: Message,
         type: KClass<E>,
         onEmit: (event: E) -> Unit
@@ -288,33 +140,11 @@ public class DesktopClient(
     }
 
     /**
-     * Stops observation by provided subscription.
-     */
-    private fun stopObservation(subscription: Subscription) {
-        client.subscriptions()
-            .cancel(subscription)
-    }
-
-    /**
-     * Throws `IllegalStateException` exception if the user is not logged in.
-     */
-    private fun ensureLoggedIn() {
-        check(session != null && session!!.isLoggedIn) { "The user is not logged in." }
-    }
-
-    /**
-     * Closes the client by shutting down the gRPC connection.
-     */
-    public fun close() {
-        client.close()
-    }
-
-    /**
      * Subscribes to the update of the entity with the specified type and ID.
      *
      * The subscription cancels itself after the observer has completed its work.
      */
-    internal fun <E : EntityState> observeEntityOnce(
+    public fun <E : EntityState> observeEntityOnce(
         id: Message,
         type: KClass<E>,
         onUpdated: (entity: E) -> Unit
@@ -328,5 +158,29 @@ public class DesktopClient(
                 onUpdated(entity)
             }
             .post()
+    }
+
+    /**
+     * Stops observation by provided subscription.
+     */
+    public fun stopObservation(subscription: Subscription) {
+        client.subscriptions()
+            .cancel(subscription)
+    }
+
+    /**
+     * Closes the client by shutting down the gRPC connection.
+     */
+    public fun close() {
+        client.close()
+    }
+
+    /**
+     * Provides `ClientRequest` on behalf of logged-in user if it exists,
+     * or as guest if it doesn't.
+     */
+    private fun clientRequest(): ClientRequest {
+        // TODO: Impl client.onBehalfOf().
+        return client.asGuest()
     }
 }
