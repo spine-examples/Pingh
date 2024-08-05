@@ -37,9 +37,15 @@ internal class UserSession(
     internal val id: SessionId
 ) {
 
+    /**
+     * The username to which the current session belongs.
+     */
     internal val username: Username
         get() = id.username
 
+    /**
+     * The client user ID for making requests to the Pingh server.
+     */
     internal val userId = UserId.newBuilder()
         .setValue(username.value)
         .vBuild()

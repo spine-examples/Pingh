@@ -46,10 +46,19 @@ import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
 import java.lang.Thread.sleep
 
+/**
+ * The flow for managing the lifecycle of mentions.
+ *
+ * Enables updating mentions from GitHub, as well as reading and snoozing them.
+ *
+ * @param client enables interaction with the Pingh server.
+ * @param session the information about the current user session.
+ * @param settings the state of application settings.
+ */
 internal class MentionsFlow internal constructor(
     private val client: DesktopClient,
     private val session: MutableState<UserSession?>,
-    internal val settings: SettingsState
+    private val settings: SettingsState
 ) {
     private companion object {
         /**
@@ -89,7 +98,7 @@ internal class MentionsFlow internal constructor(
      *
      * @return List of `MentionView`s sorted by descending time of creation.
      */
-    internal fun findUserMentions(): List<MentionView> {
+    private fun findUserMentions(): List<MentionView> {
         ensureLoggedIn()
         val userMentions = client.readById(
             UserMentionsId::class.buildBy(session.value!!.username),

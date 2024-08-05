@@ -74,7 +74,7 @@ import io.spine.examples.pingh.github.Username
  *
  * All changes are saved automatically and applied immediately.
  *
- * @param flow
+ * @param flow the application settings control flow.
  * @param toMentionsPage the navigation to the 'Mentions' page.
  * @param toLoginPage the navigation to the 'Login' page.
  */
@@ -170,7 +170,7 @@ private fun SettingsBox(
 /**
  * Displays user information and provides an option to log out of the account.
  *
- * @param flow
+ * @param flow the application settings control flow.
  * @param toLoginPage the navigation to the 'Login' page.
  */
 @Composable
@@ -198,7 +198,7 @@ private fun Profile(
 /**
  * Displays a username and a button to log out of the account.
  *
- * @param flow
+ * @param flow the application settings control flow.
  * @param toLoginPage the navigation to the 'Login' page.
  * @param username the name of the user to whom the current session belongs.
  */

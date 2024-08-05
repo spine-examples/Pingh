@@ -32,6 +32,9 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
 
+/**
+ * Manages the logic for the Pingh app.
+ */
 private val application = PinghApplication()
 
 /**

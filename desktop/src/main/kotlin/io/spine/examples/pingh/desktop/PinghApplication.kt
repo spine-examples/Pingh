@@ -29,6 +29,11 @@ package io.spine.examples.pingh.desktop
 import androidx.compose.runtime.mutableStateOf
 import io.spine.examples.pingh.client.DesktopClient
 
+/**
+ * Manages the logic for the Pingh app.
+ *
+ * Stores application states and allows to create different process flows.
+ */
 internal class PinghApplication {
 
     /**
@@ -42,15 +47,27 @@ internal class PinghApplication {
     private val settings = SettingsState()
 
     /**
-     *
+     * Information about the current user session.
      */
     private val session = mutableStateOf<UserSession?>(null)
 
+    /**
+     * Returns `true` if a user session exists, otherwise `false`.
+     */
     internal fun isLoggedIn(): Boolean = session.value != null
 
+    /**
+     * Initiates the login flow.
+     */
     internal fun startLoginFlow(): LoginFlow = LoginFlow(client, session)
 
+    /**
+     * Initiates the mentions flow.
+     */
     internal fun startMentionsFlow(): MentionsFlow = MentionsFlow(client, session, settings)
 
+    /**
+     * Initiates the settings flow.
+     */
     internal fun startSettingsFlow(): SettingsFlow = SettingsFlow(client, session, settings)
 }

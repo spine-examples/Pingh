@@ -68,7 +68,7 @@ import io.spine.examples.pingh.mentions.MentionView
  * Users can snooze and read mentions on this page. Additionally, it is
  * possible to manually update the list of mentions from the server.
  *
- * @param flow
+ * @param flow the flow for managing the lifecycle of mentions.
  * @param toSettingsPage the navigation to the 'Settings' page.
  */
 @Composable
@@ -89,7 +89,7 @@ internal fun MentionsPage(
  * Displays a menu of tools for navigating to a application settings page or
  * manually updating mentions.
  *
- * @param flow
+ * @param flow the flow for managing the lifecycle of mentions.
  * @param toSettingsPage the navigation to the 'Settings' page.
  */
 @Composable
@@ -147,7 +147,7 @@ private fun ToolBar(
  *
  * Within each group, mentions are sorted by time.
  *
- * @param flow
+ * @param flow the flow for managing the lifecycle of mentions.
  */
 @Composable
 private fun MentionCards(
@@ -181,7 +181,7 @@ private fun MentionCards(
  * - If the mention is snoozed, it can only be read.
  * - If the mention is read, it can still be opened, but its status does not change.
  *
- * @param flow
+ * @param flow the flow for managing the lifecycle of mentions.
  * @param mention the mention whose information is displayed.
  */
 @Composable
@@ -275,7 +275,7 @@ private fun MentionCardText(
  *
  * Otherwise, nothing is displayed.
  *
- * @param flow
+ * @param flow the flow for managing the lifecycle of mentions.
  * @param mention the mention whose information is displayed.
  */
 @Composable

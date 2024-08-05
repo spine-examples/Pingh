@@ -37,12 +37,22 @@ import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.protobuf.Durations2.hours
 import io.spine.protobuf.Durations2.minutes
 
+/**
+ * The application settings control flow.
+ *
+ * @param client enables interaction with the Pingh server.
+ * @param session the information about the current user session.
+ * @param settings the state of application settings.
+ */
 internal class SettingsFlow(
     private val client: DesktopClient,
     private val session: MutableState<UserSession?>,
     internal val settings: SettingsState
 ) {
 
+    /**
+     * The username to which the current session belongs.
+     */
     internal val username: Username
         get() = session.value!!.username
 

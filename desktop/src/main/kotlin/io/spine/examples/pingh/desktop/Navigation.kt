@@ -33,7 +33,7 @@ import androidx.compose.runtime.remember
 /**
  * Displays the current page of the application.
  *
- * @param application
+ * @param application manages the logic for the Pingh app.
  */
 @Composable
 internal fun CurrentPage(application: PinghApplication) {

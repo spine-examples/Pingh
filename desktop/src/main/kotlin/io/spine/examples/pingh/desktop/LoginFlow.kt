@@ -46,13 +46,27 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * The control flow for the user login process.
+ *
+ * Enables sending commands to the Pingh server and stores the states of the login process.
+ *
+ * @param client enables interaction with the Pingh server.
+ * @param session the information about the current user session.
+ */
 internal class LoginFlow(
     private val client: DesktopClient,
     private val session: MutableState<UserSession?>
 ) {
+    /**
+     * The current state of the login process.
+     */
     internal var state = mutableStateOf(LoginState.USERNAME_ENTERING)
         private set
 
+    /**
+     * The name of the user who is logging in.
+     */
     internal lateinit var username: Username
         private set
 
@@ -71,6 +85,9 @@ internal class LoginFlow(
      */
     internal val isAccessTokenRequestAvailable = mutableStateOf(true)
 
+    /**
+     * A job that marks a [userCode] as expired after the [time][expiresIn] has expired.
+     */
     private lateinit var expirationObservationJob: Job
 
     /**
@@ -87,18 +104,31 @@ internal class LoginFlow(
         client.observeEventOnce(command.id, UserCodeReceived::class) { event ->
             session.value = UserSession(command.id)
             client.onBehalfOf(session.value!!.userId)
-            state.value = LoginState.VERIFICATION
-            userCode.value = event.userCode
-            verificationUrl.value = event.verificationUrl
-            expiresIn.value = event.expiresIn
-            interval.value = event.interval
-            isAccessTokenRequestAvailable.value = true
-            startExpirationObservationJob()
+            setDataForVerificationState(event)
             onSuccess(event)
         }
         client.send(command)
     }
 
+    /**
+     * Advances the process to the verification state and fills all necessary data
+     * for this state.
+     */
+    private fun setDataForVerificationState(
+        event: UserCodeReceived
+    ) {
+        state.value = LoginState.VERIFICATION
+        userCode.value = event.userCode
+        verificationUrl.value = event.verificationUrl
+        expiresIn.value = event.expiresIn
+        interval.value = event.interval
+        isAccessTokenRequestAvailable.value = true
+        startExpirationObservationJob()
+    }
+
+    /**
+     * Starts a job that will mark the [userCode] as expired when [time][expiresIn] passes.
+     */
     private fun startExpirationObservationJob() {
         isUserCodeExpired.value = false
         expirationObservationJob = makeJobWithDelay(expiresIn.value!!) {
@@ -133,6 +163,9 @@ internal class LoginFlow(
         client.send(command)
     }
 
+    /**
+     * Specifies that access token cannot be requested for within a certain [interval].
+     */
     private fun blockTokenRequestsForInterval() {
         isAccessTokenRequestAvailable.value = false
         makeJobWithDelay(interval.value!!) {
