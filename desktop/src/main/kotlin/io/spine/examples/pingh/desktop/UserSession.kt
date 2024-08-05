@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.desktop
 
+import io.spine.core.UserId
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.SessionId
 
@@ -38,4 +39,8 @@ internal class UserSession(
 
     internal val username: Username
         get() = id.username
+
+    internal val userId = UserId.newBuilder()
+        .setValue(username.value)
+        .vBuild()
 }

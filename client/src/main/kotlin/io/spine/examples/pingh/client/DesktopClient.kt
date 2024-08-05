@@ -38,6 +38,7 @@ import io.spine.client.ClientRequest
 import io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT
 import io.spine.client.EventFilter.eq
 import io.spine.client.Subscription
+import io.spine.core.UserId
 import kotlin.reflect.KClass
 
 /**
@@ -53,6 +54,14 @@ public class DesktopClient(
     port: Int = DEFAULT_CLIENT_SERVICE_PORT
 ) {
     private val client: Client
+
+    /**
+     * Indicates on whose behalf the request is made.
+     *
+     * If `null`, requests are sent on behalf of a guest.
+     * To specify a particular user, use the [onBehalfOf] method.
+     */
+    private var userId: UserId? = null
 
     init {
         val channel = ManagedChannelBuilder
@@ -180,7 +189,23 @@ public class DesktopClient(
      * or as guest if it doesn't.
      */
     private fun clientRequest(): ClientRequest {
-        // TODO: Impl client.onBehalfOf().
+        if (userId != null) {
+            return client.onBehalfOf(userId!!)
+        }
         return client.asGuest()
+    }
+
+    /**
+     * Specifies a particular user to make requests on their behalf.
+     */
+    public fun onBehalfOf(userId: UserId) {
+        this.userId = userId
+    }
+
+    /**
+     * Indicates that subsequent requests will be made on behalf of the guest.
+     */
+    public fun asGuest() {
+        this.userId = null
     }
 }

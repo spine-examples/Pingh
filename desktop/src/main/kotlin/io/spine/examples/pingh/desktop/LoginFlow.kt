@@ -27,7 +27,9 @@
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.runtime.MutableState
+import com.google.protobuf.Duration
 import io.spine.examples.pingh.client.DesktopClient
+import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.buildBy
@@ -36,11 +38,27 @@ import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
+import io.spine.net.Url
 
 internal class LoginFlow(
     private val client: DesktopClient,
     private val session: MutableState<UserSession?>
 ) {
+
+    internal lateinit var username: Username
+        private set
+
+    internal lateinit var userCode: UserCode
+        private set
+
+    internal lateinit var verificationUrl: Url
+        private set
+
+    internal lateinit var expiresIn: Duration
+        private set
+
+    internal lateinit var interval: Duration
+        private set
 
     /**
      * Starts the login process and requests `UserCode`.
@@ -49,11 +67,13 @@ internal class LoginFlow(
         username: Username,
         onSuccess: (event: UserCodeReceived) -> Unit = {}
     ) {
+        this.username = username
         val command = LogUserIn::class.buildBy(
             SessionId::class.buildBy(username)
         )
         client.observeEventOnce(command.id, UserCodeReceived::class) { event ->
             session.value = UserSession(command.id)
+            client.onBehalfOf(session.value!!.userId)
             onSuccess(event)
         }
         client.send(command)
@@ -78,5 +98,12 @@ internal class LoginFlow(
             onFail
         )
         client.send(command)
+    }
+
+    internal fun setVerificationContext(event: UserCodeReceived) {
+        userCode = event.userCode
+        verificationUrl = event.verificationUrl
+        expiresIn = event.expiresIn
+        interval = event.interval
     }
 }

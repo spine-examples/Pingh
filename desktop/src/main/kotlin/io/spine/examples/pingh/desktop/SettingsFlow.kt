@@ -55,6 +55,7 @@ internal class SettingsFlow(
         val command = LogUserOut::class.buildBy(session.value!!.id)
         client.observeEventOnce(command.id, UserLoggedOut::class) { event ->
             session.value = null
+            client.asGuest()
             onSuccess(event)
         }
         client.send(command)
