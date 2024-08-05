@@ -28,6 +28,7 @@ package io.spine.examples.pingh.client
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import com.google.protobuf.Duration
 import com.google.protobuf.util.Timestamps
 import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.mentions.GitHubClientId
@@ -97,7 +98,7 @@ public class MentionsFlow internal constructor(
      *
      * @return List of `MentionView`s sorted by descending time of creation.
      */
-    private fun findUserMentions(): List<MentionView> {
+    public fun findUserMentions(): List<MentionView> {
         ensureLoggedIn()
         val userMentions = client.readById(
             UserMentionsId::class.buildBy(session.value!!.username),
@@ -116,13 +117,24 @@ public class MentionsFlow internal constructor(
      *
      * @param id the identifier of the mention that is marked as snoozed.
      */
-    public fun markMentionAsSnoozed(
-        id: MentionId
+    public fun markMentionAsSnoozed(id: MentionId) {
+        markMentionAsSnoozed(id, settings.snoozeTime.value.value)
+    }
+
+    /**
+     * Marks the mention as snoozed.
+     *
+     * @param id the identifier of the mention that is marked as snoozed.
+     * @param snoozeTimeDuration the duration of mention snooze.
+     */
+    internal fun markMentionAsSnoozed(
+        id: MentionId,
+        snoozeTimeDuration: Duration
     ) {
         ensureLoggedIn()
         val command = SnoozeMention::class.buildBy(
             id,
-            currentTime().add(settings.snoozeTime.value.value)
+            currentTime().add(snoozeTimeDuration)
         )
         client.observeEventOnce(command.id, MentionSnoozed::class) {
             mentions.value = mentions.value.setMentionStatus(id, MentionStatus.SNOOZED)

@@ -44,7 +44,7 @@ public class PinghApplication(
     /**
      * Enables interaction with the Pingh server.
      */
-    private val client = DesktopClient(address, port)
+    internal val client = DesktopClient(address, port)
 
     /**
      * State of application settings.
@@ -75,4 +75,11 @@ public class PinghApplication(
      * Initiates the settings flow.
      */
     public fun startSettingsFlow(): SettingsFlow = SettingsFlow(client, session, settings)
+
+    /**
+     * Closes the client by shutting down the gRPC connection.
+     */
+    public fun close() {
+        client.close()
+    }
 }
