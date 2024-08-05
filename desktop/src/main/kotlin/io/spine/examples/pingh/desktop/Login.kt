@@ -589,6 +589,13 @@ private fun SubmitButton(
     toMentionsPage: () -> Unit
 ) {
     val enabled = flow.isAccessTokenRequestAvailable
+    val onClick = {
+        flow.verify(
+            onSuccess = {
+                toMentionsPage()
+            }
+        )
+    }
     Box(
         modifier = Modifier
             .width(210.dp)
@@ -596,13 +603,7 @@ private fun SubmitButton(
         contentAlignment = Alignment.TopCenter
     ) {
         Button(
-            onClick = {
-                flow.verify(
-                    onSuccess = {
-                        toMentionsPage()
-                    }
-                )
-            },
+            onClick = onClick,
             modifier = Modifier.fillMaxSize(),
             enabled = enabled.value,
             colors = ButtonDefaults.buttonColors(

@@ -41,12 +41,12 @@ import io.spine.protobuf.Durations2.minutes
  *
  * @param client enables interaction with the Pingh server.
  * @param session the information about the current user session.
- * @param settingsState the state of application settings.
+ * @param settings the information about the current user session.
  */
 public class SettingsFlow internal constructor(
     private val client: DesktopClient,
     private val session: MutableState<UserSession?>,
-    settingsState: SettingsState
+    public val settings: SettingsState
 ) {
 
     /**
@@ -54,11 +54,6 @@ public class SettingsFlow internal constructor(
      */
     public val username: Username
         get() = session.value!!.username
-
-    /**
-     * The information about the current user session.
-     */
-    public val settings: SettingsState = settingsState
 
     /**
      * Logs the user out, cancels all subscriptions and clears the session ID.

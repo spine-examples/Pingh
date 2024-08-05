@@ -73,7 +73,7 @@ message UserLoggedIn {
     spine_examples.pingh.github.PersonalAccessToken token = 2 [(required) = true];
 }
 
-// The user has not yet entered their user code on GitHub,
+// The user has not entered their user code on GitHub,
 // so logging into the Pingh app is not complete.
 message UserIsNotLoggedIntoGitHub {
 

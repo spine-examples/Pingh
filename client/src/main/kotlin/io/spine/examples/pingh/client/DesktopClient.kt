@@ -70,6 +70,20 @@ internal class DesktopClient(
     }
 
     /**
+     * Specifies a particular user to make requests on their behalf.
+     */
+    internal fun onBehalfOf(userId: UserId) {
+        this.userId = userId
+    }
+
+    /**
+     * Indicates that subsequent requests will be made on behalf of the guest.
+     */
+    internal fun asGuest() {
+        this.userId = null
+    }
+
+    /**
      * Sends a command to the server on behalf of the user.
      */
     internal fun send(command: CommandMessage) {
@@ -189,19 +203,5 @@ internal class DesktopClient(
             return client.onBehalfOf(userId!!)
         }
         return client.asGuest()
-    }
-
-    /**
-     * Specifies a particular user to make requests on their behalf.
-     */
-    internal fun onBehalfOf(userId: UserId) {
-        this.userId = userId
-    }
-
-    /**
-     * Indicates that subsequent requests will be made on behalf of the guest.
-     */
-    internal fun asGuest() {
-        this.userId = null
     }
 }

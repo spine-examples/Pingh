@@ -72,8 +72,7 @@ public class MentionsFlow internal constructor(
     /**
      * User mentions.
      */
-    public var mentions: MutableState<MentionsList> = mutableStateOf(findUserMentions())
-        private set
+    public val mentions: MutableState<MentionsList> = mutableStateOf(findUserMentions())
 
     /**
      * Updates the user's mentions.
@@ -159,7 +158,7 @@ public class MentionsFlow internal constructor(
     }
 
     /**
-     * Throws `IllegalStateException` exception if the user is not logged in.
+     * Throws an `IllegalStateException` exception if the user is not logged in.
      */
     private fun ensureLoggedIn() {
         check(session.value != null) { "The user is not logged in." }

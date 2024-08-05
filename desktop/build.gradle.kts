@@ -90,7 +90,6 @@ dependencies {
     implementation(Coil.compose)
     implementation(Ktor.Client.android)
     implementation(Pingh.client)
-    implementation("io.spine:spine-client:1.9.0")
 }
 
 compose.desktop {

@@ -26,12 +26,11 @@
 
 package io.spine.examples.pingh.client
 
-import com.google.protobuf.Duration
 import com.google.protobuf.Timestamp
+import com.google.protobuf.Duration
 import com.google.protobuf.util.Timestamps
 
 /**
  * Adds a duration to this timestamp.
  */
-internal fun Timestamp.add(duration: Duration): Timestamp =
-    Timestamps.add(this, duration)
+internal fun Timestamp.add(duration: Duration): Timestamp = Timestamps.add(this, duration)

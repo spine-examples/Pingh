@@ -79,7 +79,7 @@ internal abstract class IntegrationTest {
      * Marks that the user has entered their user code.
      *
      * After calling this method, the login verification will be successful,
-     * which will allow you to use login to the application after calling
+     * which will allow to use login to the application after calling
      * the [LoginFlow.verify] method.
      */
     protected fun enterUserCode() {

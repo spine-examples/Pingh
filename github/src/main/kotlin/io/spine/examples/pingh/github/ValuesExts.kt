@@ -131,7 +131,7 @@ public fun KClass<Mention>.buildFromFragment(
 /**
  * Creates a new `DeviceCode` with the specified string value.
  */
-public fun KClass<DeviceCode>.buildBy(value: String): DeviceCode =
+public fun KClass<DeviceCode>.of(value: String): DeviceCode =
     DeviceCode.newBuilder()
         .setValue(value)
         .vBuild()
@@ -139,7 +139,7 @@ public fun KClass<DeviceCode>.buildBy(value: String): DeviceCode =
 /**
  * Creates a new `UserCode` with the specified string value.
  */
-public fun KClass<UserCode>.buildBy(value: String): UserCode =
+public fun KClass<UserCode>.of(value: String): UserCode =
     UserCode.newBuilder()
         .setValue(value)
         .vBuild()
@@ -147,7 +147,7 @@ public fun KClass<UserCode>.buildBy(value: String): UserCode =
 /**
  * Creates a new `RefreshToken` with the specified string value.
  */
-public fun KClass<RefreshToken>.buildBy(value: String): RefreshToken =
+public fun KClass<RefreshToken>.of(value: String): RefreshToken =
     RefreshToken.newBuilder()
         .setValue(value)
         .vBuild()
@@ -160,8 +160,8 @@ public fun KClass<VerificationCodesResponse>.buildFromFragment(
     fragment: VerificationCodesFragment
 ): VerificationCodesResponse =
     with(VerificationCodesResponse.newBuilder()) {
-        deviceCode = DeviceCode::class.buildBy(fragment.deviceCode)
-        userCode = UserCode::class.buildBy(fragment.userCode)
+        deviceCode = DeviceCode::class.of(fragment.deviceCode)
+        userCode = UserCode::class.of(fragment.userCode)
         verificationUrl = Url::class.buildBy(fragment.verificationUri)
         expiresIn = seconds(fragment.expiresIn)
         interval = seconds(fragment.interval)
@@ -178,6 +178,6 @@ public fun KClass<AccessTokenResponse>.buildFromFragment(
     with(AccessTokenResponse.newBuilder()) {
         accessToken = PersonalAccessToken::class.buildBy(fragment.accessToken)
         whenExpires = Timestamps.add(currentTime(), seconds(fragment.expiresIn))
-        refreshToken = RefreshToken::class.buildBy(fragment.refreshToken)
+        refreshToken = RefreshToken::class.of(fragment.refreshToken)
         vBuild()
     }

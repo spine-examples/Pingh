@@ -60,8 +60,7 @@ public class LoginFlow internal constructor(
     /**
      * The current state of the login process.
      */
-    public var state: MutableState<LoginState> = mutableStateOf(LoginState.USERNAME_ENTERING)
-        private set
+    public val state: MutableState<LoginState> = mutableStateOf(LoginState.USERNAME_ENTERING)
 
     /**
      * The name of the user who is logging in.
