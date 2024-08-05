@@ -44,7 +44,7 @@ internal fun CurrentPage(application: PinghApplication) {
     }
     when (currentPage.value) {
         Page.LOGIN -> LoginPage(
-            loginFlow = application.startLoginFlow(),
+            flow = application.startLoginFlow(),
             toMentionsPage = {
                 currentPage.value = Page.MENTIONS
             }

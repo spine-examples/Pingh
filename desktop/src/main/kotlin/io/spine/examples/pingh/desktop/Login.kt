@@ -77,19 +77,12 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.protobuf.Duration
-import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.github.validateUsernameValue
-import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.net.Url
 import io.spine.protobuf.Durations2.toMinutes
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 /**
  * Displays the page with the current login step.
@@ -98,31 +91,22 @@ import kotlinx.coroutines.launch
  * a code that must be entered into GitHub. After entering the code, the user needs
  * to confirm the login on the application page.
  *
- * @param loginFlow
+ * @param flow
  * @param toMentionsPage the navigation to the 'Mentions' page.
  */
 @Composable
 internal fun LoginPage(
-    loginFlow: LoginFlow,
+    flow: LoginFlow,
     toMentionsPage: () -> Unit
 ) {
-    var state by remember { mutableStateOf(LoginState.USERNAME_ENTERING) }
-    var verificationInfo by remember { mutableStateOf<VerificationInfo?>(null) }
-    val toVerificationPage = { info: VerificationInfo ->
-        verificationInfo = info
-        state = LoginState.VERIFICATION
-    }
-    when (state) {
+    when (flow.state.value) {
         LoginState.USERNAME_ENTERING -> UsernameEnteringPage(
-            loginFlow = loginFlow,
-            toVerificationPage = toVerificationPage
+            flow = flow
         )
 
         LoginState.VERIFICATION -> VerificationPage(
-            loginFlow = loginFlow,
-            verificationInfo = verificationInfo!!,
-            toMentionsPage = toMentionsPage,
-            changeVerificationInfo = toVerificationPage
+            flow = flow,
+            toMentionsPage = toMentionsPage
         )
     }
 }
@@ -134,13 +118,11 @@ internal fun LoginPage(
  * be redirected to the login verification page.
  * [LoginButton] is not enable while the entered `Username` is invalid.
  *
- * @param loginFlow
- * @param toVerificationPage the navigation to the 'Login Verification' page.
+ * @param flow
  */
 @Composable
 private fun UsernameEnteringPage(
-    loginFlow: LoginFlow,
-    toVerificationPage: (info: VerificationInfo) -> Unit
+    flow: LoginFlow
 ) {
     var username by remember { mutableStateOf("") }
     var wasChanged by remember { mutableStateOf(false) }
@@ -167,9 +149,7 @@ private fun UsernameEnteringPage(
             enabled = wasChanged && !isError.value
         ) {
             val name = Username::class.buildBy(username)
-            loginFlow.requestUserCode(name) { event ->
-                toVerificationPage(VerificationInfo(name, event))
-            }
+            flow.requestUserCode(name)
         }
     }
 }
@@ -405,32 +385,14 @@ private fun LoginButton(
  * In this case, the user code cannot be copied, and the instructions and button
  * will not be displayed.
  *
- * @param loginFlow
- * @param verificationInfo the information required to verify login.
+ * @param flow
  * @param toMentionsPage the navigation to the 'Mentions' page.
- * @param changeVerificationInfo sets a new value for `VerificationInfo` to recompose the page.
  */
 @Composable
 private fun VerificationPage(
-    loginFlow: LoginFlow,
-    verificationInfo: VerificationInfo,
-    toMentionsPage: () -> Unit,
-    changeVerificationInfo: (info: VerificationInfo) -> Unit
+    flow: LoginFlow,
+    toMentionsPage: () -> Unit
 ) {
-    var isUserCodeExpired by remember { mutableStateOf(false) }
-    val expirationObservationJob = makeJobWithDelay(verificationInfo.expiresIn) {
-        isUserCodeExpired = true
-    }
-    val isButtonEnabled = remember { mutableStateOf(true) }
-    val reloadVerificationPage = {
-        val name = verificationInfo.username
-        loginFlow.requestUserCode(name) { event ->
-            isUserCodeExpired = false
-            isButtonEnabled.value = true
-            expirationObservationJob.cancel()
-            changeVerificationInfo(VerificationInfo(name, event))
-        }
-    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -441,28 +403,22 @@ private fun VerificationPage(
         VerificationTitle()
         Spacer(Modifier.height(15.dp))
         UserCodeField(
-            userCode = verificationInfo.userCode,
-            isExpired = isUserCodeExpired
+            userCode = flow.userCode.value!!,
+            isExpired = flow.isUserCodeExpired.value
         )
         Spacer(Modifier.height(10.dp))
-        if (isUserCodeExpired) {
+        if (flow.isUserCodeExpired.value) {
             Spacer(Modifier.height(5.dp))
-            CodeExpiredErrorMessage(reloadVerificationPage)
+            CodeExpiredErrorMessage(flow)
         } else {
             VerificationText(
-                verificationUrl = verificationInfo.verificationUrl,
-                expiresIn = verificationInfo.expiresIn
+                verificationUrl = flow.verificationUrl.value!!,
+                expiresIn = flow.expiresIn.value!!
             )
             Spacer(Modifier.height(20.dp))
             SubmitButton(
-                loginFlow = loginFlow,
-                interval = verificationInfo.interval,
-                enabled = isButtonEnabled,
-                onSuccess = {
-                    expirationObservationJob.cancel()
-                    toMentionsPage()
-                },
-                onClickToRestartLink = reloadVerificationPage
+                flow = flow,
+                toMentionsPage = toMentionsPage
             )
         }
     }
@@ -544,14 +500,16 @@ private fun CopyToClipboardIcon(
 /**
  * Displays an error message indicating that the `UserCode` has expired.
  *
- * @param onClick called when clickable part of message is clicked.
+ * @param flow
  */
 @Composable
-private fun CodeExpiredErrorMessage(onClick: () -> Unit) {
+private fun CodeExpiredErrorMessage(flow: LoginFlow) {
     ClickableErrorMessage(
         text = "The code has expired, please start over.",
         clickablePartOfText = "start over",
-        onClick = onClick
+        onClick = {
+            flow.requestUserCode(flow.username)
+        }
     )
 }
 
@@ -620,35 +578,15 @@ private fun VerificationUrlButton(url: Url) {
 /**
  * Displays a button to confirm verification.
  *
- * @param loginFlow
- * @param interval the minimum duration that must pass before user can make
- *                 a new access token request.
- * @param enabled controls the enabled state of this button.
- *                If `false`, the button cannot be pressed.
- * @param onSuccess called if this button is clicked and login is verified.
- * @param onClickToRestartLink called when clickable part of error message is clicked.
+ * @param flow
+ * @param toMentionsPage
  */
 @Composable
 private fun SubmitButton(
-    loginFlow: LoginFlow,
-    interval: Duration,
-    enabled: MutableState<Boolean>,
-    onSuccess: () -> Unit,
-    onClickToRestartLink: () -> Unit
+    flow: LoginFlow,
+    toMentionsPage: () -> Unit
 ) {
-    val onClick = {
-        loginFlow.verify(
-            onSuccess = {
-                onSuccess()
-            },
-            onFail = {
-                enabled.value = false
-                makeJobWithDelay(interval) {
-                    enabled.value = true
-                }
-            }
-        )
-    }
+    val enabled = flow.isAccessTokenRequestAvailable
     Box(
         modifier = Modifier
             .width(210.dp)
@@ -656,7 +594,13 @@ private fun SubmitButton(
         contentAlignment = Alignment.TopCenter
     ) {
         Button(
-            onClick = onClick,
+            onClick = {
+                flow.verify (
+                    onSuccess = {
+                        toMentionsPage()
+                    }
+                )
+            },
             modifier = Modifier.fillMaxSize(),
             enabled = enabled.value,
             colors = ButtonDefaults.buttonColors(
@@ -671,8 +615,7 @@ private fun SubmitButton(
         }
         if (!enabled.value) {
             NoResponseErrorMessage(
-                interval = interval,
-                onClickToRestartLink = onClickToRestartLink
+                flow = flow
             )
         }
     }
@@ -681,21 +624,21 @@ private fun SubmitButton(
 /**
  * Displays an error message indicating that GitHub could not verify the login.
  *
- * @param interval the duration after which user can try to verify again.
- * @param onClickToRestartLink called when clickable part of message is clicked.
+ * @param flow
  */
 @Composable
 private fun NoResponseErrorMessage(
-    interval: Duration,
-    onClickToRestartLink: () -> Unit
+    flow: LoginFlow
 ) {
     ClickableErrorMessage(
         text = """
                 No response from GitHub yet.
-                Try again in ${interval.seconds} seconds, or start over.
+                Try again in ${flow.interval.value!!.seconds} seconds, or start over.
             """.trimIndent(),
         clickablePartOfText = "start over",
-        onClick = onClickToRestartLink,
+        onClick = {
+            flow.requestUserCode(flow.username)
+        },
         modifier = Modifier
             .width(180.dp)
             .offset(y = 40.dp)
@@ -754,63 +697,4 @@ private fun ClickableErrorMessage(
                 onClick()
             }
     }
-}
-
-/**
- * Asynchronously performs work with a delay.
- */
-private fun makeJobWithDelay(
-    delayDuration: Duration,
-    jobAction: () -> Unit
-): Job =
-    CoroutineScope(Dispatchers.Default).launch {
-        delay(delayDuration.inWholeMilliseconds)
-        jobAction()
-    }
-
-/**
- * Information required to verify login.
- *
- * @param username the name of the user that who is being verified.
- * @param userCode the verification code that displays so that
- *                 the user can enter the code in a browser.
- * @param verificationUrl the URL of the GitHub page where user needs to enter their `userCode`.
- * @param expiresIn the duration after which the `userCode` expires.
- * @param interval the minimum duration that must pass before user can make
- *                 a new access token request.
- */
-private class VerificationInfo(
-    internal val username: Username,
-    internal val userCode: UserCode,
-    internal val verificationUrl: Url,
-    internal val expiresIn: Duration,
-    internal val interval: Duration
-) {
-    internal constructor(
-        username: Username,
-        event: UserCodeReceived
-    ) : this(
-        username,
-        event.userCode,
-        event.verificationUrl,
-        event.expiresIn,
-        event.interval
-    )
-}
-
-/**
- * State of login process.
- */
-private enum class LoginState {
-
-    /**
-     * Initial state where the user enters their `Username` and receives a `UserCode`.
-     */
-    USERNAME_ENTERING,
-
-    /**
-     * The final step where the user enters their `UserCode` into GitHub and
-     * completes the login process in the Pingh app.
-     */
-    VERIFICATION
 }

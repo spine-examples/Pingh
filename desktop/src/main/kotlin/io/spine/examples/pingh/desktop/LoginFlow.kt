@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import com.google.protobuf.Duration
 import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.github.UserCode
@@ -39,26 +40,38 @@ import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.net.Url
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 internal class LoginFlow(
     private val client: DesktopClient,
     private val session: MutableState<UserSession?>
 ) {
+    internal var state = mutableStateOf(LoginState.USERNAME_ENTERING)
+        private set
 
     internal lateinit var username: Username
         private set
 
-    internal lateinit var userCode: UserCode
-        private set
+    internal val userCode = mutableStateOf<UserCode?>(null)
+    internal val verificationUrl = mutableStateOf<Url?>(null)
+    internal val expiresIn = mutableStateOf<Duration?>(null)
+    internal var interval = mutableStateOf<Duration?>(null)
 
-    internal lateinit var verificationUrl: Url
-        private set
+    /**
+     * Whether the user code is expired.
+     */
+    internal val isUserCodeExpired = mutableStateOf(false)
 
-    internal lateinit var expiresIn: Duration
-        private set
+    /**
+     * Whether an access code request is available.
+     */
+    internal val isAccessTokenRequestAvailable = mutableStateOf(true)
 
-    internal lateinit var interval: Duration
-        private set
+    private lateinit var expirationObservationJob: Job
 
     /**
      * Starts the login process and requests `UserCode`.
@@ -74,9 +87,23 @@ internal class LoginFlow(
         client.observeEventOnce(command.id, UserCodeReceived::class) { event ->
             session.value = UserSession(command.id)
             client.onBehalfOf(session.value!!.userId)
+            state.value = LoginState.VERIFICATION
+            userCode.value = event.userCode
+            verificationUrl.value = event.verificationUrl
+            expiresIn.value = event.expiresIn
+            interval.value = event.interval
+            isAccessTokenRequestAvailable.value = true
+            startExpirationObservationJob()
             onSuccess(event)
         }
         client.send(command)
+    }
+
+    private fun startExpirationObservationJob() {
+        isUserCodeExpired.value = false
+        expirationObservationJob = makeJobWithDelay(expiresIn.value!!) {
+            isUserCodeExpired.value = true
+        }
     }
 
     /**
@@ -93,17 +120,52 @@ internal class LoginFlow(
         client.observeCommandOutcome(
             command.id,
             UserLoggedIn::class,
-            onSuccess,
+            { event ->
+                expirationObservationJob.cancel()
+                onSuccess(event)
+            },
             UserIsNotLoggedIntoGitHub::class,
-            onFail
+            { event ->
+                blockTokenRequestsForInterval()
+                onFail(event)
+            }
         )
         client.send(command)
     }
 
-    internal fun setVerificationContext(event: UserCodeReceived) {
-        userCode = event.userCode
-        verificationUrl = event.verificationUrl
-        expiresIn = event.expiresIn
-        interval = event.interval
+    private fun blockTokenRequestsForInterval() {
+        isAccessTokenRequestAvailable.value = false
+        makeJobWithDelay(interval.value!!) {
+            isAccessTokenRequestAvailable.value = true
+        }
     }
 }
+
+/**
+ * State of login process.
+ */
+internal enum class LoginState {
+
+    /**
+     * Initial state where the user enters their `Username` and receives a `UserCode`.
+     */
+    USERNAME_ENTERING,
+
+    /**
+     * The final step where the user enters their `UserCode` into GitHub and
+     * completes the login process in the Pingh app.
+     */
+    VERIFICATION
+}
+
+/**
+ * Asynchronously performs work with a delay.
+ */
+private fun makeJobWithDelay(
+    delayDuration: Duration,
+    jobAction: () -> Unit
+): Job =
+    CoroutineScope(Dispatchers.Default).launch {
+        delay(delayDuration.inWholeMilliseconds)
+        jobAction()
+    }
