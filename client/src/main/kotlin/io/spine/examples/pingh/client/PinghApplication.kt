@@ -27,18 +27,24 @@
 package io.spine.examples.pingh.client
 
 import androidx.compose.runtime.mutableStateOf
+import io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT
 
 /**
  * Manages the logic for the Pingh app.
  *
  * Stores application states and allows to create different process flows.
+ *
+ * By default, application opens channel for the client
+ * to 'localhost:[50051][DEFAULT_CLIENT_SERVICE_PORT]'.
  */
-public class PinghApplication {
-
+public class PinghApplication(
+    address: String = "localhost",
+    port: Int = DEFAULT_CLIENT_SERVICE_PORT
+) {
     /**
      * Enables interaction with the Pingh server.
      */
-    private val client = DesktopClient()
+    private val client = DesktopClient(address, port)
 
     /**
      * State of application settings.

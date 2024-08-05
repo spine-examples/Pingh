@@ -35,7 +35,6 @@ import io.spine.base.EventMessageField
 import io.spine.base.Field
 import io.spine.client.Client
 import io.spine.client.ClientRequest
-import io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT
 import io.spine.client.EventFilter.eq
 import io.spine.client.Subscription
 import io.spine.core.UserId
@@ -43,15 +42,12 @@ import kotlin.reflect.KClass
 
 /**
  * Interacts with [Pingh server][io.spine.examples.pingh.server] via gRPC.
- *
- * By default, client will open channel to 'localhost:[50051]
- * [io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT]'.
  */
 @Suppress("TooManyFunctions") // The client must contain multiple methods
 // to interact with the server, which does not enable Detekt.
-public class DesktopClient(
-    address: String = "localhost",
-    port: Int = DEFAULT_CLIENT_SERVICE_PORT
+internal class DesktopClient(
+    address: String,
+    port: Int
 ) {
     private val client: Client
 
@@ -76,7 +72,7 @@ public class DesktopClient(
     /**
      * Sends a command to the server on behalf of the user.
      */
-    public fun send(command: CommandMessage) {
+    internal fun send(command: CommandMessage) {
         clientRequest()
             .command(command)
             .postAndForget()
@@ -85,7 +81,7 @@ public class DesktopClient(
     /**
      * Reads records from the projection with the specified ID.
      */
-    public fun <I : Message, E : EntityState> readById(
+    internal fun <I : Message, E : EntityState> readById(
         id: I,
         type: KClass<E>
     ): List<E> =
@@ -99,7 +95,7 @@ public class DesktopClient(
      *
      * When a success or failure event is emitted, subscriptions are cancelled.
      */
-    public fun <S : EventMessage, F : EventMessage> observeCommandOutcome(
+    internal fun <S : EventMessage, F : EventMessage> observeCommandOutcome(
         id: Message,
         successType: KClass<S>,
         onSuccess: (event: S) -> Unit,
@@ -120,7 +116,7 @@ public class DesktopClient(
     /**
      * Observes the provided event with the specified ID.
      */
-    public fun <E : EventMessage> observeEvent(
+    internal fun <E : EventMessage> observeEvent(
         id: Message,
         type: KClass<E>,
         onEmit: (event: E) -> Unit
@@ -135,7 +131,7 @@ public class DesktopClient(
      * Subscribes to the event of the provided type and cancels itself after
      * the observer has worked.
      */
-    public fun <E : EventMessage> observeEventOnce(
+    internal fun <E : EventMessage> observeEventOnce(
         id: Message,
         type: KClass<E>,
         onEmit: (event: E) -> Unit
@@ -153,7 +149,7 @@ public class DesktopClient(
      *
      * The subscription cancels itself after the observer has completed its work.
      */
-    public fun <E : EntityState> observeEntityOnce(
+    internal fun <E : EntityState> observeEntityOnce(
         id: Message,
         type: KClass<E>,
         onUpdated: (entity: E) -> Unit
@@ -172,7 +168,7 @@ public class DesktopClient(
     /**
      * Stops observation by provided subscription.
      */
-    public fun stopObservation(subscription: Subscription) {
+    internal fun stopObservation(subscription: Subscription) {
         client.subscriptions()
             .cancel(subscription)
     }
@@ -180,7 +176,7 @@ public class DesktopClient(
     /**
      * Closes the client by shutting down the gRPC connection.
      */
-    public fun close() {
+    internal fun close() {
         client.close()
     }
 
@@ -198,14 +194,14 @@ public class DesktopClient(
     /**
      * Specifies a particular user to make requests on their behalf.
      */
-    public fun onBehalfOf(userId: UserId) {
+    internal fun onBehalfOf(userId: UserId) {
         this.userId = userId
     }
 
     /**
      * Indicates that subsequent requests will be made on behalf of the guest.
      */
-    public fun asGuest() {
+    internal fun asGuest() {
         this.userId = null
     }
 }

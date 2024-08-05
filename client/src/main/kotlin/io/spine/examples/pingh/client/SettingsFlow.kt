@@ -101,8 +101,8 @@ public class SettingsState {
  */
 @Suppress("MagicNumber") // The durations are specified using numbers.
 public enum class SnoozeTime(
-    internal val label: String,
-    internal val value: Duration
+    public val label: String,
+    public val value: Duration
 ) {
     /**
      * The interval is 30 minutes in duration.
