@@ -24,12 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop
+package io.spine.examples.pingh.client
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.google.protobuf.Duration
-import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.buildBy
 import io.spine.examples.pingh.sessions.command.LogUserOut
@@ -42,24 +41,29 @@ import io.spine.protobuf.Durations2.minutes
  *
  * @param client enables interaction with the Pingh server.
  * @param session the information about the current user session.
- * @param settings the state of application settings.
+ * @param settingsState the state of application settings.
  */
-internal class SettingsFlow(
+public class SettingsFlow internal constructor(
     private val client: DesktopClient,
     private val session: MutableState<UserSession?>,
-    internal val settings: SettingsState
+    settingsState: SettingsState
 ) {
 
     /**
      * The username to which the current session belongs.
      */
-    internal val username: Username
+    public val username: Username
         get() = session.value!!.username
+
+    /**
+     * The information about the current user session.
+     */
+    public val settings: SettingsState = settingsState
 
     /**
      * Logs the user out, cancels all subscriptions and clears the session ID.
      */
-    internal fun logOut(
+    public fun logOut(
         onSuccess: (event: UserLoggedOut) -> Unit = {}
     ) {
         val command = LogUserOut::class.buildBy(session.value!!.id)
@@ -75,18 +79,18 @@ internal class SettingsFlow(
 /**
  * State of application settings.
  */
-internal class SettingsState {
+public class SettingsState {
 
     /**
      * If `true`, the user is not notified about new mentions and snooze expirations.
      * If `false`, the user receives notifications.
      */
-    internal var enabledDndMode: MutableState<Boolean> = mutableStateOf(false)
+    public var enabledDndMode: MutableState<Boolean> = mutableStateOf(false)
 
     /**
      * The interval after which the new mention notification is repeated.
      */
-    internal var snoozeTime: MutableState<SnoozeTime> = mutableStateOf(SnoozeTime.TWO_HOURS)
+    public var snoozeTime: MutableState<SnoozeTime> = mutableStateOf(SnoozeTime.TWO_HOURS)
 }
 
 /**
@@ -96,7 +100,7 @@ internal class SettingsState {
  * @param value the duration corresponding to this interval.
  */
 @Suppress("MagicNumber") // The durations are specified using numbers.
-internal enum class SnoozeTime(
+public enum class SnoozeTime(
     internal val label: String,
     internal val value: Duration
 ) {

@@ -24,17 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop
+package io.spine.examples.pingh.client
 
 import com.google.protobuf.Duration
+import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Timestamps
 
 /**
- * Number of milliseconds in one second.
+ * Adds a duration to this timestamp.
  */
-private const val millisecondsPerSecond = 1000
-
-/**
- * The value of this duration expressed as a `Long` number of milliseconds.
- */
-internal val Duration.inWholeMilliseconds: Long
-    get() = seconds * millisecondsPerSecond
+internal fun Timestamp.add(duration: Duration): Timestamp =
+    Timestamps.add(this, duration)

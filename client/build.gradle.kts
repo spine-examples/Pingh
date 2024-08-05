@@ -25,8 +25,10 @@
  */
 
 import io.spine.internal.BuildSettings
+import io.spine.internal.dependency.Compose
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Guava
+import io.spine.internal.dependency.KotlinX
 import io.spine.internal.dependency.Spine
 
 plugins {
@@ -35,6 +37,10 @@ plugins {
     // Add the Gradle plugin for bootstrapping projects built with Spine.
     // See: https://github.com/SpineEventEngine/bootstrap
     id("io.spine.tools.gradle.bootstrap").version("1.9.0")
+}
+
+repositories {
+    google()
 }
 
 spine {
@@ -53,13 +59,16 @@ kotlin {
 }
 
 dependencies {
-    // To work with `DesktopClient`, it is necessary to use values-objects and IDs declared
+    // To work with `PinghApplication`, it is necessary to use values-objects and IDs declared
     // in different bounded contexts. All necessary classes are collected in the `server` module.
     api(project(":server"))
 
     implementation(Guava.lib)
     implementation(Grpc.netty)
     implementation(Grpc.inprocess)
+    implementation(KotlinX.Coroutines.core)
+    // For the state of processes in flows.
+    implementation(Compose.Runtime.lib)
 
     testImplementation(project(":testutil-mentions"))
     testImplementation(project(":testutil-sessions"))

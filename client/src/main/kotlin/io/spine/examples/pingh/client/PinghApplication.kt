@@ -24,17 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop
+package io.spine.examples.pingh.client
 
 import androidx.compose.runtime.mutableStateOf
-import io.spine.examples.pingh.client.DesktopClient
 
 /**
  * Manages the logic for the Pingh app.
  *
  * Stores application states and allows to create different process flows.
  */
-internal class PinghApplication {
+public class PinghApplication {
 
     /**
      * Enables interaction with the Pingh server.
@@ -54,20 +53,20 @@ internal class PinghApplication {
     /**
      * Returns `true` if a user session exists, otherwise `false`.
      */
-    internal fun isLoggedIn(): Boolean = session.value != null
+    public fun isLoggedIn(): Boolean = session.value != null
 
     /**
      * Initiates the login flow.
      */
-    internal fun startLoginFlow(): LoginFlow = LoginFlow(client, session)
+    public fun startLoginFlow(): LoginFlow = LoginFlow(client, session)
 
     /**
      * Initiates the mentions flow.
      */
-    internal fun startMentionsFlow(): MentionsFlow = MentionsFlow(client, session, settings)
+    public fun startMentionsFlow(): MentionsFlow = MentionsFlow(client, session, settings)
 
     /**
      * Initiates the settings flow.
      */
-    internal fun startSettingsFlow(): SettingsFlow = SettingsFlow(client, session, settings)
+    public fun startSettingsFlow(): SettingsFlow = SettingsFlow(client, session, settings)
 }

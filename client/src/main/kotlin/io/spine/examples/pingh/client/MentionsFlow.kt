@@ -24,13 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop
+package io.spine.examples.pingh.client
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.google.protobuf.util.Timestamps
 import io.spine.base.Time.currentTime
-import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.mentions.GitHubClientId
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionStatus
@@ -55,7 +54,7 @@ import java.lang.Thread.sleep
  * @param session the information about the current user session.
  * @param settings the state of application settings.
  */
-internal class MentionsFlow internal constructor(
+public class MentionsFlow internal constructor(
     private val client: DesktopClient,
     private val session: MutableState<UserSession?>,
     private val settings: SettingsState
@@ -72,13 +71,13 @@ internal class MentionsFlow internal constructor(
     /**
      * User mentions.
      */
-    internal var mentions: MutableState<MentionsList> = mutableStateOf(findUserMentions())
+    public var mentions: MutableState<MentionsList> = mutableStateOf(findUserMentions())
         private set
 
     /**
      * Updates the user's mentions.
      */
-    internal fun updateMentions() {
+    public fun updateMentions() {
         ensureLoggedIn()
         val command = UpdateMentionsFromGitHub::class.buildBy(
             GitHubClientId::class.buildBy(session.value!!.username)
@@ -117,7 +116,7 @@ internal class MentionsFlow internal constructor(
      *
      * @param id the identifier of the mention that is marked as snoozed.
      */
-    internal fun markMentionAsSnoozed(
+    public fun markMentionAsSnoozed(
         id: MentionId
     ) {
         ensureLoggedIn()
@@ -136,7 +135,7 @@ internal class MentionsFlow internal constructor(
      *
      * @param id the identifier of the mention that is marked as read.
      */
-    internal fun markMentionAsRead(
+    public fun markMentionAsRead(
         id: MentionId
     ) {
         ensureLoggedIn()
@@ -158,7 +157,7 @@ internal class MentionsFlow internal constructor(
 /**
  * List of `MentionsView`s.
  */
-internal typealias MentionsList = List<MentionView>
+public typealias MentionsList = List<MentionView>
 
 /**
  * Updates the status of the mention with the specified identifier to the new status.
@@ -166,7 +165,7 @@ internal typealias MentionsList = List<MentionView>
  * @param id the identifier of the mention which the status was changed.
  * @param status new status of the mention.
  */
-internal fun MentionsList.setMentionStatus(
+public fun MentionsList.setMentionStatus(
     id: MentionId,
     status: MentionStatus
 ): MentionsList {
@@ -186,7 +185,7 @@ internal fun MentionsList.setMentionStatus(
  *
  * Within each group, mentions are sorted by the time they were made.
  */
-internal fun MentionsList.sortByStatusAndWhenMentioned(): MentionsList =
+public fun MentionsList.sortByStatusAndWhenMentioned(): MentionsList =
     this.sortedWith { firstMentions, secondMentions ->
         val statusComparison = firstMentions.status.compareTo(secondMentions.status)
         if (statusComparison != 0) {

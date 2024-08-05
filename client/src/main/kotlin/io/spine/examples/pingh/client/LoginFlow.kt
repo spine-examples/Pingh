@@ -24,12 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop
+package io.spine.examples.pingh.client
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.google.protobuf.Duration
-import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.SessionId
@@ -54,36 +53,36 @@ import kotlinx.coroutines.launch
  * @param client enables interaction with the Pingh server.
  * @param session the information about the current user session.
  */
-internal class LoginFlow(
+public class LoginFlow internal constructor(
     private val client: DesktopClient,
     private val session: MutableState<UserSession?>
 ) {
     /**
      * The current state of the login process.
      */
-    internal var state = mutableStateOf(LoginState.USERNAME_ENTERING)
+    public var state: MutableState<LoginState> = mutableStateOf(LoginState.USERNAME_ENTERING)
         private set
 
     /**
      * The name of the user who is logging in.
      */
-    internal lateinit var username: Username
+    public lateinit var username: Username
         private set
 
-    internal val userCode = mutableStateOf<UserCode?>(null)
-    internal val verificationUrl = mutableStateOf<Url?>(null)
-    internal val expiresIn = mutableStateOf<Duration?>(null)
-    internal var interval = mutableStateOf<Duration?>(null)
+    public val userCode: MutableState<UserCode?> = mutableStateOf<UserCode?>(null)
+    public val verificationUrl: MutableState<Url?> = mutableStateOf<Url?>(null)
+    public val expiresIn: MutableState<Duration?> = mutableStateOf<Duration?>(null)
+    public var interval: MutableState<Duration?> = mutableStateOf<Duration?>(null)
 
     /**
      * Whether the user code is expired.
      */
-    internal val isUserCodeExpired = mutableStateOf(false)
+    public val isUserCodeExpired: MutableState<Boolean> = mutableStateOf(false)
 
     /**
      * Whether an access code request is available.
      */
-    internal val isAccessTokenRequestAvailable = mutableStateOf(true)
+    public val isAccessTokenRequestAvailable: MutableState<Boolean> = mutableStateOf(true)
 
     /**
      * A job that marks a [userCode] as expired after the [time][expiresIn] has expired.
@@ -93,7 +92,7 @@ internal class LoginFlow(
     /**
      * Starts the login process and requests `UserCode`.
      */
-    internal fun requestUserCode(
+    public fun requestUserCode(
         username: Username,
         onSuccess: (event: UserCodeReceived) -> Unit = {}
     ) {
@@ -139,7 +138,7 @@ internal class LoginFlow(
     /**
      * Checks whether the user has completed the login on GitHub and entered their user code.
      */
-    internal fun verify(
+    public fun verify(
         onSuccess: (event: UserLoggedIn) -> Unit = {},
         onFail: (event: UserIsNotLoggedIntoGitHub) -> Unit = {}
     ) {
@@ -177,7 +176,7 @@ internal class LoginFlow(
 /**
  * State of login process.
  */
-internal enum class LoginState {
+public enum class LoginState {
 
     /**
      * Initial state where the user enters their `Username` and receives a `UserCode`.

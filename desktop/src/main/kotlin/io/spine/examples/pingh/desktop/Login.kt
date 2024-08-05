@@ -77,6 +77,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.protobuf.Duration
+import io.spine.examples.pingh.client.LoginFlow
+import io.spine.examples.pingh.client.LoginState
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy

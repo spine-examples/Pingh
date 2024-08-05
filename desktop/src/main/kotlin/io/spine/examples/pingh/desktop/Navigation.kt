@@ -29,6 +29,7 @@ package io.spine.examples.pingh.desktop
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import io.spine.examples.pingh.client.PinghApplication
 
 /**
  * Displays the current page of the application.

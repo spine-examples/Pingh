@@ -24,40 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop
+package io.spine.internal.dependency
 
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowState
-import androidx.compose.ui.window.application
-import io.spine.examples.pingh.client.PinghApplication
+@Suppress("ConstPropertyName")
+public object KotlinX {
 
-/**
- * Manages the logic for the Pingh app.
- */
-private val application = PinghApplication()
+    private const val group = "org.jetbrains.kotlinx"
 
-/**
- * Entry point of the desktop application.
- */
-public fun main() {
-    app()
-}
-
-/**
- * The root component of the desktop application.
- */
-private fun app() {
-    application {
-        PinghTheme {
-            Window(
-                onCloseRequest = ::exitApplication,
-                title = "Pingh",
-                state = WindowState(size = DpSize(240.dp, 426.dp))
-            ) {
-                CurrentPage(application)
-            }
-        }
+    // https://github.com/Kotlin/kotlinx.coroutines
+    public object Coroutines {
+        private const val version = "1.8.1"
+        public const val core: String = "$group:kotlinx-coroutines-core:$version"
     }
 }

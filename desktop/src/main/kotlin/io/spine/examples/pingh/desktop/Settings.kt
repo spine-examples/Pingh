@@ -67,6 +67,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.spine.examples.pingh.client.SettingsFlow
+import io.spine.examples.pingh.client.SettingsState
+import io.spine.examples.pingh.client.SnoozeTime
 import io.spine.examples.pingh.github.Username
 
 /**

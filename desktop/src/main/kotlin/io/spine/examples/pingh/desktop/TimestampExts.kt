@@ -99,9 +99,3 @@ internal fun Timestamp.howMuchTimeHasPassed(): String {
  */
 private fun Timestamp.toLocalDateTime(): LocalDateTime =
     LocalDateTime.ofEpochSecond(this.seconds, this.nanos, ZoneOffset.UTC)
-
-/**
- * Adds a duration to this timestamp.
- */
-internal fun Timestamp.add(duration: com.google.protobuf.Duration): Timestamp =
-    Timestamps.add(this, duration)

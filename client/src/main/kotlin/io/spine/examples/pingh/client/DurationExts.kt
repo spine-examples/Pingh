@@ -24,40 +24,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop
+package io.spine.examples.pingh.client
 
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowState
-import androidx.compose.ui.window.application
-import io.spine.examples.pingh.client.PinghApplication
+import com.google.protobuf.Duration
 
 /**
- * Manages the logic for the Pingh app.
+ * Number of milliseconds in one second.
  */
-private val application = PinghApplication()
+private const val millisecondsPerSecond = 1000
 
 /**
- * Entry point of the desktop application.
+ * The value of this duration expressed as a `Long` number of milliseconds.
  */
-public fun main() {
-    app()
-}
-
-/**
- * The root component of the desktop application.
- */
-private fun app() {
-    application {
-        PinghTheme {
-            Window(
-                onCloseRequest = ::exitApplication,
-                title = "Pingh",
-                state = WindowState(size = DpSize(240.dp, 426.dp))
-            ) {
-                CurrentPage(application)
-            }
-        }
-    }
-}
+internal val Duration.inWholeMilliseconds: Long
+    get() = seconds * millisecondsPerSecond
