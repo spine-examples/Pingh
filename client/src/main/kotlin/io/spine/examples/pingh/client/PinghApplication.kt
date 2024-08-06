@@ -27,6 +27,8 @@
 package io.spine.examples.pingh.client
 
 import io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT
+import io.spine.core.UserId
+import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
@@ -44,7 +46,7 @@ public class PinghApplication(
     /**
      * Enables interaction with the Pingh server.
      */
-    internal val client = DesktopClient(address, port)
+    internal val client = DesktopClient(address, port, generateUserId())
 
     /**
      * State of application settings.
@@ -83,3 +85,11 @@ public class PinghApplication(
         client.close()
     }
 }
+
+/**
+ * Create a new `UserId` with the random value.
+ */
+private fun generateUserId(): UserId =
+    UserId.newBuilder()
+        .setValue(UUID.randomUUID().toString())
+        .vBuild()

@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.client
 
-import io.spine.core.UserId
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.SessionId
 
@@ -42,11 +41,4 @@ internal class UserSession(
      */
     internal val username: Username
         get() = id.username
-
-    /**
-     * The client user ID for making requests to the Pingh server.
-     */
-    internal val userId = UserId.newBuilder()
-        .setValue(username.value)
-        .vBuild()
 }

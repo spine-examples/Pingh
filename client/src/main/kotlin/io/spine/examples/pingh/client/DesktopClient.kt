@@ -42,22 +42,17 @@ import kotlin.reflect.KClass
 
 /**
  * Interacts with [Pingh server][io.spine.examples.pingh.server] via gRPC.
+ *
+ * @param userId indicates on whose behalf the request is made.
  */
 @Suppress("TooManyFunctions") // The client must contain multiple methods
 // to interact with the server, which does not enable Detekt.
 internal class DesktopClient(
     address: String,
-    port: Int
+    port: Int,
+    private val userId: UserId
 ) {
     private val client: Client
-
-    /**
-     * Indicates on whose behalf the request is made.
-     *
-     * If `null`, requests are sent on behalf of a guest.
-     * To specify a particular user, use the [onBehalfOf] method.
-     */
-    private var userId: UserId? = null
 
     init {
         val channel = ManagedChannelBuilder
@@ -67,20 +62,6 @@ internal class DesktopClient(
         client = Client
             .usingChannel(channel)
             .build()
-    }
-
-    /**
-     * Specifies a particular user to make requests on their behalf.
-     */
-    internal fun onBehalfOf(userId: UserId) {
-        this.userId = userId
-    }
-
-    /**
-     * Indicates that subsequent requests will be made on behalf of the guest.
-     */
-    internal fun asGuest() {
-        this.userId = null
     }
 
     /**
@@ -182,26 +163,20 @@ internal class DesktopClient(
     /**
      * Stops observation by provided subscription.
      */
-    internal fun stopObservation(subscription: Subscription) {
+    private fun stopObservation(subscription: Subscription) {
         client.subscriptions()
             .cancel(subscription)
     }
+
+    /**
+     * Provides `ClientRequest` on behalf of current client.
+     */
+    private fun clientRequest(): ClientRequest = client.onBehalfOf(userId)
 
     /**
      * Closes the client by shutting down the gRPC connection.
      */
     internal fun close() {
         client.close()
-    }
-
-    /**
-     * Provides `ClientRequest` on behalf of logged-in user if it exists,
-     * or as guest if it doesn't.
-     */
-    private fun clientRequest(): ClientRequest {
-        if (userId != null) {
-            return client.onBehalfOf(userId!!)
-        }
-        return client.asGuest()
     }
 }

@@ -101,7 +101,6 @@ public class LoginFlow internal constructor(
         )
         client.observeEventOnce(command.id, UserCodeReceived::class) { event ->
             session.value = UserSession(command.id)
-            client.onBehalfOf(session.value!!.userId)
             setDataForVerificationState(event)
             onSuccess(event)
         }
