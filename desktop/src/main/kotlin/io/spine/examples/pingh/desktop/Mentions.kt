@@ -90,7 +90,7 @@ internal fun MentionsPage(
 }
 
 /**
- * Displays a menu of tools for navigating to a application settings page or
+ * Displays a menu of tools for navigating to an application settings page or
  * manually updating mentions.
  *
  * @param flow the flow for managing the lifecycle of mentions.

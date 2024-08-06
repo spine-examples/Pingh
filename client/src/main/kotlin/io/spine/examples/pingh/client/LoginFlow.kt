@@ -62,15 +62,100 @@ public class LoginFlow internal constructor(
     public val state: MutableStateFlow<LoginState> = MutableStateFlow(LoginState.USERNAME_ENTERING)
 
     /**
-     * The name of the user who is logging in.
+     * Stores the event received after the user enters their name.
+     *
+     * This is required to initialize the verification state flow.
      */
-    public lateinit var username: Username
-        private set
+    private var userCodeReceived: UserCodeReceived? = null
 
-    public val userCode: MutableStateFlow<UserCode?> = MutableStateFlow(null)
-    public val verificationUrl: MutableStateFlow<Url?> = MutableStateFlow(null)
-    public val expiresIn: MutableStateFlow<Duration?> = MutableStateFlow(null)
-    public val interval: MutableStateFlow<Duration?> = MutableStateFlow(null)
+    /**
+     * Initiates the username entering state of the login flow.
+     *
+     * @throws IllegalStateException if the state of the login flow is not `USERNAME_ENTERING`.
+     */
+    public fun startUsernameEnteringFlow(): UsernameEnteringFlow {
+        check(state.value == LoginState.USERNAME_ENTERING) {
+            "State of the login must be `USERNAME_ENTERING`"
+        }
+        return UsernameEnteringFlow(client, session) { event ->
+            state.value = LoginState.VERIFICATION
+            userCodeReceived = event
+        }
+    }
+
+    /**
+     * Initiates the verification state of the login flow.
+     *
+     * @throws IllegalStateException if the state of the login flow is not `VERIFICATION`.
+     */
+    public fun startVerificationFlow(): VerificationFlow {
+        check(state.value == LoginState.VERIFICATION) {
+            "State of the login must be `VERIFICATION`"
+        }
+        return VerificationFlow(client, session, userCodeReceived!!)
+    }
+}
+
+/**
+ * The control flow of the username entering state of the login process.
+ *
+ * @param client enables interaction with the Pingh server.
+ * @param session the information about the current user session.
+ * @param toVerificationState called when user codes are successfully received.
+ */
+public class UsernameEnteringFlow internal constructor(
+    private val client: DesktopClient,
+    private val session: MutableStateFlow<UserSession?>,
+    private val toVerificationState: (UserCodeReceived) -> Unit
+) {
+    /**
+     * Starts the login process and requests `UserCode`.
+     */
+    public fun requestUserCode(
+        username: Username,
+        onSuccess: (event: UserCodeReceived) -> Unit = {}
+    ) {
+        client.requestUserCode(username) { event ->
+            session.value = UserSession(event.id)
+            onSuccess(event)
+            toVerificationState(event)
+        }
+    }
+}
+
+/**
+ * The control flow of the verification state of the login process.
+ *
+ * @param client enables interaction with the Pingh server.
+ * @param session the information about the current user session.
+ * @param event event received in username entering state.
+ */
+@Suppress("MemberVisibilityCanBePrivate")
+public class VerificationFlow internal constructor(
+    private val client: DesktopClient,
+    private val session: MutableStateFlow<UserSession?>,
+    event: UserCodeReceived
+) {
+    /**
+     * The code a user needs to enter on GitHub to confirm login to the app.
+     */
+    public val userCode: MutableStateFlow<UserCode> = MutableStateFlow(event.userCode)
+
+    /**
+     * The URL of the GitHub resource, where users will be entering the verification code
+     * in scope of the device login flow.
+     */
+    public val verificationUrl: MutableStateFlow<Url> = MutableStateFlow(event.verificationUrl)
+
+    /**
+     *  The duration after which the [userCode] expires.
+     */
+    public val expiresIn: MutableStateFlow<Duration> = MutableStateFlow(event.expiresIn)
+
+    /**
+     * The minimum duration that must pass before user can make a new access token request.
+     */
+    public val interval: MutableStateFlow<Duration> = MutableStateFlow(event.interval)
 
     /**
      * Whether the user code is expired.
@@ -88,38 +173,7 @@ public class LoginFlow internal constructor(
      */
     private lateinit var expirationObservationJob: Job
 
-    /**
-     * Starts the login process and requests `UserCode`.
-     */
-    public fun requestUserCode(
-        username: Username,
-        onSuccess: (event: UserCodeReceived) -> Unit = {}
-    ) {
-        this.username = username
-        val command = LogUserIn::class.buildBy(
-            SessionId::class.buildBy(username)
-        )
-        client.observeEventOnce(command.id, UserCodeReceived::class) { event ->
-            session.value = UserSession(command.id)
-            setDataForVerificationState(event)
-            onSuccess(event)
-        }
-        client.send(command)
-    }
-
-    /**
-     * Advances the process to the verification state and fills all necessary data
-     * for this state.
-     */
-    private fun setDataForVerificationState(
-        event: UserCodeReceived
-    ) {
-        state.value = LoginState.VERIFICATION
-        userCode.value = event.userCode
-        verificationUrl.value = event.verificationUrl
-        expiresIn.value = event.expiresIn
-        interval.value = event.interval
-        isAccessTokenRequestAvailable.value = true
+    init {
         startExpirationObservationJob()
     }
 
@@ -128,7 +182,7 @@ public class LoginFlow internal constructor(
      */
     private fun startExpirationObservationJob() {
         isUserCodeExpired.value = false
-        expirationObservationJob = makeJobWithDelay(expiresIn.value!!) {
+        expirationObservationJob = makeJobWithDelay(expiresIn.value) {
             isUserCodeExpired.value = true
         }
     }
@@ -140,9 +194,6 @@ public class LoginFlow internal constructor(
         onSuccess: (event: UserLoggedIn) -> Unit = {},
         onFail: (event: UserIsNotLoggedIntoGitHub) -> Unit = {}
     ) {
-        check(session.value != null) {
-            "Initially it is necessary to start the login process by requesting a user code."
-        }
         val command = VerifyUserLoginToGitHub::class.buildBy(session.value!!.id)
         client.observeCommandOutcome(
             command.id,
@@ -165,10 +216,42 @@ public class LoginFlow internal constructor(
      */
     private fun blockTokenRequestsForInterval() {
         isAccessTokenRequestAvailable.value = false
-        makeJobWithDelay(interval.value!!) {
+        makeJobWithDelay(interval.value) {
             isAccessTokenRequestAvailable.value = true
         }
     }
+
+    /**
+     * Requests new `UserCode` and updates state of verification flow.
+     */
+    public fun requestNewUserCode(
+        onSuccess: (event: UserCodeReceived) -> Unit = {}
+    ) {
+        client.requestUserCode(session.value!!.username) { event ->
+            userCode.value = event.userCode
+            verificationUrl.value = event.verificationUrl
+            expiresIn.value = event.expiresIn
+            interval.value = event.interval
+            isAccessTokenRequestAvailable.value = true
+            expirationObservationJob.cancel()
+            startExpirationObservationJob()
+            onSuccess(event)
+        }
+    }
+}
+
+/**
+ * Starts the login process and requests `UserCode`.
+ */
+private fun DesktopClient.requestUserCode(
+    username: Username,
+    onSuccess: (event: UserCodeReceived) -> Unit = {}
+) {
+    val command = LogUserIn::class.buildBy(
+        SessionId::class.buildBy(username)
+    )
+    observeEventOnce(command.id, UserCodeReceived::class, onSuccess)
+    send(command)
 }
 
 /**
