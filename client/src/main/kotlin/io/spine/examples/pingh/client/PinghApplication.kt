@@ -26,8 +26,8 @@
 
 package io.spine.examples.pingh.client
 
-import androidx.compose.runtime.mutableStateOf
 import io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * Manages the logic for the Pingh app.
@@ -54,7 +54,7 @@ public class PinghApplication(
     /**
      * Information about the current user session.
      */
-    private val session = mutableStateOf<UserSession?>(null)
+    private val session = MutableStateFlow<UserSession?>(null)
 
     /**
      * Returns `true` if a user session exists, otherwise `false`.

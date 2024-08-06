@@ -26,8 +26,6 @@
 
 package io.spine.examples.pingh.client
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import com.google.protobuf.Duration
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.buildBy
@@ -35,6 +33,7 @@ import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.protobuf.Durations2.hours
 import io.spine.protobuf.Durations2.minutes
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * The application settings control flow.
@@ -45,7 +44,7 @@ import io.spine.protobuf.Durations2.minutes
  */
 public class SettingsFlow internal constructor(
     private val client: DesktopClient,
-    private val session: MutableState<UserSession?>,
+    private val session: MutableStateFlow<UserSession?>,
     public val settings: SettingsState
 ) {
 
@@ -80,12 +79,12 @@ public class SettingsState {
      * If `true`, the user is not notified about new mentions and snooze expirations.
      * If `false`, the user receives notifications.
      */
-    public var enabledDndMode: MutableState<Boolean> = mutableStateOf(false)
+    public val enabledDndMode: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     /**
      * The interval after which the new mention notification is repeated.
      */
-    public var snoozeTime: MutableState<SnoozeTime> = mutableStateOf(SnoozeTime.TWO_HOURS)
+    public val snoozeTime: MutableStateFlow<SnoozeTime> = MutableStateFlow(SnoozeTime.TWO_HOURS)
 }
 
 /**

@@ -57,6 +57,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -73,7 +75,7 @@ import io.spine.examples.pingh.client.SnoozeTime
 import io.spine.examples.pingh.github.Username
 
 /**
- * Displays a application settings.
+ * Displays an application settings.
  *
  * All changes are saved automatically and applied immediately.
  *
@@ -286,13 +288,14 @@ private fun DndOption(
     state: SettingsState,
     switchScale: Float = 0.6f
 ) {
+    val enabledDndMode by state.enabledDndMode.collectAsState()
     Option(
         title = "Do not disturb",
         description = "Turn off notifications for new mentions or snooze expirations.",
         titleWight = 174.dp
     ) {
         Switch(
-            checked = state.enabledDndMode.value,
+            checked = enabledDndMode,
             onCheckedChange = {
                 state.enabledDndMode.value = it
             },
@@ -362,6 +365,7 @@ private fun Option(
 @OptIn(ExperimentalMaterial3Api::class) // Required for `SegmentedButtonDefaults.itemShape()`.
 private fun SnoozeTimeSegmentedButtonRow(state: SettingsState) {
     val snoozeTimeOptions = SnoozeTime.entries
+    val currentSnoozeTime by state.snoozeTime.collectAsState()
     Row(
         modifier = Modifier.selectableGroup(),
         horizontalArrangement = Arrangement.spacedBy((-1).dp),
@@ -369,7 +373,7 @@ private fun SnoozeTimeSegmentedButtonRow(state: SettingsState) {
     ) {
         snoozeTimeOptions.forEachIndexed { index, snoozeTime ->
             SegmentedButton(
-                selected = snoozeTime == state.snoozeTime.value,
+                selected = currentSnoozeTime == snoozeTime,
                 onClick = {
                     state.snoozeTime.value = snoozeTime
                 },

@@ -60,6 +60,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -101,7 +102,8 @@ internal fun LoginPage(
     flow: LoginFlow,
     toMentionsPage: () -> Unit
 ) {
-    when (flow.state.value) {
+    val state by flow.state.collectAsState()
+    when (state) {
         LoginState.USERNAME_ENTERING -> UsernameEnteringPage(
             flow = flow
         )
@@ -395,6 +397,10 @@ private fun VerificationPage(
     flow: LoginFlow,
     toMentionsPage: () -> Unit
 ) {
+    val userCode by flow.userCode.collectAsState()
+    val verificationUrl by flow.verificationUrl.collectAsState()
+    val expiresIn by flow.expiresIn.collectAsState()
+    val isUserCodeExpired by flow.isUserCodeExpired.collectAsState()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -405,17 +411,17 @@ private fun VerificationPage(
         VerificationTitle()
         Spacer(Modifier.height(15.dp))
         UserCodeField(
-            userCode = flow.userCode.value!!,
-            isExpired = flow.isUserCodeExpired.value
+            userCode = userCode!!,
+            isExpired = isUserCodeExpired
         )
         Spacer(Modifier.height(10.dp))
-        if (flow.isUserCodeExpired.value) {
+        if (isUserCodeExpired) {
             Spacer(Modifier.height(5.dp))
             CodeExpiredErrorMessage(flow)
         } else {
             VerificationText(
-                verificationUrl = flow.verificationUrl.value!!,
-                expiresIn = flow.expiresIn.value!!
+                verificationUrl = verificationUrl!!,
+                expiresIn = expiresIn!!
             )
             Spacer(Modifier.height(20.dp))
             SubmitButton(
@@ -588,7 +594,7 @@ private fun SubmitButton(
     flow: LoginFlow,
     toMentionsPage: () -> Unit
 ) {
-    val enabled = flow.isAccessTokenRequestAvailable
+    val enabled by flow.isAccessTokenRequestAvailable.collectAsState()
     val onClick = {
         flow.verify(
             onSuccess = {
@@ -605,7 +611,7 @@ private fun SubmitButton(
         Button(
             onClick = onClick,
             modifier = Modifier.fillMaxSize(),
-            enabled = enabled.value,
+            enabled = enabled,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
@@ -616,7 +622,7 @@ private fun SubmitButton(
                 style = MaterialTheme.typography.displayMedium
             )
         }
-        if (!enabled.value) {
+        if (!enabled) {
             NoResponseErrorMessage(
                 flow = flow
             )
@@ -633,10 +639,11 @@ private fun SubmitButton(
 private fun NoResponseErrorMessage(
     flow: LoginFlow
 ) {
+    val interval by flow.interval.collectAsState()
     ClickableErrorMessage(
         text = """
                 No response from GitHub yet.
-                Try again in ${flow.interval.value!!.seconds} seconds, or start over.
+                Try again in ${interval!!.seconds} seconds, or start over.
             """.trimIndent(),
         clickablePartOfText = "start over",
         onClick = {

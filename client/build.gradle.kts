@@ -25,7 +25,6 @@
  */
 
 import io.spine.internal.BuildSettings
-import io.spine.internal.dependency.Compose
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.KotlinX
@@ -67,8 +66,6 @@ dependencies {
     implementation(Grpc.netty)
     implementation(Grpc.inprocess)
     implementation(KotlinX.Coroutines.core)
-    // For the state of processes in flows.
-    implementation(Compose.Runtime.lib)
 
     testImplementation(project(":testutil-mentions"))
     testImplementation(project(":testutil-sessions"))

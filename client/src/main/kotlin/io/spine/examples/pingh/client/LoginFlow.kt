@@ -26,8 +26,6 @@
 
 package io.spine.examples.pingh.client
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import com.google.protobuf.Duration
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.Username
@@ -43,6 +41,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -55,12 +54,12 @@ import kotlinx.coroutines.launch
  */
 public class LoginFlow internal constructor(
     private val client: DesktopClient,
-    private val session: MutableState<UserSession?>
+    private val session: MutableStateFlow<UserSession?>
 ) {
     /**
      * The current state of the login process.
      */
-    public val state: MutableState<LoginState> = mutableStateOf(LoginState.USERNAME_ENTERING)
+    public val state: MutableStateFlow<LoginState> = MutableStateFlow(LoginState.USERNAME_ENTERING)
 
     /**
      * The name of the user who is logging in.
@@ -68,20 +67,21 @@ public class LoginFlow internal constructor(
     public lateinit var username: Username
         private set
 
-    public val userCode: MutableState<UserCode?> = mutableStateOf<UserCode?>(null)
-    public val verificationUrl: MutableState<Url?> = mutableStateOf<Url?>(null)
-    public val expiresIn: MutableState<Duration?> = mutableStateOf<Duration?>(null)
-    public var interval: MutableState<Duration?> = mutableStateOf<Duration?>(null)
+    public val userCode: MutableStateFlow<UserCode?> = MutableStateFlow(null)
+    public val verificationUrl: MutableStateFlow<Url?> = MutableStateFlow(null)
+    public val expiresIn: MutableStateFlow<Duration?> = MutableStateFlow(null)
+    public val interval: MutableStateFlow<Duration?> = MutableStateFlow(null)
 
     /**
      * Whether the user code is expired.
      */
-    public val isUserCodeExpired: MutableState<Boolean> = mutableStateOf(false)
+    public val isUserCodeExpired: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     /**
      * Whether an access code request is available.
      */
-    public val isAccessTokenRequestAvailable: MutableState<Boolean> = mutableStateOf(true)
+    public val isAccessTokenRequestAvailable: MutableStateFlow<Boolean> =
+        MutableStateFlow(true)
 
     /**
      * A job that marks a [userCode] as expired after the [time][expiresIn] has expired.

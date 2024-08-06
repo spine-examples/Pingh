@@ -26,8 +26,6 @@
 
 package io.spine.examples.pingh.client
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import com.google.protobuf.Duration
 import com.google.protobuf.util.Timestamps
 import io.spine.base.Time.currentTime
@@ -45,6 +43,7 @@ import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
 import java.lang.Thread.sleep
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * The flow for managing the lifecycle of mentions.
@@ -57,7 +56,7 @@ import java.lang.Thread.sleep
  */
 public class MentionsFlow internal constructor(
     private val client: DesktopClient,
-    private val session: MutableState<UserSession?>,
+    private val session: MutableStateFlow<UserSession?>,
     private val settings: SettingsState
 ) {
     private companion object {
@@ -72,7 +71,7 @@ public class MentionsFlow internal constructor(
     /**
      * User mentions.
      */
-    public val mentions: MutableState<MentionsList> = mutableStateOf(findUserMentions())
+    public val mentions: MutableStateFlow<MentionsList> = MutableStateFlow(findUserMentions())
 
     /**
      * Updates the user's mentions.
