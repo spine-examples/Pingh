@@ -26,7 +26,7 @@
 
 package io.spine.examples.pingh.client.e2e
 
-import io.spine.examples.pingh.client.LoginFlow
+import io.spine.examples.pingh.client.VerificationFlow
 import io.spine.examples.pingh.client.PinghApplication
 import io.spine.examples.pingh.clock.IntervalClock
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
@@ -80,7 +80,7 @@ internal abstract class IntegrationTest {
      *
      * After calling this method, the login verification will be successful,
      * which will allow to use login to the application after calling
-     * the [LoginFlow.verify] method.
+     * the [VerificationFlow.verify] method.
      */
     protected fun enterUserCode() {
         authenticationService.enterUserCode()

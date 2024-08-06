@@ -45,6 +45,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 public class SettingsFlow internal constructor(
     private val client: DesktopClient,
     private val session: MutableStateFlow<UserSession?>,
+    @Suppress("MemberVisibilityCanBePrivate") // The settings value is part
+    // of the public API for the desktop standalone project.
     public val settings: SettingsState
 ) {
 

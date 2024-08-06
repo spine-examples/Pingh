@@ -111,7 +111,7 @@ internal class DesktopClient(
     /**
      * Observes the provided event with the specified ID.
      */
-    internal fun <E : EventMessage> observeEvent(
+    private fun <E : EventMessage> observeEvent(
         id: Message,
         type: KClass<E>,
         onEmit: (event: E) -> Unit

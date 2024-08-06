@@ -133,7 +133,7 @@ internal class PersonalInteractionTest : IntegrationTest() {
      * 5. Logs in again.
      * 6. Reads mentions that were updated in the first session.
      *
-     * In this test, the arrival of an event in response to a sent command is important,
+     * In this test, the arrival of an event in response to a dispatched command is important,
      * so all assertions take place in the client callbacks. The [CompletableFuture] is used
      * to ensure that the test does not end before the asynchronous callback is called.
      */
