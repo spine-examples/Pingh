@@ -66,9 +66,9 @@ internal class PersonalInteractionTest : IntegrationTest() {
     @BeforeEach
     internal fun logInAndUpdateMentions() {
         val loginFlow = app().startLoginFlow()
-        loginFlow.requestUserCode(username)
+        loginFlow.startUsernameEnteringFlow().requestUserCode(username)
         enterUserCode()
-        loginFlow.verify()
+        loginFlow.startVerificationFlow().verify()
         val mentionsFlow = app().startMentionsFlow()
         mentionsFlow.updateMentions()
         actual = mentionsFlow.findUserMentions()
@@ -153,9 +153,9 @@ internal class PersonalInteractionTest : IntegrationTest() {
 
     private fun logInAgainAndCheckMentions(future: CompletableFuture<Void>) {
         val loginFlow = app().startLoginFlow()
-        loginFlow.requestUserCode(username) {
+        loginFlow.startUsernameEnteringFlow().requestUserCode(username) {
             enterUserCode()
-            loginFlow.verify(
+            loginFlow.startVerificationFlow().verify(
                 onSuccess = {
                     val mentionsFlow = app().startMentionsFlow()
                     actual = mentionsFlow.findUserMentions()

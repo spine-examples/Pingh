@@ -117,8 +117,8 @@ public class UsernameEnteringFlow internal constructor(
     ) {
         client.requestUserCode(username) { event ->
             session.value = UserSession(event.id)
-            onSuccess(event)
             toVerificationState(event)
+            onSuccess(event)
         }
     }
 }
@@ -130,7 +130,8 @@ public class UsernameEnteringFlow internal constructor(
  * @param session the information about the current user session.
  * @param event event received in username entering state.
  */
-@Suppress("MemberVisibilityCanBePrivate")
+@Suppress("MemberVisibilityCanBePrivate") // Some public properties are part
+// of the public API for the desktop standalone project.
 public class VerificationFlow internal constructor(
     private val client: DesktopClient,
     private val session: MutableStateFlow<UserSession?>,
