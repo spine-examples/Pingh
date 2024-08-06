@@ -69,13 +69,13 @@ public class LoginFlow internal constructor(
     private var userCodeReceived: UserCodeReceived? = null
 
     /**
-     * Initiates the username entering state of the login flow.
+     * Initiates the username entering state of the login process.
      *
      * @throws IllegalStateException if the state of the login flow is not `USERNAME_ENTERING`.
      */
     public fun startUsernameEnteringFlow(): UsernameEnteringFlow {
         check(state.value == LoginState.USERNAME_ENTERING) {
-            "State of the login must be `USERNAME_ENTERING`"
+            "State of the login must be `USERNAME_ENTERING`."
         }
         return UsernameEnteringFlow(client, session) { event ->
             state.value = LoginState.VERIFICATION
@@ -84,13 +84,13 @@ public class LoginFlow internal constructor(
     }
 
     /**
-     * Initiates the verification state of the login flow.
+     * Initiates the verification state of the login process.
      *
      * @throws IllegalStateException if the state of the login flow is not `VERIFICATION`.
      */
     public fun startVerificationFlow(): VerificationFlow {
         check(state.value == LoginState.VERIFICATION) {
-            "State of the login must be `VERIFICATION`"
+            "State of the login must be `VERIFICATION`."
         }
         return VerificationFlow(client, session, userCodeReceived!!)
     }
