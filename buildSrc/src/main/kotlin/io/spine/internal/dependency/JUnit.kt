@@ -27,7 +27,6 @@
 package io.spine.internal.dependency
 
 // https://junit.org/junit5
-@Suppress("ConstPropertyName")
 public object JUnit {
     private const val version = "5.8.0"
 

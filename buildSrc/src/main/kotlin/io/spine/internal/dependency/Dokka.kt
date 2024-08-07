@@ -27,7 +27,6 @@
 package io.spine.internal.dependency
 
 // https://github.com/Kotlin/dokka
-@Suppress("unused", "ConstPropertyName")
 public object Dokka {
 
     /**

@@ -27,7 +27,6 @@
 package io.spine.internal.dependency
 
 // https://github.com/SpineEventEngine
-@Suppress("ConstPropertyName")
 public object Spine {
 
     // Keep in sync with in sync with Spine Bootstraps plugin

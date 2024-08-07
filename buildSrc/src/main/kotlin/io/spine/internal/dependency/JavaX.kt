@@ -26,7 +26,6 @@
 
 package io.spine.internal.dependency
 
-@Suppress("ConstPropertyName")
 public object JavaX {
 
     // This artifact which used to be a part of J2EE moved under Eclipse EE4J project.

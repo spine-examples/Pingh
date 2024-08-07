@@ -29,6 +29,7 @@ package io.spine.internal.gradle.publishing
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
+import org.gradle.api.tasks.Internal
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.findByType
@@ -38,7 +39,7 @@ import org.gradle.kotlin.dsl.findByType
  *
  * This extension sets up publishing of artifacts to Maven Local repository.
  *
- * The extension can be configured only for multi-module projects. The extension should be opened
+ * The extension can be configured only for multimodule projects. The extension should be opened
  * in the root project's build file. The published modules are specified explicitly by their names
  * or paths:
  *
@@ -88,6 +89,7 @@ public open class PublishToMavenLocal(
      * This property must be specified, and the set must be non-empty.
      * Otherwise, [configuring][configured] such an extension throws a [GradleException].
      */
+    @Internal
     public lateinit var modules: Set<String>
 
     /**
