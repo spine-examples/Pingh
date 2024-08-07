@@ -33,7 +33,7 @@ package io.spine.examples.pingh.sessions
  * @see <a href="https://shorturl.at/nsfby">Problems that can occur</a>
  */
 public class CannotObtainAccessToken(
-    public val errorName: String
+    private val errorName: String
 ) : Exception() {
 
     public companion object {

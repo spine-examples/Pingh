@@ -37,7 +37,7 @@ internal class UserSessionRepository(
 ) : ProcessManagerRepository<SessionId, UserSessionProcess, UserSession>() {
 
     @OverridingMethodsMustInvokeSuper
-    protected override fun configure(processManager: UserSessionProcess) {
+    override fun configure(processManager: UserSessionProcess) {
         super.configure(processManager)
         processManager.inject(authenticationService)
     }

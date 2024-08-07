@@ -52,6 +52,7 @@ internal fun KClass<SessionId>.generate(): SessionId =
  *
  * Additionally, the device code and the refresh token can be specified.
  */
+@Suppress("UnusedReceiverParameter" /* Class extension does not use class as a parameter. */)
 internal fun KClass<UserSession>.buildBy(
     id: SessionId,
     deviceCode: DeviceCode? = null,
