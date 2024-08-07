@@ -65,7 +65,7 @@ public class MentionsFlow internal constructor(
          *
          * Time is specified in milliseconds.
          */
-        @Suppress("ConstPropertyName") // In the project, constants are called in camel case.
+        @Suppress("ConstPropertyName" /* Constants are called in camel case. */)
         private const val delayBeforeReadingMentions = 100L
     }
 
@@ -103,10 +103,10 @@ public class MentionsFlow internal constructor(
             UserMentionsId::class.buildBy(session.value!!.username),
             UserMentions::class
         )
-        if (userMentions.isEmpty()) {
+        if (userMentions == null) {
             return listOf()
         }
-        return userMentions[0]
+        return userMentions
             .mentionList
             .sortedByDescending { mention -> mention.whenMentioned.seconds }
     }

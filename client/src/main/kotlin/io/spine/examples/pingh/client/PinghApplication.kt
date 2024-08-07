@@ -79,7 +79,7 @@ public class PinghApplication(
     public fun startSettingsFlow(): SettingsFlow = SettingsFlow(client, session, settings)
 
     /**
-     * Closes the client by shutting down the gRPC connection.
+     * Closes the client.
      */
     public fun close() {
         client.close()

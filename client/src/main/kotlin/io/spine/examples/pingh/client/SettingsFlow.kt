@@ -45,8 +45,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 public class SettingsFlow internal constructor(
     private val client: DesktopClient,
     private val session: MutableStateFlow<UserSession?>,
-    @Suppress("MemberVisibilityCanBePrivate") // The settings value is part
-    // of the public API for the desktop standalone project.
+    @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
     public val settings: SettingsState
 ) {
 
@@ -94,7 +93,7 @@ public class SettingsState {
  * @param label the text corresponding to this interval.
  * @param value the duration corresponding to this interval.
  */
-@Suppress("MagicNumber") // The durations are specified using numbers.
+@Suppress("MagicNumber" /* The durations are specified using numbers. */)
 public enum class SnoozeTime(
     public val label: String,
     public val value: Duration
