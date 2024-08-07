@@ -33,6 +33,7 @@ import io.spine.examples.pingh.mentions.UserMentionsId
 import io.spine.examples.pingh.mentions.buildBy
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 /**
  * Starts observing the update of the [UserMentions] projection.

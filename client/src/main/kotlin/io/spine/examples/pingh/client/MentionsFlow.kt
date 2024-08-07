@@ -65,7 +65,6 @@ public class MentionsFlow internal constructor(
          *
          * Time is specified in milliseconds.
          */
-        @Suppress("ConstPropertyName" /* Constants are called in camel case. */)
         private const val delayBeforeReadingMentions = 100L
     }
 

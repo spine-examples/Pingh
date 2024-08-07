@@ -46,8 +46,23 @@ import org.junit.jupiter.api.BeforeEach
  */
 internal abstract class IntegrationTest {
 
-    private val port = 4242
-    private val address = "localhost"
+    private companion object {
+
+        private const val port = 4242
+        private const val address = "localhost"
+
+        /**
+         * Creates a new test Pingh `Server`.
+         */
+        private fun createServer(
+            authenticationService: GitHubAuthentication
+        ): Server =
+            Server.atPort(port)
+                .add(newSessionsContext(authenticationService))
+                .add(newMentionsContext(PredefinedGitHubResponses()))
+                .build()
+    }
+
     private val authenticationService = PredefinedGitHubAuthenticationResponses()
     private lateinit var clock: IntervalClock
     private lateinit var server: Server
@@ -57,7 +72,7 @@ internal abstract class IntegrationTest {
     internal fun runServer() {
         clock = IntervalClock(100.milliseconds)
         clock.start()
-        server = createServer(port, authenticationService)
+        server = createServer(authenticationService)
         server.start()
         application = PinghApplication(address, port)
     }
@@ -84,19 +99,5 @@ internal abstract class IntegrationTest {
      */
     protected fun enterUserCode() {
         authenticationService.enterUserCode()
-    }
-
-    private companion object {
-        /**
-         * Creates a new test Pingh `Server`.
-         */
-        private fun createServer(
-            port: Int,
-            authenticationService: GitHubAuthentication
-        ): Server =
-            Server.atPort(port)
-                .add(newSessionsContext(authenticationService))
-                .add(newMentionsContext(PredefinedGitHubResponses()))
-                .build()
     }
 }
