@@ -54,7 +54,7 @@ private fun DependencyHandler.dokkaPlugin(dependencyNotation: Any): Dependency? 
 /**
  * Configures [DokkaTask]s to accept Kotlin files.
  */
-@Suppress("UnstableApiUsage") // Used to specify the JVM version.
+@Suppress("UnstableApiUsage" /* Used to specify the JVM version. */)
 public fun DokkaTask.configureForKotlin() {
     dokkaSourceSets.configureEach {
         // Configures links to the external Java documentation.

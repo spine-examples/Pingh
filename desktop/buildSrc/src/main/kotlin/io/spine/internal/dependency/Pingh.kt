@@ -27,7 +27,6 @@
 package io.spine.internal.dependency
 
 // https://github.com/spine-examples/Pingh
-@Suppress("ConstPropertyName")
 public object Pingh {
     private const val version = "1.0.0-SNAPSHOT"
     public const val client: String = "io.spine.examples.pingh:client:$version"

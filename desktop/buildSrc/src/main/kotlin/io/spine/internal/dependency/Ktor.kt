@@ -27,7 +27,6 @@
 package io.spine.internal.dependency
 
 // https://github.com/ktorio/ktor
-@Suppress("ConstPropertyName")
 public object Ktor {
     private const val version = "2.3.11"
     private const val group = "io.ktor"

@@ -32,7 +32,7 @@ plugins {
 }
 
 kotlin {
-    @Suppress("UnstableApiUsage") // Used to specify the JVM version.
+    @Suppress("UnstableApiUsage" /* Used to specify the JVM version. */)
     jvmToolchain {
         languageVersion.set(BuildSettings.javaVersion)
     }
