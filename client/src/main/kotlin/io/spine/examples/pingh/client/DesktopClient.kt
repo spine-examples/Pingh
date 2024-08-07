@@ -45,8 +45,6 @@ import kotlin.reflect.KClass
  *
  * @param userId user on whose behalf client requests are made.
  */
-@Suppress("TooManyFunctions") // The client must contain multiple methods
-// to interact with the server, which does not enable Detekt.
 internal class DesktopClient(
     address: String,
     port: Int,
