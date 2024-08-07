@@ -24,36 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.BuildSettings
-import io.spine.internal.dependency.Kotlin
+package io.spine.internal.dependency
 
-plugins {
-    kotlin("jvm")
-}
+// https://github.com/JetBrains/kotlin
+// https://github.com/Kotlin
+public object Kotlin {
+    private const val group = "org.jetbrains.kotlin"
+    private const val version = "1.9.20"
 
-kotlin {
-    @Suppress("UnstableApiUsage") // Used to specify the JVM version.
-    jvmToolchain {
-        languageVersion.set(BuildSettings.javaVersion)
-    }
-    explicitApi()
-}
-
-/**
- * Force Kotlin library versions to avoid using those bundled with the `buildSrc` module.
- */
-configurations.all {
-    resolutionStrategy {
-        force(
-            Kotlin.stdLib,
-            Kotlin.stdLibCommon,
-            Kotlin.reflect
-        )
-    }
-}
-
-dependencies {
-    implementation(Kotlin.stdLib)
-    implementation(Kotlin.stdLibCommon)
-    implementation(Kotlin.reflect)
+    public const val stdLib: String = "$group:kotlin-stdlib:$version"
+    public const val stdLibCommon: String = "$group:kotlin-stdlib-common:$version"
+    public const val reflect: String = "$group:kotlin-reflect:$version"
 }
