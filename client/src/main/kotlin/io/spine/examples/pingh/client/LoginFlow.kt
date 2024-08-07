@@ -47,7 +47,8 @@ import kotlinx.coroutines.launch
 /**
  * The control flow for the user login process.
  *
- * Enables sending commands to the Pingh server and stores the states of the login process.
+ * The flow consists of two consecutive stages. To successfully complete the login process,
+ * first enter a username and obtain a user code, then verify the login.
  *
  * @param client enables interaction with the Pingh server.
  * @param session the information about the current user session.
@@ -57,53 +58,54 @@ public class LoginFlow internal constructor(
     private val session: MutableStateFlow<UserSession?>
 ) {
     /**
-     * The current state of the login process.
+     * The current stage of the login process.
      */
-    public val state: MutableStateFlow<LoginState> = MutableStateFlow(LoginState.USERNAME_ENTERING)
+    @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
+    public val stage: MutableStateFlow<LoginStage> = MutableStateFlow(LoginStage.USERNAME_ENTERING)
 
     /**
      * Stores the event received after the user enters their name.
      *
-     * This is required to initialize the verification state flow.
+     * This is required to initialize the verification stage flow.
      */
     private var userCodeReceived: UserCodeReceived? = null
 
     /**
-     * Initiates the username entering state of the login process.
+     * Initiates the username entering stage of the login process.
      *
-     * @throws IllegalStateException if the state of the login flow is not `USERNAME_ENTERING`.
+     * @throws IllegalStateException if the stage of the login flow is not `USERNAME_ENTERING`.
      */
-    public fun startUsernameEnteringFlow(): UsernameEnteringFlow {
-        check(state.value == LoginState.USERNAME_ENTERING) {
-            "State of the login must be `USERNAME_ENTERING`."
+    public fun startUsernameEntering(): EnterUsername {
+        check(stage.value == LoginStage.USERNAME_ENTERING) {
+            "Stage of the login must be `USERNAME_ENTERING`."
         }
-        return UsernameEnteringFlow(client, session) { event ->
-            state.value = LoginState.VERIFICATION
+        return EnterUsername(client, session) { event ->
+            stage.value = LoginStage.VERIFICATION
             userCodeReceived = event
         }
     }
 
     /**
-     * Initiates the verification state of the login process.
+     * Initiates the verification stage of the login process.
      *
-     * @throws IllegalStateException if the state of the login flow is not `VERIFICATION`.
+     * @throws IllegalStateException if the stage of the login flow is not `VERIFICATION`.
      */
-    public fun startVerificationFlow(): VerificationFlow {
-        check(state.value == LoginState.VERIFICATION) {
-            "State of the login must be `VERIFICATION`."
+    public fun startVerification(): VerifyLogin {
+        check(stage.value == LoginStage.VERIFICATION) {
+            "Stage of the login must be `VERIFICATION`."
         }
-        return VerificationFlow(client, session, userCodeReceived!!)
+        return VerifyLogin(client, session, userCodeReceived!!)
     }
 }
 
 /**
- * The control flow of the username entering state of the login process.
+ * The control flow of the username entering stage of the login process.
  *
  * @param client enables interaction with the Pingh server.
  * @param session the information about the current user session.
  * @param toVerificationState called when user codes are successfully received.
  */
-public class UsernameEnteringFlow internal constructor(
+public class EnterUsername internal constructor(
     private val client: DesktopClient,
     private val session: MutableStateFlow<UserSession?>,
     private val toVerificationState: (UserCodeReceived) -> Unit
@@ -124,15 +126,14 @@ public class UsernameEnteringFlow internal constructor(
 }
 
 /**
- * The control flow of the verification state of the login process.
+ * The control flow of the verification stage of the login process.
  *
  * @param client enables interaction with the Pingh server.
  * @param session the information about the current user session.
- * @param event event received in username entering state.
+ * @param event event received in username entering stage.
  */
-@Suppress("MemberVisibilityCanBePrivate") // Some public properties are part
-// of the public API for the desktop standalone project.
-public class VerificationFlow internal constructor(
+@Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
+public class VerifyLogin internal constructor(
     private val client: DesktopClient,
     private val session: MutableStateFlow<UserSession?>,
     event: UserCodeReceived
@@ -256,17 +257,17 @@ private fun DesktopClient.requestUserCode(
 }
 
 /**
- * State of login process.
+ * Stages of login process.
  */
-public enum class LoginState {
+public enum class LoginStage {
 
     /**
-     * Initial state where the user enters their `Username` and receives a `UserCode`.
+     * Initial stage where the user enters their `Username` and receives a `UserCode`.
      */
     USERNAME_ENTERING,
 
     /**
-     * The final step where the user enters their `UserCode` into GitHub and
+     * The final stage where the user enters their `UserCode` into GitHub and
      * completes the login process in the Pingh app.
      */
     VERIFICATION

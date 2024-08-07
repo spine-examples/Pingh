@@ -79,9 +79,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.protobuf.Duration
 import io.spine.examples.pingh.client.LoginFlow
-import io.spine.examples.pingh.client.LoginState
-import io.spine.examples.pingh.client.UsernameEnteringFlow
-import io.spine.examples.pingh.client.VerificationFlow
+import io.spine.examples.pingh.client.LoginStage
+import io.spine.examples.pingh.client.EnterUsername
+import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
@@ -104,14 +104,14 @@ internal fun LoginPage(
     flow: LoginFlow,
     toMentionsPage: () -> Unit
 ) {
-    val state by flow.state.collectAsState()
-    when (state) {
-        LoginState.USERNAME_ENTERING -> UsernameEnteringPage(
-            flow = flow.startUsernameEnteringFlow()
+    val stage by flow.stage.collectAsState()
+    when (stage) {
+        LoginStage.USERNAME_ENTERING -> UsernameEnteringPage(
+            flow = flow.startUsernameEntering()
         )
 
-        LoginState.VERIFICATION -> VerificationPage(
-            flow = flow.startVerificationFlow(),
+        LoginStage.VERIFICATION -> VerificationPage(
+            flow = flow.startVerification(),
             toMentionsPage = toMentionsPage
         )
     }
@@ -124,11 +124,11 @@ internal fun LoginPage(
  * be redirected to the login verification page.
  * [LoginButton] is not enable while the entered `Username` is invalid.
  *
- * @param flow the control flow for the username entering state in the user login process.
+ * @param flow the control flow for the username entering stage in the user login process.
  */
 @Composable
 private fun UsernameEnteringPage(
-    flow: UsernameEnteringFlow
+    flow: EnterUsername
 ) {
     var username by remember { mutableStateOf("") }
     var wasChanged by remember { mutableStateOf(false) }
@@ -391,12 +391,12 @@ private fun LoginButton(
  * In this case, the user code cannot be copied, and the instructions and button
  * will not be displayed.
  *
- * @param flow the control flow for the verification state in the user login process.
+ * @param flow the control flow for the verification stage in the user login process.
  * @param toMentionsPage the navigation to the 'Mentions' page.
  */
 @Composable
 private fun VerificationPage(
-    flow: VerificationFlow,
+    flow: VerifyLogin,
     toMentionsPage: () -> Unit
 ) {
     val userCode by flow.userCode.collectAsState()
@@ -510,10 +510,10 @@ private fun CopyToClipboardIcon(
 /**
  * Displays an error message indicating that the `UserCode` has expired.
  *
- * @param flow the control flow for the verification state of the user login process.
+ * @param flow the control flow for the verification stage of the user login process.
  */
 @Composable
-private fun CodeExpiredErrorMessage(flow: VerificationFlow) {
+private fun CodeExpiredErrorMessage(flow: VerifyLogin) {
     ClickableErrorMessage(
         text = "The code has expired, please start over.",
         clickablePartOfText = "start over",
@@ -586,12 +586,12 @@ private fun VerificationUrlButton(url: Url) {
 /**
  * Displays a button to confirm verification.
  *
- * @param flow the control flow for the verification state of the user login process.
+ * @param flow the control flow for the verification stage of the user login process.
  * @param toMentionsPage the navigation to the 'Mentions' page.
  */
 @Composable
 private fun SubmitButton(
-    flow: VerificationFlow,
+    flow: VerifyLogin,
     toMentionsPage: () -> Unit
 ) {
     val enabled by flow.isAccessTokenRequestAvailable.collectAsState()
@@ -633,11 +633,11 @@ private fun SubmitButton(
 /**
  * Displays an error message indicating that GitHub could not verify the login.
  *
- * @param flow the control flow for the verification state of the user login process.
+ * @param flow the control flow for the verification stage of the user login process.
  */
 @Composable
 private fun NoResponseErrorMessage(
-    flow: VerificationFlow
+    flow: VerifyLogin
 ) {
     val interval by flow.interval.collectAsState()
     ClickableErrorMessage(
