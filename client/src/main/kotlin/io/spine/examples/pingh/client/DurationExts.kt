@@ -27,14 +27,10 @@
 package io.spine.examples.pingh.client
 
 import com.google.protobuf.Duration
+import com.google.protobuf.util.Durations
 
 /**
- * Number of milliseconds in one second.
- */
-private const val millisecondsPerSecond = 1000
-
-/**
- * The value of this duration expressed as a `Long` number of milliseconds.
+ * The value of this `Duration` in milliseconds.
  */
 internal val Duration.inWholeMilliseconds: Long
-    get() = seconds * millisecondsPerSecond
+    get() = Durations.toMillis(this)
