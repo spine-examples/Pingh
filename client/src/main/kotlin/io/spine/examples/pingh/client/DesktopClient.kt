@@ -74,16 +74,17 @@ internal class DesktopClient(
     }
 
     /**
-     * Reads records from the projection with the specified ID.
+     * Reads entity state by the specified ID.
      */
     internal fun <I : Message, E : EntityState> readById(
         id: I,
         type: KClass<E>
-    ): List<E> =
+    ): E? =
         clientRequest()
             .select(type.java)
             .byId(id)
             .run()
+            .getOrNull(0)
 
     /**
      * Observes the outcome of the command.
