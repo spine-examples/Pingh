@@ -72,7 +72,9 @@ internal class DesktopClient(
     }
 
     /**
-     * Reads entity state by the specified ID.
+     * Reads the entity state by the specified ID.
+     *
+     * @return the entity state if it exists, or `null` otherwise.
      */
     internal fun <I : Message, E : EntityState> readById(
         id: I,

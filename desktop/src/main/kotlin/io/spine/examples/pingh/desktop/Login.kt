@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-@file:Suppress("TooManyFunctions") // Using Compose requires many functions to render the UI.
+@file:Suppress("TooManyFunctions" /* Using Compose requires many functions to render the UI. */)
 
 package io.spine.examples.pingh.desktop
 
@@ -90,7 +90,7 @@ import io.spine.net.Url
 import io.spine.protobuf.Durations2.toMinutes
 
 /**
- * Displays the page with the current login step.
+ * Displays the page with the current login stage.
  *
  * Initially, the user must enter their `Username`, after which they will receive
  * a code that must be entered into GitHub. After entering the code, the user needs

@@ -103,12 +103,12 @@ public class LoginFlow internal constructor(
  *
  * @param client enables interaction with the Pingh server.
  * @param session the information about the current user session.
- * @param toVerificationState called when user codes are successfully received.
+ * @param toVerificationStage called when user codes are successfully received.
  */
 public class EnterUsername internal constructor(
     private val client: DesktopClient,
     private val session: MutableStateFlow<UserSession?>,
-    private val toVerificationState: (UserCodeReceived) -> Unit
+    private val toVerificationStage: (UserCodeReceived) -> Unit
 ) {
     /**
      * Starts the login process and requests `UserCode`.
@@ -119,7 +119,7 @@ public class EnterUsername internal constructor(
     ) {
         client.requestUserCode(username) { event ->
             session.value = UserSession(event.id)
-            toVerificationState(event)
+            toVerificationStage(event)
             onSuccess(event)
         }
     }
@@ -171,7 +171,7 @@ public class VerifyLogin internal constructor(
         MutableStateFlow(true)
 
     /**
-     * A job that marks a [userCode] as expired after the [time][expiresIn] has expired.
+     * A job that marks a [userCode] as expired after the [time][expiresIn] has passed.
      */
     private lateinit var expirationObservationJob: Job
 
@@ -224,7 +224,7 @@ public class VerifyLogin internal constructor(
     }
 
     /**
-     * Requests new `UserCode` and updates state of verification flow.
+     * Requests new `UserCode` and updates state of the verification flow.
      */
     public fun requestNewUserCode(
         onSuccess: (event: UserCodeReceived) -> Unit = {}
