@@ -43,7 +43,7 @@ import kotlin.reflect.KClass
 /**
  * Interacts with [Pingh server][io.spine.examples.pingh.server] via gRPC.
  *
- * @param userId indicates on whose behalf the request is made.
+ * @param userId user on whose behalf client requests are made.
  */
 @Suppress("TooManyFunctions") // The client must contain multiple methods
 // to interact with the server, which does not enable Detekt.
@@ -162,7 +162,7 @@ internal class DesktopClient(
     }
 
     /**
-     * Stops observation by provided subscription.
+     * Stops observation of the provided subscription.
      */
     private fun stopObservation(subscription: Subscription) {
         client.subscriptions()
@@ -170,12 +170,12 @@ internal class DesktopClient(
     }
 
     /**
-     * Provides `ClientRequest` on behalf of current client.
+     * Creates a new instance of the `ClientRequest` on behalf of current client.
      */
     private fun clientRequest(): ClientRequest = client.onBehalfOf(userId)
 
     /**
-     * Closes the client by shutting down the gRPC connection.
+     * Closes the client.
      */
     internal fun close() {
         client.close()
