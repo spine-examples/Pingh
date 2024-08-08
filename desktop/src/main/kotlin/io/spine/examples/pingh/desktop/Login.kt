@@ -95,7 +95,7 @@ import io.spine.protobuf.Durations2.toMinutes
  * a code that must be entered into GitHub. After entering the code, the user needs
  * to confirm the login on the application page.
  *
- * @param flow the control flow for the user login process.
+ * @param flow the control flow of the user login process.
  * @param toMentionsPage the navigation to the 'Mentions' page.
  */
 @Composable
@@ -106,11 +106,11 @@ internal fun LoginPage(
     val stage by flow.stage.collectAsState()
     when (stage) {
         EnterUsername::class -> UsernameEnteringPage(
-            flow = flow.startUsernameEntering()
+            flow = flow.askForUsername()
         )
 
         VerifyLogin::class -> VerificationPage(
-            flow = flow.startVerification(),
+            flow = flow.verifyLogin(),
             toMentionsPage = toMentionsPage
         )
     }
@@ -123,7 +123,7 @@ internal fun LoginPage(
  * be redirected to the login verification page.
  * [LoginButton] is not enable while the entered `Username` is invalid.
  *
- * @param flow the control flow for the username entering stage in the user login process.
+ * @param flow the control flow of the login process stage where the user must enter their name.
  */
 @Composable
 private fun UsernameEnteringPage(
@@ -390,7 +390,7 @@ private fun LoginButton(
  * In this case, the user code cannot be copied, and the instructions and button
  * will not be displayed.
  *
- * @param flow the control flow for the verification stage in the user login process.
+ * @param flow the control flow of the login process stage where the user must verify their login.
  * @param toMentionsPage the navigation to the 'Mentions' page.
  */
 @Composable
@@ -509,7 +509,7 @@ private fun CopyToClipboardIcon(
 /**
  * Displays an error message indicating that the `UserCode` has expired.
  *
- * @param flow the control flow for the verification stage of the user login process.
+ * @param flow the control flow of the login process stage where the user must verify their login.
  */
 @Composable
 private fun CodeExpiredErrorMessage(flow: VerifyLogin) {
@@ -585,7 +585,7 @@ private fun VerificationUrlButton(url: Url) {
 /**
  * Displays a button to confirm verification.
  *
- * @param flow the control flow for the verification stage of the user login process.
+ * @param flow the control flow of the login process stage where the user must verify their login.
  * @param toMentionsPage the navigation to the 'Mentions' page.
  */
 @Composable
@@ -593,7 +593,7 @@ private fun SubmitButton(
     flow: VerifyLogin,
     toMentionsPage: () -> Unit
 ) {
-    val enabled by flow.isAccessTokenRequestAvailable.collectAsState()
+    val enabled by flow.canAskForNewTokens.collectAsState()
     val onClick = {
         flow.verify(
             onSuccess = {
@@ -632,7 +632,7 @@ private fun SubmitButton(
 /**
  * Displays an error message indicating that GitHub could not verify the login.
  *
- * @param flow the control flow for the verification stage of the user login process.
+ * @param flow the control flow of the login process stage where the user must verify their login.
  */
 @Composable
 private fun NoResponseErrorMessage(

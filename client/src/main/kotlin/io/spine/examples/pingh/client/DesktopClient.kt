@@ -91,7 +91,7 @@ internal class DesktopClient(
      *
      * When either the first or second event is emitted, all subscriptions are cancelled.
      */
-    internal fun <F : EventMessage, S : EventMessage> observeOneOfTwoEvents(
+    internal fun <F : EventMessage, S : EventMessage> observeEither(
         id: Message,
         firstType: KClass<F>,
         onFirst: (event: F) -> Unit,

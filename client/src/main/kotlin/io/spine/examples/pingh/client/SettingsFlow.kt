@@ -28,7 +28,7 @@ package io.spine.examples.pingh.client
 
 import com.google.protobuf.Duration
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.sessions.buildBy
+import io.spine.examples.pingh.sessions.withSession
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.protobuf.Durations2.hours
@@ -61,7 +61,7 @@ public class SettingsFlow internal constructor(
     public fun logOut(
         onSuccess: (event: UserLoggedOut) -> Unit = {}
     ) {
-        val command = LogUserOut::class.buildBy(session.value!!.id)
+        val command = LogUserOut::class.withSession(session.value!!.id)
         client.observeEventOnce(command.id, UserLoggedOut::class) { event ->
             session.value = null
             onSuccess(event)

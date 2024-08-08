@@ -31,6 +31,7 @@ import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.buildBy
+import io.spine.examples.pingh.sessions.withSession
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
@@ -58,44 +59,42 @@ public class LoginFlow internal constructor(
     private val client: DesktopClient,
     private val session: MutableStateFlow<UserSession?>
 ) {
+
+    /**
+     * Internal data of the login process.
+     */
+    private val context = LoginContext()
+
     /**
      * The current stage of the login process.
      */
     @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
-    public val stage: MutableStateFlow<LoginStageType> = MutableStateFlow(EnterUsername::class)
+    public val stage: MutableStateFlow<LoginStageType>
+        get() = context.stage
 
     /**
-     * Stores the event received after the user enters their name.
+     * Initiates the stage of the login process where the user must enter their username
+     * and receive a user code.
      *
-     * This is required to initialize the verification stage flow.
+     * @throws IllegalStateException if the current login stage is not `EnterUsername`.
      */
-    private var userCodeReceived: UserCodeReceived? = null
-
-    /**
-     * Initiates the username entering stage of the login process.
-     *
-     * @throws IllegalStateException if the stage of the login flow is not `EnterUsername`.
-     */
-    public fun startUsernameEntering(): EnterUsername {
+    public fun askForUsername(): EnterUsername {
         check(stage.value == EnterUsername::class) {
-            "Stage of the login must be `EnterUsername`."
+            "The current login stage must be `EnterUsername`."
         }
-        return EnterUsername(client, session) { event ->
-            stage.value = VerifyLogin::class
-            userCodeReceived = event
-        }
+        return EnterUsername(client, session, context)
     }
 
     /**
-     * Initiates the verification stage of the login process.
+     * Initiates the stage of the login process where the user must verify their login to GitHub.
      *
-     * @throws IllegalStateException if the stage of the login flow is not `VerifyLogin`.
+     * @throws IllegalStateException if the current login stage is not `VerifyLogin`.
      */
-    public fun startVerification(): VerifyLogin {
+    public fun verifyLogin(): VerifyLogin {
         check(stage.value == VerifyLogin::class) {
-            "Stage of the login must be `VerifyLogin`."
+            "The current login stage must be `VerifyLogin`."
         }
-        return VerifyLogin(client, session, userCodeReceived!!)
+        return VerifyLogin(client, session, context)
     }
 }
 
@@ -110,17 +109,37 @@ public interface LoginStage
 public typealias LoginStageType = KClass<out LoginStage>
 
 /**
- * The control flow of the username entering stage of the login process.
+ * Internal data of the login process.
+ */
+internal class LoginContext {
+
+    /**
+     * The current stage of the login process.
+     */
+    internal val stage: MutableStateFlow<LoginStageType> = MutableStateFlow(EnterUsername::class)
+
+    /**
+     * Stores the event received after the user enters their name.
+     *
+     * This is required to initialize the verification stage.
+     */
+    internal var userCodeReceived: UserCodeReceived? = null
+}
+
+/**
+ * Manages the stage of the login process where the user must enter their username
+ * will receive a user code in return.
  *
  * @param client enables interaction with the Pingh server.
  * @param session the information about the current user session.
- * @param toVerificationStage called when user codes are successfully received.
+ * @param context the login process data.
  */
 public class EnterUsername internal constructor(
     private val client: DesktopClient,
     private val session: MutableStateFlow<UserSession?>,
-    private val toVerificationStage: (UserCodeReceived) -> Unit
+    private val context: LoginContext
 ) : LoginStage {
+
     /**
      * Starts the login process and requests `UserCode`.
      */
@@ -130,72 +149,86 @@ public class EnterUsername internal constructor(
     ) {
         client.requestUserCode(username) { event ->
             session.value = UserSession(event.id)
-            toVerificationStage(event)
+            context.userCodeReceived = event
+            context.stage.value = VerifyLogin::class
             onSuccess(event)
         }
     }
 }
 
 /**
- * The control flow of the verification stage of the login process.
+ * Manages the stage of the login process where the user must enter the received user code
+ * into GitHub to verify their login.
  *
  * @param client enables interaction with the Pingh server.
- * @param session the information about the current user session.
- * @param event event received in username entering stage.
+ * @param session provides information about the current user session.
+ * @param context contains data relevant to the login process.
  */
 @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
 public class VerifyLogin internal constructor(
     private val client: DesktopClient,
     private val session: MutableStateFlow<UserSession?>,
-    event: UserCodeReceived
+    context: LoginContext
 ) : LoginStage {
+
     /**
      * The code a user needs to enter on GitHub to confirm login to the app.
      */
-    public val userCode: MutableStateFlow<UserCode> = MutableStateFlow(event.userCode)
+    public val userCode: MutableStateFlow<UserCode> =
+        MutableStateFlow(context.userCodeReceived!!.userCode)
 
     /**
      * The URL of the GitHub resource, where users will be entering the verification code
      * in scope of the device login flow.
      */
-    public val verificationUrl: MutableStateFlow<Url> = MutableStateFlow(event.verificationUrl)
-
-    /**
-     *  The duration after which the [userCode] expires.
-     */
-    public val expiresIn: MutableStateFlow<Duration> = MutableStateFlow(event.expiresIn)
+    public val verificationUrl: MutableStateFlow<Url> =
+        MutableStateFlow(context.userCodeReceived!!.verificationUrl)
 
     /**
      * The minimum duration that must pass before user can make a new access token request.
      */
-    public val interval: MutableStateFlow<Duration> = MutableStateFlow(event.interval)
+    public val interval: MutableStateFlow<Duration> =
+        MutableStateFlow(context.userCodeReceived!!.interval)
+
+    /**
+     * Whether we can ask for a new user token from the external API.
+     *
+     * The contract of the external API assumes some delay that must pass
+     * before a new token can be requested. Therefore, we should wait for this call
+     * to become available.
+     *
+     * @see [interval]
+     */
+    public val canAskForNewTokens: MutableStateFlow<Boolean> = MutableStateFlow(true)
+
+    /**
+     * The duration after which the [userCode] expires.
+     */
+    public val expiresIn: MutableStateFlow<Duration> =
+        MutableStateFlow(context.userCodeReceived!!.expiresIn)
 
     /**
      * Whether the user code is expired.
+     *
+     * @see [expiresIn]
      */
     public val isUserCodeExpired: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     /**
-     * Whether an access code request is available.
+     * Job that marks a [userCode] as expired after the [time][expiresIn] has passed.
      */
-    public val isAccessTokenRequestAvailable: MutableStateFlow<Boolean> =
-        MutableStateFlow(true)
-
-    /**
-     * A job that marks a [userCode] as expired after the [time][expiresIn] has passed.
-     */
-    private lateinit var expirationObservationJob: Job
+    private lateinit var codeExpirationJob: Job
 
     init {
-        startExpirationObservationJob()
+        watchForCodeExpiration()
     }
 
     /**
      * Starts a job that will mark the [userCode] as expired when [time][expiresIn] passes.
      */
-    private fun startExpirationObservationJob() {
+    private fun watchForCodeExpiration() {
         isUserCodeExpired.value = false
-        expirationObservationJob = makeJobWithDelay(expiresIn.value) {
+        codeExpirationJob = invoke(expiresIn.value) {
             isUserCodeExpired.value = true
         }
     }
@@ -207,17 +240,16 @@ public class VerifyLogin internal constructor(
         onSuccess: (event: UserLoggedIn) -> Unit = {},
         onFail: (event: UserIsNotLoggedIntoGitHub) -> Unit = {}
     ) {
-        val command = VerifyUserLoginToGitHub::class.buildBy(session.value!!.id)
-        client.observeOneOfTwoEvents(
-            command.id,
+        val command = VerifyUserLoginToGitHub::class.withSession(session.value!!.id)
+        client.observeEither(command.id,
             UserLoggedIn::class,
             { event ->
-                expirationObservationJob.cancel()
+                codeExpirationJob.cancel()
                 onSuccess(event)
             },
             UserIsNotLoggedIntoGitHub::class,
             { event ->
-                blockTokenRequestsForInterval()
+                preventAskingForNewTokens()
                 onFail(event)
             }
         )
@@ -225,12 +257,12 @@ public class VerifyLogin internal constructor(
     }
 
     /**
-     * Specifies that access token cannot be requested for within a certain [interval].
+     * Prevents requests for new tokens during the [interval].
      */
-    private fun blockTokenRequestsForInterval() {
-        isAccessTokenRequestAvailable.value = false
-        makeJobWithDelay(interval.value) {
-            isAccessTokenRequestAvailable.value = true
+    private fun preventAskingForNewTokens() {
+        canAskForNewTokens.value = false
+        invoke(interval.value) {
+            canAskForNewTokens.value = true
         }
     }
 
@@ -245,9 +277,9 @@ public class VerifyLogin internal constructor(
             verificationUrl.value = event.verificationUrl
             expiresIn.value = event.expiresIn
             interval.value = event.interval
-            isAccessTokenRequestAvailable.value = true
-            expirationObservationJob.cancel()
-            startExpirationObservationJob()
+            canAskForNewTokens.value = true
+            codeExpirationJob.cancel()
+            watchForCodeExpiration()
             onSuccess(event)
         }
     }
@@ -260,7 +292,7 @@ private fun DesktopClient.requestUserCode(
     username: Username,
     onSuccess: (event: UserCodeReceived) -> Unit = {}
 ) {
-    val command = LogUserIn::class.buildBy(
+    val command = LogUserIn::class.withSession(
         SessionId::class.buildBy(username)
     )
     observeEventOnce(command.id, UserCodeReceived::class, onSuccess)
@@ -270,11 +302,8 @@ private fun DesktopClient.requestUserCode(
 /**
  * Asynchronously performs work with a delay.
  */
-private fun makeJobWithDelay(
-    delayDuration: Duration,
-    jobAction: () -> Unit
-): Job =
+private fun invoke(delay: Duration, action: () -> Unit): Job =
     CoroutineScope(Dispatchers.Default).launch {
-        delay(delayDuration.inWholeMilliseconds)
-        jobAction()
+        delay(delay.inWholeMilliseconds)
+        action()
     }

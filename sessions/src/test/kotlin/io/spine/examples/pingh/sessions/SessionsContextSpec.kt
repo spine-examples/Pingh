@@ -68,7 +68,7 @@ internal class SessionsContextSpec : ContextAwareTest() {
         @BeforeEach
         internal fun sendCommand() {
             sessionId = SessionId::class.generate()
-            val command = LogUserIn::class.buildBy(sessionId)
+            val command = LogUserIn::class.withSession(sessionId)
             context().receivesCommand(command)
         }
 
@@ -125,7 +125,7 @@ internal class SessionsContextSpec : ContextAwareTest() {
         }
 
         private fun sendCommand() {
-            val command = VerifyUserLoginToGitHub::class.buildBy(sessionId)
+            val command = VerifyUserLoginToGitHub::class.withSession(sessionId)
             context().receivesCommand(command)
         }
     }
@@ -139,7 +139,7 @@ internal class SessionsContextSpec : ContextAwareTest() {
         internal fun sendCommand() {
             sessionId = SessionId::class.generate()
             logIn(sessionId)
-            context().receivesCommand(LogUserOut::class.buildBy(sessionId))
+            context().receivesCommand(LogUserOut::class.withSession(sessionId))
         }
 
         @Test
@@ -174,7 +174,7 @@ internal class SessionsContextSpec : ContextAwareTest() {
         val firstSession = SessionId::class.generate()
         val secondSession = SessionId::class.buildBy(firstSession.username)
         logIn(firstSession)
-        context().receivesCommand(LogUserOut::class.buildBy(firstSession))
+        context().receivesCommand(LogUserOut::class.withSession(firstSession))
         logIn(secondSession)
 
         val secondExpected = UserSession::class.buildBy(secondSession)
@@ -185,8 +185,8 @@ internal class SessionsContextSpec : ContextAwareTest() {
     }
 
     private fun logIn(id: SessionId) {
-        context().receivesCommand(LogUserIn::class.buildBy(id))
+        context().receivesCommand(LogUserIn::class.withSession(id))
         authenticationService.enterUserCode()
-        context().receivesCommand(VerifyUserLoginToGitHub::class.buildBy(id))
+        context().receivesCommand(VerifyUserLoginToGitHub::class.withSession(id))
     }
 }
