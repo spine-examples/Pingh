@@ -35,7 +35,6 @@ import io.spine.examples.pingh.sessions.SessionId
 internal class UserSession(
     internal val id: SessionId
 ) {
-
     /**
      * The username to which the current session belongs.
      */

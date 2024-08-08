@@ -123,17 +123,11 @@ public class MentionsFlow internal constructor(
      * Marks the mention as snoozed.
      *
      * @param id the identifier of the mention that is marked as snoozed.
-     * @param snoozeTimeDuration the duration of mention snooze.
+     * @param snoozeTime the duration of mention snooze.
      */
-    internal fun markMentionAsSnoozed(
-        id: MentionId,
-        snoozeTimeDuration: Duration
-    ) {
+    internal fun markMentionAsSnoozed(id: MentionId, snoozeTime: Duration) {
         ensureLoggedIn()
-        val command = SnoozeMention::class.buildBy(
-            id,
-            currentTime().add(snoozeTimeDuration)
-        )
+        val command = SnoozeMention::class.buildBy(id, currentTime().add(snoozeTime))
         client.observeEventOnce(command.id, MentionSnoozed::class) {
             mentions.value = mentions.value.setMentionStatus(id, MentionStatus.SNOOZED)
         }
@@ -145,9 +139,7 @@ public class MentionsFlow internal constructor(
      *
      * @param id the identifier of the mention that is marked as read.
      */
-    public fun markMentionAsRead(
-        id: MentionId
-    ) {
+    public fun markMentionAsRead(id: MentionId) {
         ensureLoggedIn()
         val command = MarkMentionAsRead::class.buildBy(id)
         client.observeEventOnce(command.id, MentionRead::class) {
@@ -175,10 +167,7 @@ public typealias MentionsList = List<MentionView>
  * @param id the identifier of the mention which the status was changed.
  * @param status new status of the mention.
  */
-public fun MentionsList.setMentionStatus(
-    id: MentionId,
-    status: MentionStatus
-): MentionsList {
+private fun MentionsList.setMentionStatus(id: MentionId, status: MentionStatus): MentionsList {
     val idInList = this.indexOfFirst { it.id == id }
     val updatedMention = this[idInList]
         .toBuilder()

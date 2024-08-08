@@ -40,7 +40,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
  *
  * @param client enables interaction with the Pingh server.
  * @param session the information about the current user session.
- * @param settings the information about the current user session.
+ * @param settings the state of application settings.
  */
 public class SettingsFlow internal constructor(
     private val client: DesktopClient,
@@ -58,9 +58,7 @@ public class SettingsFlow internal constructor(
     /**
      * Logs the user out, cancels all subscriptions and clears the session ID.
      */
-    public fun logOut(
-        onSuccess: (event: UserLoggedOut) -> Unit = {}
-    ) {
+    public fun logOut(onSuccess: (event: UserLoggedOut) -> Unit = {}) {
         val command = LogUserOut::class.withSession(session.value!!.id)
         client.observeEventOnce(command.id, UserLoggedOut::class) { event ->
             session.value = null

@@ -76,10 +76,7 @@ internal class DesktopClient(
      *
      * @return the entity state if it exists, or `null` otherwise.
      */
-    internal fun <I : Message, E : EntityState> readById(
-        id: I,
-        type: KClass<E>
-    ): E? =
+    internal fun <I : Message, E : EntityState> readById(id: I, type: KClass<E>): E? =
         clientRequest()
             .select(type.java)
             .byId(id)
