@@ -65,7 +65,6 @@ public class MentionsFlow internal constructor(
          *
          * Time is specified in milliseconds.
          */
-        @Suppress("ConstPropertyName" /* Constants are called in camel case. */)
         private const val delayBeforeReadingMentions = 100L
     }
 
@@ -196,7 +195,7 @@ public fun MentionsList.setMentionStatus(
  *
  * Within each group, mentions are sorted by the time they were made.
  */
-public fun MentionsList.sortByStatusAndWhenMentioned(): MentionsList =
+public fun MentionsList.sorted(): MentionsList =
     this.sortedWith { firstMentions, secondMentions ->
         val statusComparison = firstMentions.status.compareTo(secondMentions.status)
         if (statusComparison != 0) {

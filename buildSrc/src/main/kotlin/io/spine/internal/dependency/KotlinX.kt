@@ -26,9 +26,7 @@
 
 package io.spine.internal.dependency
 
-@Suppress("ConstPropertyName")
 public object KotlinX {
-
     private const val group = "org.jetbrains.kotlinx"
 
     // https://github.com/Kotlin/kotlinx.coroutines
