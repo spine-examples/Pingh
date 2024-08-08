@@ -156,7 +156,7 @@ public fun KClass<RefreshToken>.of(value: String): RefreshToken =
  * Creates a new `VerificationCodesResponse` with the data specified
  * in the `VerificationCodesResponse`.
  */
-public fun KClass<VerificationCodesResponse>.buildFromFragment(
+public fun KClass<VerificationCodesResponse>.fromFragment(
     fragment: VerificationCodesFragment
 ): VerificationCodesResponse =
     with(VerificationCodesResponse.newBuilder()) {
@@ -172,7 +172,7 @@ public fun KClass<VerificationCodesResponse>.buildFromFragment(
  * Creates a new `AccessTokenResponse` with the data specified
  * in the `AccessTokenFragment`.
  */
-public fun KClass<AccessTokenResponse>.buildFromFragment(
+public fun KClass<AccessTokenResponse>.fromFragment(
     fragment: AccessTokenFragment
 ): AccessTokenResponse =
     with(AccessTokenResponse.newBuilder()) {

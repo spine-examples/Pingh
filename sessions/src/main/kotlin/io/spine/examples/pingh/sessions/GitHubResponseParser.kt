@@ -26,7 +26,7 @@
 
 package io.spine.examples.pingh.sessions
 
-import io.spine.examples.pingh.github.buildFromFragment
+import io.spine.examples.pingh.github.fromFragment
 import io.spine.examples.pingh.github.rest.AccessTokenFragment
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.VerificationCodesFragment
@@ -37,7 +37,7 @@ import io.spine.json.Json
  * Parses `VerificationCodesResponse` from the JSON.
  */
 public fun parseVerificationCodesResponse(json: String): VerificationCodesResponse =
-    VerificationCodesResponse::class.buildFromFragment(
+    VerificationCodesResponse::class.fromFragment(
         Json.fromJson(json, VerificationCodesFragment::class.java)
     )
 
@@ -45,6 +45,6 @@ public fun parseVerificationCodesResponse(json: String): VerificationCodesRespon
  * Parses `AccessTokenResponse` from the JSON.
  */
 public fun parseAccessTokenResponse(json: String): AccessTokenResponse =
-    AccessTokenResponse::class.buildFromFragment(
+    AccessTokenResponse::class.fromFragment(
         Json.fromJson(json, AccessTokenFragment::class.java)
     )

@@ -94,7 +94,7 @@ public class MentionsFlow internal constructor(
     /**
      * Finds mentions of the user by their ID.
      *
-     * @return List of `MentionView`s sorted by descending time of creation.
+     * @return list of `MentionView`s sorted by descending time of creation.
      */
     public fun findUserMentions(): List<MentionView> {
         ensureLoggedIn()

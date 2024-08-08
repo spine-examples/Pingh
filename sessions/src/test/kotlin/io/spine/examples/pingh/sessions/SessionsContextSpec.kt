@@ -32,7 +32,7 @@ import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
-import io.spine.examples.pingh.sessions.given.buildBy
+import io.spine.examples.pingh.sessions.given.with
 import io.spine.examples.pingh.sessions.given.expectedUserCodeReceivedEvent
 import io.spine.examples.pingh.sessions.given.expectedUserLoggedInEvent
 import io.spine.examples.pingh.sessions.given.expectedUserSessionWithDeviceCode
@@ -98,7 +98,7 @@ internal class SessionsContextSpec : ContextAwareTest() {
         @Test
         internal fun `emit 'UserIsNotLoggedIntoGitHub' if user code has not been entered`() {
             sendCommand()
-            val expected = UserIsNotLoggedIntoGitHub::class.buildBy(sessionId)
+            val expected = UserIsNotLoggedIntoGitHub::class.withSession(sessionId)
             context().assertEvent(expected)
             context().assertEvents()
                 .withType(UserLoggedIn::class.java)
@@ -163,8 +163,8 @@ internal class SessionsContextSpec : ContextAwareTest() {
         logIn(firstSession)
         logIn(secondSession)
 
-        val firstExpected = UserSession::class.buildBy(firstSession)
-        val secondExpected = UserSession::class.buildBy(secondSession)
+        val firstExpected = UserSession::class.with(firstSession)
+        val secondExpected = UserSession::class.with(secondSession)
         context().assertState(firstSession, firstExpected)
         context().assertState(secondSession, secondExpected)
     }
@@ -177,7 +177,7 @@ internal class SessionsContextSpec : ContextAwareTest() {
         context().receivesCommand(LogUserOut::class.withSession(firstSession))
         logIn(secondSession)
 
-        val secondExpected = UserSession::class.buildBy(secondSession)
+        val secondExpected = UserSession::class.with(secondSession)
         context().assertEntity(firstSession, UserSessionProcess::class.java)
             .deletedFlag()
             .isTrue()

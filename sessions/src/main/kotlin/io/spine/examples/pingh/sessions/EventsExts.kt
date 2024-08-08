@@ -41,7 +41,7 @@ import kotlin.reflect.KClass
  * the URL where users need to enter their `UserCode`, the duration after which `UserCode` expires,
  * and the minimum duration that must pass before user can make a new access token request.
  */
-public fun KClass<UserCodeReceived>.buildBy(
+public fun KClass<UserCodeReceived>.buildWith(
     id: SessionId,
     userCode: UserCode,
     verificationUrl: Url,
@@ -69,7 +69,7 @@ public fun KClass<UserLoggedIn>.buildBy(id: SessionId, token: PersonalAccessToke
 /**
  * Creates a new `UserIsNotLoggedIntoGitHub` event with the specified ID of the session.
  */
-public fun KClass<UserIsNotLoggedIntoGitHub>.buildBy(id: SessionId): UserIsNotLoggedIntoGitHub =
+public fun KClass<UserIsNotLoggedIntoGitHub>.withSession(id: SessionId): UserIsNotLoggedIntoGitHub =
     UserIsNotLoggedIntoGitHub.newBuilder()
         .setId(id)
         .vBuild()

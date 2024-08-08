@@ -64,7 +64,7 @@ public class UserSessionProcess :
         with(builder()) {
             deviceCode = codes.deviceCode
         }
-        return UserCodeReceived::class.buildBy(
+        return UserCodeReceived::class.buildWith(
             command.id,
             codes.userCode,
             codes.verificationUrl,
@@ -87,7 +87,7 @@ public class UserSessionProcess :
         val tokens = try {
             authenticationService.requestAccessToken(state().deviceCode)
         } catch (exception: CannotObtainAccessToken) {
-            return EitherOf2.withB(UserIsNotLoggedIntoGitHub::class.buildBy(command.id))
+            return EitherOf2.withB(UserIsNotLoggedIntoGitHub::class.withSession(command.id))
         }
         with(builder()) {
             refreshToken = tokens.refreshToken

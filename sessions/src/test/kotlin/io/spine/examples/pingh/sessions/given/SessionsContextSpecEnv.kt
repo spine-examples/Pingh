@@ -33,6 +33,7 @@ import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.UserSession
 import io.spine.examples.pingh.sessions.buildBy
+import io.spine.examples.pingh.sessions.buildWith
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.testing.sessions.given.predefinedAccessTokenResponse
@@ -52,7 +53,7 @@ internal fun KClass<SessionId>.generate(): SessionId =
  *
  * Additionally, the device code and the refresh token can be specified.
  */
-internal fun KClass<UserSession>.buildBy(
+internal fun KClass<UserSession>.with(
     id: SessionId,
     deviceCode: DeviceCode? = null,
     refreshToken: RefreshToken? = null
@@ -74,7 +75,7 @@ internal fun KClass<UserSession>.buildBy(
  */
 internal fun expectedUserSessionWithDeviceCode(id: SessionId): UserSession =
     with(predefinedVerificationCodes()) {
-        UserSession::class.buildBy(id, deviceCode)
+        UserSession::class.with(id, deviceCode)
     }
 
 /**
@@ -83,7 +84,7 @@ internal fun expectedUserSessionWithDeviceCode(id: SessionId): UserSession =
  */
 internal fun expectedUserSessionWithRefreshToken(id: SessionId): UserSession =
     with(predefinedAccessTokenResponse()) {
-        UserSession::class.buildBy(id, refreshToken = refreshToken)
+        UserSession::class.with(id, refreshToken = refreshToken)
     }
 
 /**
@@ -92,7 +93,7 @@ internal fun expectedUserSessionWithRefreshToken(id: SessionId): UserSession =
  */
 internal fun expectedUserCodeReceivedEvent(id: SessionId): UserCodeReceived =
     with(predefinedVerificationCodes()) {
-        UserCodeReceived::class.buildBy(id, userCode, verificationUrl, expiresIn, interval)
+        UserCodeReceived::class.buildWith(id, userCode, verificationUrl, expiresIn, interval)
     }
 
 /**
