@@ -94,6 +94,6 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "io.spine.examples.pingh.desktop.AppKt"
+        mainClass = "io.spine.examples.pingh.desktop.MainKt"
     }
 }

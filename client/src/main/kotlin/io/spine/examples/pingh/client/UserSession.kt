@@ -31,14 +31,13 @@ import io.spine.examples.pingh.sessions.SessionId
 
 /**
  * Information about the current user session.
- *
- * @param id the identifier of the user session on the Pingh server.
  */
-public class UserSession(
+internal class UserSession(
     internal val id: SessionId
 ) {
     /**
-     * Name of the user to which this session belongs.
+     * The username to which the current session belongs.
      */
-    public val username: Username = id.username
+    internal val username: Username
+        get() = id.username
 }

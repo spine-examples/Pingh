@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.client
 
-import com.google.protobuf.Duration
 import com.google.protobuf.Message
 import io.grpc.ManagedChannelBuilder
 import io.spine.base.CommandMessage
@@ -34,65 +33,24 @@ import io.spine.base.EntityState
 import io.spine.base.EventMessage
 import io.spine.base.EventMessageField
 import io.spine.base.Field
-import io.spine.base.Time.currentTime
 import io.spine.client.Client
 import io.spine.client.ClientRequest
-import io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT
 import io.spine.client.EventFilter.eq
 import io.spine.client.Subscription
 import io.spine.core.UserId
-import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.mentions.GitHubClientId
-import io.spine.examples.pingh.mentions.MentionId
-import io.spine.examples.pingh.mentions.MentionView
-import io.spine.examples.pingh.mentions.UserMentions
-import io.spine.examples.pingh.mentions.UserMentionsId
-import io.spine.examples.pingh.mentions.buildBy
-import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
-import io.spine.examples.pingh.mentions.command.SnoozeMention
-import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
-import io.spine.examples.pingh.mentions.event.MentionRead
-import io.spine.examples.pingh.mentions.event.MentionSnoozed
-import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
-import io.spine.examples.pingh.mentions.event.RequestMentionsFromGitHubFailed
-import io.spine.examples.pingh.sessions.SessionId
-import io.spine.examples.pingh.sessions.buildBy
-import io.spine.examples.pingh.sessions.command.LogUserIn
-import io.spine.examples.pingh.sessions.command.LogUserOut
-import io.spine.examples.pingh.sessions.event.UserLoggedIn
-import io.spine.examples.pingh.sessions.event.UserLoggedOut
-import io.spine.protobuf.Durations2
-import java.util.UUID
 import kotlin.reflect.KClass
 
 /**
  * Interacts with [Pingh server][io.spine.examples.pingh.server] via gRPC.
  *
- * By default, client will open channel to 'localhost:[50051]
- * [io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT]'.
+ * @param userId user on whose behalf client requests are made.
  */
-@Suppress("TooManyFunctions") // The client must contain multiple methods
-// to interact with the server, which does not enable Detekt.
-public class DesktopClient(
-    address: String = "localhost",
-    port: Int = DEFAULT_CLIENT_SERVICE_PORT
+internal class DesktopClient(
+    address: String,
+    port: Int,
+    private val userId: UserId
 ) {
-
-    private companion object {
-        /**
-         * The default snooze time of mention.
-         */
-        private val defaultSnoozeTime = Durations2.hours(2)
-    }
-
     private val client: Client
-    private val user: UserId
-
-    /**
-     * Current user session.
-     */
-    public var session: UserSession? = null
-        private set
 
     init {
         val channel = ManagedChannelBuilder
@@ -102,147 +60,49 @@ public class DesktopClient(
         client = Client
             .usingChannel(channel)
             .build()
-        user = UserId.newBuilder()
-            .setValue(UUID.randomUUID().toString())
-            .vBuild()
-    }
-
-    /**
-     * Logs the user in and remembers the session ID.
-     */
-    public fun logIn(
-        username: Username,
-        onSuccess: (event: UserLoggedIn) -> Unit = {}
-    ) {
-        val command = LogUserIn::class.buildBy(
-            SessionId::class.buildBy(username)
-        )
-        observeEventOnce(command.id, UserLoggedIn::class) { event ->
-            this.session = UserSession(command.id)
-            onSuccess(event)
-        }
-        send(command)
-    }
-
-    /**
-     * Logs the user out, cancels all subscriptions and clears the session ID.
-     */
-    public fun logOut(
-        onSuccess: (event: UserLoggedOut) -> Unit = {}
-    ) {
-        checkNotNull(session) { "The user has not been logged in." }
-        val command = LogUserOut::class.buildBy(session!!.id)
-        observeEventOnce(command.id, UserLoggedOut::class) { event ->
-            this.session = null
-            onSuccess(event)
-        }
-        send(command)
-    }
-
-    /**
-     * Updates the user's mentions.
-     */
-    public fun updateMentions(
-        onSuccess: (event: MentionsUpdateFromGitHubCompleted) -> Unit = {},
-        onFail: (event: RequestMentionsFromGitHubFailed) -> Unit = {}
-    ) {
-        checkNotNull(session) { "The user has not been logged in." }
-        val command = UpdateMentionsFromGitHub::class.buildBy(
-            GitHubClientId::class.buildBy(session!!.username)
-        )
-        observeCommandOutcome(
-            command.id,
-            MentionsUpdateFromGitHubCompleted::class,
-            onSuccess,
-            RequestMentionsFromGitHubFailed::class,
-            onFail
-        )
-        send(command)
-    }
-
-    /**
-     * Finds mentions of the user by their ID.
-     *
-     * @return List of `MentionView`s sorted by descending time of creation.
-     */
-    public fun findUserMentions(): List<MentionView> {
-        checkNotNull(session) { "The user has not been logged in." }
-        val userMentions = clientRequest()
-            .select(UserMentions::class.java)
-            .byId(UserMentionsId::class.buildBy(session!!.username))
-            .run()
-        if (userMentions.size == 0) {
-            return listOf()
-        }
-        return userMentions[0]
-            .mentionList
-            .sortedByDescending { mention -> mention.whenMentioned.seconds }
-    }
-
-    /**
-     * Marks the mention as snoozed.
-     *
-     * If snooze time is not specified, the mention will snooze the [defaultSnoozeTime].
-     */
-    public fun markMentionAsSnoozed(
-        id: MentionId,
-        snoozeTime: Duration = defaultSnoozeTime,
-        onSuccess: (event: MentionSnoozed) -> Unit = {}
-    ) {
-        val command = SnoozeMention::class.buildBy(id, currentTime().add(snoozeTime))
-        observeEventOnce(command.id, MentionSnoozed::class, onSuccess)
-        send(command)
-    }
-
-    /**
-     * Marks that the mention is read.
-     */
-    public fun markMentionAsRead(id: MentionId, onSuccess: (event: MentionRead) -> Unit = {}) {
-        val command = MarkMentionAsRead::class.buildBy(id)
-        observeEventOnce(command.id, MentionRead::class, onSuccess)
-        send(command)
     }
 
     /**
      * Sends a command to the server on behalf of the user.
      */
-    private fun send(command: CommandMessage) {
+    internal fun send(command: CommandMessage) {
         clientRequest()
             .command(command)
             .postAndForget()
     }
 
     /**
-     * Provides `ClientRequest` on behalf of logged-in user if it exists,
-     * or as guest if it doesn't.
+     * Reads the entity state by the specified ID.
+     *
+     * @return the entity state if it exists, or `null` otherwise.
      */
-    private fun clientRequest(): ClientRequest {
-        if (session == null) {
-            return client.asGuest()
-        }
-        return client.onBehalfOf(user)
-    }
+    internal fun <I : Message, E : EntityState> readById(id: I, type: KClass<E>): E? =
+        clientRequest()
+            .select(type.java)
+            .byId(id)
+            .run()
+            .getOrNull(0)
 
     /**
-     * Observes the outcome of the command.
+     * Observes both events until one is emitted.
      *
-     * When a success or failure event is emitted, subscriptions are cancelled.
+     * When either the first or second event is emitted, all subscriptions are cancelled.
      */
-    private fun <S : EventMessage, F : EventMessage> observeCommandOutcome(
+    internal fun <F : EventMessage, S : EventMessage> observeEither(
         id: Message,
-        successType: KClass<S>,
-        onSuccess: (event: S) -> Unit,
-        failType: KClass<F>,
-        onFail: (event: F) -> Unit
+        firstType: KClass<F>,
+        onFirst: (event: F) -> Unit,
+        secondType: KClass<S>,
+        onSecond: (event: S) -> Unit
     ) {
-        var subscriptionOnFail: Subscription? = null
-        val subscriptionOnSuccess = observeEventOnce(id, successType) { event ->
-            stopObservation(subscriptionOnFail!!)
-            onSuccess(event)
+        var subscriptionOnSecond: Subscription? = null
+        val subscriptionOnFirst = observeEventOnce(id, firstType) { event ->
+            stopObservation(subscriptionOnSecond!!)
+            onFirst(event)
         }
-        subscriptionOnFail = observeEventOnce(id, failType) { event ->
-            stopObservation(subscriptionOnSuccess)
-            onFail(event)
+        subscriptionOnSecond = observeEventOnce(id, secondType) { event ->
+            stopObservation(subscriptionOnFirst)
+            onSecond(event)
         }
     }
 
@@ -264,7 +124,7 @@ public class DesktopClient(
      * Subscribes to the event of the provided type and cancels itself after
      * the observer has worked.
      */
-    private fun <E : EventMessage> observeEventOnce(
+    internal fun <E : EventMessage> observeEventOnce(
         id: Message,
         type: KClass<E>,
         onEmit: (event: E) -> Unit
@@ -275,21 +135,6 @@ public class DesktopClient(
             onEmit(event)
         }
         return subscription
-    }
-
-    /**
-     * Stops observation by provided subscription.
-     */
-    private fun stopObservation(subscription: Subscription) {
-        client.subscriptions()
-            .cancel(subscription)
-    }
-
-    /**
-     * Closes the client by shutting down the gRPC connection.
-     */
-    public fun close() {
-        client.close()
     }
 
     /**
@@ -311,5 +156,25 @@ public class DesktopClient(
                 onUpdated(entity)
             }
             .post()
+    }
+
+    /**
+     * Stops observation of the provided subscription.
+     */
+    private fun stopObservation(subscription: Subscription) {
+        client.subscriptions()
+            .cancel(subscription)
+    }
+
+    /**
+     * Creates a new instance of the `ClientRequest` on behalf of current client.
+     */
+    private fun clientRequest(): ClientRequest = client.onBehalfOf(userId)
+
+    /**
+     * Closes the client.
+     */
+    internal fun close() {
+        client.close()
     }
 }

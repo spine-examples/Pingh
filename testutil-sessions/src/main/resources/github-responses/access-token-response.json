@@ -1,0 +1,8 @@
+{
+  "access_token": "ghu__access_token",
+  "expires_in": 28800,
+  "refresh_token": "ghr__refresh_token",
+  "refresh_token_expires_in": 15897600,
+  "token_type": "bearer",
+  "scope": ""
+}

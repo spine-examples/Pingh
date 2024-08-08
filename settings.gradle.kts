@@ -31,6 +31,7 @@ include(
     "sessions",
     "mentions",
     "testutil-mentions",
+    "testutil-sessions",
     "server",
     "client"
 )
