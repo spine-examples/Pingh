@@ -79,7 +79,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.protobuf.Duration
 import io.spine.examples.pingh.client.LoginFlow
-import io.spine.examples.pingh.client.LoginStage
 import io.spine.examples.pingh.client.EnterUsername
 import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.github.UserCode
@@ -106,11 +105,11 @@ internal fun LoginPage(
 ) {
     val stage by flow.stage.collectAsState()
     when (stage) {
-        LoginStage.USERNAME_ENTERING -> UsernameEnteringPage(
+        EnterUsername::class -> UsernameEnteringPage(
             flow = flow.startUsernameEntering()
         )
 
-        LoginStage.VERIFICATION -> VerificationPage(
+        VerifyLogin::class -> VerificationPage(
             flow = flow.startVerification(),
             toMentionsPage = toMentionsPage
         )

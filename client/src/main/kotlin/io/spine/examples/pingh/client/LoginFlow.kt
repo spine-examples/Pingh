@@ -37,6 +37,7 @@ import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.net.Url
+import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -61,7 +62,7 @@ public class LoginFlow internal constructor(
      * The current stage of the login process.
      */
     @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
-    public val stage: MutableStateFlow<LoginStage> = MutableStateFlow(LoginStage.USERNAME_ENTERING)
+    public val stage: MutableStateFlow<LoginStageType> = MutableStateFlow(EnterUsername::class)
 
     /**
      * Stores the event received after the user enters their name.
@@ -73,14 +74,14 @@ public class LoginFlow internal constructor(
     /**
      * Initiates the username entering stage of the login process.
      *
-     * @throws IllegalStateException if the stage of the login flow is not `USERNAME_ENTERING`.
+     * @throws IllegalStateException if the stage of the login flow is not `EnterUsername`.
      */
     public fun startUsernameEntering(): EnterUsername {
-        check(stage.value == LoginStage.USERNAME_ENTERING) {
-            "Stage of the login must be `USERNAME_ENTERING`."
+        check(stage.value == EnterUsername::class) {
+            "Stage of the login must be `EnterUsername`."
         }
         return EnterUsername(client, session) { event ->
-            stage.value = LoginStage.VERIFICATION
+            stage.value = VerifyLogin::class
             userCodeReceived = event
         }
     }
@@ -88,15 +89,25 @@ public class LoginFlow internal constructor(
     /**
      * Initiates the verification stage of the login process.
      *
-     * @throws IllegalStateException if the stage of the login flow is not `VERIFICATION`.
+     * @throws IllegalStateException if the stage of the login flow is not `VerifyLogin`.
      */
     public fun startVerification(): VerifyLogin {
-        check(stage.value == LoginStage.VERIFICATION) {
-            "Stage of the login must be `VERIFICATION`."
+        check(stage.value == VerifyLogin::class) {
+            "Stage of the login must be `VerifyLogin`."
         }
         return VerifyLogin(client, session, userCodeReceived!!)
     }
 }
+
+/**
+ * Stages of login process.
+ */
+public interface LoginStage
+
+/**
+ * Type of the login process stage.
+ */
+public typealias LoginStageType = KClass<out LoginStage>
 
 /**
  * The control flow of the username entering stage of the login process.
@@ -109,7 +120,7 @@ public class EnterUsername internal constructor(
     private val client: DesktopClient,
     private val session: MutableStateFlow<UserSession?>,
     private val toVerificationStage: (UserCodeReceived) -> Unit
-) {
+) : LoginStage {
     /**
      * Starts the login process and requests `UserCode`.
      */
@@ -137,7 +148,7 @@ public class VerifyLogin internal constructor(
     private val client: DesktopClient,
     private val session: MutableStateFlow<UserSession?>,
     event: UserCodeReceived
-) {
+) : LoginStage {
     /**
      * The code a user needs to enter on GitHub to confirm login to the app.
      */
@@ -254,23 +265,6 @@ private fun DesktopClient.requestUserCode(
     )
     observeEventOnce(command.id, UserCodeReceived::class, onSuccess)
     send(command)
-}
-
-/**
- * Stages of login process.
- */
-public enum class LoginStage {
-
-    /**
-     * Initial stage where the user enters their `Username` and receives a `UserCode`.
-     */
-    USERNAME_ENTERING,
-
-    /**
-     * The final stage where the user enters their `UserCode` into GitHub and
-     * completes the login process in the Pingh app.
-     */
-    VERIFICATION
 }
 
 /**
