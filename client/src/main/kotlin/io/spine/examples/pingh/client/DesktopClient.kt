@@ -87,25 +87,25 @@ internal class DesktopClient(
             .getOrNull(0)
 
     /**
-     * Observes the outcome of the command.
+     * Observes both events until one is emitted.
      *
-     * When a success or failure event is emitted, subscriptions are cancelled.
+     * When either the first or second event is emitted, all subscriptions are cancelled.
      */
-    internal fun <S : EventMessage, F : EventMessage> observeCommandOutcome(
+    internal fun <F : EventMessage, S : EventMessage> observeOneOfTwoEvents(
         id: Message,
-        successType: KClass<S>,
-        onSuccess: (event: S) -> Unit,
-        failType: KClass<F>,
-        onFail: (event: F) -> Unit
+        firstType: KClass<F>,
+        onFirst: (event: F) -> Unit,
+        secondType: KClass<S>,
+        onSecond: (event: S) -> Unit
     ) {
-        var subscriptionOnFail: Subscription? = null
-        val subscriptionOnSuccess = observeEventOnce(id, successType) { event ->
-            stopObservation(subscriptionOnFail!!)
-            onSuccess(event)
+        var subscriptionOnSecond: Subscription? = null
+        val subscriptionOnFirst = observeEventOnce(id, firstType) { event ->
+            stopObservation(subscriptionOnSecond!!)
+            onFirst(event)
         }
-        subscriptionOnFail = observeEventOnce(id, failType) { event ->
-            stopObservation(subscriptionOnSuccess)
-            onFail(event)
+        subscriptionOnSecond = observeEventOnce(id, secondType) { event ->
+            stopObservation(subscriptionOnFirst)
+            onSecond(event)
         }
     }
 

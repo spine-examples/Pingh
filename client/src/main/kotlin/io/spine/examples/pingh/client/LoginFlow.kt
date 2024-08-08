@@ -197,7 +197,7 @@ public class VerifyLogin internal constructor(
         onFail: (event: UserIsNotLoggedIntoGitHub) -> Unit = {}
     ) {
         val command = VerifyUserLoginToGitHub::class.buildBy(session.value!!.id)
-        client.observeCommandOutcome(
+        client.observeOneOfTwoEvents(
             command.id,
             UserLoggedIn::class,
             { event ->
