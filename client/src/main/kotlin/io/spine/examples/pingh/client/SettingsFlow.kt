@@ -57,6 +57,8 @@ public class SettingsFlow internal constructor(
 
     /**
      * Logs the user out, cancels all subscriptions and clears the session ID.
+     *
+     * @param onSuccess called when the user successfully logs out.
      */
     public fun logOut(onSuccess: (event: UserLoggedOut) -> Unit = {}) {
         val command = LogUserOut::class.withSession(session.value!!.id)

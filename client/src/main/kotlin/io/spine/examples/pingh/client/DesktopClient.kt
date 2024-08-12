@@ -43,6 +43,8 @@ import kotlin.reflect.KClass
 /**
  * Interacts with [Pingh server][io.spine.examples.pingh.server] via gRPC.
  *
+ * @param address the address of the Pingh server.
+ * @param port the port on which the Pingh server is running.
  * @param userId user on whose behalf client requests are made.
  */
 internal class DesktopClient(
@@ -74,6 +76,8 @@ internal class DesktopClient(
     /**
      * Reads the entity state by the specified ID.
      *
+     * @param id the ID of the entity state.
+     * @param type the type of the entity state.
      * @return the entity state if it exists, or `null` otherwise.
      */
     internal fun <I : Message, E : EntityState> readById(id: I, type: KClass<E>): E? =
@@ -87,6 +91,12 @@ internal class DesktopClient(
      * Observes both events until one is emitted.
      *
      * When either the first or second event is emitted, all subscriptions are cancelled.
+     *
+     * @param id the ID of the events to be observed.
+     * @param firstType the type of the first observed event.
+     * @param onFirst called when the first event is emitted.
+     * @param secondType the type of the second observed event.
+     * @param onSecond called when the second event is emitted.
      */
     internal fun <F : EventMessage, S : EventMessage> observeEither(
         id: Message,
@@ -123,6 +133,10 @@ internal class DesktopClient(
     /**
      * Subscribes to the event of the provided type and cancels itself after
      * the observer has worked.
+     *
+     * @param id the ID of the observed event.
+     * @param type the type of the observed event.
+     * @param onEmit called when the event is emitted.
      */
     internal fun <E : EventMessage> observeEventOnce(
         id: Message,
@@ -141,6 +155,10 @@ internal class DesktopClient(
      * Subscribes to the update of the entity with the specified type and ID.
      *
      * The subscription cancels itself after the observer has completed its work.
+     *
+     * @param id the ID of the observed entity.
+     * @param type the type of the observed entity.
+     * @param onUpdated called when the entity is updated.
      */
     internal fun <E : EntityState> observeEntityOnce(
         id: Message,

@@ -43,6 +43,8 @@ public const val NAME: String = "Sessions"
  * It is expected that the business scenarios of the created context require access
  * to the GitHub REST API. Therefore, an instance of GitHub authentication server is required
  * as a parameter.
+ *
+ * @param authenticationService the service that allows to access GitHub authentication API.
  */
 public fun newSessionsContext(
     authenticationService: GitHubAuthentication

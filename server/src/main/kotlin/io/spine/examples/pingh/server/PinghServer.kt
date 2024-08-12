@@ -66,10 +66,11 @@ public fun main() {
  */
 private fun createServer(): Server {
     configureEnvironment()
+    val clientEngine = CIO.create()
     return Server
         .atPort(DEFAULT_CLIENT_SERVICE_PORT)
-        .add(newSessionsContext(RemoteGitHubAuthentication(clientId, CIO.create())))
-        .add(newMentionsContext(GitHubClientServiceImpl(CIO.create())))
+        .add(newSessionsContext(RemoteGitHubAuthentication(clientId, clientEngine)))
+        .add(newMentionsContext(GitHubClientServiceImpl(clientEngine)))
         .build()
 }
 

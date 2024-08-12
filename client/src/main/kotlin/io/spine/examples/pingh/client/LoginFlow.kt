@@ -99,6 +99,9 @@ public class EnterUsername internal constructor(
 
     /**
      * Starts the login process and requests `UserCode`.
+     *
+     * @param username the username of the user logging in.
+     * @param onSuccess called when the user code is successfully received.
      */
     public fun requestUserCode(
         username: Username,
@@ -191,6 +194,9 @@ public class VerifyLogin internal constructor(
 
     /**
      * Checks whether the user has completed the login on GitHub and entered their user code.
+     *
+     * @param onSuccess called when the login is successfully verified.
+     * @param onFail called when login verification fails.
      */
     public fun confirm(
         onSuccess: (event: UserLoggedIn) -> Unit = {},
@@ -224,6 +230,8 @@ public class VerifyLogin internal constructor(
 
     /**
      * Requests new `UserCode` and updates state of the verification flow.
+     *
+     * @param onSuccess called when the user code is successfully received.
      */
     public fun requestNewUserCode(
         onSuccess: (event: UserCodeReceived) -> Unit = {}

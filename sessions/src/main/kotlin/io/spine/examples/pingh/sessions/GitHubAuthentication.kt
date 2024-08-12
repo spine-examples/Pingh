@@ -45,6 +45,7 @@ public interface GitHubAuthentication {
     /**
      * Requests an access token for the user using the `DeviceCode`.
      *
+     * @param deviceCode the code used to verify the device.
      * @throws CannotObtainAccessToken if failed to obtain the access token.
      */
     @Throws(CannotObtainAccessToken::class)

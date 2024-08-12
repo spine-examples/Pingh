@@ -38,6 +38,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
  *
  * By default, application opens channel for the client
  * to 'localhost:[50051][DEFAULT_CLIENT_SERVICE_PORT]'.
+ *
+ * @param address the address of the Pingh server.
+ * @param port the port on which the Pingh server is running.
  */
 public class PinghApplication(
     address: String = "localhost",
