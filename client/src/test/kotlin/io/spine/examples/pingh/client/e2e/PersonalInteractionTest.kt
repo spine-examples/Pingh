@@ -29,7 +29,9 @@ package io.spine.examples.pingh.client.e2e
 import com.google.protobuf.Duration
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import io.spine.examples.pingh.client.EnterUsername
 import io.spine.examples.pingh.client.MentionsFlow
+import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.client.e2e.given.expectedMentionsList
 import io.spine.examples.pingh.client.e2e.given.observeUserMentions
 import io.spine.examples.pingh.client.e2e.given.randomUnread
@@ -65,15 +67,26 @@ internal class PersonalInteractionTest : IntegrationTest() {
 
     @BeforeEach
     internal fun logInAndUpdateMentions() {
-        val loginFlow = app().startLoginFlow()
-        loginFlow.askForUsername().requestUserCode(username)
-        enterUserCode()
-        loginFlow.verifyLogin().verify()
+        logIn()
         val mentionsFlow = app().startMentionsFlow()
         mentionsFlow.updateMentions()
         actual = mentionsFlow.findUserMentions()
         expected = expectedMentionsList(username)
         actual shouldBe expected
+    }
+
+    private fun logIn() {
+        val future = CompletableFuture<Void>()
+        val loginFlow = app().startLoginFlow()
+        (loginFlow.currentStage().value as EnterUsername).requestUserCode(username) {
+            enterUserCode()
+            (loginFlow.currentStage().value as VerifyLogin).confirm(
+                onSuccess = {
+                    future.complete(null)
+                }
+            )
+        }
+        future.get(1, TimeUnit.SECONDS)
     }
 
     /**
@@ -152,18 +165,11 @@ internal class PersonalInteractionTest : IntegrationTest() {
     }
 
     private fun logInAgainAndCheckMentions(future: CompletableFuture<Void>) {
-        val loginFlow = app().startLoginFlow()
-        loginFlow.askForUsername().requestUserCode(username) {
-            enterUserCode()
-            loginFlow.verifyLogin().verify(
-                onSuccess = {
-                    val mentionsFlow = app().startMentionsFlow()
-                    actual = mentionsFlow.findUserMentions()
-                    actual shouldBe expected
-                    future.complete(null)
-                }
-            )
-        }
+        logIn()
+        val mentionsFlow = app().startMentionsFlow()
+        actual = mentionsFlow.findUserMentions()
+        actual shouldBe expected
+        future.complete(null)
     }
 
     private fun MentionsFlow.snoozeRandomMention(snoozeTime: Duration = hours(2)): MentionId {

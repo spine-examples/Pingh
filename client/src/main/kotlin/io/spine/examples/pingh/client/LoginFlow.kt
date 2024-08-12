@@ -38,12 +38,12 @@ import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.net.Url
-import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -59,42 +59,22 @@ public class LoginFlow internal constructor(
     private val client: DesktopClient,
     private val session: MutableStateFlow<UserSession?>
 ) {
+    /**
+     * Current stage of the login process.
+     */
+    private val stage: MutableStateFlow<LoginStage> =
+        MutableStateFlow(EnterUsername(client, session, this::moveToNextStage))
 
     /**
-     * Internal data of the login process.
+     * Returns the immutable state of the current login stage.
      */
-    private val context = LoginContext()
+    public fun currentStage(): StateFlow<LoginStage> = stage
 
     /**
-     * The current stage of the login process.
+     * Updates value of the current stage of the login process.
      */
-    @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
-    public val stage: MutableStateFlow<LoginStageType>
-        get() = context.stage
-
-    /**
-     * Initiates the stage of the login process where the user must enter their username
-     * and receive a user code.
-     *
-     * @throws IllegalStateException if the current login stage is not `EnterUsername`.
-     */
-    public fun askForUsername(): EnterUsername {
-        check(stage.value == EnterUsername::class) {
-            "The current login stage must be `EnterUsername`."
-        }
-        return EnterUsername(client, session, context)
-    }
-
-    /**
-     * Initiates the stage of the login process where the user must verify their login to GitHub.
-     *
-     * @throws IllegalStateException if the current login stage is not `VerifyLogin`.
-     */
-    public fun verifyLogin(): VerifyLogin {
-        check(stage.value == VerifyLogin::class) {
-            "The current login stage must be `VerifyLogin`."
-        }
-        return VerifyLogin(client, session, context)
+    private fun moveToNextStage(nextStage: LoginStage) {
+        stage.value = nextStage
     }
 }
 
@@ -104,40 +84,17 @@ public class LoginFlow internal constructor(
 public interface LoginStage
 
 /**
- * Type of the login process stage.
- */
-public typealias LoginStageType = KClass<out LoginStage>
-
-/**
- * Internal data of the login process.
- */
-internal class LoginContext {
-
-    /**
-     * The current stage of the login process.
-     */
-    internal val stage: MutableStateFlow<LoginStageType> = MutableStateFlow(EnterUsername::class)
-
-    /**
-     * Stores the event received after the user enters their name.
-     *
-     * This is required to initialize the verification stage.
-     */
-    internal var userCodeReceived: UserCodeReceived? = null
-}
-
-/**
  * Manages the stage of the login process where the user must enter their username
  * will receive a user code in return.
  *
  * @param client enables interaction with the Pingh server.
  * @param session the information about the current user session.
- * @param context the login process data.
+ * @param moveToNextStage updates value of the current login stage.
  */
 public class EnterUsername internal constructor(
     private val client: DesktopClient,
     private val session: MutableStateFlow<UserSession?>,
-    private val context: LoginContext
+    private val moveToNextStage: (LoginStage) -> Unit
 ) : LoginStage {
 
     /**
@@ -149,8 +106,7 @@ public class EnterUsername internal constructor(
     ) {
         client.requestUserCode(username) { event ->
             session.value = UserSession(event.id)
-            context.userCodeReceived = event
-            context.stage.value = VerifyLogin::class
+            moveToNextStage(VerifyLogin(client, session, event))
             onSuccess(event)
         }
     }
@@ -162,33 +118,33 @@ public class EnterUsername internal constructor(
  *
  * @param client enables interaction with the Pingh server.
  * @param session provides information about the current user session.
- * @param context contains data relevant to the login process.
+ * @param event event received after the user enters their name.
  */
 @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
 public class VerifyLogin internal constructor(
     private val client: DesktopClient,
     private val session: MutableStateFlow<UserSession?>,
-    context: LoginContext
+    event: UserCodeReceived
 ) : LoginStage {
 
     /**
      * The code a user needs to enter on GitHub to confirm login to the app.
      */
     public val userCode: MutableStateFlow<UserCode> =
-        MutableStateFlow(context.userCodeReceived!!.userCode)
+        MutableStateFlow(event.userCode)
 
     /**
      * The URL of the GitHub resource, where users will be entering the verification code
      * in scope of the device login flow.
      */
     public val verificationUrl: MutableStateFlow<Url> =
-        MutableStateFlow(context.userCodeReceived!!.verificationUrl)
+        MutableStateFlow(event.verificationUrl)
 
     /**
      * The minimum duration that must pass before user can make a new access token request.
      */
     public val interval: MutableStateFlow<Duration> =
-        MutableStateFlow(context.userCodeReceived!!.interval)
+        MutableStateFlow(event.interval)
 
     /**
      * Whether we can ask for a new user token from the external API.
@@ -205,7 +161,7 @@ public class VerifyLogin internal constructor(
      * The duration after which the [userCode] expires.
      */
     public val expiresIn: MutableStateFlow<Duration> =
-        MutableStateFlow(context.userCodeReceived!!.expiresIn)
+        MutableStateFlow(event.expiresIn)
 
     /**
      * Whether the user code is expired.
@@ -236,7 +192,7 @@ public class VerifyLogin internal constructor(
     /**
      * Checks whether the user has completed the login on GitHub and entered their user code.
      */
-    public fun verify(
+    public fun confirm(
         onSuccess: (event: UserLoggedIn) -> Unit = {},
         onFail: (event: UserIsNotLoggedIntoGitHub) -> Unit = {}
     ) {

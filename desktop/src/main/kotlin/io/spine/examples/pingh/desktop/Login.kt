@@ -103,14 +103,14 @@ internal fun LoginPage(
     flow: LoginFlow,
     toMentionsPage: () -> Unit
 ) {
-    val stage by flow.stage.collectAsState()
-    when (stage) {
-        EnterUsername::class -> UsernameEnteringPage(
-            flow = flow.askForUsername()
+    val stage by flow.currentStage().collectAsState()
+    when (val screenStage = stage) {
+        is EnterUsername -> UsernameEnteringPage(
+            flow = screenStage
         )
 
-        VerifyLogin::class -> VerificationPage(
-            flow = flow.verifyLogin(),
+        is VerifyLogin -> VerificationPage(
+            flow = screenStage,
             toMentionsPage = toMentionsPage
         )
     }
@@ -595,7 +595,7 @@ private fun SubmitButton(
 ) {
     val enabled by flow.canAskForNewTokens.collectAsState()
     val onClick = {
-        flow.verify(
+        flow.confirm(
             onSuccess = {
                 toMentionsPage()
             }
