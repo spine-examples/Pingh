@@ -48,7 +48,6 @@ public class SettingsFlow internal constructor(
     @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
     public val settings: SettingsState
 ) {
-
     /**
      * The username to which the current session belongs.
      */

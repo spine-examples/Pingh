@@ -47,7 +47,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
- * The control flow for the user login process.
+ * The control flow of the user login process.
  *
  * The flow consists of two consecutive stages. To successfully complete the login process,
  * first enter a username and obtain a user code, then verify the login.

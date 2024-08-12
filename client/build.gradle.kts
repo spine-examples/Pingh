@@ -38,10 +38,6 @@ plugins {
     id("io.spine.tools.gradle.bootstrap").version("1.9.0")
 }
 
-repositories {
-    google()
-}
-
 spine {
     // Add and configure required dependencies for developing a Spine-based Java client.
     // See: https://github.com/SpineEventEngine/bootstrap#java-projects

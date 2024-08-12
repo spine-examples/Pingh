@@ -491,7 +491,7 @@ private fun CopyToClipboardIcon(
 ) {
     val clipboardManager = LocalClipboardManager.current
     Box(
-        modifier = Modifier.offset(x = 100.dp)
+        modifier = Modifier.offset(x = 103.dp)
     ) {
         IconButton(
             icon = Icons.copy,
