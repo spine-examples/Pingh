@@ -92,27 +92,21 @@ internal class DesktopClient(
      *
      * When either the first or second event is emitted, all subscriptions are cancelled.
      *
-     * @param id the ID of the events to be observed.
-     * @param firstType the type of the first observed event.
-     * @param onFirst called when the first event is emitted.
-     * @param secondType the type of the second observed event.
-     * @param onSecond called when the second event is emitted.
+     * @param first the information on the observation of the first event.
+     * @param second the information on the observation of the second event.
      */
     internal fun <F : EventMessage, S : EventMessage> observeEither(
-        id: Message,
-        firstType: KClass<F>,
-        onFirst: (event: F) -> Unit,
-        secondType: KClass<S>,
-        onSecond: (event: S) -> Unit
+        first: EventObserver<F>,
+        second: EventObserver<S>
     ) {
         var subscriptionOnSecond: Subscription? = null
-        val subscriptionOnFirst = observeEventOnce(id, firstType) { event ->
+        val subscriptionOnFirst = observeEventOnce(first.id, first.type) { event ->
             stopObservation(subscriptionOnSecond!!)
-            onFirst(event)
+            first.callback(event)
         }
-        subscriptionOnSecond = observeEventOnce(id, secondType) { event ->
+        subscriptionOnSecond = observeEventOnce(second.id, second.type) { event ->
             stopObservation(subscriptionOnFirst)
-            onSecond(event)
+            second.callback(event)
         }
     }
 
@@ -196,3 +190,16 @@ internal class DesktopClient(
         client.close()
     }
 }
+
+/**
+ * Holds details about the observation of the event.
+ *
+ * @param id the ID of the observed event.
+ * @param type the type of the observed event.
+ * @param callback called when the event is emitted.
+ */
+internal data class EventObserver<E : EventMessage> internal constructor(
+    internal val id: Message,
+    internal val type: KClass<E>,
+    internal val callback: (event: E) -> Unit
+)

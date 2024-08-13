@@ -123,7 +123,7 @@ private fun HttpClient.authenticationRequest(url: String): AuthenticationRequest
 /**
  * Builder for creating and sending authentication request on GitHub.
  */
-private class AuthenticationRequestBuilder internal constructor(
+private class AuthenticationRequestBuilder(
     private val client: HttpClient,
     private val url: String
 ) {
@@ -146,7 +146,7 @@ private class AuthenticationRequestBuilder internal constructor(
     /**
      * Sets the client ID for the Pingh GitHub App.
      */
-    internal fun with(clientId: ClientId): AuthenticationRequestBuilder {
+    fun with(clientId: ClientId): AuthenticationRequestBuilder {
         this.clientId = clientId
         return this
     }
@@ -154,7 +154,7 @@ private class AuthenticationRequestBuilder internal constructor(
     /**
      * Sets the verification code that is used to verify the device.
      */
-    internal fun with(deviceCode: DeviceCode): AuthenticationRequestBuilder {
+    fun with(deviceCode: DeviceCode): AuthenticationRequestBuilder {
         this.deviceCode = deviceCode
         return this
     }
@@ -162,7 +162,7 @@ private class AuthenticationRequestBuilder internal constructor(
     /**
      * Specifies that the grant type parameter is added to the query.
      */
-    internal fun includeGrantType(): AuthenticationRequestBuilder {
+    fun includeGrantType(): AuthenticationRequestBuilder {
         isGrantTypeIncluded = true
         return this
     }
@@ -172,7 +172,7 @@ private class AuthenticationRequestBuilder internal constructor(
      *
      * @throws IllegalArgumentException if the client ID request data is not specified.
      */
-    internal suspend fun post(): HttpResponse {
+    suspend fun post(): HttpResponse {
         checkNotNull(clientId) { "Client ID must be set." }
         return client.post(url) {
             url.configureParameters()

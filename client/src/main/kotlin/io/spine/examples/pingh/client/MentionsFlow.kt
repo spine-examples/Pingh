@@ -102,12 +102,10 @@ public class MentionsFlow internal constructor(
             UserMentionsId::class.buildBy(session.value!!.username),
             UserMentions::class
         )
-        if (userMentions == null) {
-            return listOf()
-        }
         return userMentions
-            .mentionList
-            .sortedByDescending { mention -> mention.whenMentioned.seconds }
+            ?.mentionList
+            ?.sortedByDescending { mention -> mention.whenMentioned.seconds }
+            ?: listOf()
     }
 
     /**

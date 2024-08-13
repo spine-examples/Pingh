@@ -203,14 +203,12 @@ public class VerifyLogin internal constructor(
         onFail: (event: UserIsNotLoggedIntoGitHub) -> Unit = {}
     ) {
         val command = VerifyUserLoginToGitHub::class.withSession(session.value!!.id)
-        client.observeEither(command.id,
-            UserLoggedIn::class,
-            { event ->
+        client.observeEither(
+            EventObserver(command.id, UserLoggedIn::class) { event ->
                 codeExpirationJob.cancel()
                 onSuccess(event)
             },
-            UserIsNotLoggedIntoGitHub::class,
-            { event ->
+            EventObserver(command.id, UserIsNotLoggedIntoGitHub::class) { event ->
                 preventAskingForNewTokens()
                 onFail(event)
             }
