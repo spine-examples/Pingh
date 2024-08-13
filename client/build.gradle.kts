@@ -54,7 +54,7 @@ kotlin {
 }
 
 dependencies {
-    // To work with `PinghApplication`, it is necessary to use values-objects and IDs declared
+    // To work with `PinghApplication`, it is necessary to use value objects and IDs declared
     // in different bounded contexts. All necessary classes are collected in the `server` module.
     api(project(":server"))
 
