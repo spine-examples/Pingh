@@ -36,7 +36,7 @@ option java_multiple_files = true;
 
 import "spine_examples/pingh/mentions/identifiers.proto";
 import "spine_examples/pingh/mentions/mention.proto";
-import "spine_examples/pingh/github/github.proto";
+import "spine_examples/pingh/github/values.proto";
 import "spine/net/url.proto";
 import "google/protobuf/timestamp.proto";
 

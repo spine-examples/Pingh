@@ -35,7 +35,7 @@ option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/sessions/identifiers.proto";
-import "spine_examples/pingh/github/github.proto";
+import "spine_examples/pingh/github/values.proto";
 
 // The user logged in.
 message UserLoggedIn {
