@@ -26,10 +26,15 @@
 
 package io.spine.examples.pingh.client
 
+import io.grpc.ManagedChannel
+import io.grpc.ManagedChannelBuilder
 import io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT
 import io.spine.core.UserId
-import java.util.UUID
+import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 /**
  * Manages the logic for the Pingh app.
@@ -46,10 +51,27 @@ public class PinghApplication(
     address: String = "localhost",
     port: Int = DEFAULT_CLIENT_SERVICE_PORT
 ) {
+    private companion object {
+        /**
+         * The default amount of seconds to wait
+         * when [closing][ManagedChannel.shutdown] the channel.
+         */
+        private const val defaultShutdownTimeout = 5L
+    }
+
+    /**
+     * Channel for the communication with the Pingh server.
+     */
+    private val channel = ManagedChannelBuilder
+        .forAddress(address, port)
+        .usePlaintext()
+        .build()
+
     /**
      * Enables interaction with the Pingh server.
      */
-    internal val client = DesktopClient(address, port, generateUserId())
+    internal var client = DesktopClient(channel)
+        private set
 
     /**
      * State of application settings.
@@ -60,6 +82,26 @@ public class PinghApplication(
      * Information about the current user session.
      */
     private val session = MutableStateFlow<UserSession?>(null)
+
+    /**
+     * Asynchronously updates the [client] after the [session] is updated.
+     *
+     * If the `session` is closed, a guest `client` is created. If a new `session` is established,
+     * a `client` is created to make requests on behalf of the user.
+     *
+     * The previous `client` is closed as soon as the new `client` is initialized.
+     */
+    private val clientUpdatingJob = CoroutineScope(Dispatchers.Default).launch {
+        session.collect { value ->
+            val previousClient = client
+            client = if (value != null) {
+                DesktopClient(channel, value.asUserId())
+            } else {
+                DesktopClient(channel)
+            }
+            previousClient.close()
+        }
+    }
 
     /**
      * Returns `true` if a user session exists, otherwise `false`.
@@ -86,13 +128,16 @@ public class PinghApplication(
      */
     public fun close() {
         client.close()
+        channel.shutdown()
+            .awaitTermination(defaultShutdownTimeout, TimeUnit.SECONDS)
+        clientUpdatingJob.cancel()
     }
 }
 
 /**
- * Create a new `UserId` with the random value.
+ * Creates a new `UserId` using the username contained in this `UserSession`.
  */
-private fun generateUserId(): UserId =
+private fun UserSession.asUserId(): UserId =
     UserId.newBuilder()
-        .setValue(UUID.randomUUID().toString())
+        .setValue(id.username.value)
         .vBuild()

@@ -27,7 +27,7 @@
 package io.spine.examples.pingh.client
 
 import com.google.protobuf.Message
-import io.grpc.ManagedChannelBuilder
+import io.grpc.ManagedChannel
 import io.spine.base.CommandMessage
 import io.spine.base.EntityState
 import io.spine.base.EventMessage
@@ -43,26 +43,19 @@ import kotlin.reflect.KClass
 /**
  * Interacts with [Pingh server][io.spine.examples.pingh.server] via gRPC.
  *
- * @param address the address of the Pingh server.
- * @param port the port on which the Pingh server is running.
+ * @param channel the channel for the communication with the Pingh server.
  * @param userId user on whose behalf client requests are made.
  */
 internal class DesktopClient(
-    address: String,
-    port: Int,
-    private val userId: UserId
+    channel: ManagedChannel,
+    private val userId: UserId? = null
 ) {
-    private val client: Client
-
-    init {
-        val channel = ManagedChannelBuilder
-            .forAddress(address, port)
-            .usePlaintext()
-            .build()
-        client = Client
-            .usingChannel(channel)
-            .build()
-    }
+    /**
+     * Gateway for backend services that handles commands, queries, and subscriptions.
+     */
+    private val client = Client
+        .usingChannel(channel)
+        .build()
 
     /**
      * Sends a command to the server on behalf of the user.
@@ -179,15 +172,22 @@ internal class DesktopClient(
     }
 
     /**
-     * Creates a new instance of the `ClientRequest` on behalf of current client.
+     * Creates a new instance of the `ClientRequest` on behalf of [user][userId] if it exists,
+     * or as guest if it doesn't.
      */
-    private fun clientRequest(): ClientRequest = client.onBehalfOf(userId)
+    private fun clientRequest(): ClientRequest =
+        if (userId == null) {
+            client.asGuest()
+        } else {
+            client.onBehalfOf(userId)
+        }
 
     /**
-     * Closes the client.
+     * Cancels all subscriptions.
      */
     internal fun close() {
-        client.close()
+        client.subscriptions()
+            .cancelAll()
     }
 }
 

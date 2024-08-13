@@ -33,8 +33,8 @@ package io.spine.examples.pingh.sessions
  * @see <a href="https://shorturl.at/nsfby">Problems that can occur</a>
  */
 public class CannotObtainAccessToken(
-    public val errorName: String
-) : Exception() {
+    errorName: String
+) : Exception("Received an error from GitHub with name `$errorName`.") {
 
     public companion object {
         private const val serialVersionUID: Long = -93148501036759551L
