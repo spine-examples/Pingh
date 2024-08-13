@@ -24,23 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.BuildSettings
 import io.spine.internal.dependency.Ktor
-
-plugins {
-    kotlin("jvm")
-}
-
-kotlin {
-    jvmToolchain {
-        languageVersion.set(BuildSettings.javaVersion)
-    }
-    explicitApi()
-}
 
 dependencies {
     implementation(project(":github"))
     implementation(project(":mentions"))
-
     implementation(Ktor.Client.core)
 }

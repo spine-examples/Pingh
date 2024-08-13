@@ -24,15 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.BuildSettings
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Guava
-import io.spine.internal.dependency.JavaX
 import io.spine.internal.dependency.Ktor
 
 plugins {
-    kotlin("jvm")
-
     // Add the Gradle plugin for bootstrapping projects built with Spine.
     // See: https://github.com/SpineEventEngine/bootstrap
     id("io.spine.tools.gradle.bootstrap").version("1.9.0")
@@ -49,19 +45,11 @@ spine {
     forceDependencies = true
 }
 
-kotlin {
-    jvmToolchain {
-        languageVersion.set(BuildSettings.javaVersion)
-    }
-    explicitApi()
-}
-
 dependencies {
     api(project(":github"))
     api(project(":sessions"))
     api(project(":mentions"))
 
-    implementation(JavaX.annotations)
     implementation(Ktor.Client.cio)
     implementation(Guava.lib)
     implementation(Grpc.netty)
