@@ -170,7 +170,7 @@ public class GitHubClientServiceImpl(
         /**
          * Returns GitHub name to search for an item of this type.
          */
-        public fun value(): String = gitHubName
+        fun value(): String = gitHubName
     }
 
     /**
@@ -178,11 +178,11 @@ public class GitHubClientServiceImpl(
      */
     private class GitHubSearchRequest private constructor(private val url: String) {
 
-        public companion object {
+        companion object {
             /**
              * Creates builder and sets the request URL.
              */
-            public fun get(url: String): GitHubSearchRequest = GitHubSearchRequest(url)
+            fun get(url: String): GitHubSearchRequest = GitHubSearchRequest(url)
         }
 
         /**
@@ -209,7 +209,7 @@ public class GitHubClientServiceImpl(
         /**
          * Sets the type of the searched item.
          */
-        public fun by(itemType: ItemType): GitHubSearchRequest {
+        fun by(itemType: ItemType): GitHubSearchRequest {
             this.itemType = itemType
             return this
         }
@@ -217,7 +217,7 @@ public class GitHubClientServiceImpl(
         /**
          * Sets the name of the user whose mentions are requested.
          */
-        public fun by(username: Username): GitHubSearchRequest {
+        fun by(username: Username): GitHubSearchRequest {
             this.username = username
             return this
         }
@@ -226,7 +226,7 @@ public class GitHubClientServiceImpl(
          * Sets the time after which GitHub items containing the searched mentions
          * should have been updated.
          */
-        public fun by(updatedAfter: Timestamp): GitHubSearchRequest {
+        fun by(updatedAfter: Timestamp): GitHubSearchRequest {
             this.updatedAfter = updatedAfter
             return this
         }
@@ -234,7 +234,7 @@ public class GitHubClientServiceImpl(
         /**
          * Sets the user authentication token on GitHub
          */
-        public fun with(token: PersonalAccessToken): GitHubSearchRequest {
+        fun with(token: PersonalAccessToken): GitHubSearchRequest {
             this.token = token
             return this
         }
@@ -244,7 +244,7 @@ public class GitHubClientServiceImpl(
          *
          * @throws IllegalArgumentException some request data is not specified.
          */
-        public suspend fun requestOnBehalfOf(client: HttpClient): HttpResponse {
+        suspend fun requestOnBehalfOf(client: HttpClient): HttpResponse {
             checkNotNull(itemType) { "The type of the searched item is not specified." }
             checkNotNull(username) {
                 "The name of the user whose mentions are requested is not specified."

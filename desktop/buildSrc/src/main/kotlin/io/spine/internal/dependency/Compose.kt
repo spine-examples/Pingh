@@ -27,7 +27,6 @@
 package io.spine.internal.dependency
 
 // https://github.com/JetBrains/compose-multiplatform
-@Suppress("ConstPropertyName")
 public object Compose {
     private const val group = "androidx.compose"
 

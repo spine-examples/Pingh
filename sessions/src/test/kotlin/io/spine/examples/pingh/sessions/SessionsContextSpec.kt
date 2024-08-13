@@ -43,25 +43,25 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 @DisplayName("Sessions Context should")
-public class SessionsContextSpec : ContextAwareTest() {
+internal class SessionsContextSpec : ContextAwareTest() {
 
-    protected override fun contextBuilder(): BoundedContextBuilder =
+    override fun contextBuilder(): BoundedContextBuilder =
         newSessionsContext()
 
     @Nested
-    public inner class `handle 'LogUserIn' command, and` {
+    internal inner class `handle 'LogUserIn' command, and` {
 
         private lateinit var sessionId: SessionId
 
         @BeforeEach
-        public fun sendCommand() {
+        internal fun sendCommand() {
             sessionId = SessionId::class.generate()
             val command = LogUserIn::class.buildBy(sessionId)
             context().receivesCommand(command)
         }
 
         @Test
-        public fun `emit 'UserLoggedIn' event`() {
+        internal fun `emit 'UserLoggedIn' event`() {
             val expected = UserLoggedIn::class.buildWithoutToken(sessionId)
             val events = assertEvents(UserLoggedIn::class.java)
             events.hasSize(1)
@@ -71,19 +71,19 @@ public class SessionsContextSpec : ContextAwareTest() {
         }
 
         @Test
-        public fun `update 'UserSession' entity`() {
+        internal fun `update 'UserSession' entity`() {
             val expected = UserSession::class.buildBy(sessionId)
             context().assertState(sessionId, expected)
         }
     }
 
     @Nested
-    public inner class `handle 'LogUserOut' command, and` {
+    internal inner class `handle 'LogUserOut' command, and` {
 
         private lateinit var sessionId: SessionId
 
         @BeforeEach
-        public fun sendCommand() {
+        internal fun sendCommand() {
             sessionId = SessionId::class.generate()
             context()
                 .receivesCommand(LogUserIn::class.buildBy(sessionId))
@@ -91,13 +91,13 @@ public class SessionsContextSpec : ContextAwareTest() {
         }
 
         @Test
-        public fun `emit 'UserLoggedOut' event`() {
+        internal fun `emit 'UserLoggedOut' event`() {
             val expected = UserLoggedOut::class.buildBy(sessionId)
             context().assertEvent(expected)
         }
 
         @Test
-        public fun `delete 'UserSession' entity`() {
+        internal fun `delete 'UserSession' entity`() {
             context().assertEntity(sessionId, UserSessionProcess::class.java)
                 .deletedFlag()
                 .isTrue()
@@ -105,7 +105,7 @@ public class SessionsContextSpec : ContextAwareTest() {
     }
 
     @Test
-    public fun `support simultaneous sessions`() {
+    internal fun `support simultaneous sessions`() {
         val firstSession = SessionId::class.generate()
         val secondSession = SessionId::class.buildBy(firstSession.username)
         context()
@@ -119,7 +119,7 @@ public class SessionsContextSpec : ContextAwareTest() {
     }
 
     @Test
-    public fun `create new session when user logs in again`() {
+    internal fun `create new session when user logs in again`() {
         val firstSession = SessionId::class.generate()
         val secondSession = SessionId::class.buildBy(firstSession.username)
         context()

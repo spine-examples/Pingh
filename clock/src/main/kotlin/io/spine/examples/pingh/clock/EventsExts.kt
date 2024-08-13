@@ -33,6 +33,7 @@ import kotlin.reflect.KClass
 /**
  * Creates a new `TimePassed` event with the specified value of the time.
  */
+@Suppress("UnusedReceiverParameter" /* Class extension doesn't use class as a parameter. */)
 public fun KClass<TimePassed>.buildBy(time: Timestamp): TimePassed =
     TimePassed.newBuilder()
         .setTime(time)

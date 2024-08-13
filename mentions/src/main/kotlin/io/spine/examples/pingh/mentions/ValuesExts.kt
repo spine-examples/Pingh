@@ -32,6 +32,7 @@ import kotlin.reflect.KClass
 /**
  * Creates a new `MentionView` with the specified status and data from the passed event.
  */
+@Suppress("UnusedReceiverParameter" /* Class extension doesn't use class as a parameter. */)
 public fun KClass<MentionView>.buildBy(event: UserMentioned, status: MentionStatus):
         MentionView =
     MentionView.newBuilder()
