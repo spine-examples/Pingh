@@ -27,11 +27,11 @@
 package io.spine.internal.dependency
 
 // https://github.com/SpineEventEngine
-@Suppress("ConstPropertyName")
 public object Spine {
-
-    // Keep in sync with in sync with Spine Bootstraps plugin
-    // in `build.gradle.kts` in each module.
+    /**
+     * Keep in sync with in sync with Spine Bootstraps plugin
+     * in `build.gradle.kts` in each module.
+     */
     private const val version = "1.9.0"
 
     // https://github.com/SpineEventEngine/core-java

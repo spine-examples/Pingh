@@ -63,6 +63,7 @@ internal val Project.publications: PublicationContainer
  *
  * @see [JavaPluginExtension.withSourcesJar]
  */
+@Suppress("UnstableApiUsage" /* For using `withSourcesJar()`, which is `Incubating`. */)
 internal fun Project.addSourcesJar() {
     extensions.getByType<JavaPluginExtension>()
         .withSourcesJar()

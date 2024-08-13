@@ -27,9 +27,7 @@
 package io.spine.internal.dependency
 
 // https://github.com/Kotlin/dokka
-@Suppress("unused", "ConstPropertyName")
 public object Dokka {
-
     /**
      * Custom Dokka plugins developed for Spine-specific needs like excluding by
      * `@Internal` annotation.

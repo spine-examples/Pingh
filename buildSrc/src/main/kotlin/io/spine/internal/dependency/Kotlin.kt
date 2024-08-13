@@ -26,9 +26,13 @@
 
 package io.spine.internal.dependency
 
-// https://github.com/grpc/grpc-java
-public object Grpc {
-    private const val version = "1.58.0"
-    public const val netty: String = "io.grpc:grpc-netty:$version"
-    public const val inprocess: String = "io.grpc:grpc-inprocess:$version"
+// https://github.com/JetBrains/kotlin
+// https://github.com/Kotlin
+public object Kotlin {
+    private const val group = "org.jetbrains.kotlin"
+    private const val version = "1.9.20"
+
+    public const val stdLib: String = "$group:kotlin-stdlib:$version"
+    public const val stdLibCommon: String = "$group:kotlin-stdlib-common:$version"
+    public const val reflect: String = "$group:kotlin-reflect:$version"
 }
