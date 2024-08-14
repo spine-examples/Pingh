@@ -88,18 +88,15 @@ public class PinghApplication(
      *
      * If the `session` is closed, a guest `client` is created. If a new `session` is established,
      * a `client` is created to make requests on behalf of the user.
-     *
-     * The previous `client` is closed as soon as the new `client` is initialized.
      */
     private val clientUpdatingJob = CoroutineScope(Dispatchers.Default).launch {
         session.collect { value ->
-            val previousClient = client
+            client.close()
             client = if (value != null) {
                 DesktopClient(channel, value.asUserId())
             } else {
                 DesktopClient(channel)
             }
-            previousClient.close()
         }
     }
 
