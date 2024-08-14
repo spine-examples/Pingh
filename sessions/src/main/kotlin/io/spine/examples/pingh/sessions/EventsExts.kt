@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("UnusedReceiverParameter" /* Class extensions don't use class as a parameter. */)
+
 package io.spine.examples.pingh.sessions
 
 import com.google.protobuf.Duration

@@ -113,12 +113,12 @@ public class GitHubClientProcess :
         } catch (exception: CannotFetchMentionsFromGitHubException) {
             builder().clearWhenStarted()
             return listOf(
-                RequestMentionsFromGitHubFailed::class.buildBy(state().id, exception.statusCode())
+                RequestMentionsFromGitHubFailed::class.buildBy(event.id, exception.statusCode())
             )
         }
         val userMentionedEvents = toEvents(mentions, state().id.username)
         val mentionsUpdateFromGitHubCompleted =
-            MentionsUpdateFromGitHubCompleted::class.buildBy(state().id)
+            MentionsUpdateFromGitHubCompleted::class.buildBy(event.id)
         builder()
             .setWhenLastSuccessfullyUpdated(state().whenStarted)
             .clearWhenStarted()
@@ -157,7 +157,7 @@ public class GitHubClientProcess :
  * @see [thisOrLastWorkday]
  */
 private fun Timestamp.thisOrLastWorkday(): Timestamp {
-    if (!this.equals(this.defaultInstanceForType)) {
+    if (Timestamps.compare(this, this.defaultInstanceForType) != 0) {
         return this
     }
     return Timestamp::class.identifyLastWorkday()
@@ -170,6 +170,7 @@ private fun Timestamp.thisOrLastWorkday(): Timestamp {
  *
  * If today is a workday, returns midnight today.
  */
+@Suppress("UnusedReceiverParameter" /* Class extension doesn't use class as a parameter. */)
 public fun KClass<Timestamp>.identifyLastWorkday(): Timestamp {
     var localDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN)
     while (localDateTime.dayOfWeek in listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)) {

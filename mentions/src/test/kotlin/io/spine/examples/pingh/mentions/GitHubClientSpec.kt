@@ -57,18 +57,18 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 @DisplayName("`GitHubClient` should")
-public class GitHubClientSpec : ContextAwareTest() {
+internal class GitHubClientSpec : ContextAwareTest() {
 
     private val gitHubClientService = PredefinedGitHubResponses()
     private lateinit var sessionContext: BlackBoxContext
     private lateinit var gitHubClientId: GitHubClientId
     private lateinit var token: PersonalAccessToken
 
-    protected override fun contextBuilder(): BoundedContextBuilder =
+    override fun contextBuilder(): BoundedContextBuilder =
         newMentionsContext(gitHubClientService)
 
     @BeforeEach
-    public fun prepareSessionsContextAndEmitEvent() {
+    internal fun prepareSessionsContextAndEmitEvent() {
         gitHubClientService.unfreeze()
         gitHubClientService.setDefaultResponseStatusCode()
         sessionContext = BlackBoxContext
@@ -85,27 +85,27 @@ public class GitHubClientSpec : ContextAwareTest() {
     }
 
     @AfterEach
-    public fun closeSessionsContext() {
+    internal fun closeSessionsContext() {
         sessionContext.close()
     }
 
     @Nested
-    public inner class `react on 'UserLoggedIn' event in Sessions bounded context, and` {
+    internal inner class `react on 'UserLoggedIn' event in Sessions bounded context, and` {
 
         @Test
-        public fun `emit 'GitHubTokenUpdated' event`() {
+        internal fun `emit 'GitHubTokenUpdated' event`() {
             val expected = GitHubTokenUpdated::class.buildBy(gitHubClientId, token)
             context().assertEvent(expected)
         }
 
         @Test
-        public fun `init 'GitHubClient' state and set the received token`() {
+        internal fun `init 'GitHubClient' state and set the received token`() {
             val expected = GitHubClient::class.buildBy(gitHubClientId, token)
             context().assertState(gitHubClientId, expected)
         }
 
         @Test
-        public fun `update token in existing 'GitHubClient' entity`() {
+        internal fun `update token in existing 'GitHubClient' entity`() {
             emitUserLoggedInEventInSessionsContext()
             val expected = GitHubClient::class.buildBy(gitHubClientId, token)
             context().assertState(gitHubClientId, expected)
@@ -113,10 +113,10 @@ public class GitHubClientSpec : ContextAwareTest() {
     }
 
     @Nested
-    public inner class `handle 'UpdateMentionsFromGitHub' command, and` {
+    internal inner class `handle 'UpdateMentionsFromGitHub' command, and` {
 
         @Test
-        public fun `emit 'MentionsUpdateFromGitHubRequested' event if update process started`() {
+        internal fun `emit 'MentionsUpdateFromGitHubRequested' event if update process started`() {
             val command = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
             context().receivesCommand(command)
             val expected = MentionsUpdateFromGitHubRequested::class.buildBy(gitHubClientId)
@@ -124,7 +124,7 @@ public class GitHubClientSpec : ContextAwareTest() {
         }
 
         @Test
-        public fun `set the start time of the update operation`() {
+        internal fun `set the start time of the update operation`() {
             val otherClientThread = Thread {
                 val command = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
                 context().receivesCommand(command)
@@ -142,7 +142,7 @@ public class GitHubClientSpec : ContextAwareTest() {
         }
 
         @Test
-        public fun `reject if the update process is already in progress at this time`() {
+        internal fun `reject if the update process is already in progress at this time`() {
             gitHubClientService.freeze()
             val firstClientThread = Thread {
                 val firstCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
@@ -167,10 +167,10 @@ public class GitHubClientSpec : ContextAwareTest() {
     }
 
     @Nested
-    public inner class `react on 'MentionsUpdateFromGitHubRequested' event, and` {
+    internal inner class `react on 'MentionsUpdateFromGitHubRequested' event, and` {
 
         @Test
-        public fun `emit 'UserMentioned' events for each mentions fetched from GitHub`() {
+        internal fun `emit 'UserMentioned' events for each mentions fetched from GitHub`() {
             emitMentionsUpdateFromGitHubRequestedEvent()
             val expectedUserMentionedSet = expectedUserMentionedSet(gitHubClientId.username)
             val eventSubject = context().assertEvents()
@@ -184,14 +184,14 @@ public class GitHubClientSpec : ContextAwareTest() {
         }
 
         @Test
-        public fun `emit 'MentionsUpdateFromGitHubCompleted' event`() {
+        internal fun `emit 'MentionsUpdateFromGitHubCompleted' event`() {
             emitMentionsUpdateFromGitHubRequestedEvent()
             val expected = MentionsUpdateFromGitHubCompleted::class.buildBy(gitHubClientId)
             context().assertEvent(expected)
         }
 
         @Test
-        public fun `emit 'RequestMentionsFromGitHubFailed' event if request to GitHub failed`() {
+        internal fun `emit 'RequestMentionsFromGitHubFailed' event if request to GitHub failed`() {
             val responseStatusCode = HttpStatusCode.ServiceUnavailable
             gitHubClientService.setResponseStatusCode(responseStatusCode)
             emitMentionsUpdateFromGitHubRequestedEvent()
@@ -216,7 +216,7 @@ public class GitHubClientSpec : ContextAwareTest() {
     }
 
     @Test
-    public fun `reset process start time after completing the update process`() {
+    internal fun `reset process start time after completing the update process`() {
         val command = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
         context().receivesCommand(command)
         val expected = GitHubClient::class.buildBy(gitHubClientId, token)
@@ -224,7 +224,7 @@ public class GitHubClientSpec : ContextAwareTest() {
     }
 
     @Test
-    public fun `remember the time of last successful update`() {
+    internal fun `remember the time of last successful update`() {
         val whenRequested = currentTime()
         val command = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId, whenRequested)
         context().receivesCommand(command)
@@ -233,7 +233,7 @@ public class GitHubClientSpec : ContextAwareTest() {
     }
 
     @Test
-    public fun `allow new update process after the previous one is completed`() {
+    internal fun `allow new update process after the previous one is completed`() {
         val firstCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
         context().receivesCommand(firstCommand)
         val secondCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)

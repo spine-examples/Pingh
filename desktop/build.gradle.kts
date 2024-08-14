@@ -73,11 +73,9 @@ kotlin {
     explicitApi()
 }
 
-configurations {
-    all {
-        resolutionStrategy {
-            force(Guava.lib)
-        }
+configurations.all {
+    resolutionStrategy {
+        force(Guava.lib)
     }
 }
 

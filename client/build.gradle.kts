@@ -24,15 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.BuildSettings
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.KotlinX
 import io.spine.internal.dependency.Spine
 
 plugins {
-    kotlin("jvm")
-
     // Add the Gradle plugin for bootstrapping projects built with Spine.
     // See: https://github.com/SpineEventEngine/bootstrap
     id("io.spine.tools.gradle.bootstrap").version("1.9.0")
@@ -45,13 +42,6 @@ spine {
 }
 
 forceGrpcDependencies(configurations)
-
-kotlin {
-    jvmToolchain {
-        languageVersion.set(BuildSettings.javaVersion)
-    }
-    explicitApi()
-}
 
 dependencies {
     // To work with `PinghApplication`, it is necessary to use value objects and IDs declared

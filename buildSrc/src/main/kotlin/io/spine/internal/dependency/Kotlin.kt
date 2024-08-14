@@ -24,17 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.clock
+package io.spine.internal.dependency
 
-import com.google.protobuf.Timestamp
-import io.spine.examples.pingh.clock.event.TimePassed
-import kotlin.reflect.KClass
+// https://github.com/JetBrains/kotlin
+// https://github.com/Kotlin
+public object Kotlin {
+    private const val group = "org.jetbrains.kotlin"
+    private const val version = "1.9.20"
 
-/**
- * Creates a new `TimePassed` event with the specified value of the time.
- */
-@Suppress("UnusedReceiverParameter" /* Class extension doesn't use class as a parameter. */)
-public fun KClass<TimePassed>.buildBy(time: Timestamp): TimePassed =
-    TimePassed.newBuilder()
-        .setTime(time)
-        .vBuild()
+    public const val stdLib: String = "$group:kotlin-stdlib:$version"
+    public const val stdLibCommon: String = "$group:kotlin-stdlib-common:$version"
+    public const val reflect: String = "$group:kotlin-reflect:$version"
+}

@@ -42,18 +42,18 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 @DisplayName("`GitHubClientService` should")
-public class GitHubClientServiceSpec {
+internal class GitHubClientServiceSpec {
 
     private val username = Username::class.buildBy("MykytaPimonovTD")
     private lateinit var token: PersonalAccessToken
 
     @BeforeEach
-    public fun generateToken() {
+    internal fun generateToken() {
         token = PersonalAccessToken::class.buildBy(randomString())
     }
 
     @Test
-    public fun `fetch mentions from GitHub`() {
+    internal fun `fetch mentions from GitHub`() {
         val service = GitHubClientServiceImpl(mockEngineThatContainsMentions(token))
         val mentions = service.fetchMentions(username, token)
         val expected = expectedMentions()
@@ -61,7 +61,7 @@ public class GitHubClientServiceSpec {
     }
 
     @Test
-    public fun `throw exception if fetching from GitHub failed`() {
+    internal fun `throw exception if fetching from GitHub failed`() {
         val service = GitHubClientServiceImpl(mockEngineThatFailsAllRequest(token))
         val exception = shouldThrow<CannotFetchMentionsFromGitHubException> {
             service.fetchMentions(username, token)
@@ -70,7 +70,7 @@ public class GitHubClientServiceSpec {
     }
 
     @Test
-    public fun `return empty set if the user has not been mentioned`() {
+    internal fun `return empty set if the user has not been mentioned`() {
         val service = GitHubClientServiceImpl(mockEngineThatDoesNotContainMentions(token))
         val mentions = service.fetchMentions(username, token)
         mentions.shouldBeEmpty()

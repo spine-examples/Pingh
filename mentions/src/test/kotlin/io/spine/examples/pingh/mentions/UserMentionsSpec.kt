@@ -43,16 +43,16 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 @DisplayName("`UserMentions` should")
-public class UserMentionsSpec : ContextAwareTest() {
+internal class UserMentionsSpec : ContextAwareTest() {
 
     private lateinit var id: UserMentionsId
     private lateinit var userMentioned: UserMentioned
 
-    protected override fun contextBuilder(): BoundedContextBuilder =
+    override fun contextBuilder(): BoundedContextBuilder =
         newMentionsContext(PredefinedGitHubResponses())
 
     @BeforeEach
-    public fun emitUserMentionedEvent() {
+    internal fun emitUserMentionedEvent() {
         val username = Username::class.buildBy(randomString())
         id = UserMentionsId::class.buildBy(username)
         userMentioned = UserMentioned::class.generateWith(username)
@@ -60,19 +60,19 @@ public class UserMentionsSpec : ContextAwareTest() {
     }
 
     @Test
-    public fun `init 'UserMentions' state, and mark it as unread`() {
+    internal fun `init 'UserMentions' state, and mark it as unread`() {
         assertMentionStatus(MentionStatus.UNREAD)
     }
 
     @Test
-    public fun `react on 'MentionSnoozed' event, and mark the target mention as snoozed`() {
+    internal fun `react on 'MentionSnoozed' event, and mark the target mention as snoozed`() {
         val event = MentionSnoozed::class.buildBy(userMentioned.id)
         context().receivesEvent(event)
         assertMentionStatus(MentionStatus.SNOOZED)
     }
 
     @Test
-    public fun `react on 'MentionUnsnoozed', and mark the target mention as unread`() {
+    internal fun `react on 'MentionUnsnoozed', and mark the target mention as unread`() {
         val snoozedEvent = MentionSnoozed::class.buildBy(userMentioned.id)
         val unsnoozedEvent = MentionUnsnoozed::class.buildBy(userMentioned.id)
         context()
@@ -82,7 +82,7 @@ public class UserMentionsSpec : ContextAwareTest() {
     }
 
     @Test
-    public fun `react on 'MentionRead' event, and mark the target mention as read`() {
+    internal fun `react on 'MentionRead' event, and mark the target mention as read`() {
         val event = MentionRead::class.buildBy(userMentioned.id)
         context().receivesEvent(event)
         assertMentionStatus(MentionStatus.READ)

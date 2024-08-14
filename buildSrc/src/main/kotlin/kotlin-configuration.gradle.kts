@@ -24,17 +24,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.clock
+import io.spine.internal.BuildSettings
+import io.spine.internal.dependency.Kotlin
 
-import com.google.protobuf.Timestamp
-import io.spine.examples.pingh.clock.event.TimePassed
-import kotlin.reflect.KClass
+plugins {
+    kotlin("jvm")
+}
+
+kotlin {
+    @Suppress("UnstableApiUsage" /* Used to specify the JVM version. */)
+    jvmToolchain {
+        languageVersion.set(BuildSettings.javaVersion)
+    }
+    explicitApi()
+}
 
 /**
- * Creates a new `TimePassed` event with the specified value of the time.
+ * Force Kotlin library versions to avoid using those bundled with the `buildSrc` module.
  */
-@Suppress("UnusedReceiverParameter" /* Class extension doesn't use class as a parameter. */)
-public fun KClass<TimePassed>.buildBy(time: Timestamp): TimePassed =
-    TimePassed.newBuilder()
-        .setTime(time)
-        .vBuild()
+configurations.all {
+    resolutionStrategy {
+        force(
+            Kotlin.stdLib,
+            Kotlin.stdLibCommon,
+            Kotlin.reflect
+        )
+    }
+}
+
+dependencies {
+    implementation(Kotlin.stdLib)
+    implementation(Kotlin.stdLibCommon)
+    implementation(Kotlin.reflect)
+}
