@@ -34,7 +34,7 @@ option java_package = "io.spine.examples.pingh.sessions";
 option java_outer_classname = "IdentifiersProto";
 option java_multiple_files = true;
 
-import "spine_examples/pingh/github/github.proto";
+import "spine_examples/pingh/github/values.proto";
 import "google/protobuf/timestamp.proto";
 
 // Identifies a user session.

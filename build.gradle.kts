@@ -35,9 +35,7 @@ plugins {
  * Gradle configuration for the whole project.
  */
 allprojects {
-    /*
-    * Import the `version.gradle.kts` file and set the version and group for each module.
-    */
+    // Import the `version.gradle.kts` file and set the version and group for each module.
     apply(from = "$rootDir/version.gradle.kts")
     version = extra["pinghVersion"]!!
     group = "io.spine.examples.pingh"
@@ -53,24 +51,19 @@ subprojects {
 
     apply<JavaPlugin>()
 
-    /*
-     * Configure repositories.
-     */
+    // Adds Kotlin plugin and configures it.
+    apply<KotlinConfigurationPlugin>()
+
+    // Configure repositories.
     apply<RepositoriesConfigurationPlugin>()
 
-    /*
-     * Adds dependencies for Dokka and configures it.
-     */
+    // Adds dependencies for Dokka and configures it.
     apply<DokkaConfigurationPlugin>()
 
-    /*
-     * Adds and configures the Detekt Plugin for analysis code.
-     */
+    // Adds and configures the Detekt Plugin for analysis code.
     apply<DetektCodeAnalysisPlugin>()
 
-    /*
-     * Adds dependencies for testing and configure test-running tasks.
-     */
+    // Adds dependencies for testing and configure test-running tasks.
     apply<TestsConfigurationPlugin>()
 }
 

@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-@file:Suppress("TooManyFunctions") // Using Compose requires many functions to render the UI.
+@file:Suppress("TooManyFunctions" /* Using Compose requires many functions to render the UI. */)
 
 package io.spine.examples.pingh.desktop
 
@@ -76,7 +76,7 @@ import io.spine.protobuf.Durations2.hours
 import io.spine.protobuf.Durations2.minutes
 
 /**
- * Displays a application settings.
+ * Displays an application settings.
  *
  * All changes are saved automatically and applied immediately.
  *

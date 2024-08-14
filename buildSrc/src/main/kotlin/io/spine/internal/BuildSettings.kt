@@ -34,8 +34,8 @@ import org.gradle.jvm.toolchain.JavaLanguageVersion
  *
  * It cannot be used in the build script of `buildSrc` itself.
  */
+@Suppress("UnstableApiUsage" /* For `JavaLanguageVersion`, used to specify the JVM version. */)
 public object BuildSettings {
-
-    private const val JVM_VERSION = 11
-    public val javaVersion: JavaLanguageVersion = JavaLanguageVersion.of(JVM_VERSION)
+    private const val jvmVersion = 11
+    public val javaVersion: JavaLanguageVersion = JavaLanguageVersion.of(jvmVersion)
 }

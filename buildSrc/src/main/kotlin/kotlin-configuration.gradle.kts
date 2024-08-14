@@ -24,34 +24,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.dependency.Guava
-import io.spine.internal.dependency.Spine
+import io.spine.internal.BuildSettings
+import io.spine.internal.dependency.Kotlin
 
 plugins {
-    // Add the Gradle plugin for bootstrapping projects built with Spine.
-    // See: https://github.com/SpineEventEngine/bootstrap
-    id("io.spine.tools.gradle.bootstrap").version("1.9.0")
+    kotlin("jvm")
 }
 
-spine {
-    // Add and configure required dependencies for developing a Spine-based Java client.
-    // See: https://github.com/SpineEventEngine/bootstrap#java-projects
-    enableJava().client()
+kotlin {
+    @Suppress("UnstableApiUsage" /* Used to specify the JVM version. */)
+    jvmToolchain {
+        languageVersion.set(BuildSettings.javaVersion)
+    }
+    explicitApi()
 }
 
-forceGrpcDependencies(configurations)
+/**
+ * Force Kotlin library versions to avoid using those bundled with the `buildSrc` module.
+ */
+configurations.all {
+    resolutionStrategy {
+        force(
+            Kotlin.stdLib,
+            Kotlin.stdLibCommon,
+            Kotlin.reflect
+        )
+    }
+}
 
 dependencies {
-    // To work with `DesktopClient`, it is necessary to use values-objects and IDs declared
-    // in different bounded contexts. All necessary classes are collected in the `server` module.
-    api(project(":server"))
-
-    implementation(Guava.lib)
-    implementation(Grpc.netty)
-    implementation(Grpc.inprocess)
-
-    testImplementation(project(":testutil-mentions"))
-    testImplementation(project(":clock"))
-    testImplementation(Spine.Server.lib)
+    implementation(Kotlin.stdLib)
+    implementation(Kotlin.stdLibCommon)
+    implementation(Kotlin.reflect)
 }

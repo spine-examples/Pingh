@@ -34,7 +34,7 @@ option java_package = "io.spine.examples.pingh.mentions";
 option java_outer_classname = "IdentifiersProto";
 option java_multiple_files = true;
 
-import "spine_examples/pingh/github/github.proto";
+import "spine_examples/pingh/github/values.proto";
 import "spine_examples/pingh/github/identifiers.proto";
 
 // Identifies a mention.

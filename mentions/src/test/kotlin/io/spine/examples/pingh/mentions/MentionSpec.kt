@@ -51,105 +51,105 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 @DisplayName("`Mention` should")
-public class MentionSpec : ContextAwareTest() {
+internal class MentionSpec : ContextAwareTest() {
 
     private lateinit var id: MentionId
 
-    protected override fun contextBuilder(): BoundedContextBuilder =
+    override fun contextBuilder(): BoundedContextBuilder =
         newMentionsContext(PredefinedGitHubResponses())
 
     @BeforeEach
-    public fun emitUserMentionedEvent() {
+    internal fun emitUserMentionedEvent() {
         id = MentionId::class.generate()
         val event = UserMentioned::class.buildBy(id)
         context().receivesEvent(event)
     }
 
     @Nested
-    public inner class `react on 'UserMentioned' event, and` {
+    internal inner class `react on 'UserMentioned' event, and` {
 
         @Test
-        public fun `init 'Mention' state and mark it as unread`() {
+        internal fun `init 'Mention' state and mark it as unread`() {
             val expected = Mention::class.buildBy(id, MentionStatus.UNREAD)
             context().assertState(id, expected)
         }
     }
 
     @Nested
-    public inner class `handle 'SnoozeMention' command, and` {
+    internal inner class `handle 'SnoozeMention' command, and` {
 
         private lateinit var untilWhen: Timestamp
 
         @BeforeEach
-        public fun sendSnoozeMentionCommand() {
+        internal fun sendSnoozeMentionCommand() {
             untilWhen = currentTime()
             val command = SnoozeMention::class.buildBy(id, untilWhen)
             context().receivesCommand(command)
         }
 
         @Test
-        public fun `emit 'MentionSnoozed' event`() {
+        internal fun `emit 'MentionSnoozed' event`() {
             val expected = MentionSnoozed::class.buildBy(id, untilWhen)
             context().assertEvent(expected)
         }
 
         @Test
-        public fun `snooze the target 'Mention', remembering the time until which it is snoozed`() {
+        internal fun `snooze the target 'Mention', remembering the time until which it is snoozed`() {
             val expected = Mention::class.buildBy(id, MentionStatus.SNOOZED, untilWhen)
             context().assertState(id, expected)
         }
     }
 
     @Nested
-    public inner class `handle 'MarkMentionAsRead' command, and` {
+    internal inner class `handle 'MarkMentionAsRead' command, and` {
 
         @BeforeEach
-        public fun sendUserMentionAsReadCommand() {
+        internal fun sendUserMentionAsReadCommand() {
             val command = MarkMentionAsRead::class.buildBy(id)
             context().receivesCommand(command)
         }
 
         @Test
-        public fun `emit 'MentionRead' event`() {
+        internal fun `emit 'MentionRead' event`() {
             val expected = MentionRead::class.buildBy(id)
             context().assertEvent(expected)
         }
 
         @Test
-        public fun `read the target 'Mention'`() {
+        internal fun `read the target 'Mention'`() {
             val expected = Mention::class.buildBy(id, MentionStatus.READ)
             context().assertState(id, expected)
         }
     }
 
     @Nested
-    public inner class `react on 'TimePassed' event, and` {
+    internal inner class `react on 'TimePassed' event, and` {
 
         @Nested
-        public inner class `if mention is snoozed,` {
+        internal inner class `if mention is snoozed,` {
 
             @BeforeEach
-            public fun setSnoozedStatus() {
+            internal fun setSnoozedStatus() {
                 val command = SnoozeMention::class.buildBy(id, currentTime())
                 context().receivesCommand(command)
                 emitTimePassedEvent()
             }
 
             @Test
-            public fun `emit 'MentionUnsnoozed' event`() {
+            internal fun `emit 'MentionUnsnoozed' event`() {
                 val expected = MentionUnsnoozed::class.buildBy(id)
                 context().assertEvent(expected)
             }
 
             @Test
-            public fun `mark the target 'Mention' as unread`() {
+            internal fun `mark the target 'Mention' as unread`() {
                 val expected = Mention::class.buildBy(id, MentionStatus.UNREAD)
                 context().assertState(id, expected)
             }
         }
 
         @Test
-        public fun `do nothing if mention is read`() {
+        internal fun `do nothing if mention is read`() {
             val command = MarkMentionAsRead::class.buildBy(id)
             context().receivesCommand(command)
             emitTimePassedEvent()
@@ -157,13 +157,13 @@ public class MentionSpec : ContextAwareTest() {
         }
 
         @Test
-        public fun `do nothing if mention is unread`() {
+        internal fun `do nothing if mention is unread`() {
             emitTimePassedEvent()
             assertThatNothingHappened(MentionStatus.UNREAD)
         }
 
         @Test
-        public fun `do nothing if snooze time hasn't already passed`() {
+        internal fun `do nothing if snooze time hasn't already passed`() {
             val command = SnoozeMention::class.buildBy(id, currentTime())
             context().receivesCommand(command)
             emitTimePassedEvent(Timestamps.MIN_VALUE)
@@ -187,7 +187,7 @@ public class MentionSpec : ContextAwareTest() {
     }
 
     @Test
-    public fun `reject 'SnoozeMention' command, if mention is already read`() {
+    internal fun `reject 'SnoozeMention' command, if mention is already read`() {
         val readCommand = MarkMentionAsRead::class.buildBy(id)
         val snoozeCommand = SnoozeMention::class.buildBy(id, currentTime())
         context()
@@ -198,7 +198,7 @@ public class MentionSpec : ContextAwareTest() {
     }
 
     @Test
-    public fun `reject 'MarkMentionAsRead' command, if mention is already read`() {
+    internal fun `reject 'MarkMentionAsRead' command, if mention is already read`() {
         val firstReadCommand = MarkMentionAsRead::class.buildBy(id)
         val secondReadCommand = MarkMentionAsRead::class.buildBy(id)
         context()

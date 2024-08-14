@@ -34,7 +34,7 @@ option java_package = "io.spine.examples.pingh.sessions.rejection";
 option java_multiple_files = false;
 
 import "spine_examples/pingh/sessions/identifiers.proto";
-import "spine_examples/pingh/github/github.proto";
+import "spine_examples/pingh/github/values.proto";
 
 // Cannot log in because authentication on the GitHub side failed.
 //

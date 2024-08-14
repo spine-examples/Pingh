@@ -24,34 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.dependency.Guava
-import io.spine.internal.dependency.Spine
+package io.spine.internal.dependency
 
-plugins {
-    // Add the Gradle plugin for bootstrapping projects built with Spine.
-    // See: https://github.com/SpineEventEngine/bootstrap
-    id("io.spine.tools.gradle.bootstrap").version("1.9.0")
-}
+// https://github.com/JetBrains/kotlin
+// https://github.com/Kotlin
+public object Kotlin {
+    private const val group = "org.jetbrains.kotlin"
+    private const val version = "1.9.20"
 
-spine {
-    // Add and configure required dependencies for developing a Spine-based Java client.
-    // See: https://github.com/SpineEventEngine/bootstrap#java-projects
-    enableJava().client()
-}
-
-forceGrpcDependencies(configurations)
-
-dependencies {
-    // To work with `DesktopClient`, it is necessary to use values-objects and IDs declared
-    // in different bounded contexts. All necessary classes are collected in the `server` module.
-    api(project(":server"))
-
-    implementation(Guava.lib)
-    implementation(Grpc.netty)
-    implementation(Grpc.inprocess)
-
-    testImplementation(project(":testutil-mentions"))
-    testImplementation(project(":clock"))
-    testImplementation(Spine.Server.lib)
+    public const val stdLib: String = "$group:kotlin-stdlib:$version"
+    public const val stdLibCommon: String = "$group:kotlin-stdlib-common:$version"
+    public const val reflect: String = "$group:kotlin-reflect:$version"
 }

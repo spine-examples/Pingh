@@ -33,7 +33,6 @@ package io.spine.internal.dependency
  * @see <a href="https://coil-kt.github.io/coil/upgrading_to_coil3/#multiplatform">
  *     Coil with Compose Multiplatform</a>
  */
-@Suppress("ConstPropertyName")
 public object Coil {
     // Compose Multiplatform requires Coil version 3.x for compatibility,
     // but it is currently in the alpha phase.

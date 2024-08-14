@@ -53,7 +53,7 @@ internal fun PinghTheme(content: @Composable () -> Unit): Unit = MaterialTheme(
 /**
  * The light colors scheme of the application.
  */
-@Suppress("MagicNumber") // Colors are defined using RGB components.
+@Suppress("MagicNumber" /* Colors are defined using RGB components. */)
 private val colorScheme = lightColorScheme(
     primary = Color(162, 215, 245),
     onPrimary = Color.White,
