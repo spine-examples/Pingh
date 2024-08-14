@@ -24,19 +24,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.BuildSettings
-
-plugins {
-    kotlin("jvm")
-}
-
-kotlin {
-    jvmToolchain {
-        languageVersion.set(BuildSettings.javaVersion)
-    }
-    explicitApi()
-}
-
 dependencies {
     implementation(project(":github"))
     implementation(project(":sessions"))

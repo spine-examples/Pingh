@@ -52,7 +52,7 @@ internal class SessionsContextSpec : ContextAwareTest() {
 
     private val authenticationService = PredefinedGitHubAuthenticationResponses()
 
-    protected override fun contextBuilder(): BoundedContextBuilder =
+    override fun contextBuilder(): BoundedContextBuilder =
         newSessionsContext(authenticationService)
 
     @AfterEach
@@ -91,7 +91,7 @@ internal class SessionsContextSpec : ContextAwareTest() {
         private lateinit var sessionId: SessionId
 
         @BeforeEach
-        internal fun genereteId() {
+        internal fun generateId() {
             sessionId = SessionId::class.generate()
         }
 
