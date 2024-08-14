@@ -107,11 +107,15 @@ public class EnterUsername internal constructor(
         username: Username,
         onSuccess: (event: UserCodeReceived) -> Unit = {}
     ) {
-        client.requestUserCode(username) { event ->
+        val command = LogUserIn::class.withSession(
+            SessionId::class.buildBy(username)
+        )
+        client.observeEvent(command.id, UserCodeReceived::class) { event ->
             session.value = UserSession(event.id)
             moveToNextStage(VerifyLogin(client, session, event))
             onSuccess(event)
         }
+        client.send(command)
     }
 }
 

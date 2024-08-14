@@ -105,8 +105,12 @@ internal class DesktopClient(
 
     /**
      * Observes the provided event with the specified ID.
+     *
+     * @param id the ID of the observed event.
+     * @param type the type of the observed event.
+     * @param onEmit called when the event is emitted.
      */
-    private fun <E : EventMessage> observeEvent(
+    internal fun <E : EventMessage> observeEvent(
         id: Message,
         type: KClass<E>,
         onEmit: (event: E) -> Unit

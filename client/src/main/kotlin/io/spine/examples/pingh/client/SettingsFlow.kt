@@ -61,7 +61,7 @@ public class SettingsFlow internal constructor(
      */
     public fun logOut(onSuccess: (event: UserLoggedOut) -> Unit = {}) {
         val command = LogUserOut::class.withSession(session.value!!.id)
-        client.observeEventOnce(command.id, UserLoggedOut::class) { event ->
+        client.observeEvent(command.id, UserLoggedOut::class) { event ->
             session.value = null
             onSuccess(event)
         }
