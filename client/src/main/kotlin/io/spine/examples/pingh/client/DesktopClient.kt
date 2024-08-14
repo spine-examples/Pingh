@@ -35,6 +35,7 @@ import io.spine.base.EventMessageField
 import io.spine.base.Field
 import io.spine.client.Client
 import io.spine.client.ClientRequest
+import io.spine.client.EventFilter
 import io.spine.client.EventFilter.eq
 import io.spine.client.Subscription
 import io.spine.core.UserId
@@ -115,9 +116,27 @@ internal class DesktopClient(
         type: KClass<E>,
         onEmit: (event: E) -> Unit
     ): Subscription =
+        observeEvent(
+            type,
+            eq(EventMessageField(Field.named("id")), id),
+            onEmit
+        )
+
+    /**
+     * Observes the specified event that meets the `filter` condition.
+     *
+     * @param type the type of the observed event.
+     * @param filter selection condition for observed events.
+     * @param onEmit called when the event is emitted.
+     */
+    internal fun <E : EventMessage> observeEvent(
+        type: KClass<E>,
+        filter: EventFilter,
+        onEmit: (event: E) -> Unit
+    ): Subscription =
         clientRequest()
             .subscribeToEvent(type.java)
-            .where(eq(EventMessageField(Field.named("id")), id))
+            .where(filter)
             .observe(onEmit)
             .post()
 
