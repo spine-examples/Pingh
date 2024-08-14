@@ -26,18 +26,33 @@
 
 package io.spine.examples.pingh.desktop
 
-import androidx.compose.runtime.remember
-import androidx.compose.ui.window.application
+import androidx.compose.ui.window.TrayState
+import io.spine.examples.pingh.client.PinghApplication
 
 /**
- * Entry point of the desktop application.
+ * The top-level application state.
  */
-public fun main() {
-    application {
-        PinghTheme {
-            val state = remember { PinghApplicationState() }
-            PinghWindow(state.window, state.app)
-            PinghTray(state.tray, state.app)
-        }
-    }
+internal class PinghApplicationState {
+
+    /**
+     * A built-in state for Compose trays.
+     *
+     * Enables sending notifications.
+     */
+    private val composeTray = TrayState()
+
+    /**
+     * Manages the logic for the Pingh app.
+     */
+    internal val app = PinghApplication()
+
+    /**
+     * State of the window.
+     */
+    internal val window = PinghWindowState()
+
+    /**
+     * State of the application icon, located in the platform taskbar.
+     */
+    internal val tray = PinghTrayState(window, composeTray)
 }

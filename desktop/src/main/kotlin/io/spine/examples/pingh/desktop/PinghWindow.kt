@@ -43,13 +43,13 @@ import io.spine.examples.pingh.client.PinghApplication
  * @see [PlatformWindow]
  */
 @Composable
-internal fun PinghWindow(state: PinghWindowState) {
+internal fun PinghWindow(state: PinghWindowState, app: PinghApplication) {
     PlatformWindow(
         title = state.title,
         isShown = state.isShown,
         onClose = state::hide
     ) {
-        CurrentPage(state.app)
+        CurrentPage(app)
     }
 }
 
@@ -90,11 +90,6 @@ private fun PlatformWindow(
  * State of [PinghWindow].
  */
 internal class PinghWindowState {
-
-    /**
-     * Manages the logic for the Pingh app.
-     */
-    internal val app = PinghApplication()
 
     /**
      * Window's title.
