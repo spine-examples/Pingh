@@ -82,6 +82,7 @@ internal fun MentionsPage(
 ) {
     Column(
         Modifier.fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
     ) {
         ToolBar(flow, toSettingsPage)
         Spacer(Modifier.height(0.5.dp))
