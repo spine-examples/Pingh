@@ -35,48 +35,98 @@ import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import kotlin.reflect.KClass
 
+/**
+ * Allows to send notifications.
+ */
 public interface NotificationSender {
+
+    /**
+     * Creates and sends a notification with the given header and text.
+     *
+     * @param title the notification's title.
+     * @param content the notification's content.
+     */
     public fun send(title: String, content: String)
 }
 
-internal class NotificationFlow(
+/**
+ * The flow that manages the sending of notifications within the app.
+ *
+ * In the Pingh application, notifications are triggered by predefined events.
+ * When such an event is emitted, a notification is sent to the user.
+ *
+ * Notifications will be suppressed if 'Do Not Disturb' mode is enabled
+ * in the application settings.
+ *
+ * Please note that notifications flow automatically subscribes to the necessary events
+ * to generate notifications, but does not provide options to manage or close these subscriptions.
+ * Ensure the previous [client][DesktopClient] is properly [closed][DesktopClient.close]
+ * before initiating notifications for a new `client`.
+ *
+ * @param sender allows to send notifications.
+ * @param settings the state of application settings.
+ */
+internal class NotificationsFlow(
     private val sender: NotificationSender,
     private val settings: SettingsState
 ) {
     companion object {
+        /**
+         * List of information about available notifications.
+         */
         private val notifications = listOf(
             NotificationInfo(UserMentioned::class, "Pingh", "New mentions!"),
             NotificationInfo(MentionUnsnoozed::class, "Pingh", "Mentions unsnoozed!")
         )
     }
 
-    internal fun start(client: DesktopClient, username: Username) {
+    /**
+     * Enables the sending of notifications for the provided client with the given username.
+     *
+     * @param client enables subscription to events emitted by the Pingh server.
+     * @param username the username for which mentions will be sent.
+     */
+    internal fun enableNotifications(client: DesktopClient, username: Username) {
         notifications.forEach { notification ->
-            observe(client, username, notification)
+            enable(client, username, notification)
         }
     }
 
-    private fun <E : EventMessage> observe(
+    /**
+     * Creates a subscription to an event that triggers the sending of
+     * a notification when emitted.
+     */
+    private fun <E : EventMessage> enable(
         client: DesktopClient,
         username: Username,
-        info: NotificationInfo<E>
+        notification: NotificationInfo<E>
     ) {
         client.observeEvent(
-            info.onEvent,
+            notification.onEvent,
             eq(usernameField(), username)
         ) {
             if (!settings.enabledDndMode.value) {
-                sender.send(info.title, info.content)
+                sender.send(notification.title, notification.content)
             }
         }
     }
 
+    /**
+     * Returns the subscribable field of the username extracted from the mention ID.
+     */
     private fun usernameField(): EventMessageField =
         EventMessageField(Field.named("id").nested("user"))
-}
 
-private data class NotificationInfo<E : EventMessage>(
-    val onEvent: KClass<E>,
-    val title: String,
-    val content: String
-)
+    /**
+     * Information about available notifications.
+     *
+     * @param onEvent the event that triggers the sending of a notification.
+     * @param title the notification's title.
+     * @param content the notification's content.
+     */
+    private data class NotificationInfo<E : EventMessage>(
+        val onEvent: KClass<E>,
+        val title: String,
+        val content: String
+    )
+}
