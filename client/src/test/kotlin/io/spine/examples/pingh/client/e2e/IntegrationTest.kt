@@ -28,6 +28,8 @@ package io.spine.examples.pingh.client.e2e
 
 import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.client.PinghApplication
+import io.spine.examples.pingh.client.e2e.given.MemorableNotificationSender
+import io.spine.examples.pingh.client.e2e.given.NotificationsSubject
 import io.spine.examples.pingh.clock.IntervalClock
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.newMentionsContext
@@ -61,17 +63,19 @@ internal abstract class IntegrationTest {
     }
 
     private val authenticationService = PredefinedGitHubAuthenticationResponses()
+    private lateinit var notificationSender: MemorableNotificationSender
     private lateinit var clock: IntervalClock
     private lateinit var server: Server
     private lateinit var application: PinghApplication
 
     @BeforeEach
     internal fun runServer() {
+        notificationSender = MemorableNotificationSender()
         clock = IntervalClock(100.milliseconds)
         clock.start()
         server = createServer(authenticationService)
         server.start()
-        application = PinghApplication(address, port)
+        application = PinghApplication(notificationSender, address, port)
     }
 
     @AfterEach
@@ -97,4 +101,9 @@ internal abstract class IntegrationTest {
     protected fun enterUserCode() {
         authenticationService.enterUserCode()
     }
+
+    /**
+     * Returns the subject to check sent notifications.
+     */
+    protected fun notifications(): NotificationsSubject = notificationSender.assertNotifications()
 }
