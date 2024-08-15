@@ -26,7 +26,9 @@
 
 package io.spine.examples.pingh.desktop
 
+import androidx.compose.ui.window.Notification
 import androidx.compose.ui.window.TrayState
+import io.spine.examples.pingh.client.NotificationSender
 import io.spine.examples.pingh.client.PinghApplication
 
 /**
@@ -42,11 +44,6 @@ internal class PinghApplicationState {
     private val composeTray = TrayState()
 
     /**
-     * Manages the logic for the Pingh app.
-     */
-    internal val app = PinghApplication()
-
-    /**
      * State of the window.
      */
     internal val window = PinghWindowState()
@@ -55,4 +52,42 @@ internal class PinghApplicationState {
      * State of the application icon, located in the platform taskbar.
      */
     internal val tray = PinghTrayState(window, composeTray)
+
+    /**
+     * Manages the logic for the Pingh app.
+     */
+    internal val app: PinghApplication
+
+    init {
+        val notificationSender = TrayNotificationSender(composeTray) { !window.isShown }
+        app = PinghApplication(notificationSender)
+    }
+}
+
+/**
+ * Allows you to send notifications to the system tray.
+ *
+ * Notifications will only be sent if the window is hidden but the application is enabled.
+ *
+ * @param composeTray the built-in state for Compose trays.
+ * @param isWindowHidden returns `true` if the [window][PinghApplicationState.window] is hidden;
+ *                       returns `false` otherwise.
+ */
+private class TrayNotificationSender(
+    private val composeTray: TrayState,
+    private val isWindowHidden: () -> Boolean
+) : NotificationSender {
+
+    /**
+     * Sends the information [Notification] to the system tray.
+     *
+     * @param title the notification's title.
+     * @param content the notification's content.
+     */
+    override fun send(title: String, content: String) {
+        if (isWindowHidden()) {
+            val notification = Notification(title, content, Notification.Type.Info)
+            composeTray.sendNotification(notification)
+        }
+    }
 }
