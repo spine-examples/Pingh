@@ -44,10 +44,12 @@ import kotlinx.coroutines.launch
  * By default, application opens channel for the client
  * to 'localhost:[50051][DEFAULT_CLIENT_SERVICE_PORT]'.
  *
+ * @param notificationSender allows to send notifications.
  * @param address the address of the Pingh server.
  * @param port the port on which the Pingh server is running.
  */
 public class PinghApplication(
+    notificationSender: NotificationSender,
     address: String = "localhost",
     port: Int = DEFAULT_CLIENT_SERVICE_PORT
 ) {
@@ -84,18 +86,31 @@ public class PinghApplication(
     private val session = MutableStateFlow<UserSession?>(null)
 
     /**
-     * Asynchronously updates the [client] after the [session] is updated.
-     *
-     * If the `session` is closed, a guest `client` is created. If a new `session` is established,
-     * a `client` is created to make requests on behalf of the user.
+     * Flow that manages the sending of notifications within the app.
      */
-    private val clientUpdatingJob = CoroutineScope(Dispatchers.Default).launch {
+    private val notificationsFlow = NotificationsFlow(notificationSender, settings)
+
+    /**
+     * Asynchronously updates the state of the Pingh application after the [session] is updated.
+     *
+     * If the `session` is closed:
+     * - a guest [client] is created.
+     *
+     * If a new `session` is established:
+     * - a `client` is created to make requests on behalf of the user.
+     * - notifications are enabled for the newly created client.
+     *
+     * In all cases, prior to creating a new `client`, all subscriptions of
+     * the previous `client` are closed.
+     */
+    private val sessionObservation = CoroutineScope(Dispatchers.Default).launch {
         session.collect { value ->
             client.close()
-            client = if (value != null) {
-                DesktopClient(channel, value.asUserId())
+            if (value != null) {
+                client = DesktopClient(channel, value.asUserId())
+                notificationsFlow.enableNotifications(client, value.username)
             } else {
-                DesktopClient(channel)
+                client = DesktopClient(channel)
             }
         }
     }
@@ -124,10 +139,10 @@ public class PinghApplication(
      * Closes the client.
      */
     public fun close() {
+        sessionObservation.cancel()
         client.close()
         channel.shutdown()
             .awaitTermination(defaultShutdownTimeout, TimeUnit.SECONDS)
-        clientUpdatingJob.cancel()
     }
 }
 

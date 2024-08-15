@@ -118,7 +118,7 @@ internal class NotificationsFlow(
         EventMessageField(Field.named("id").nested("user"))
 
     /**
-     * Information about available notifications.
+     * Information about available notification.
      *
      * @param onEvent the event that triggers the sending of a notification.
      * @param title the notification's title.
