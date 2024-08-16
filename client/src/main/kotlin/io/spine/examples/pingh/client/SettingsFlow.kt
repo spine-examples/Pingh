@@ -38,6 +38,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 /**
  * The application settings control flow.
  *
+ * Allows changing application settings and logging out.
+ *
  * @param client enables interaction with the Pingh server.
  * @param session the information about the current user session.
  * @param settings the state of application settings.

@@ -38,6 +38,7 @@ import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.net.Url
+import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -47,10 +48,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
- * The control flow of the user login process.
+ * Describes the login to GitHub via GitHub's device flow.
  *
- * The flow consists of two consecutive stages. To successfully complete the login process,
- * first enter a username and obtain a user code, then verify the login.
+ * There are several stages in this process:
+ *
+ * 1. [EnterUsername]: The user inputs their username to receive a user code.
+ * 2. [VerifyLogin]: The user enters the user code on GitHub and confirms
+ * the login within the Pingh app.
+ *
+ * The flow is considered completed whenever the login is successfully
+ * [confirmed][VerifyLogin.confirm] in the Pingh app.
  *
  * @param client enables interaction with the Pingh server.
  * @param session the information about the current user session.
@@ -60,10 +67,22 @@ public class LoginFlow internal constructor(
     private val session: MutableStateFlow<UserSession?>
 ) {
     /**
-     * Current stage of the login process.
+     * Possible transitions between stages.
+     *
+     * Movement from one stage to another is restricted to specific stages,
+     * and some stages may be final with no further transitions.
+     * Each stage [change][moveToNextStage] verifies if the transition is permissible.
+     */
+    private val possibleTransitions = mapOf<LoginStageType, List<LoginStageType>>(
+        EnterUsername::class to listOf(VerifyLogin::class),
+        VerifyLogin::class to emptyList()
+    )
+
+    /**
+     * Current stage of the GitHub login process.
      */
     private val stage: MutableStateFlow<LoginStage> =
-        MutableStateFlow(EnterUsername(client, session, this::moveToNextStage))
+        MutableStateFlow(EnterUsername(client, session, ::moveToNextStage))
 
     /**
      * Returns the immutable state of the current login stage.
@@ -71,21 +90,38 @@ public class LoginFlow internal constructor(
     public fun currentStage(): StateFlow<LoginStage> = stage
 
     /**
-     * Updates value of the current stage of the login process.
+     * Switches the current stage to the passed one.
+     *
+     * @throws IllegalStateException if the transition of their current [stage]
+     * to the passed stage is not [allowed][possibleTransitions].
      */
-    private fun moveToNextStage(nextStage: LoginStage) {
-        stage.value = nextStage
+    private fun moveToNextStage(stage: LoginStage) {
+        val current = this.stage.value::class
+        val possibleNext = possibleTransitions.getOrDefault(current, emptyList())
+        val next = stage::class
+        if (!possibleNext.contains(next)) {
+            throw IllegalStateException(
+                "Moving from $current stage to $next stage is not allowed; " +
+                        "only $possibleNext stages is permitted."
+            )
+        }
+        this.stage.value = stage
     }
 }
 
 /**
- * Stages of login process.
+ * Represents a stage in the GitHub login process.
  */
 public interface LoginStage
 
 /**
- * Manages the stage of the login process where the user must enter their username
- * will receive a user code in return.
+ * Type of the stage in the GitHub login process.
+ */
+private typealias LoginStageType = KClass<out LoginStage>
+
+/**
+ * A stage of the login flow on which the user enters their GitHub username
+ * and receives a user code in return.
  *
  * @param client enables interaction with the Pingh server.
  * @param session the information about the current user session.
@@ -98,7 +134,7 @@ public class EnterUsername internal constructor(
 ) : LoginStage {
 
     /**
-     * Starts the login process and requests `UserCode`.
+     * Starts the GitHub login process and requests `UserCode`.
      *
      * @param username the username of the user logging in.
      * @param onSuccess called when the user code is successfully received.
@@ -120,7 +156,7 @@ public class EnterUsername internal constructor(
 }
 
 /**
- * Manages the stage of the login process where the user must enter the received user code
+ * A stage of the login flow on which the user enters the received user code
  * into GitHub to verify their login.
  *
  * @param client enables interaction with the Pingh server.
@@ -154,7 +190,7 @@ public class VerifyLogin internal constructor(
         MutableStateFlow(event.interval)
 
     /**
-     * Whether we can ask for a new user token from the external API.
+     * Whether a new token can be asked from the external API.
      *
      * The contract of the external API assumes some delay that must pass
      * before a new token can be requested. Therefore, we should wait for this call
@@ -231,7 +267,10 @@ public class VerifyLogin internal constructor(
     }
 
     /**
-     * Requests new `UserCode` and updates state of the verification flow.
+     * Requests a new `UserCode` on behalf of the current user.
+     *
+     * Resets the current stage to its initial state by canceling all active tasks
+     * and updating fields values with data from the `UserCodeReceived` event.
      *
      * @param onSuccess called when the user code is successfully received.
      */
@@ -252,7 +291,7 @@ public class VerifyLogin internal constructor(
 }
 
 /**
- * Starts the login process and requests `UserCode`.
+ * Starts the GitHub login process and requests `UserCode`.
  */
 private fun DesktopClient.requestUserCode(
     username: Username,

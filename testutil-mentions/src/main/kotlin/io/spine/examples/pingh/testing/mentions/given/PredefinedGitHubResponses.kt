@@ -31,7 +31,6 @@ import io.ktor.http.HttpStatusCode
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.mentions.GitHubClient
 import io.spine.examples.pingh.mentions.GitHubClientService
 import io.spine.examples.pingh.mentions.CannotFetchMentionsFromGitHubException
 import java.lang.Thread.sleep
@@ -41,7 +40,7 @@ import kotlin.jvm.Throws
  * Implementation of [GitHubClientService] that fetches mentions
  * from a JSON file in the resource folder.
  *
- * Uses exclusively for testing [GitHubClient] behavior.
+ * Uses exclusively for testing.
  */
 public class PredefinedGitHubResponses : GitHubClientService {
 
@@ -69,7 +68,18 @@ public class PredefinedGitHubResponses : GitHubClientService {
     private var responseStatusCode = HttpStatusCode.OK
 
     /**
-     * Returns set of [Mention]s retrieved from a JSON file in the resource folder.
+     * Indicates whether mentions from this service have been successfully obtained.
+     *
+     * Once mentions are successfully fetched, this value is set to `true`. To reset the value,
+     * use the [mentionsAreNotFetched] method.
+     *
+     * This variable helps prevent duplicate mentions when [fetching][fetchMentions] them again.
+     */
+    private var areMentionsFetched = false
+
+    /**
+     * Returns set of [Mention]s retrieved from a JSON file in the resource folder,
+     * or empty set if mentions have already been fetched.
      */
     @Throws(CannotFetchMentionsFromGitHubException::class)
     public override fun fetchMentions(
@@ -80,8 +90,12 @@ public class PredefinedGitHubResponses : GitHubClientService {
         if (responseStatusCode != HttpStatusCode.OK) {
             throw CannotFetchMentionsFromGitHubException(responseStatusCode.value)
         }
+        if (areMentionsFetched) {
+            return emptySet()
+        }
         val mentions = predefinedMentionsSet()
         waitWhileServiceIsFrozen()
+        areMentionsFetched = true
         return mentions
     }
 
@@ -128,5 +142,12 @@ public class PredefinedGitHubResponses : GitHubClientService {
      */
     public fun setDefaultResponseStatusCode() {
         responseStatusCode = HttpStatusCode.OK
+    }
+
+    /**
+     * Indicates that mentions have not yet been fetched.
+     */
+    public fun mentionsAreNotFetched() {
+        areMentionsFetched = false
     }
 }

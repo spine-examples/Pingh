@@ -69,8 +69,7 @@ internal class PersonalInteractionTest : IntegrationTest() {
     internal fun logInAndUpdateMentions() {
         logIn()
         val mentionsFlow = app().startMentionsFlow()
-        mentionsFlow.updateMentions()
-        actual = mentionsFlow.findUserMentions()
+        actual = mentionsFlow.allMentions()
         expected = expectedMentionsList(username)
         actual shouldBe expected
     }
@@ -105,9 +104,9 @@ internal class PersonalInteractionTest : IntegrationTest() {
         val snoozedMentionId = mentionsFlow.snoozeRandomMention()
         actual shouldBe expected
         val observer = app().client.observeUserMentions(snoozedMentionId)
-        mentionsFlow.markMentionAsRead(snoozedMentionId)
+        mentionsFlow.markAsRead(snoozedMentionId)
         observer.waitUntilUpdate()
-        actual = mentionsFlow.findUserMentions()
+        actual = mentionsFlow.allMentions()
         expected = expected.updateStatusById(snoozedMentionId, MentionStatus.READ)
         actual shouldBe expected
     }
@@ -129,7 +128,7 @@ internal class PersonalInteractionTest : IntegrationTest() {
         val snoozedMentionId = mentionsFlow.snoozeRandomMention(milliseconds(500))
         actual shouldBe expected
         sleep(1000)
-        actual = mentionsFlow.findUserMentions()
+        actual = mentionsFlow.allMentions()
         expected = expected.updateStatusById(snoozedMentionId, MentionStatus.UNREAD)
         actual shouldBe expected
     }
@@ -157,7 +156,7 @@ internal class PersonalInteractionTest : IntegrationTest() {
         settingsFlow.logOut {
             shouldThrow<IllegalStateException> {
                 val mentionsFlow = app().startMentionsFlow()
-                mentionsFlow.findUserMentions()
+                mentionsFlow.allMentions()
             }
             logInAgainAndCheckMentions(future)
         }
@@ -167,7 +166,7 @@ internal class PersonalInteractionTest : IntegrationTest() {
     private fun logInAgainAndCheckMentions(future: CompletableFuture<Void>) {
         logIn()
         val mentionsFlow = app().startMentionsFlow()
-        actual = mentionsFlow.findUserMentions()
+        actual = mentionsFlow.allMentions()
         actual shouldBe expected
         future.complete(null)
     }
@@ -196,9 +195,9 @@ internal class PersonalInteractionTest : IntegrationTest() {
     private fun MentionsFlow.snoozeRandomMention(snoozeTime: Duration = hours(2)): MentionId {
         val mention = actual.randomUnread()
         val observer = app().client.observeUserMentions(mention.id)
-        markMentionAsSnoozed(mention.id, snoozeTime)
+        snooze(mention.id, snoozeTime)
         observer.waitUntilUpdate()
-        actual = findUserMentions()
+        actual = allMentions()
         expected = expected.updateStatusById(mention.id, MentionStatus.SNOOZED)
         return mention.id
     }

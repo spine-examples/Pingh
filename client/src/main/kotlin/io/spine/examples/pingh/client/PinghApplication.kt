@@ -86,6 +86,11 @@ public class PinghApplication(
     private val session = MutableStateFlow<UserSession?>(null)
 
     /**
+     * Controls the lifecycle of mentions and handles the user's action in relation to them.
+     */
+    private var mentionsFlow: MentionsFlow? = null
+
+    /**
      * Flow that manages the sending of notifications within the app.
      */
     private val notificationsFlow = NotificationsFlow(notificationSender, settings)
@@ -94,10 +99,11 @@ public class PinghApplication(
      * Asynchronously updates the state of the Pingh application after the [session] is updated.
      *
      * If the `session` is closed:
-     * - a guest [client] is created.
+     * - a guest [client] is created;
+     * - the [mentions flow][mentionsFlow] for previous session is deleted.
      *
      * If a new `session` is established:
-     * - a `client` is created to make requests on behalf of the user.
+     * - a `client` is created to make requests on behalf of the user;
      * - notifications are enabled for the newly created client.
      *
      * In all cases, prior to creating a new `client`, all subscriptions of
@@ -111,6 +117,7 @@ public class PinghApplication(
                 notificationsFlow.enableNotifications(client, value.username)
             } else {
                 client = DesktopClient(channel)
+                mentionsFlow = null
             }
         }
     }
@@ -126,9 +133,16 @@ public class PinghApplication(
     public fun startLoginFlow(): LoginFlow = LoginFlow(client, session)
 
     /**
-     * Initiates the mentions flow.
+     * Returns mentions flow for current session.
+     *
+     * If the mentions flow does not already exist, it is initialized.
      */
-    public fun startMentionsFlow(): MentionsFlow = MentionsFlow(client, session, settings)
+    public fun startMentionsFlow(): MentionsFlow {
+        if (mentionsFlow == null) {
+            mentionsFlow = MentionsFlow(client, session, settings)
+        }
+        return mentionsFlow!!
+    }
 
     /**
      * Initiates the settings flow.
