@@ -145,6 +145,24 @@ internal class DesktopClient(
     /**
      * Subscribes to the update of the entity with the specified type and ID.
      *
+     * @param id the ID of the observed entity.
+     * @param type the type of the observed entity.
+     * @param onUpdated called when the entity is updated.
+     */
+    internal fun <E : EntityState> observeEntity(
+        id: Message,
+        type: KClass<E>,
+        onUpdated: (entity: E) -> Unit
+    ): Subscription =
+        clientRequest()
+            .subscribeTo(type.java)
+            .byId(id)
+            .observe(onUpdated)
+            .post()
+
+    /**
+     * Subscribes to the update of the entity with the specified type and ID.
+     *
      * The subscription cancels itself after the observer has completed its work.
      *
      * @param id the ID of the observed entity.
@@ -155,16 +173,13 @@ internal class DesktopClient(
         id: Message,
         type: KClass<E>,
         onUpdated: (entity: E) -> Unit
-    ) {
+    ): Subscription {
         var subscription: Subscription? = null
-        subscription = clientRequest()
-            .subscribeTo(type.java)
-            .byId(id)
-            .observe { entity ->
-                stopObservation(subscription!!)
-                onUpdated(entity)
-            }
-            .post()
+        subscription = observeEntity(id, type) { entity ->
+            stopObservation(subscription!!)
+            onUpdated(entity)
+        }
+        return subscription
     }
 
     /**

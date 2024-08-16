@@ -84,18 +84,31 @@ public class PinghApplication(
     private val session = MutableStateFlow<UserSession?>(null)
 
     /**
-     * Asynchronously updates the [client] after the [session] is updated.
-     *
-     * If the `session` is closed, a guest `client` is created. If a new `session` is established,
-     * a `client` is created to make requests on behalf of the user.
+     * Controls the lifecycle of mentions and handles the user's action in relation to them.
      */
-    private val clientUpdatingJob = CoroutineScope(Dispatchers.Default).launch {
+    private var mentionsFlow: MentionsFlow? = null
+
+    /**
+     * Asynchronously updates the state of the Pingh application after the [session] is updated.
+     *
+     * If the `session` is closed:
+     * - a guest [client] is created;
+     * - the [mentions flow][mentionsFlow] for previous session is deleted.
+     *
+     * If a new `session` is established:
+     * - a `client` is created to make requests on behalf of the user.
+     *
+     * In all cases, prior to creating a new `client`, all subscriptions of
+     * the previous `client` are closed.
+     */
+    private val sessionObservation = CoroutineScope(Dispatchers.Default).launch {
         session.collect { value ->
             client.close()
-            client = if (value != null) {
-                DesktopClient(channel, value.asUserId())
+            if (value != null) {
+                client = DesktopClient(channel, value.asUserId())
             } else {
-                DesktopClient(channel)
+                client = DesktopClient(channel)
+                mentionsFlow = null
             }
         }
     }
@@ -111,9 +124,16 @@ public class PinghApplication(
     public fun startLoginFlow(): LoginFlow = LoginFlow(client, session)
 
     /**
-     * Initiates the mentions flow.
+     * Returns mentions flow for current session.
+     *
+     * If the mentions flow does not already exist, it is initialized.
      */
-    public fun startMentionsFlow(): MentionsFlow = MentionsFlow(client, session, settings)
+    public fun startMentionsFlow(): MentionsFlow {
+        if (mentionsFlow == null) {
+            mentionsFlow = MentionsFlow(client, session, settings)
+        }
+        return mentionsFlow!!
+    }
 
     /**
      * Initiates the settings flow.
@@ -124,10 +144,10 @@ public class PinghApplication(
      * Closes the client.
      */
     public fun close() {
+        sessionObservation.cancel()
         client.close()
         channel.shutdown()
             .awaitTermination(defaultShutdownTimeout, TimeUnit.SECONDS)
-        clientUpdatingJob.cancel()
     }
 }
 

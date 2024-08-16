@@ -31,7 +31,6 @@ import com.google.protobuf.util.Timestamps
 import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.mentions.GitHubClientId
 import io.spine.examples.pingh.mentions.MentionId
-import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
 import io.spine.examples.pingh.mentions.UserMentions
 import io.spine.examples.pingh.mentions.UserMentionsId
@@ -39,10 +38,6 @@ import io.spine.examples.pingh.mentions.buildBy
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
 import io.spine.examples.pingh.mentions.command.SnoozeMention
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
-import io.spine.examples.pingh.mentions.event.MentionRead
-import io.spine.examples.pingh.mentions.event.MentionSnoozed
-import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
-import java.lang.Thread.sleep
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
@@ -59,35 +54,40 @@ public class MentionsFlow internal constructor(
     private val session: MutableStateFlow<UserSession?>,
     private val settings: SettingsState
 ) {
-    private companion object {
-        /**
-         * Delay before reading mentions so that the read-side on the server can be updated.
-         *
-         * Time is specified in milliseconds.
-         */
-        private const val delayBeforeReadingMentions = 100L
-    }
-
     /**
      * User mentions.
      */
     public val mentions: MutableStateFlow<MentionsList> = MutableStateFlow(allMentions())
 
+    init {
+        subscribeToMentionsUpdates()
+        updateMentions()
+    }
+
     /**
-     * Updates the user's mentions.
+     * Subscribes to updates for user mentions to automatically refresh
+     * current [mentions] when changes occur on the server.
      */
+    private fun subscribeToMentionsUpdates() {
+        ensureLoggedIn()
+        val id = UserMentionsId::class.buildBy(session.value!!.username)
+        client.observeEntity(id, UserMentions::class) { entity ->
+            mentions.value = entity.mentionList
+        }
+    }
+
+    /**
+     * Requests the server to update the user's mentions from GitHub.
+     *
+     * Once updated, changes will be automatically applied,
+     * as the flow [subscribes][subscribeToMentionsUpdates] to the user's mentions projection.
+     */
+    @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
     public fun updateMentions() {
         ensureLoggedIn()
         val command = UpdateMentionsFromGitHub::class.buildBy(
             GitHubClientId::class.buildBy(session.value!!.username)
         )
-        client.observeEventOnce(
-            command.id,
-            MentionsUpdateFromGitHubCompleted::class,
-        ) {
-            sleep(delayBeforeReadingMentions)
-            mentions.value = allMentions()
-        }
         client.send(command)
     }
 
@@ -105,7 +105,7 @@ public class MentionsFlow internal constructor(
         return userMentions
             ?.mentionList
             ?.sortedByDescending { mention -> mention.whenMentioned.seconds }
-            ?: listOf()
+            ?: emptyList()
     }
 
     /**
@@ -129,9 +129,6 @@ public class MentionsFlow internal constructor(
     internal fun snooze(id: MentionId, snoozeTime: Duration) {
         ensureLoggedIn()
         val command = SnoozeMention::class.buildBy(id, currentTime().add(snoozeTime))
-        client.observeEventOnce(command.id, MentionSnoozed::class) {
-            mentions.value = mentions.value.setMentionStatus(id, MentionStatus.SNOOZED)
-        }
         client.send(command)
     }
 
@@ -143,9 +140,6 @@ public class MentionsFlow internal constructor(
     public fun markAsRead(id: MentionId) {
         ensureLoggedIn()
         val command = MarkMentionAsRead::class.buildBy(id)
-        client.observeEventOnce(command.id, MentionRead::class) {
-            mentions.value = mentions.value.setMentionStatus(id, MentionStatus.READ)
-        }
         client.send(command)
     }
 
@@ -161,23 +155,6 @@ public class MentionsFlow internal constructor(
  * List of `MentionsView`s.
  */
 public typealias MentionsList = List<MentionView>
-
-/**
- * Updates the status of the mention with the specified identifier to the new status.
- *
- * @param id the identifier of the mention which the status was changed.
- * @param status new status of the mention.
- */
-private fun MentionsList.setMentionStatus(id: MentionId, status: MentionStatus): MentionsList {
-    val idInList = this.indexOfFirst { it.id == id }
-    val updatedMention = this[idInList]
-        .toBuilder()
-        .setStatus(status)
-        .vBuild()
-    val newMentionsList = this.toMutableList()
-    newMentionsList[idInList] = updatedMention
-    return newMentionsList
-}
 
 /**
  * Returns a `MentionsList` sorted such that unread mentions come first,
