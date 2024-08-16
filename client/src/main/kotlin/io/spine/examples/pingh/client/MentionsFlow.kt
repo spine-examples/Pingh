@@ -41,9 +41,14 @@ import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
- * The flow for managing the lifecycle of mentions.
+ * Controls the lifecycle of mentions and handles the user's action in relation to them.
  *
- * Enables updating mentions from GitHub, as well as reading and snoozing them.
+ * In particular:
+ *
+ * - subscribes to the user mentions projection, ensuring that any changes on
+ *  the server are automatically updated in the application;
+ * - whenever the user acts in relation to some mention, propagates these actions
+ *  as commands to the server-side.
  *
  * @param client enables interaction with the Pingh server.
  * @param session the information about the current user session.

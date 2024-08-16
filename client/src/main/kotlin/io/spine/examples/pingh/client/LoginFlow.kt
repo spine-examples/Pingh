@@ -38,6 +38,7 @@ import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.net.Url
+import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -47,10 +48,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
- * The control flow of the user login process.
+ * Describes the login to GitHub via GitHub's device flow.
  *
- * The flow consists of two consecutive stages. To successfully complete the login process,
- * first enter a username and obtain a user code, then verify the login.
+ * There are several stages in this process:
+ *
+ * 1. [EnterUsername]: The user inputs their username to receive a user code.
+ * 2. [VerifyLogin]: The user enters the user code on GitHub and confirms
+ * the login within the Pingh app.
+ *
+ * The flow is considered completed whenever the login is successfully
+ * [confirmed][VerifyLogin.confirm] in the Pingh app.
  *
  * @param client enables interaction with the Pingh server.
  * @param session the information about the current user session.
@@ -66,7 +73,7 @@ public class LoginFlow internal constructor(
      * and some stages may be final with no further transitions.
      * Each stage [change][moveToNextStage] verifies if the transition is permissible.
      */
-    private val possibleTransitions = mapOf(
+    private val possibleTransitions = mapOf<LoginStageType, List<LoginStageType>>(
         EnterUsername::class to listOf(VerifyLogin::class),
         VerifyLogin::class to emptyList()
     )
@@ -106,6 +113,11 @@ public class LoginFlow internal constructor(
  * Represents a stage in the GitHub login process.
  */
 public interface LoginStage
+
+/**
+ * Type of the stage in the GitHub login process.
+ */
+private typealias LoginStageType = KClass<out LoginStage>
 
 /**
  * A stage of the login flow on which the user enters their GitHub username
