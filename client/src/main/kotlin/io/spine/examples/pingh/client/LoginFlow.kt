@@ -60,10 +60,22 @@ public class LoginFlow internal constructor(
     private val session: MutableStateFlow<UserSession?>
 ) {
     /**
+     * Possible transitions between stages.
+     *
+     * Movement from one stage to another is restricted to specific stages,
+     * and some stages may be final with no further transitions.
+     * Each stage [change][moveToNextStage] verifies if the transition is permissible.
+     */
+    private val possibleTransitions = mapOf(
+        EnterUsername::class to listOf(VerifyLogin::class),
+        VerifyLogin::class to emptyList()
+    )
+
+    /**
      * Current stage of the GitHub login process.
      */
     private val stage: MutableStateFlow<LoginStage> =
-        MutableStateFlow(EnterUsername(client, session, this::moveToNextStage))
+        MutableStateFlow(EnterUsername(client, session, ::moveToNextStage))
 
     /**
      * Returns the immutable state of the current login stage.
@@ -72,8 +84,20 @@ public class LoginFlow internal constructor(
 
     /**
      * Switches the current stage to the passed one.
+     *
+     * @throws IllegalStateException if the transition of their current [stage]
+     * to the passed stage is not [allowed][possibleTransitions].
      */
     private fun moveToNextStage(stage: LoginStage) {
+        val current = this.stage.value::class
+        val possibleNext = possibleTransitions.getOrDefault(current, emptyList())
+        val next = stage::class
+        if (!possibleNext.contains(next)) {
+            throw IllegalStateException(
+                "Moving from $current stage to $next stage is not allowed; " +
+                        "only $possibleNext stages is permitted."
+            )
+        }
         this.stage.value = stage
     }
 }
