@@ -71,7 +71,7 @@ public class MentionsFlow internal constructor(
     /**
      * User mentions.
      */
-    public val mentions: MutableStateFlow<MentionsList> = MutableStateFlow(findUserMentions())
+    public val mentions: MutableStateFlow<MentionsList> = MutableStateFlow(allMentions())
 
     /**
      * Updates the user's mentions.
@@ -86,7 +86,7 @@ public class MentionsFlow internal constructor(
             MentionsUpdateFromGitHubCompleted::class,
         ) {
             sleep(delayBeforeReadingMentions)
-            mentions.value = findUserMentions()
+            mentions.value = allMentions()
         }
         client.send(command)
     }
@@ -96,7 +96,7 @@ public class MentionsFlow internal constructor(
      *
      * @return list of `MentionView`s sorted by descending time of creation.
      */
-    public fun findUserMentions(): List<MentionView> {
+    public fun allMentions(): List<MentionView> {
         ensureLoggedIn()
         val userMentions = client.readById(
             UserMentionsId::class.buildBy(session.value!!.username),
@@ -109,21 +109,24 @@ public class MentionsFlow internal constructor(
     }
 
     /**
-     * Marks the mention as snoozed.
+     * Snoozes the mention.
      *
-     * @param id the identifier of the mention that is marked as snoozed.
+     * The duration for which a mention is snoozed is determined
+     * by the app's [settings][SettingsState.snoozeTime].
+     *
+     * @param id the identifier of the mention to be snoozed.
      */
-    public fun markMentionAsSnoozed(id: MentionId) {
-        markMentionAsSnoozed(id, settings.snoozeTime.value.value)
+    public fun snooze(id: MentionId) {
+        snooze(id, settings.snoozeTime.value.value)
     }
 
     /**
-     * Marks the mention as snoozed.
+     * Snoozes the mention.
      *
-     * @param id the identifier of the mention that is marked as snoozed.
+     * @param id the identifier of the mention to be snoozed.
      * @param snoozeTime the duration of mention snooze.
      */
-    internal fun markMentionAsSnoozed(id: MentionId, snoozeTime: Duration) {
+    internal fun snooze(id: MentionId, snoozeTime: Duration) {
         ensureLoggedIn()
         val command = SnoozeMention::class.buildBy(id, currentTime().add(snoozeTime))
         client.observeEventOnce(command.id, MentionSnoozed::class) {
@@ -133,11 +136,11 @@ public class MentionsFlow internal constructor(
     }
 
     /**
-     * Marks that the mention is read.
+     * Marks the mention as read.
      *
      * @param id the identifier of the mention that is marked as read.
      */
-    public fun markMentionAsRead(id: MentionId) {
+    public fun markAsRead(id: MentionId) {
         ensureLoggedIn()
         val command = MarkMentionAsRead::class.buildBy(id)
         client.observeEventOnce(command.id, MentionRead::class) {

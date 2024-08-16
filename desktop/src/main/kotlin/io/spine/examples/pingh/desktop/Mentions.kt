@@ -204,7 +204,7 @@ private fun MentionCard(
     val onClick = {
         uriHandler.openUri(mention.url.spec)
         if (!mentionIsRead) {
-            flow.markMentionAsRead(mention.id)
+            flow.markAsRead(mention.id)
         }
     }
     ElevatedCard(
@@ -291,7 +291,7 @@ private fun SnoozeButton(
             IconButton(
                 icon = Icons.snooze,
                 onClick = {
-                    flow.markMentionAsSnoozed(mention.id)
+                    flow.snooze(mention.id)
                 },
                 modifier = Modifier.size(40.dp),
                 colors = IconButtonDefaults.iconButtonColors(

@@ -60,7 +60,7 @@ public class LoginFlow internal constructor(
     private val session: MutableStateFlow<UserSession?>
 ) {
     /**
-     * Current stage of the login process.
+     * Current stage of the GitHub login process.
      */
     private val stage: MutableStateFlow<LoginStage> =
         MutableStateFlow(EnterUsername(client, session, this::moveToNextStage))
@@ -71,21 +71,21 @@ public class LoginFlow internal constructor(
     public fun currentStage(): StateFlow<LoginStage> = stage
 
     /**
-     * Updates value of the current stage of the login process.
+     * Switches the current stage to the passed one.
      */
-    private fun moveToNextStage(nextStage: LoginStage) {
-        stage.value = nextStage
+    private fun moveToNextStage(stage: LoginStage) {
+        this.stage.value = stage
     }
 }
 
 /**
- * Stages of login process.
+ * Represents a stage in the GitHub login process.
  */
 public interface LoginStage
 
 /**
- * Manages the stage of the login process where the user must enter their username
- * will receive a user code in return.
+ * A stage of the login flow on which the user enters their GitHub username
+ * and receives a user code in return.
  *
  * @param client enables interaction with the Pingh server.
  * @param session the information about the current user session.
@@ -98,7 +98,7 @@ public class EnterUsername internal constructor(
 ) : LoginStage {
 
     /**
-     * Starts the login process and requests `UserCode`.
+     * Starts the GitHub login process and requests `UserCode`.
      *
      * @param username the username of the user logging in.
      * @param onSuccess called when the user code is successfully received.
@@ -120,7 +120,7 @@ public class EnterUsername internal constructor(
 }
 
 /**
- * Manages the stage of the login process where the user must enter the received user code
+ * A stage of the login flow on which the user enters the received user code
  * into GitHub to verify their login.
  *
  * @param client enables interaction with the Pingh server.
@@ -154,7 +154,7 @@ public class VerifyLogin internal constructor(
         MutableStateFlow(event.interval)
 
     /**
-     * Whether we can ask for a new user token from the external API.
+     * Whether a new token can be asked from the external API.
      *
      * The contract of the external API assumes some delay that must pass
      * before a new token can be requested. Therefore, we should wait for this call
@@ -231,7 +231,10 @@ public class VerifyLogin internal constructor(
     }
 
     /**
-     * Requests new `UserCode` and updates state of the verification flow.
+     * Requests a new `UserCode` on behalf of the current user.
+     *
+     * Resets the current stage to its initial state by canceling all active tasks
+     * and updating fields values with data from the `UserCodeReceived` event.
      *
      * @param onSuccess called when the user code is successfully received.
      */
@@ -252,7 +255,7 @@ public class VerifyLogin internal constructor(
 }
 
 /**
- * Starts the login process and requests `UserCode`.
+ * Starts the GitHub login process and requests `UserCode`.
  */
 private fun DesktopClient.requestUserCode(
     username: Username,
