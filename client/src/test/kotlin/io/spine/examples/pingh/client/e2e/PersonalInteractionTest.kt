@@ -69,7 +69,6 @@ internal class PersonalInteractionTest : IntegrationTest() {
     internal fun logInAndUpdateMentions() {
         logIn()
         val mentionsFlow = app().startMentionsFlow()
-        mentionsFlow.updateMentions()
         actual = mentionsFlow.allMentions()
         expected = expectedMentionsList(username)
         actual shouldBe expected
