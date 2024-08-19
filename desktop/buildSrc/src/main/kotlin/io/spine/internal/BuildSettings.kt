@@ -35,6 +35,6 @@ import org.gradle.jvm.toolchain.JavaLanguageVersion
  * It cannot be used in the build script of `buildSrc` itself.
  */
 public object BuildSettings {
-    private const val jvmVersion = 11
+    private const val jvmVersion = 17
     public val javaVersion: JavaLanguageVersion = JavaLanguageVersion.of(jvmVersion)
 }
