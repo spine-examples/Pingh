@@ -16,5 +16,5 @@ Currently, this is a work-in-progress example.
 
 * JDK 11.
 * Spine Event Engine.
-* Kotlin, TypeScript.
+* Kotlin.
 * Google Cloud.
