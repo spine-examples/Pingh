@@ -24,14 +24,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "Pingh"
-include(
-    "clock",
-    "github",
-    "sessions",
-    "mentions",
-    "testutil-mentions",
-    "testutil-sessions",
-    "server",
-    "client"
-)
+package io.spine.examples.pingh.client
+
+import com.google.protobuf.Duration
+import com.google.protobuf.util.Durations
+
+/**
+ * The value of this `Duration` in milliseconds.
+ */
+internal val Duration.inWholeMilliseconds: Long
+    get() = Durations.toMillis(this)

@@ -28,10 +28,41 @@
 
 package io.spine.examples.pingh.sessions
 
+import com.google.protobuf.Duration
 import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.UserCode
+import io.spine.examples.pingh.sessions.event.UserCodeReceived
+import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
+import io.spine.net.Url
 import kotlin.reflect.KClass
+
+/**
+ * Creates a new `UserTokenReceived` event with the specified data.
+ *
+ * @param id the ID of the session.
+ * @param userCode the verification code that displays so that the user can enter
+ *                 the code in a browser.
+ * @param verificationUrl the URL where users need to enter their `UserCode`.
+ * @param expiresIn the duration after which `UserCode` expires.
+ * @param interval the minimum duration that must pass before user can make
+ *                 a new access token request.
+ */
+public fun KClass<UserCodeReceived>.buildWith(
+    id: SessionId,
+    userCode: UserCode,
+    verificationUrl: Url,
+    expiresIn: Duration,
+    interval: Duration
+): UserCodeReceived =
+    UserCodeReceived.newBuilder()
+        .setId(id)
+        .setUserCode(userCode)
+        .setVerificationUrl(verificationUrl)
+        .setExpiresIn(expiresIn)
+        .setInterval(interval)
+        .vBuild()
 
 /**
  * Creates a new `UserLoggedIn` event with the specified ID of the session
@@ -41,6 +72,14 @@ public fun KClass<UserLoggedIn>.buildBy(id: SessionId, token: PersonalAccessToke
     UserLoggedIn.newBuilder()
         .setId(id)
         .setToken(token)
+        .vBuild()
+
+/**
+ * Creates a new `UserIsNotLoggedIntoGitHub` event with the specified ID of the session.
+ */
+public fun KClass<UserIsNotLoggedIntoGitHub>.withSession(id: SessionId): UserIsNotLoggedIntoGitHub =
+    UserIsNotLoggedIntoGitHub.newBuilder()
+        .setId(id)
         .vBuild()
 
 /**

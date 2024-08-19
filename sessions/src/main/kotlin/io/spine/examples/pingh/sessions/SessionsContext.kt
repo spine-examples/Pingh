@@ -36,7 +36,18 @@ public const val NAME: String = "Sessions"
 
 /**
  * Configures Sessions [BoundedContext] with repositories.
+ *
+ * The returned builder instance is already configured to serve the entities which belong
+ * to this context.
+ *
+ * It is expected that the business scenarios of the created context require access
+ * to the GitHub REST API. Therefore, an instance of GitHub authentication server is required
+ * as a parameter.
+ *
+ * @param authenticationService the service that allows to access GitHub authentication API.
  */
-public fun newSessionsContext(): BoundedContextBuilder =
+public fun newSessionsContext(
+    authenticationService: GitHubAuthentication
+): BoundedContextBuilder =
     BoundedContext.singleTenant(NAME)
-        .add(UserSessionProcess::class.java)
+        .add(UserSessionRepository(authenticationService))

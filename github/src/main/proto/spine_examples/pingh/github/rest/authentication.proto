@@ -25,65 +25,59 @@
  */
 syntax = "proto3";
 
-package spine_examples.pingh.sessions;
+package spine_examples.pingh.github.rest;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.pingh.spine.io";
-option java_package = "io.spine.examples.pingh.sessions.event";
-option java_outer_classname = "EventsProto";
+option java_package = "io.spine.examples.pingh.github.rest";
+option java_outer_classname = "AuthenticationProto";
 option java_multiple_files = true;
 
-import "spine_examples/pingh/sessions/identifiers.proto";
 import "spine_examples/pingh/github/values.proto";
-import "spine/net/url.proto";
-import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+import "spine/net/url.proto";
 
-// User code received.
+// Response from GitHub REST API containing verification codes required for login.
 //
-// To continue the login process, the user must enter this code
-// on the verification GitHub page.
+// See: https://shorturl.at/oZzSJ.
 //
-message UserCodeReceived {
+message VerificationCodesResponse {
 
-    // The ID of user session.
-    SessionId id = 1;
+    // The verification code that is used to verify the device.
+    DeviceCode device_code = 1 [(required) = true];
 
-    // The code a user needs to enter on GitHub to confirm login to the Pingh app.
-    spine_examples.pingh.github.UserCode user_code = 2 [(required) = true];
+    // The verification code that displays so that the user can enter the code in a browser.
+    UserCode user_code = 2 [(required) = true];
 
-    // The URL where users need to enter their `user_code`.
+    // The URL of the GitHub resource, where users will be entering the verification code
+    // in scope of the device login flow.
+    //
     spine.net.Url verification_url = 3 [(required) = true];
 
-    // The duration after which the `user_code` expires.
+    // The duration after which the `device_code` and `user_code` expire.
     google.protobuf.Duration expires_in = 4 [(required) = true];
 
-    // The minimum duration that must pass before user can make a new access token request.
+    // The minimum duration that must pass before the user can make a new access token request
+    // to complete the device authentication.
+    //
     google.protobuf.Duration interval = 5 [(required) = true];
 }
 
-// The user logged in.
-message UserLoggedIn {
+// Response from the GitHub REST API containing an `PersonalAccessToken`,
+// as well as a token to refresh the `PersonalAccessToken`.
+//
+// See: https://shorturl.at/22cwb.
+//
+message AccessTokenResponse {
 
-    // The ID of user session.
-    SessionId id = 1;
+    // The user access token.
+    PersonalAccessToken access_token = 1 [(required) = true];
 
-    // The GitHub token obtained as a result of logging in.
-    spine_examples.pingh.github.PersonalAccessToken token = 2 [(required) = true];
-}
+    // The time when `access_token` expires.
+    google.protobuf.Timestamp when_expires = 2 [(required) = true];
 
-// The user has not entered their user code on GitHub,
-// so logging into the Pingh app is not complete.
-message UserIsNotLoggedIntoGitHub {
-
-    // The ID of user session.
-    SessionId id = 1;
-}
-
-// The user logged out.
-message UserLoggedOut {
-
-    // The ID of user session.
-    SessionId id = 1;
+    // The token to renew the `access_token` when it expires.
+    RefreshToken refresh_token = 3 [(required) = true];
 }

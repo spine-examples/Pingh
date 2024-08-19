@@ -24,14 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "Pingh"
-include(
-    "clock",
-    "github",
-    "sessions",
-    "mentions",
-    "testutil-mentions",
-    "testutil-sessions",
-    "server",
-    "client"
-)
+package io.spine.internal.dependency
+
+public object KotlinX {
+    private const val group = "org.jetbrains.kotlinx"
+
+    // https://github.com/Kotlin/kotlinx.coroutines
+    public object Coroutines {
+        private const val version = "1.8.1"
+        public const val core: String = "$group:kotlinx-coroutines-core:$version"
+    }
+}

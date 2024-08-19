@@ -26,6 +26,7 @@
 
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Guava
+import io.spine.internal.dependency.KotlinX
 import io.spine.internal.dependency.Spine
 
 plugins {
@@ -43,15 +44,17 @@ spine {
 forceGrpcDependencies(configurations)
 
 dependencies {
-    // To work with `DesktopClient`, it is necessary to use values-objects and IDs declared
+    // To work with `PinghApplication`, it is necessary to use value objects and IDs declared
     // in different bounded contexts. All necessary classes are collected in the `server` module.
     api(project(":server"))
 
     implementation(Guava.lib)
     implementation(Grpc.netty)
     implementation(Grpc.inprocess)
+    implementation(KotlinX.Coroutines.core)
 
     testImplementation(project(":testutil-mentions"))
+    testImplementation(project(":testutil-sessions"))
     testImplementation(project(":clock"))
     testImplementation(Spine.Server.lib)
 }

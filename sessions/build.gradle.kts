@@ -25,6 +25,7 @@
  */
 
 import io.spine.internal.dependency.JavaX
+import io.spine.internal.dependency.Ktor
 
 plugins {
     // Add the Gradle plugin for bootstrapping projects built with Spine.
@@ -47,4 +48,7 @@ spine {
 dependencies {
     implementation(project(":github"))
     implementation(JavaX.annotations)
+    implementation(Ktor.Client.core)
+
+    testImplementation(project(":testutil-sessions"))
 }

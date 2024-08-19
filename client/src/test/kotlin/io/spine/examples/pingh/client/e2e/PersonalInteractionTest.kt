@@ -29,6 +29,9 @@ package io.spine.examples.pingh.client.e2e
 import com.google.protobuf.Duration
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import io.spine.examples.pingh.client.EnterUsername
+import io.spine.examples.pingh.client.MentionsFlow
+import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.client.e2e.given.expectedMentionsList
 import io.spine.examples.pingh.client.e2e.given.observeUserMentions
 import io.spine.examples.pingh.client.e2e.given.randomUnread
@@ -64,11 +67,25 @@ internal class PersonalInteractionTest : IntegrationTest() {
 
     @BeforeEach
     internal fun logInAndUpdateMentions() {
-        client().logIn(username)
-        client().updateMentions()
-        actual = client().findUserMentions()
+        logIn()
+        val mentionsFlow = app().startMentionsFlow()
+        actual = mentionsFlow.allMentions()
         expected = expectedMentionsList(username)
         actual shouldBe expected
+    }
+
+    private fun logIn() {
+        val future = CompletableFuture<Void>()
+        val loginFlow = app().startLoginFlow()
+        (loginFlow.currentStage().value as EnterUsername).requestUserCode(username) {
+            enterUserCode()
+            (loginFlow.currentStage().value as VerifyLogin).confirm(
+                onSuccess = {
+                    future.complete(null)
+                }
+            )
+        }
+        future.get(1, TimeUnit.SECONDS)
     }
 
     /**
@@ -83,12 +100,13 @@ internal class PersonalInteractionTest : IntegrationTest() {
      */
     @Test
     internal fun `the user should snooze the mention, and then read this mention`() {
-        val snoozedMentionId = snoozeRandomMention()
+        val mentionsFlow = app().startMentionsFlow()
+        val snoozedMentionId = mentionsFlow.snoozeRandomMention()
         actual shouldBe expected
-        val observer = client().observeUserMentions(snoozedMentionId)
-        client().markMentionAsRead(snoozedMentionId)
+        val observer = app().client.observeUserMentions(snoozedMentionId)
+        mentionsFlow.markAsRead(snoozedMentionId)
         observer.waitUntilUpdate()
-        actual = client().findUserMentions()
+        actual = mentionsFlow.allMentions()
         expected = expected.updateStatusById(snoozedMentionId, MentionStatus.READ)
         actual shouldBe expected
     }
@@ -106,10 +124,11 @@ internal class PersonalInteractionTest : IntegrationTest() {
      */
     @Test
     internal fun `the user should snooze the mention and wait until the snooze time is over`() {
-        val snoozedMentionId = snoozeRandomMention(milliseconds(500))
+        val mentionsFlow = app().startMentionsFlow()
+        val snoozedMentionId = mentionsFlow.snoozeRandomMention(milliseconds(500))
         actual shouldBe expected
         sleep(1000)
-        actual = client().findUserMentions()
+        actual = mentionsFlow.allMentions()
         expected = expected.updateStatusById(snoozedMentionId, MentionStatus.UNREAD)
         actual shouldBe expected
     }
@@ -126,32 +145,38 @@ internal class PersonalInteractionTest : IntegrationTest() {
      * 5. Logs in again.
      * 6. Reads mentions that were updated in the first session.
      *
-     * In this test, the arrival of an event in response to a sent command is important,
+     * In this test, the arrival of an event in response to a dispatched command is important,
      * so all assertions take place in the client callbacks. The [CompletableFuture] is used
      * to ensure that the test does not end before the asynchronous callback is called.
      */
     @Test
     internal fun `the user should log in, log out, log in again, and then read mentions`() {
+        val settingsFlow = app().startSettingsFlow()
         val future = CompletableFuture<Void>()
-        client().logOut {
+        settingsFlow.logOut {
             shouldThrow<IllegalStateException> {
-                client().findUserMentions()
+                val mentionsFlow = app().startMentionsFlow()
+                mentionsFlow.allMentions()
             }
-            client().logIn(username) {
-                actual = client().findUserMentions()
-                actual shouldBe expected
-                future.complete(null)
-            }
+            logInAgainAndCheckMentions(future)
         }
         future.get(5, TimeUnit.SECONDS)
     }
 
-    private fun snoozeRandomMention(snoozeTime: Duration = hours(2)): MentionId {
+    private fun logInAgainAndCheckMentions(future: CompletableFuture<Void>) {
+        logIn()
+        val mentionsFlow = app().startMentionsFlow()
+        actual = mentionsFlow.allMentions()
+        actual shouldBe expected
+        future.complete(null)
+    }
+
+    private fun MentionsFlow.snoozeRandomMention(snoozeTime: Duration = hours(2)): MentionId {
         val mention = actual.randomUnread()
-        val observer = client().observeUserMentions(mention.id)
-        client().markMentionAsSnoozed(mention.id, snoozeTime)
+        val observer = app().client.observeUserMentions(mention.id)
+        snooze(mention.id, snoozeTime)
         observer.waitUntilUpdate()
-        actual = client().findUserMentions()
+        actual = allMentions()
         expected = expected.updateStatusById(mention.id, MentionStatus.SNOOZED)
         return mention.id
     }

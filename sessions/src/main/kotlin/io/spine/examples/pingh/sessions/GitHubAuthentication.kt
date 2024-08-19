@@ -24,14 +24,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "Pingh"
-include(
-    "clock",
-    "github",
-    "sessions",
-    "mentions",
-    "testutil-mentions",
-    "testutil-sessions",
-    "server",
-    "client"
-)
+package io.spine.examples.pingh.sessions
+
+import io.spine.examples.pingh.github.DeviceCode
+import io.spine.examples.pingh.github.UserCode
+import io.spine.examples.pingh.github.rest.AccessTokenResponse
+import io.spine.examples.pingh.github.rest.VerificationCodesResponse
+import kotlin.jvm.Throws
+
+/**
+ * Allows to access GitHub authentication API.
+ */
+public interface GitHubAuthentication {
+
+    /**
+     * Requests the [UserCode] and [DeviceCode] required for verification.
+     */
+    public fun requestVerificationCodes(): VerificationCodesResponse
+
+    /**
+     * Requests an access token for the user using the `DeviceCode`.
+     *
+     * @param deviceCode the code used to verify the device.
+     * @throws CannotObtainAccessToken if failed to obtain the access token.
+     */
+    @Throws(CannotObtainAccessToken::class)
+    public fun requestAccessToken(deviceCode: DeviceCode): AccessTokenResponse
+}

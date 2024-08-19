@@ -29,40 +29,37 @@ package io.spine.examples.pingh.desktop
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import io.spine.examples.pingh.client.DesktopClient
+import io.spine.examples.pingh.client.PinghApplication
 
 /**
  * Displays the current page of the application.
  *
- * @param client enables interaction with the Pingh server.
+ * @param application manages the logic for the Pingh app.
  */
 @Composable
-internal fun CurrentPage(client: DesktopClient) {
+internal fun CurrentPage(application: PinghApplication) {
     val currentPage = remember {
         mutableStateOf(
-            if (client.session != null) Page.MENTIONS else Page.LOGIN
+            if (application.isLoggedIn()) Page.MENTIONS else Page.LOGIN
         )
     }
-    val settings = remember { SettingsState() }
     when (currentPage.value) {
         Page.LOGIN -> LoginPage(
-            client = client,
+            flow = application.startLoginFlow(),
             toMentionsPage = {
                 currentPage.value = Page.MENTIONS
             }
         )
 
         Page.MENTIONS -> MentionsPage(
-            client = client,
-            settings = settings,
+            flow = application.startMentionsFlow(),
             toSettingsPage = {
                 currentPage.value = Page.SETTINGS
             }
         )
 
         Page.SETTINGS -> SettingsPage(
-            client = client,
-            state = settings,
+            flow = application.startSettingsFlow(),
             toMentionsPage = {
                 currentPage.value = Page.MENTIONS
             },

@@ -24,14 +24,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "Pingh"
-include(
-    "clock",
-    "github",
-    "sessions",
-    "mentions",
-    "testutil-mentions",
-    "testutil-sessions",
-    "server",
-    "client"
-)
+package io.spine.examples.pingh.sessions
+
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
+import io.spine.server.procman.ProcessManagerRepository
+
+/**
+ * Manages instances of `UserSession`.
+ */
+internal class UserSessionRepository(
+    private val authenticationService: GitHubAuthentication
+) : ProcessManagerRepository<SessionId, UserSessionProcess, UserSession>() {
+
+    @OverridingMethodsMustInvokeSuper
+    override fun configure(processManager: UserSessionProcess) {
+        super.configure(processManager)
+        processManager.inject(authenticationService)
+    }
+}

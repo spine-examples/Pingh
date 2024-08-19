@@ -24,13 +24,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("TooManyFunctions" /* Using Compose requires many functions to render the UI. */)
+
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,17 +45,22 @@ import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,28 +68,66 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.spine.examples.pingh.client.DesktopClient
+import com.google.protobuf.Duration
+import io.spine.examples.pingh.client.LoginFlow
+import io.spine.examples.pingh.client.EnterUsername
+import io.spine.examples.pingh.client.VerifyLogin
+import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.github.validateUsernameValue
+import io.spine.net.Url
+import io.spine.protobuf.Durations2.toMinutes
 
 /**
- * Displays a login form.
+ * Displays the page with the current login stage.
  *
- * If the `Username` is entered correct, user will be [logged in][DesktopClient.logIn] into
- * the Pingh application and redirected to the [MentionsPage].
- * [LoginButton] is not enable while the entered `Username` is invalid.
+ * Initially, the user must enter their `Username`, after which they will receive
+ * a code that must be entered into GitHub. After entering the code, the user needs
+ * to confirm the login on the application page.
  *
- * @param client enables interaction with the Pingh server.
+ * @param flow the control flow of the GitHub login process.
  * @param toMentionsPage the navigation to the 'Mentions' page.
  */
 @Composable
 internal fun LoginPage(
-    client: DesktopClient,
+    flow: LoginFlow,
     toMentionsPage: () -> Unit
+) {
+    val stage by flow.currentStage().collectAsState()
+    when (val screenStage = stage) {
+        is EnterUsername -> UsernameEnteringPage(
+            flow = screenStage
+        )
+
+        is VerifyLogin -> VerificationPage(
+            flow = screenStage,
+            toMentionsPage = toMentionsPage
+        )
+    }
+}
+
+/**
+ * Displays a login form.
+ *
+ * If the `Username` is entered correctly, the user will receive the `UserCode` and
+ * be redirected to the login verification page.
+ * [LoginButton] is not enable while the entered `Username` is invalid.
+ *
+ * @param flow the control flow of the GitHub login process stage where the user must enter their name.
+ */
+@Composable
+private fun UsernameEnteringPage(
+    flow: EnterUsername
 ) {
     var username by remember { mutableStateOf("") }
     var wasChanged by remember { mutableStateOf(false) }
@@ -105,11 +153,8 @@ internal fun LoginPage(
         LoginButton(
             enabled = wasChanged && !isError.value
         ) {
-            client.logIn(
-                Username::class.buildBy(username)
-            ) {
-                toMentionsPage()
-            }
+            val name = Username::class.buildBy(username)
+            flow.requestUserCode(name)
         }
     }
 }
@@ -149,6 +194,7 @@ private fun ApplicationInfo() {
             text = "Pingh is a GitHub app that looks up mentions on behalf of the user. " +
                     "It requires authentication via GitHub.",
             modifier = Modifier.width(180.dp),
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyMedium
         )
@@ -174,7 +220,7 @@ private fun UsernameInput(
     val borderColor = when {
         isError.value -> MaterialTheme.colorScheme.error
         isFocused -> MaterialTheme.colorScheme.primary
-        else -> MaterialTheme.colorScheme.tertiary
+        else -> MaterialTheme.colorScheme.secondaryContainer
     }
     BasicTextField(
         value = value,
@@ -200,7 +246,7 @@ private fun UsernameInput(
                 border = BorderStroke(borderWidth, borderColor)
             )
             Label(borderColor)
-            ErrorMesage(isError.value)
+            ErrorMessage(isError.value)
         }
     }
 }
@@ -289,7 +335,7 @@ private fun Placeholder(isShown: Boolean) {
  * @param isShown indicates whether the error message is displayed.
  */
 @Composable
-private fun ErrorMesage(isShown: Boolean) {
+private fun ErrorMessage(isShown: Boolean) {
     if (isShown) {
         Text(
             text = "Enter a valid GitHub username.",
@@ -330,5 +376,332 @@ private fun LoginButton(
             text = "Login",
             style = MaterialTheme.typography.displayMedium
         )
+    }
+}
+
+/**
+ * Displays a login verification page.
+ *
+ * Displays the user code and provides instructions for completing the verification process.
+ * Upon successful verification, the user will receive tokens and be redirected
+ * to the `Mentions` page. If verification fails, the user will need to try again.
+ *
+ * If the user code expires before verification is complete, the process must be restarted.
+ * In this case, the user code cannot be copied, and the instructions and button
+ * will not be displayed.
+ *
+ * @param flow the control flow of the GitHub login process stage where the user must verify their login.
+ * @param toMentionsPage the navigation to the 'Mentions' page.
+ */
+@Composable
+private fun VerificationPage(
+    flow: VerifyLogin,
+    toMentionsPage: () -> Unit
+) {
+    val userCode by flow.userCode.collectAsState()
+    val verificationUrl by flow.verificationUrl.collectAsState()
+    val expiresIn by flow.expiresIn.collectAsState()
+    val isUserCodeExpired by flow.isUserCodeExpired.collectAsState()
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.secondary),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        VerificationTitle()
+        Spacer(Modifier.height(15.dp))
+        UserCodeField(
+            userCode = userCode,
+            isExpired = isUserCodeExpired
+        )
+        Spacer(Modifier.height(10.dp))
+        if (isUserCodeExpired) {
+            Spacer(Modifier.height(5.dp))
+            CodeExpiredErrorMessage(flow)
+        } else {
+            VerificationText(
+                verificationUrl = verificationUrl,
+                expiresIn = expiresIn
+            )
+            Spacer(Modifier.height(20.dp))
+            SubmitButton(
+                flow = flow,
+                toMentionsPage = toMentionsPage
+            )
+        }
+    }
+}
+
+/**
+ * Displays a title of the login verification page.
+ */
+@Composable
+private fun VerificationTitle() {
+    Text(
+        text = "Verify your login",
+        fontSize = 18.sp,
+        style = MaterialTheme.typography.displayLarge
+    )
+}
+
+/**
+ * Displays the user code with an option to copy it.
+ *
+ * @param userCode the verification code to be displayed.
+ * @param isExpired whether `userCode` is expired.
+ */
+@Composable
+private fun UserCodeField(
+    userCode: UserCode,
+    isExpired: Boolean
+) {
+    val color = if (isExpired) {
+        MaterialTheme.colorScheme.onBackground
+    } else {
+        MaterialTheme.colorScheme.onSecondary
+    }
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        SelectionContainer {
+            Text(
+                text = userCode.value,
+                color = color,
+                fontSize = 28.sp,
+                letterSpacing = 3.sp,
+                style = MaterialTheme.typography.displayLarge
+            )
+        }
+        if (!isExpired) {
+            CopyToClipboardIcon(userCode)
+        }
+    }
+}
+
+/**
+ * Displays an icon to copy the specified `UserCode` to the clipboard.
+ *
+ * @param userCode the `UserCode` to copy.
+ */
+@Composable
+private fun CopyToClipboardIcon(
+    userCode: UserCode
+) {
+    val clipboardManager = LocalClipboardManager.current
+    Box(
+        modifier = Modifier.offset(x = 103.dp)
+    ) {
+        IconButton(
+            icon = Icons.copy,
+            onClick = {
+                clipboardManager.setText(AnnotatedString(userCode.value))
+            },
+            modifier = Modifier.size(30.dp),
+            colors = IconButtonDefaults.iconButtonColors(
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+        )
+    }
+}
+
+/**
+ * Displays an error message indicating that the `UserCode` has expired.
+ *
+ * @param flow the control flow of the GitHub login process stage where the user must verify their login.
+ */
+@Composable
+private fun CodeExpiredErrorMessage(flow: VerifyLogin) {
+    ClickableErrorMessage(
+        text = "The code has expired, please start over.",
+        clickablePartOfText = "start over",
+        onClick = flow::requestNewUserCode
+    )
+}
+
+/**
+ * Displays instructions for login verification.
+ *
+ * @param verificationUrl the URL of the GitHub verification page.
+ * @param expiresIn the duration after which the `userCode` expires.
+ */
+@Composable
+private fun VerificationText(
+    verificationUrl: Url,
+    expiresIn: Duration
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Enter this code at",
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Spacer(Modifier.height(3.dp))
+        VerificationUrlButton(verificationUrl)
+        Spacer(Modifier.height(3.dp))
+        Text(
+            text = "The code is valid for ${toMinutes(expiresIn)} minutes.",
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+/**
+ * Displays a URL of the GitHub verification page.
+ *
+ * @param url the URL of the GitHub verification page.
+ */
+@Composable
+private fun VerificationUrlButton(url: Url) {
+    val uriHandler = LocalUriHandler.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val decoration = if (isHovered) {
+        TextDecoration.Underline
+    } else {
+        TextDecoration.None
+    }
+    Text(
+        text = url.spec,
+        modifier = Modifier
+            .hoverable(interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) {
+                uriHandler.openUri(url.spec)
+            },
+        color = MaterialTheme.colorScheme.primary,
+        textDecoration = decoration,
+        style = MaterialTheme.typography.bodyLarge
+    )
+}
+
+/**
+ * Displays a button to confirm verification.
+ *
+ * @param flow the control flow of the GitHub login process stage where the user must verify their login.
+ * @param toMentionsPage the navigation to the 'Mentions' page.
+ */
+@Composable
+private fun SubmitButton(
+    flow: VerifyLogin,
+    toMentionsPage: () -> Unit
+) {
+    val enabled by flow.canAskForNewTokens.collectAsState()
+    val onClick = {
+        flow.confirm(
+            onSuccess = {
+                toMentionsPage()
+            }
+        )
+    }
+    Box(
+        modifier = Modifier
+            .width(210.dp)
+            .height(32.dp),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        Button(
+            onClick = onClick,
+            modifier = Modifier.fillMaxSize(),
+            enabled = enabled,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            )
+        ) {
+            Text(
+                text = "I have entered the code",
+                style = MaterialTheme.typography.displayMedium
+            )
+        }
+        if (!enabled) {
+            NoResponseErrorMessage(
+                flow = flow
+            )
+        }
+    }
+}
+
+/**
+ * Displays an error message indicating that GitHub could not verify the login.
+ *
+ * @param flow the control flow of the GitHub login process stage where the user must verify their login.
+ */
+@Composable
+private fun NoResponseErrorMessage(
+    flow: VerifyLogin
+) {
+    val interval by flow.interval.collectAsState()
+    ClickableErrorMessage(
+        text = """
+                No response from GitHub yet.
+                Try again in ${interval.seconds} seconds, or start over.
+            """.trimIndent(),
+        clickablePartOfText = "start over",
+        onClick = flow::requestNewUserCode,
+        modifier = Modifier
+            .width(180.dp)
+            .offset(y = 40.dp)
+    )
+}
+
+/**
+ * Displays an error message, part of the text of which is a clickable link.
+ *
+ * @param text the error text.
+ * @param clickablePartOfText The substring of `text` that is a link.
+ * @param onClick called when `clickablePartOfText` is clicked.
+ * @param modifier the modifier to be applied to this error message.
+ * @throws IllegalArgumentException if `clickablePartOfText` is not substring of the `text`.
+ */
+@Composable
+private fun ClickableErrorMessage(
+    text: String,
+    clickablePartOfText: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    require(text.contains(clickablePartOfText)) {
+        "The `clickablePartOfText` must be a substring of the `text`."
+    }
+    val startPosition = text.indexOf(clickablePartOfText)
+    val endPosition = startPosition + clickablePartOfText.length
+    val annotatedString = buildAnnotatedString {
+        append(text)
+        addStringAnnotation(
+            tag = "Action",
+            annotation = clickablePartOfText,
+            start = startPosition,
+            end = endPosition
+        )
+        addStyle(
+            style = SpanStyle(
+                color = MaterialTheme.colorScheme.primary,
+                textDecoration = TextDecoration.Underline
+            ),
+            start = startPosition,
+            end = endPosition
+        )
+    }
+    ClickableText(
+        text = annotatedString,
+        modifier = modifier,
+        style = MaterialTheme.typography.bodyMedium.copy(
+            color = MaterialTheme.colorScheme.error,
+            textAlign = TextAlign.Center
+        )
+    ) { offset ->
+        annotatedString
+            .getStringAnnotations(offset, offset)
+            .firstOrNull()?.let {
+                onClick()
+            }
     }
 }

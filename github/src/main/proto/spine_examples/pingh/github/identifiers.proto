@@ -42,3 +42,16 @@ message NodeId {
 
     string value = 1 [(required) = true];
 }
+
+// The client ID for a GitHub App.
+//
+// This identifier is created and issued by GitHub when a GitHub App is set up.
+// The client ID is used in the authentication flow to log users in.
+//
+// Requests to create user's personal access tokens are made on behalf of the GitHub App
+// and require this client ID.
+//
+message ClientId {
+
+    string value = 1 [(required) = true];
+}

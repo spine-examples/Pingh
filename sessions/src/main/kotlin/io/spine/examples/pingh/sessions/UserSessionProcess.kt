@@ -26,14 +26,16 @@
 
 package io.spine.examples.pingh.sessions
 
-import io.spine.examples.pingh.github.PersonalAccessToken
-import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
+import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
+import io.spine.examples.pingh.sessions.event.UserCodeReceived
+import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.server.command.Assign
 import io.spine.server.procman.ProcessManager
+import io.spine.server.tuple.EitherOf2
 
 /**
  * Coordinates session management, that is, user login and logout.
@@ -42,19 +44,57 @@ public class UserSessionProcess :
     ProcessManager<SessionId, UserSession, UserSession.Builder>() {
 
     /**
-     * Emits event when a user logs in.
+     * Service for generating access tokens via GitHub.
+     *
+     * It is expected this field is set by calling [inject]
+     * right after the instance creation.
+     */
+    private lateinit var authenticationService: GitHubAuthentication
+
+    /**
+     * Requests user and device codes from GitHub for authentication.
+     *
+     * The device code is stored in the entity, while the user code is included
+     * in the emitted `UserCodeReceived` event. This event also provides information
+     * on where to enter the code and the timeout duration between entry attempts.
      */
     @Assign
-    internal fun handle(command: LogUserIn): UserLoggedIn {
-        initState(command)
-        return UserLoggedIn::class.buildBy(
+    internal fun handle(command: LogUserIn): UserCodeReceived {
+        val codes = authenticationService.requestVerificationCodes()
+        with(builder()) {
+            deviceCode = codes.deviceCode
+        }
+        return UserCodeReceived::class.buildWith(
             command.id,
-            PersonalAccessToken::class.buildBy("token")
+            codes.userCode,
+            codes.verificationUrl,
+            codes.expiresIn,
+            codes.interval
         )
     }
 
-    private fun initState(command: LogUserIn) {
-        builder().setId(command.id)
+    /**
+     * Requests access tokens from GitHub using the device code.
+     *
+     * If the user has already entered the user code issued with the device code, the login
+     * is considered successful, and the `UserLoggedIn` event is emitted. Otherwise,
+     * the `UserIsNotLoggedIntoGitHub` event is emitted.
+     */
+    @Assign
+    internal fun handle(
+        command: VerifyUserLoginToGitHub
+    ): EitherOf2<UserLoggedIn, UserIsNotLoggedIntoGitHub> {
+        val tokens = try {
+            authenticationService.requestAccessToken(state().deviceCode)
+        } catch (exception: CannotObtainAccessToken) {
+            return EitherOf2.withB(UserIsNotLoggedIntoGitHub::class.withSession(command.id))
+        }
+        with(builder()) {
+            refreshToken = tokens.refreshToken
+            whenAccessTokenExpires = tokens.whenExpires
+            clearDeviceCode()
+        }
+        return EitherOf2.withA(UserLoggedIn::class.buildBy(command.id, tokens.accessToken))
     }
 
     /**
@@ -64,5 +104,16 @@ public class UserSessionProcess :
     internal fun handle(command: LogUserOut): UserLoggedOut {
         deleted = true
         return UserLoggedOut::class.buildBy(command.id)
+    }
+
+    /**
+     * Supplies this instance of the process with a service for generating verification codes
+     * and access tokens via GitHub.
+     *
+     * It is expected this method is called right after the creation of the process instance.
+     * Otherwise, the process will not be able to function properly.
+     */
+    internal fun inject(authenticationService: GitHubAuthentication) {
+        this.authenticationService = authenticationService
     }
 }

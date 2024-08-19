@@ -24,14 +24,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "Pingh"
-include(
-    "clock",
-    "github",
-    "sessions",
-    "mentions",
-    "testutil-mentions",
-    "testutil-sessions",
-    "server",
-    "client"
-)
+package io.spine.examples.pingh.sessions
+
+import io.spine.examples.pingh.github.fromFragment
+import io.spine.examples.pingh.github.rest.AccessTokenFragment
+import io.spine.examples.pingh.github.rest.AccessTokenResponse
+import io.spine.examples.pingh.github.rest.VerificationCodesFragment
+import io.spine.examples.pingh.github.rest.VerificationCodesResponse
+import io.spine.json.Json
+
+/**
+ * Parses `VerificationCodesResponse` from the JSON.
+ */
+public fun parseVerificationCodesResponse(json: String): VerificationCodesResponse =
+    VerificationCodesResponse::class.fromFragment(
+        Json.fromJson(json, VerificationCodesFragment::class.java)
+    )
+
+/**
+ * Parses `AccessTokenResponse` from the JSON.
+ */
+public fun parseAccessTokenResponse(json: String): AccessTokenResponse =
+    AccessTokenResponse::class.fromFragment(
+        Json.fromJson(json, AccessTokenFragment::class.java)
+    )

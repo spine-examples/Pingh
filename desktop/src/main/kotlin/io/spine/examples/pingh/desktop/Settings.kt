@@ -57,8 +57,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -69,26 +69,23 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.google.protobuf.Duration
-import io.spine.examples.pingh.client.DesktopClient
+import io.spine.examples.pingh.client.SettingsFlow
+import io.spine.examples.pingh.client.SettingsState
+import io.spine.examples.pingh.client.SnoozeTime
 import io.spine.examples.pingh.github.Username
-import io.spine.protobuf.Durations2.hours
-import io.spine.protobuf.Durations2.minutes
 
 /**
  * Displays an application settings.
  *
  * All changes are saved automatically and applied immediately.
  *
- * @param client enables interaction with the Pingh server.
- * @param state the state of the application settings.
+ * @param flow the application settings control flow.
  * @param toMentionsPage the navigation to the 'Mentions' page.
  * @param toLoginPage the navigation to the 'Login' page.
  */
 @Composable
 internal fun SettingsPage(
-    client: DesktopClient,
-    state: SettingsState,
+    flow: SettingsFlow,
     toMentionsPage: () -> Unit,
     toLoginPage: () -> Unit
 ) {
@@ -99,9 +96,9 @@ internal fun SettingsPage(
     ) {
         SettingsHeader(toMentionsPage)
         SettingsBox {
-            Profile(client, toLoginPage)
-            SnoozeTimeOption(state)
-            DndOption(state)
+            Profile(flow, toLoginPage)
+            SnoozeTimeOption(flow.settings)
+            DndOption(flow.settings)
         }
     }
 }
@@ -178,16 +175,15 @@ private fun SettingsBox(
 /**
  * Displays user information and provides an option to log out of the account.
  *
- * @param client enables interaction with the Pingh server.
+ * @param flow the application settings control flow.
  * @param toLoginPage the navigation to the 'Login' page.
  */
 @Composable
 private fun Profile(
-    client: DesktopClient,
+    flow: SettingsFlow,
     toLoginPage: () -> Unit
 ) {
-    val username = client.session?.username
-    checkNotNull(username) { "User is not logged in." }
+    val username = flow.username
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -200,20 +196,20 @@ private fun Profile(
             size = 52.dp
         )
         Spacer(Modifier.width(8.dp))
-        ProfileControl(client, toLoginPage, username)
+        ProfileControl(flow, toLoginPage, username)
     }
 }
 
 /**
  * Displays a username and a button to log out of the account.
  *
- * @param client enables interaction with the Pingh server.
+ * @param flow the application settings control flow.
  * @param toLoginPage the navigation to the 'Login' page.
  * @param username the name of the user to whom the current session belongs.
  */
 @Composable
 private fun ProfileControl(
-    client: DesktopClient,
+    flow: SettingsFlow,
     toLoginPage: () -> Unit,
     username: Username
 ) {
@@ -231,7 +227,7 @@ private fun ProfileControl(
         )
         Spacer(Modifier.height(5.dp))
         LogOutButton {
-            client.logOut {
+            flow.logOut {
                 toLoginPage()
             }
         }
@@ -292,13 +288,14 @@ private fun DndOption(
     state: SettingsState,
     switchScale: Float = 0.6f
 ) {
+    val enabledDndMode by state.enabledDndMode.collectAsState()
     Option(
         title = "Do not disturb",
         description = "Turn off notifications for new mentions or snooze expirations.",
         titleWight = 174.dp
     ) {
         Switch(
-            checked = state.enabledDndMode.value,
+            checked = enabledDndMode,
             onCheckedChange = {
                 state.enabledDndMode.value = it
             },
@@ -310,9 +307,9 @@ private fun DndOption(
                 checkedThumbColor = MaterialTheme.colorScheme.secondary,
                 checkedTrackColor = MaterialTheme.colorScheme.primary,
                 checkedBorderColor = MaterialTheme.colorScheme.primary,
-                uncheckedThumbColor = MaterialTheme.colorScheme.tertiary,
+                uncheckedThumbColor = MaterialTheme.colorScheme.secondaryContainer,
                 uncheckedTrackColor = MaterialTheme.colorScheme.secondary,
-                uncheckedBorderColor = MaterialTheme.colorScheme.tertiary
+                uncheckedBorderColor = MaterialTheme.colorScheme.secondaryContainer
             )
         )
     }
@@ -353,7 +350,7 @@ private fun Option(
         Text(
             text = description,
             modifier = Modifier.width(170.dp),
-            color = MaterialTheme.colorScheme.tertiary,
+            color = MaterialTheme.colorScheme.secondaryContainer,
             style = MaterialTheme.typography.bodySmall
         )
     }
@@ -368,6 +365,7 @@ private fun Option(
 @OptIn(ExperimentalMaterial3Api::class) // Required for `SegmentedButtonDefaults.itemShape()`.
 private fun SnoozeTimeSegmentedButtonRow(state: SettingsState) {
     val snoozeTimeOptions = SnoozeTime.entries
+    val currentSnoozeTime by state.snoozeTime.collectAsState()
     Row(
         modifier = Modifier.selectableGroup(),
         horizontalArrangement = Arrangement.spacedBy((-1).dp),
@@ -375,7 +373,7 @@ private fun SnoozeTimeSegmentedButtonRow(state: SettingsState) {
     ) {
         snoozeTimeOptions.forEachIndexed { index, snoozeTime ->
             SegmentedButton(
-                selected = snoozeTime == state.snoozeTime.value,
+                selected = currentSnoozeTime == snoozeTime,
                 onClick = {
                     state.snoozeTime.value = snoozeTime
                 },
@@ -440,48 +438,4 @@ private fun SegmentedButton(
             label()
         }
     }
-}
-
-/**
- * State of application settings.
- */
-internal class SettingsState {
-
-    /**
-     * If `true`, the user is not notified about new mentions and snooze expirations.
-     * If `false`, the user receives notifications.
-     */
-    internal var enabledDndMode: MutableState<Boolean> = mutableStateOf(false)
-
-    /**
-     * The interval after which the new mention notification is repeated.
-     */
-    internal var snoozeTime: MutableState<SnoozeTime> = mutableStateOf(SnoozeTime.TWO_HOURS)
-}
-
-/**
- * Time after which the notification about the new mention is repeated.
- *
- * @param label the text corresponding to this interval.
- * @param value the duration corresponding to this interval.
- */
-@Suppress("MagicNumber") // The durations are specified using numbers.
-internal enum class SnoozeTime(
-    internal val label: String,
-    internal val value: Duration
-) {
-    /**
-     * The interval is 30 minutes in duration.
-     */
-    THIRTY_MINUTES("30 mins", minutes(30)),
-
-    /**
-     * The interval is 2 hours in duration.
-     */
-    TWO_HOURS("2 hours", hours(2)),
-
-    /**
-     * The interval is one day in duration.
-     */
-    ONE_DAY("1 day", hours(24))
 }

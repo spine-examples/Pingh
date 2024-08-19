@@ -26,11 +26,14 @@
 
 package io.spine.examples.pingh.client.e2e
 
-import io.spine.examples.pingh.client.DesktopClient
+import io.spine.examples.pingh.client.VerifyLogin
+import io.spine.examples.pingh.client.PinghApplication
 import io.spine.examples.pingh.clock.IntervalClock
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.newMentionsContext
+import io.spine.examples.pingh.sessions.GitHubAuthentication
 import io.spine.examples.pingh.sessions.newSessionsContext
+import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.server.Server
 import kotlin.time.Duration.Companion.milliseconds
 import org.junit.jupiter.api.AfterEach
@@ -39,45 +42,59 @@ import org.junit.jupiter.api.BeforeEach
 /**
  * Abstract base for tests that need to connect to a [Server].
  *
- * Also provides a [DesktopClient] for interacting with the `Server`.
+ * Also provides a [PinghApplication] for interacting with the `Server`.
  */
 internal abstract class IntegrationTest {
 
-    private val port = 4242
-    private val address = "localhost"
+    private companion object {
+        private const val port = 4242
+        private const val address = "localhost"
+
+        /**
+         * Creates a new test Pingh `Server`.
+         */
+        private fun createServer(authenticationService: GitHubAuthentication): Server =
+            Server.atPort(port)
+                .add(newSessionsContext(authenticationService))
+                .add(newMentionsContext(PredefinedGitHubResponses()))
+                .build()
+    }
+
+    private val authenticationService = PredefinedGitHubAuthenticationResponses()
     private lateinit var clock: IntervalClock
     private lateinit var server: Server
-    private lateinit var client: DesktopClient
+    private lateinit var application: PinghApplication
 
     @BeforeEach
     internal fun runServer() {
         clock = IntervalClock(100.milliseconds)
         clock.start()
-        server = createServer(port)
+        server = createServer(authenticationService)
         server.start()
-        client = DesktopClient(address, port)
+        application = PinghApplication(address, port)
     }
 
     @AfterEach
     internal fun shutdownServer() {
-        client.close()
+        authenticationService.clean()
+        application.close()
         clock.stop()
         server.shutdown()
     }
 
     /**
-     * Returns the `DesktopClient` connected to the server.
+     * Returns the `PinghApplication` connected to the server.
      */
-    protected fun client(): DesktopClient = client
+    protected fun app(): PinghApplication = application
 
-    private companion object {
-        /**
-         * Creates a new test Pingh `Server`.
-         */
-        private fun createServer(port: Int): Server =
-            Server.atPort(port)
-                .add(newSessionsContext())
-                .add(newMentionsContext(PredefinedGitHubResponses()))
-                .build()
+    /**
+     * Marks that the user has entered their user code.
+     *
+     * After calling this method, the login verification will be successful,
+     * which will allow to use login to the application after calling
+     * the [VerifyLogin.confirm] method.
+     */
+    protected fun enterUserCode() {
+        authenticationService.enterUserCode()
     }
 }

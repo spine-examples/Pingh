@@ -30,20 +30,29 @@ package io.spine.examples.pingh.sessions
 
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
+import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
 import kotlin.reflect.KClass
 
 /**
  * Creates a new `LogUserIn` command with the specified ID of the session.
  */
-public fun KClass<LogUserIn>.buildBy(id: SessionId): LogUserIn =
+public fun KClass<LogUserIn>.withSession(id: SessionId): LogUserIn =
     LogUserIn.newBuilder()
+        .setId(id)
+        .vBuild()
+
+/**
+ * Creates a new `VerifyUserLoginToGitHub` command with the specified ID of the session.
+ */
+public fun KClass<VerifyUserLoginToGitHub>.withSession(id: SessionId): VerifyUserLoginToGitHub =
+    VerifyUserLoginToGitHub.newBuilder()
         .setId(id)
         .vBuild()
 
 /**
  * Creates a new `LogUserOut` command with the specified ID of the session.
  */
-public fun KClass<LogUserOut>.buildBy(id: SessionId): LogUserOut =
+public fun KClass<LogUserOut>.withSession(id: SessionId): LogUserOut =
     LogUserOut.newBuilder()
         .setId(id)
         .vBuild()

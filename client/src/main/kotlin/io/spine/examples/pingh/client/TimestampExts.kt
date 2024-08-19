@@ -33,4 +33,4 @@ import com.google.protobuf.util.Timestamps
 /**
  * Adds a duration to this timestamp.
  */
-public fun Timestamp.add(duration: Duration): Timestamp = Timestamps.add(this, duration)
+internal fun Timestamp.add(duration: Duration): Timestamp = Timestamps.add(this, duration)

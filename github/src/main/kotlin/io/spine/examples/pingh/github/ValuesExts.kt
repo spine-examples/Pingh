@@ -29,9 +29,15 @@
 package io.spine.examples.pingh.github
 
 import com.google.protobuf.util.Timestamps
+import io.spine.base.Time.currentTime
+import io.spine.examples.pingh.github.rest.AccessTokenFragment
+import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.CommentFragment
 import io.spine.examples.pingh.github.rest.IssueOrPullRequestFragment
+import io.spine.examples.pingh.github.rest.VerificationCodesFragment
+import io.spine.examples.pingh.github.rest.VerificationCodesResponse
 import io.spine.net.Url
+import io.spine.protobuf.Durations2.seconds
 import kotlin.reflect.KClass
 
 /**
@@ -121,5 +127,59 @@ public fun KClass<Mention>.buildFromFragment(
         title = itemTitle
         whenMentioned = Timestamps.parse(fragment.whenCreated)
         url = Url::class.buildBy(fragment.htmlUrl)
+        vBuild()
+    }
+
+/**
+ * Creates a new `DeviceCode` with the specified string value.
+ */
+public fun KClass<DeviceCode>.of(value: String): DeviceCode =
+    DeviceCode.newBuilder()
+        .setValue(value)
+        .vBuild()
+
+/**
+ * Creates a new `UserCode` with the specified string value.
+ */
+public fun KClass<UserCode>.of(value: String): UserCode =
+    UserCode.newBuilder()
+        .setValue(value)
+        .vBuild()
+
+/**
+ * Creates a new `RefreshToken` with the specified string value.
+ */
+public fun KClass<RefreshToken>.of(value: String): RefreshToken =
+    RefreshToken.newBuilder()
+        .setValue(value)
+        .vBuild()
+
+/**
+ * Creates a new `VerificationCodesResponse` with the data specified
+ * in the `VerificationCodesResponse`.
+ */
+public fun KClass<VerificationCodesResponse>.fromFragment(
+    fragment: VerificationCodesFragment
+): VerificationCodesResponse =
+    with(VerificationCodesResponse.newBuilder()) {
+        deviceCode = DeviceCode::class.of(fragment.deviceCode)
+        userCode = UserCode::class.of(fragment.userCode)
+        verificationUrl = Url::class.buildBy(fragment.verificationUri)
+        expiresIn = seconds(fragment.expiresIn)
+        interval = seconds(fragment.interval)
+        vBuild()
+    }
+
+/**
+ * Creates a new `AccessTokenResponse` with the data specified
+ * in the `AccessTokenFragment`.
+ */
+public fun KClass<AccessTokenResponse>.fromFragment(
+    fragment: AccessTokenFragment
+): AccessTokenResponse =
+    with(AccessTokenResponse.newBuilder()) {
+        accessToken = PersonalAccessToken::class.buildBy(fragment.accessToken)
+        whenExpires = Timestamps.add(currentTime(), seconds(fragment.expiresIn))
+        refreshToken = RefreshToken::class.of(fragment.refreshToken)
         vBuild()
     }
