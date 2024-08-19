@@ -31,10 +31,13 @@ import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.Ktor
 import io.spine.internal.dependency.Material3
 import io.spine.internal.dependency.Pingh
+import io.spine.internal.gradle.allowBackgroundExecution
+import io.spine.internal.gradle.extractVersion
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
     kotlin("jvm")
-    id("org.jetbrains.compose").version("1.6.11")
+    id("org.jetbrains.compose")
 
     // Adds dependencies for Dokka and configures it.
     id("dokka-configuration")
@@ -55,7 +58,7 @@ apply(from = "$parentRootDir/version.gradle.kts")
 /**
  * The last version of the Pingh project.
  */
-private val pinghVersion = extra["pinghVersion"]!!
+private val pinghVersion = extra["pinghVersion"] as String
 
 group = "io.spine.example.pingh"
 version = pinghVersion
@@ -93,5 +96,15 @@ dependencies {
 compose.desktop {
     application {
         mainClass = "io.spine.examples.pingh.desktop.MainKt"
+        nativeDistributions {
+            packageName = "desktop"
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            packageVersion = extractVersion(pinghVersion)
+            macOS {
+                infoPlist {
+                    allowBackgroundExecution()
+                }
+            }
+        }
     }
 }
