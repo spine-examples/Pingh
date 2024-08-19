@@ -33,6 +33,8 @@ repositories {
     mavenCentral()
     gradlePluginPortal()
     mavenLocal()
+    google()
+    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
 
 /**
@@ -61,6 +63,13 @@ val detektVersion = "1.23.6"
  */
 val dokkaVersion = "1.9.20"
 
+/**
+ * The version of Compose Multiplatform.
+ *
+ * @see <a href="https://github.com/JetBrains/compose-multiplatform">Compose Multiplatform</a>
+ */
+val composeVersion = "1.6.11"
+
 kotlin {
     jvmToolchain(jvmVersion)
     explicitApiWarning()
@@ -82,4 +91,6 @@ dependencies {
     implementation("org.jetbrains.dokka:dokka-base:$dokkaVersion")
     implementation("org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion")
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+    implementation("org.jetbrains.compose:compose-gradle-plugin:$composeVersion")
+    implementation("org.jetbrains.compose.desktop:desktop:$composeVersion")
 }
