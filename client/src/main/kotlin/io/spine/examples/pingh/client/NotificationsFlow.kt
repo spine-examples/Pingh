@@ -26,10 +26,12 @@
 
 package io.spine.examples.pingh.client
 
+import com.google.protobuf.Timestamp
 import io.spine.base.EventMessage
 import io.spine.base.EventMessageField
 import io.spine.base.Field
 import io.spine.client.EventFilter.eq
+import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
@@ -75,9 +77,17 @@ internal class NotificationsFlow(
          * List of information about available notifications.
          */
         private val notifications = listOf(
-            NotificationInfo(UserMentioned::class, "Pingh", "New mentions!"),
-            NotificationInfo(MentionUnsnoozed::class, "Pingh", "Mentions unsnoozed!")
+            NotificationInfo(UserMentioned::class, "Pingh") { event ->
+                content(event.whenMentioned, event.whoMentioned, event.title)
+            },
+            NotificationInfo(MentionUnsnoozed::class, "Pingh") { event ->
+                content(event.whenMentioned, event.whoMentioned, event.title)
+            }
         )
+
+        private fun content(whenMentioned: Timestamp, whoMentioned: User, title: String): String =
+            "(${whenMentioned.howMuchTimeHasPassed()}) " +
+                    "${whoMentioned.username.value} mentioned you in ${title}."
     }
 
     /**
@@ -104,9 +114,9 @@ internal class NotificationsFlow(
         client.observeEvent(
             notification.onEvent,
             eq(usernameField(), username)
-        ) {
+        ) { event ->
             if (!settings.enabledDndMode.value) {
-                sender.send(notification.title, notification.content)
+                sender.send(notification.title, notification.content(event))
             }
         }
     }
@@ -127,6 +137,6 @@ internal class NotificationsFlow(
     private data class NotificationInfo<E : EventMessage>(
         val onEvent: KClass<E>,
         val title: String,
-        val content: String
+        val content: (event: E) -> String
     )
 }

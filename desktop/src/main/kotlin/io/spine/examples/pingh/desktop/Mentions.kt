@@ -61,6 +61,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.spine.examples.pingh.client.MentionsFlow
+import io.spine.examples.pingh.client.howMuchTimeHasPassed
 import io.spine.examples.pingh.client.sorted
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
