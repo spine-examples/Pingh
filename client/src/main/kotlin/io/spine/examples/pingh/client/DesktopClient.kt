@@ -47,6 +47,7 @@ import kotlin.reflect.KClass
  * @param channel the channel for the communication with the Pingh server.
  * @param userId user on whose behalf client requests are made.
  */
+@Suppress("TooManyFunctions" /* Many functions are required to interact with the server. */)
 internal class DesktopClient(
     channel: ManagedChannel,
     private val userId: UserId? = null

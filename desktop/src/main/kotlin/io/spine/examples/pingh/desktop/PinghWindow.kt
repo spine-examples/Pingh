@@ -83,7 +83,7 @@ private fun PlatformWindow(
     val windowState = rememberWindowState(
         width = 240.dp,
         height = 426.dp,
-        position = WindowPosition(1100.dp, 30.dp)
+        position = WindowPosition(1200.dp, 30.dp)
     )
     Window(
         onCloseRequest = onClose,
@@ -93,6 +93,7 @@ private fun PlatformWindow(
         undecorated = true,
         transparent = true,
         resizable = false,
+        alwaysOnTop = true,
         content = content
     )
 }
