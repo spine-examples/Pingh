@@ -101,6 +101,7 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageVersion = extractVersion(pinghVersion)
             macOS {
+                iconFile = iconForMacOs()
                 infoPlist {
                     allowBackgroundExecution()
                 }
@@ -108,3 +109,8 @@ compose.desktop {
         }
     }
 }
+
+/**
+ * Returns a .icons file containing the Pingh icon.
+ */
+private fun iconForMacOs() = File("distribution-resource/icons/pingh.icns")
