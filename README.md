@@ -14,7 +14,7 @@ Currently, this is a work-in-progress example.
 
 ## Tech
 
-* JDK 11.
+* JDK 11 for server and JDK 17 for client.
 * Spine Event Engine.
 * Kotlin.
 * Google Cloud.
