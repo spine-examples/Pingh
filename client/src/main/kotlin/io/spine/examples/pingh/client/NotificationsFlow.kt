@@ -86,8 +86,8 @@ internal class NotificationsFlow(
         )
 
         private fun content(whenMentioned: Timestamp, whoMentioned: User, title: String): String =
-            "(${whenMentioned.howMuchTimeHasPassed()}) " +
-                    "${whoMentioned.username.value} mentioned you in ${title}."
+            "${whenMentioned.howMuchTimeHasPassed().uppercase()} " +
+                    "${whoMentioned.username.value} mentioned you in '${title}'."
     }
 
     /**

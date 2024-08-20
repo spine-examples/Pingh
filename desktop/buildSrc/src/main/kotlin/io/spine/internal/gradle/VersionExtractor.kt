@@ -37,6 +37,6 @@ public fun extractVersion(str: String): String {
     val pattern = """\d+(.\d+){0,2}""".toRegex()
     val matchResult = pattern.find(str)
     return matchResult?.value ?: throw IllegalArgumentException(
-        "$str does not contain semantic version: ${pattern.pattern}"
+        "$str does not contain semantic version: ${pattern.pattern}."
     )
 }

@@ -97,7 +97,7 @@ compose.desktop {
     application {
         mainClass = "io.spine.examples.pingh.desktop.MainKt"
         nativeDistributions {
-            packageName = "desktop"
+            packageName = "Pingh"
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageVersion = extractVersion(pinghVersion)
             macOS {
@@ -111,6 +111,6 @@ compose.desktop {
 }
 
 /**
- * Returns a .icons file containing the Pingh icon.
+ * Returns a `.icns` file containing the Pingh icon.
  */
 private fun iconForMacOs() = File("distribution-resources/icons/pingh.icns")
