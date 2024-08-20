@@ -31,6 +31,7 @@ package io.spine.examples.pingh.mentions
 import com.google.protobuf.Timestamp
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
 import io.spine.examples.pingh.mentions.event.MentionRead
@@ -90,11 +91,24 @@ public fun KClass<MentionSnoozed>.buildBy(id: MentionId, untilWhen: Timestamp): 
         .vBuild()
 
 /**
- * Creates a new `MentionUnsnoozed` event with the specified ID of the mention.
+ * Creates a new `MentionUnsnoozed` event with the passed data.
+ *
+ * @param id the ID of the mention.
+ * @param whoMentioned the user who created the mention.
+ * @param title the mention's title.
+ * @param whenMentioned the time when the user was mentioned.
  */
-public fun KClass<MentionUnsnoozed>.buildBy(id: MentionId): MentionUnsnoozed =
+public fun KClass<MentionUnsnoozed>.with(
+    id: MentionId,
+    whoMentioned: User,
+    title: String,
+    whenMentioned: Timestamp
+): MentionUnsnoozed =
     MentionUnsnoozed.newBuilder()
         .setId(id)
+        .setWhoMentioned(whoMentioned)
+        .setTitle(title)
+        .setWhenMentioned(whenMentioned)
         .vBuild()
 
 /**

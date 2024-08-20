@@ -113,4 +113,4 @@ compose.desktop {
 /**
  * Returns a .icons file containing the Pingh icon.
  */
-private fun iconForMacOs() = File("distribution-resource/icons/pingh.icns")
+private fun iconForMacOs() = File("distribution-resources/icons/pingh.icns")

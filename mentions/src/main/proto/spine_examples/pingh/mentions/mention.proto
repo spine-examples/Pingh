@@ -54,9 +54,18 @@ message Mention {
     // The read status of mention.
     MentionStatus status = 2 [(required) = true];
 
+    // The user who created the mention.
+    spine_examples.pingh.github.User who_mentioned = 3 [(required) = true];
+
+    // The title of the GitHub page in which the mention occurred.
+    string title = 4 [(required) = true];
+
+    // The time when the user was mentioned.
+    google.protobuf.Timestamp when_mentioned = 5 [(required) = true];
+
     // The time until which the mention will snooze, if the mention status is `SNOOZED`.
     // If the status is different, the field is empty.
-    google.protobuf.Timestamp snooze_until_when = 3;
+    google.protobuf.Timestamp snooze_until_when = 6;
 }
 
 // Information about all mentions of the user.

@@ -57,6 +57,9 @@ public class MentionProcess :
     internal fun on(event: UserMentioned): Nothing {
         with(builder()) {
             id = event.id
+            whoMentioned = event.whoMentioned
+            title = event.title
+            whenMentioned = event.whenMentioned
             status = MentionStatus.UNREAD
         }
         return nothing()
@@ -111,6 +114,11 @@ public class MentionProcess :
         builder()
             .setStatus(MentionStatus.UNREAD)
             .clearSnoozeUntilWhen()
-        return Optional.of(MentionUnsnoozed::class.buildBy(state().id))
+        return Optional.of(MentionUnsnoozed::class.with(
+            state().id,
+            state().whoMentioned,
+            state().title,
+            state().whenMentioned
+        ))
     }
 }
