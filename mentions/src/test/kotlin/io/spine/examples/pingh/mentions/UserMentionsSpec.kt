@@ -74,7 +74,12 @@ internal class UserMentionsSpec : ContextAwareTest() {
     @Test
     internal fun `react on 'MentionUnsnoozed', and mark the target mention as unread`() {
         val snoozedEvent = MentionSnoozed::class.buildBy(userMentioned.id)
-        val unsnoozedEvent = MentionUnsnoozed::class.buildBy(userMentioned.id)
+        val unsnoozedEvent = MentionUnsnoozed::class.with(
+            userMentioned.id,
+            userMentioned.whoMentioned,
+            userMentioned.title,
+            userMentioned.whenMentioned
+        )
         context()
             .receivesEvent(snoozedEvent)
             .receivesEvent(unsnoozedEvent)

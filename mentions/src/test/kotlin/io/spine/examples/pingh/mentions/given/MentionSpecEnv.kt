@@ -40,10 +40,12 @@ import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.buildBy
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
+import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.Rejections.MentionIsAlreadyRead
 import io.spine.net.Url
 import io.spine.testing.TestValues.randomString
+import java.util.Objects
 import java.util.UUID
 import kotlin.reflect.KClass
 
@@ -70,28 +72,26 @@ internal fun KClass<UserMentioned>.buildBy(id: MentionId): UserMentioned =
         .vBuild()
 
 /**
- * Creates a new `Mention` with the specified ID and the status of this mention.
- */
-internal fun KClass<Mention>.buildBy(id: MentionId, status: MentionStatus): Mention =
-    Mention.newBuilder()
-        .setId(id)
-        .setStatus(status)
-        .vBuild()
-
-/**
- * Creates a new `Mention` with the specified ID, the status of this mention, and
- * the time until which the mention is snoozed.
+ * Creates a new `Mention` with the specified ID, the status of this mention,
+ * the time until which the mention is snoozed, and data contained in the `UserMentioned` event.
  */
 internal fun KClass<Mention>.buildBy(
     id: MentionId,
     status: MentionStatus,
-    snoozedUntilWhen: Timestamp
+    event: UserMentioned,
+    snoozedUntilWhen: Timestamp? = null
 ): Mention =
-    Mention.newBuilder()
-        .setId(id)
-        .setStatus(status)
-        .setSnoozeUntilWhen(snoozedUntilWhen)
-        .vBuild()
+    with(Mention.newBuilder()) {
+        this.id = id
+        this.status = status
+        whoMentioned = event.whoMentioned
+        title = event.title
+        whenMentioned = event.whenMentioned
+        if (!Objects.equals(snoozedUntilWhen, null)) {
+            this.snoozeUntilWhen = snoozedUntilWhen
+        }
+        vBuild()
+    }
 
 /**
  * Creates a new `MentionSnoozed` event with the specified ID of the mention.
@@ -114,3 +114,13 @@ internal fun KClass<UserId>.generate(): UserId =
     UserId.newBuilder()
         .setValue(UUID.randomUUID().toString())
         .vBuild()
+
+/**
+ * Creates a new `MentionUnsnoozed` event with passed ID of the mention.
+ */
+internal fun KClass<MentionUnsnoozed>.onlyWithId(id: MentionId): MentionUnsnoozed =
+    MentionUnsnoozed.newBuilder()
+        .setId(id)
+        // Building the message partially to include
+        // only the tested fields.
+        .buildPartial()
