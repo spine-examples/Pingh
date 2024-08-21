@@ -22,10 +22,10 @@ jobs:
 
       - name: Build server with JVM 11 and run tests
         run: ./gradlew build --stacktrace
-        with:
+        env:
           JAVA_HOME: /usr/lib/jvm/temurin-11
 
       - name: Build client with JVM 17
         run: ./desktop/gradlew build --stacktrace
-        with:
+        env:
           JAVA_HOME: /usr/lib/jvm/temurin-17
