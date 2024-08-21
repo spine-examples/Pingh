@@ -26,6 +26,7 @@
 
 import io.spine.internal.BuildSettings
 import io.spine.internal.dependency.Coil
+import io.spine.internal.dependency.Compose
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.Ktor
 import io.spine.internal.dependency.Material3
@@ -82,6 +83,7 @@ configurations.all {
 }
 
 dependencies {
+    implementation(Compose.Runtime.lib)
     implementation(compose.desktop.currentOs)
     implementation(Material3.Desktop.lib)
     implementation(Coil.lib)

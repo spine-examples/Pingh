@@ -27,6 +27,8 @@ jobs:
           JAVA_HOME: ${{ env.JAVA_HOME_11_X64 }}
 
       - name: Build client with JVM 17
-        run: ./desktop/gradlew build --stacktrace
+        run: |
+          cd desktop
+          ./gradlew build --stacktrace
         env:
           JAVA_HOME: ${{ env.JAVA_HOME_17_X64 }}

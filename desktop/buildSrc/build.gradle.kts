@@ -47,7 +47,7 @@ val jvmVersion = 17
 /**
  * The version of the Kotlin Gradle plugin and Kotlin binaries used by the build process.
  */
-val kotlinVersion = "1.9.22"
+val kotlinVersion = "1.9.20"
 
 /**
  * The version of the Detekt Gradle Plugin.
@@ -68,7 +68,7 @@ val dokkaVersion = "1.9.20"
  *
  * @see <a href="https://github.com/JetBrains/compose-multiplatform">Compose Multiplatform</a>
  */
-val composeVersion = "1.5.12"
+val composeVersion = "1.6.11"
 
 kotlin {
     jvmToolchain(jvmVersion)
