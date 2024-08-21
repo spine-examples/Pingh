@@ -26,6 +26,9 @@
 
 package io.spine.internal.gradle
 
+import java.io.File
+import java.io.FileOutputStream
+import java.io.FileReader
 import java.util.concurrent.TimeUnit
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -56,11 +59,22 @@ public open class RunGradleBuild : DefaultTask() {
      */
     @TaskAction
     private fun execute() {
+        val buildDir = File(directoryPath, "build")
+        if (!buildDir.exists()) {
+            buildDir.mkdir()
+        }
+        val errorOut = File(buildDir, "error-out.txt")
+        errorOut.truncate()
+        val debugOut = File(buildDir, "debug-out.txt")
+        debugOut.truncate()
+
         val command = buildCommand()
-        val process = startProcess(command)
+        val process = startProcess(command, errorOut, debugOut)
         val completed = process.waitFor(buildTimeoutMinutes, TimeUnit.MINUTES)
         val exitCode = process.exitValue()
+        debugOut.print()
         if (!completed || exitCode != 0) {
+            errorOut.print()
             throw GradleException("Child build process failed. Exit code: $exitCode.")
         }
     }
@@ -88,9 +102,24 @@ public open class RunGradleBuild : DefaultTask() {
     /**
      * Creates and starts a new operating system process.
      */
-    private fun startProcess(command: List<String>): Process =
+    private fun startProcess(command: List<String>, errorOut: File, debugOut: File): Process =
         ProcessBuilder()
             .command(command)
             .directory(project.file(directoryPath))
+            .redirectError(errorOut)
+            .redirectOutput(debugOut)
             .start()
+}
+
+private fun File.truncate() {
+    val stream = FileOutputStream(this)
+    stream.use {
+        it.channel.truncate(0)
+    }
+}
+
+private fun File.print() {
+    FileReader(this).use {
+        print(it.readLines().joinToString(separator = "\n"))
+    }
 }
