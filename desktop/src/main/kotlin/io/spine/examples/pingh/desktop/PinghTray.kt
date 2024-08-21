@@ -35,7 +35,7 @@ import io.spine.examples.pingh.client.PinghApplication
 /**
  * Adds the application icon to the platform taskbar.
  *
- * This icon allows the user to show or hide the Pomodoro window and quit the application.
+ * This icon allows the user to show or hide the Pingh window and quit the application.
  */
 @Composable
 internal fun ApplicationScope.PinghTray(state: PinghTrayState, app: PinghApplication) {

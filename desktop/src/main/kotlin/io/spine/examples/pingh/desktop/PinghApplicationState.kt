@@ -67,9 +67,9 @@ internal class PinghApplicationState(isSystemInDarkTheme: Boolean) {
 }
 
 /**
- * Allows you to send notifications to the system tray.
+ * Allows to send notifications to the system tray.
  *
- * Notifications will only be sent if the window is hidden but the application is enabled.
+ * Notifications will only be sent if the window is hidden but the application is run.
  *
  * @param composeTray the built-in state for Compose trays.
  * @param isWindowHidden returns `true` if the [window][PinghApplicationState.window] is hidden;

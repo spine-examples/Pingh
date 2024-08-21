@@ -21,12 +21,12 @@ jobs:
             11
             17
 
-      - name: Build server with JVM 11 and run tests
+      - name: Build server with JDK 11 and run tests
         run: ./gradlew build --stacktrace
         env:
           JAVA_HOME: ${{ env.JAVA_HOME_11_X64 }}
 
-      - name: Build client with JVM 17
+      - name: Build client with JDK 17
         run: |
           cd desktop
           ./gradlew build --stacktrace

@@ -121,6 +121,5 @@ internal fun KClass<UserId>.generate(): UserId =
 internal fun KClass<MentionUnsnoozed>.onlyWithId(id: MentionId): MentionUnsnoozed =
     MentionUnsnoozed.newBuilder()
         .setId(id)
-        // Building the message partially to include
-        // only the tested fields.
+        // Building the message partially to include only the tested fields.
         .buildPartial()

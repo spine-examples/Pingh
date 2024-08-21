@@ -29,7 +29,7 @@ package io.spine.internal.gradle
 import org.jetbrains.compose.desktop.application.dsl.InfoPlistSettings
 
 /**
- * Configures this [InfoPlistSettings] to allow the app to run in
+ * Configures this `InfoPlistSettings` to allow the app to run in
  * the background without appearing in the Dock.
  *
  * @see <a href="https://developer.apple.com/documentation/bundleresources/information_property_list/lsuielement">

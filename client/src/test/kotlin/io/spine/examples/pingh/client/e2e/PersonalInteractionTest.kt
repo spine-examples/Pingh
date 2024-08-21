@@ -181,7 +181,7 @@ internal class PersonalInteractionTest : IntegrationTest() {
      * 3. Obtains notifications of new mentions.
      * 4. Snoozes a random mention for 500 milliseconds.
      * 5. Waits until the snooze time is over.
-     * 6. Obtains notifications of mentions that have been unsnoozed.
+     * 6. Obtains notification of the mention that has been unsnoozed.
      */
     @Test
     internal fun `notifications about new and unsnoozed mentions should be sent to the user`() {

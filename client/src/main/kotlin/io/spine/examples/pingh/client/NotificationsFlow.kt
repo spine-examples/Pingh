@@ -43,7 +43,7 @@ import kotlin.reflect.KClass
 public interface NotificationSender {
 
     /**
-     * Creates and sends a notification with the given header and text.
+     * Creates and sends a notification with the given title and content.
      *
      * @param title the notification's title.
      * @param content the notification's content.

@@ -102,7 +102,7 @@ val buildDesktopClient = tasks.register<RunGradleBuild>("buildDesktopClient") {
 
 /**
  * Adds the publishing of modules required for the `desktop` project
- * to the local Maven repository as part of the build process.
+ * to the Local Maven repository as part of the build process.
  */
 modulesRequiredForDesktop.forEach { name ->
     tasks.build {

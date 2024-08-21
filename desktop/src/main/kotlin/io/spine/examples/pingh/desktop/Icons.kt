@@ -113,7 +113,7 @@ internal object Icons {
 }
 
 /**
- * A `Painter` implementation used to draw an `ImageBitmap` with the passed `color`.
+ * A `Painter` implementation used to draw an [ImageBitmap] with the passed `color`.
  *
  * @param resourcePath the path to the image resource.
  * @param color the color applied to the image.

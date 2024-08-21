@@ -38,6 +38,7 @@ import io.spine.examples.pingh.mentions.MentionView
 import io.spine.examples.pingh.mentions.UserMentions
 import io.spine.examples.pingh.mentions.UserMentionsId
 import io.spine.examples.pingh.mentions.buildBy
+import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.net.Url
 import io.spine.testing.TestValues.randomString
@@ -72,5 +73,17 @@ internal fun KClass<UserMentions>.buildBy(
         for (mention in mentions) {
             addMention(mention)
         }
+        vBuild()
+    }
+
+/**
+ * Creates a new `MentionUnsnoozed` event with the data from the passed event.
+ */
+internal fun KClass<MentionUnsnoozed>.from(event: UserMentioned): MentionUnsnoozed =
+    with(MentionUnsnoozed.newBuilder()) {
+        id = event.id
+        whoMentioned = event.whoMentioned
+        title = event.title
+        whenMentioned = event.whenMentioned
         vBuild()
     }
