@@ -16,6 +16,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
+          architecture: x64
           java-version: |
             11
             17
@@ -23,9 +24,9 @@ jobs:
       - name: Build server with JVM 11 and run tests
         run: ./gradlew build --stacktrace
         env:
-          JAVA_HOME: /usr/lib/jvm/temurin-11
+          JAVA_HOME: ${{ env.JAVA_HOME_11_X64 }}
 
       - name: Build client with JVM 17
         run: ./desktop/gradlew build --stacktrace
         env:
-          JAVA_HOME: /usr/lib/jvm/temurin-17
+          JAVA_HOME: ${{ env.JAVA_HOME_17_X64 }}
