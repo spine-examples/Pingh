@@ -47,7 +47,7 @@ val jvmVersion = 17
 /**
  * The version of the Kotlin Gradle plugin and Kotlin binaries used by the build process.
  */
-val kotlinVersion = "1.9.20"
+val kotlinVersion = "1.9.22"
 
 /**
  * The version of the Detekt Gradle Plugin.
@@ -62,6 +62,13 @@ val detektVersion = "1.23.6"
  * @see <a href="https://github.com/Kotlin/dokka/releases">Dokka Releases</a>
  */
 val dokkaVersion = "1.9.20"
+
+/**
+ * The version of Compose Multiplatform.
+ *
+ * @see <a href="https://github.com/JetBrains/compose-multiplatform">Compose Multiplatform</a>
+ */
+val composeVersion = "1.6.11"
 
 kotlin {
     jvmToolchain(jvmVersion)
@@ -84,4 +91,6 @@ dependencies {
     implementation("org.jetbrains.dokka:dokka-base:$dokkaVersion")
     implementation("org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion")
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+    implementation("org.jetbrains.compose:compose-gradle-plugin:$composeVersion")
+    implementation("org.jetbrains.compose.desktop:desktop:$composeVersion")
 }
