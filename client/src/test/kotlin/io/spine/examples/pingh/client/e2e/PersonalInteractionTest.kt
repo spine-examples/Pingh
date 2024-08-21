@@ -185,11 +185,11 @@ internal class PersonalInteractionTest : IntegrationTest() {
      */
     @Test
     internal fun `notifications about new and unsnoozed mentions should be sent to the user`() {
-        notifications().hasSize(expected.size)
+        notificationsCount() shouldBe expected.size
         val mentionsFlow = app().startMentionsFlow()
         mentionsFlow.snoozeRandomMention(milliseconds(500))
         sleep(1000)
-        notifications().hasSize(expected.size + 1)
+        notificationsCount() shouldBe (expected.size + 1)
     }
 
     private fun MentionsFlow.snoozeRandomMention(snoozeTime: Duration = hours(2)): MentionId {

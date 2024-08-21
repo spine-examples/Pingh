@@ -29,7 +29,6 @@ package io.spine.examples.pingh.client.e2e
 import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.client.PinghApplication
 import io.spine.examples.pingh.client.e2e.given.MemorableNotificationSender
-import io.spine.examples.pingh.client.e2e.given.NotificationsSubject
 import io.spine.examples.pingh.clock.IntervalClock
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.newMentionsContext
@@ -103,7 +102,7 @@ internal abstract class IntegrationTest {
     }
 
     /**
-     * Returns the subject to check sent notifications.
+     * Returns the count of sent notifications.
      */
-    protected fun notifications(): NotificationsSubject = notificationSender.assertNotifications()
+    protected fun notificationsCount(): Int = notificationSender.notificationsCount()
 }

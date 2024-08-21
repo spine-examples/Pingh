@@ -26,50 +26,29 @@
 
 package io.spine.examples.pingh.client.e2e.given
 
-import io.kotest.matchers.shouldBe
 import io.spine.examples.pingh.client.NotificationSender
 
 /**
- * Memorizes the number of notifications that should is sent.
+ * Memorizes the number of notifications that should be sent.
  *
  * Does not send any notifications. Use only for tests.
  */
 internal class MemorableNotificationSender : NotificationSender {
 
     /**
-     * The number of notifications that should is sent.
+     * The number of notifications that should be sent.
      */
-    private var notificationsNumber = 0
+    private var notificationsCount = 0
 
     /**
-     * Adds a notification to [total number][notificationsNumber] that should is sent.
+     * Adds a notification to [total number][notificationsCount] that should be sent.
      */
     override fun send(title: String, content: String) {
-        notificationsNumber++
+        notificationsCount++
     }
 
     /**
-     * Obtains the subject to check saved notifications.
+     * Obtains the count of notifications that should be sent.
      */
-    internal fun assertNotifications(): NotificationsSubject =
-        NotificationsSubject(notificationsNumber)
-}
-
-/**
- * Checks for notifications sent by the [MemorableNotificationSender].
- *
- * @param notificationsNumber the number of sent notifications.
- */
-internal class NotificationsSubject(
-    private val notificationsNumber: Int
-) {
-
-    /**
-     * Fails if the notifications number does not have the given size.
-     *
-     * @param size the expected number of notifications.
-     */
-    internal fun hasSize(size: Int) {
-        notificationsNumber shouldBe size
-    }
+    internal fun notificationsCount(): Int = notificationsCount
 }
