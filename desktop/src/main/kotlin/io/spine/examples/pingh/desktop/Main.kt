@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.desktop
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.remember
 import androidx.compose.ui.window.application
 
@@ -35,7 +36,8 @@ import androidx.compose.ui.window.application
 public fun main() {
     application {
         PinghTheme {
-            val state = remember { PinghApplicationState() }
+            val isSystemInDarkTheme = isSystemInDarkTheme()
+            val state = remember { PinghApplicationState(isSystemInDarkTheme) }
             PinghWindow(state.window, state.app)
             PinghTray(state.tray, state.app)
         }
