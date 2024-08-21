@@ -31,13 +31,12 @@ import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.Ktor
 import io.spine.internal.dependency.Material3
 import io.spine.internal.dependency.Pingh
-import io.spine.internal.gradle.allowBackgroundExecution
 import io.spine.internal.gradle.extractVersion
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
     kotlin("jvm")
-    id("org.jetbrains.compose")
+    id("org.jetbrains.compose").version("1.6.11")
 
     // Adds dependencies for Dokka and configures it.
     id("dokka-configuration")
@@ -103,7 +102,10 @@ compose.desktop {
             macOS {
                 iconFile = iconForMacOs()
                 infoPlist {
-                    allowBackgroundExecution()
+                    extraKeysRawXml = """
+                        <key>LSUIElement</key>
+                        <true/>
+                    """.trimIndent()
                 }
             }
         }
