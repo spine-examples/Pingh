@@ -27,16 +27,26 @@
 package io.spine.internal.gradle
 
 /**
+ * The version of the application.
+ *
+ * @property value The string value of the version.
+ */
+public data class AppVersion(
+    public val value: String
+)
+
+/**
  * Extracts the semantic version from the string, including the major version,
  * and optionally the minor and patch versions. Numbers must be separated by dots.
  *
  * @throws IllegalArgumentException if the passed string does not contain a semantic version.
  * @see <a href="https://semver.org/">Semantic Versioning</a>
  */
-public fun extractVersion(str: String): String {
+public fun AppVersion.extractSemanticVersion(): AppVersion {
     val pattern = """\d+(.\d+){0,2}""".toRegex()
-    val matchResult = pattern.find(str)
-    return matchResult?.value ?: throw IllegalArgumentException(
-        "$str does not contain semantic version: ${pattern.pattern}."
-    )
+    val matchResult = pattern.find(value)
+        ?: throw IllegalArgumentException(
+            "$value does not contain semantic version: ${pattern.pattern}."
+        )
+    return AppVersion(matchResult.value)
 }
