@@ -52,8 +52,8 @@ import io.spine.net.Url
  *
  * The image loads asynchronously.
  *
- * @param url the URL of the avatar image.
- * @param modifier the modifier to be applied to this avatar.
+ * @param url The URL of the avatar image.
+ * @param modifier The modifier to be applied to this avatar.
  */
 @Composable
 internal fun Avatar(
@@ -72,9 +72,9 @@ internal fun Avatar(
  * Displays a round avatar with the first letter of the provided name
  * on a gradient background.
  *
- * @param name the name to write it first letter on the avatar.
- * @param size the width and height of the avatar.
- * @param modifier the modifier to be applied to this avatar.
+ * @param name The name to write it first letter on the avatar.
+ * @param size The width and height of the avatar.
+ * @param modifier The modifier to be applied to this avatar.
  */
 @Composable
 internal fun Avatar(

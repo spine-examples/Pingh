@@ -73,8 +73,8 @@ import io.spine.examples.pingh.mentions.MentionView
  * Users can snooze and read mentions on this page. Additionally, it is
  * possible to manually update the list of mentions from the server.
  *
- * @param flow the flow for managing the lifecycle of mentions.
- * @param toSettingsPage the navigation to the 'Settings' page.
+ * @param flow The flow for managing the lifecycle of mentions.
+ * @param toSettingsPage The navigation to the 'Settings' page.
  */
 @Composable
 internal fun MentionsPage(
@@ -95,8 +95,8 @@ internal fun MentionsPage(
  * Displays a menu of tools for navigating to an application settings page or
  * manually updating mentions.
  *
- * @param flow the flow for managing the lifecycle of mentions.
- * @param toSettingsPage the navigation to the 'Settings' page.
+ * @param flow The flow for managing the lifecycle of mentions.
+ * @param toSettingsPage The navigation to the 'Settings' page.
  */
 @Composable
 private fun ToolBar(
@@ -153,7 +153,7 @@ private fun ToolBar(
  *
  * Within each group, mentions are sorted by time.
  *
- * @param flow the flow for managing the lifecycle of mentions.
+ * @param flow The flow for managing the lifecycle of mentions.
  */
 @Composable
 private fun MentionCards(
@@ -186,8 +186,8 @@ private fun MentionCards(
  * - If the mention is snoozed, it can only be read.
  * - If the mention is read, it can still be opened, but its status does not change.
  *
- * @param flow the flow for managing the lifecycle of mentions.
- * @param mention the mention whose information is displayed.
+ * @param flow The flow for managing the lifecycle of mentions.
+ * @param mention The mention whose information is displayed.
  */
 @Composable
 private fun MentionCard(
@@ -241,8 +241,8 @@ private fun MentionCard(
  * Displays textual information about the mention,
  * including details about who mentioned the user, where, and when.
  *
- * @param mention the mention whose information is displayed.
- * @param isHovered indicates whether the mouse is over the mention card.
+ * @param mention The mention whose information is displayed.
+ * @param isHovered Indicates whether the mouse is over the mention card.
  */
 @Composable
 private fun MentionCardText(
@@ -280,8 +280,8 @@ private fun MentionCardText(
  *
  * Otherwise, nothing is displayed.
  *
- * @param flow the flow for managing the lifecycle of mentions.
- * @param mention the mention whose information is displayed.
+ * @param flow The flow for managing the lifecycle of mentions.
+ * @param mention The mention whose information is displayed.
  */
 @Composable
 private fun SnoozeButton(

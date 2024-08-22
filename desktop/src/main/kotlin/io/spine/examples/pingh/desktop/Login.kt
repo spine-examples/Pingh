@@ -95,8 +95,8 @@ import io.spine.protobuf.Durations2.toMinutes
  * a code that must be entered into GitHub. After entering the code, the user needs
  * to confirm the login on the application page.
  *
- * @param flow the control flow of the GitHub login process.
- * @param toMentionsPage the navigation to the 'Mentions' page.
+ * @param flow The control flow of the GitHub login process.
+ * @param toMentionsPage The navigation to the 'Mentions' page.
  */
 @Composable
 internal fun LoginPage(
@@ -123,7 +123,8 @@ internal fun LoginPage(
  * be redirected to the login verification page.
  * [LoginButton] is not enable while the entered `Username` is invalid.
  *
- * @param flow the control flow of the GitHub login process stage where the user must enter their name.
+ * @param flow The control flow of the GitHub login process stage
+ *   where the user must enter their name.
  */
 @Composable
 private fun UsernameEnteringPage(
@@ -204,9 +205,9 @@ private fun ApplicationInfo() {
 /**
  * Displays a username input field on the login form.
  *
- * @param value the current value of the input field.
- * @param onChange called when input value is changed.
- * @param isError indicates if the input's current value is in error.
+ * @param value The current value of the input field.
+ * @param onChange Called when input value is changed.
+ * @param isError Indicates if the input's current value is in error.
  */
 @Composable
 private fun UsernameInput(
@@ -254,9 +255,9 @@ private fun UsernameInput(
 /**
  * Displays a container for the text field.
  *
- * @param value the current value of the input field.
- * @param textField the composable function that displays the content of an input field.
- * @param border the border of this input.
+ * @param value The current value of the input field.
+ * @param textField The composable function that displays the content of an input field.
+ * @param border The border of this input.
  */
 @Composable
 private fun InputContainer(
@@ -291,7 +292,7 @@ private fun InputContainer(
 /**
  * Displays a label which placed on the top border of the text field.
  *
- * @param color the color of this label.
+ * @param color The color of this label.
  */
 @Composable
 private fun Label(color: Color) {
@@ -316,7 +317,7 @@ private fun Label(color: Color) {
 /**
  * Displays a placeholder which placed inside the text field.
  *
- * @param isShown indicates whether the placeholder is displayed.
+ * @param isShown Indicates whether the placeholder is displayed.
  */
 @Composable
 private fun Placeholder(isShown: Boolean) {
@@ -332,7 +333,7 @@ private fun Placeholder(isShown: Boolean) {
 /**
  * Displays an error message which is placed below the text field.
  *
- * @param isShown indicates whether the error message is displayed.
+ * @param isShown Indicates whether the error message is displayed.
  */
 @Composable
 private fun ErrorMessage(isShown: Boolean) {
@@ -352,9 +353,9 @@ private fun ErrorMessage(isShown: Boolean) {
 /**
  * Displays a button on the login form.
  *
- * @param enabled controls the enabled state of this button.
- *                If `false`, the button cannot be pressed.
- * @param onClick called when this button is clicked.
+ * @param enabled Controls the enabled state of this button.
+ *   If `false`, the button cannot be pressed.
+ * @param onClick Called when this button is clicked.
  */
 @Composable
 private fun LoginButton(
@@ -390,8 +391,9 @@ private fun LoginButton(
  * In this case, the user code cannot be copied, and the instructions and button
  * will not be displayed.
  *
- * @param flow the control flow of the GitHub login process stage where the user must verify their login.
- * @param toMentionsPage the navigation to the 'Mentions' page.
+ * @param flow The control flow of the GitHub login process stage
+ *   where the user must verify their login.
+ * @param toMentionsPage The navigation to the 'Mentions' page.
  */
 @Composable
 private fun VerificationPage(
@@ -448,8 +450,8 @@ private fun VerificationTitle() {
 /**
  * Displays the user code with an option to copy it.
  *
- * @param userCode the verification code to be displayed.
- * @param isExpired whether `userCode` is expired.
+ * @param userCode The verification code to be displayed.
+ * @param isExpired Whether `userCode` is expired.
  */
 @Composable
 private fun UserCodeField(
@@ -483,7 +485,7 @@ private fun UserCodeField(
 /**
  * Displays an icon to copy the specified `UserCode` to the clipboard.
  *
- * @param userCode the `UserCode` to copy.
+ * @param userCode The `UserCode` to copy.
  */
 @Composable
 private fun CopyToClipboardIcon(
@@ -509,7 +511,8 @@ private fun CopyToClipboardIcon(
 /**
  * Displays an error message indicating that the `UserCode` has expired.
  *
- * @param flow the control flow of the GitHub login process stage where the user must verify their login.
+ * @param flow The control flow of the GitHub login process stage
+ *   where the user must verify their login.
  */
 @Composable
 private fun CodeExpiredErrorMessage(flow: VerifyLogin) {
@@ -523,8 +526,8 @@ private fun CodeExpiredErrorMessage(flow: VerifyLogin) {
 /**
  * Displays instructions for login verification.
  *
- * @param verificationUrl the URL of the GitHub verification page.
- * @param expiresIn the duration after which the `userCode` expires.
+ * @param verificationUrl The URL of the GitHub verification page.
+ * @param expiresIn The duration after which the `userCode` expires.
  */
 @Composable
 private fun VerificationText(
@@ -554,7 +557,7 @@ private fun VerificationText(
 /**
  * Displays a URL of the GitHub verification page.
  *
- * @param url the URL of the GitHub verification page.
+ * @param url The URL of the GitHub verification page.
  */
 @Composable
 private fun VerificationUrlButton(url: Url) {
@@ -585,8 +588,9 @@ private fun VerificationUrlButton(url: Url) {
 /**
  * Displays a button to confirm verification.
  *
- * @param flow the control flow of the GitHub login process stage where the user must verify their login.
- * @param toMentionsPage the navigation to the 'Mentions' page.
+ * @param flow The control flow of the GitHub login process stage
+ *   where the user must verify their login.
+ * @param toMentionsPage The navigation to the 'Mentions' page.
  */
 @Composable
 private fun SubmitButton(
@@ -632,7 +636,8 @@ private fun SubmitButton(
 /**
  * Displays an error message indicating that GitHub could not verify the login.
  *
- * @param flow the control flow of the GitHub login process stage where the user must verify their login.
+ * @param flow The control flow of the GitHub login process stage
+ *   where the user must verify their login.
  */
 @Composable
 private fun NoResponseErrorMessage(
@@ -655,11 +660,11 @@ private fun NoResponseErrorMessage(
 /**
  * Displays an error message, part of the text of which is a clickable link.
  *
- * @param text the error text.
+ * @param text The error text.
  * @param clickablePartOfText The substring of `text` that is a link.
- * @param onClick called when `clickablePartOfText` is clicked.
- * @param modifier the modifier to be applied to this error message.
- * @throws IllegalArgumentException if `clickablePartOfText` is not substring of the `text`.
+ * @param onClick Called when `clickablePartOfText` is clicked.
+ * @param modifier The modifier to be applied to this error message.
+ * @throws IllegalArgumentException If `clickablePartOfText` is not substring of the `text`.
  */
 @Composable
 private fun ClickableErrorMessage(

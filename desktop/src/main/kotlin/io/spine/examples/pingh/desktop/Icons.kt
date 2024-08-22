@@ -57,11 +57,11 @@ private const val iconSizeMultiplier = 0.75f
 /**
  * Displays a round button that contains icon.
  *
- * @param icon the painter to draw icon.
- * @param onClick called when this icon button is clicked.
- * @param modifier the modifier to be applied to this icon button.
+ * @param icon The painter to draw icon.
+ * @param onClick Called when this icon button is clicked.
+ * @param modifier The modifier to be applied to this icon button.
  * @param colors `IconButtonColors` that is used to resolve the colors used for this icon button
- * in different states.
+ *   in different states.
  */
 @Composable
 internal fun IconButton(
