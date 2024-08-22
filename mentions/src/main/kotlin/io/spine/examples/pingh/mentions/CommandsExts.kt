@@ -54,11 +54,15 @@ public fun KClass<SnoozeMention>.buildBy(id: MentionId, untilWhen: Timestamp): S
         .vBuild()
 
 /**
- * Creates a new `UpdateMentionsFromGitHub` command with the specified `GitHubClientId`.
+ * Creates a new `UpdateMentionsFromGitHub` command with the specified `GitHubClientId`
+ * and time when this update is requested.
  */
-public fun KClass<UpdateMentionsFromGitHub>.buildBy(id: GitHubClientId):
+public fun KClass<UpdateMentionsFromGitHub>.buildBy(
+    id: GitHubClientId,
+    whenRequested: Timestamp = currentTime()
+):
         UpdateMentionsFromGitHub =
     UpdateMentionsFromGitHub.newBuilder()
         .setId(id)
-        .setWhenRequested(currentTime())
+        .setWhenRequested(whenRequested)
         .vBuild()

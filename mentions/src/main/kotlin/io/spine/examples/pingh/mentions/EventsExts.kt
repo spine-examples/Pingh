@@ -35,7 +35,6 @@ import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.event.AutoUpdateMentionsStarted
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
-import io.spine.examples.pingh.mentions.event.LastRequestTimeUpdated
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
@@ -144,13 +143,5 @@ public fun KClass<UserMentioned>.buildBy(mention: Mention, whoWasMentioned: User
 internal fun KClass<AutoUpdateMentionsStarted>.withId(id: GitHubClientId):
         AutoUpdateMentionsStarted =
     AutoUpdateMentionsStarted.newBuilder()
-        .setId(id)
-        .vBuild()
-
-/**
- * Creates a new `LastRequestTimeUpdated` event with the provided `GitHubClientID`.
- */
-internal fun KClass<LastRequestTimeUpdated>.withId(id: GitHubClientId): LastRequestTimeUpdated =
-    LastRequestTimeUpdated.newBuilder()
         .setId(id)
         .vBuild()

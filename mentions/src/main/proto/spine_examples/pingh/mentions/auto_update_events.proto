@@ -43,10 +43,3 @@ message AutoUpdateMentionsStarted {
     // The ID of the auto update mentions process that started.
     GitHubClientId id = 1;
 }
-
-// The time of the last request for mentions from GitHub was updated.
-message LastRequestTimeUpdated {
-
-    // The ID of the auto update mentions process where the time of the last request was updated.
-    GitHubClientId id = 1;
-}
