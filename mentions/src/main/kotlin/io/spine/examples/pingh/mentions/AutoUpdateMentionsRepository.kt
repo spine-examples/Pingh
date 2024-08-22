@@ -26,28 +26,26 @@
 
 package io.spine.examples.pingh.mentions
 
-import io.spine.server.BoundedContext
-import io.spine.server.BoundedContextBuilder
+import io.spine.examples.pingh.clock.event.TimePassed
+import io.spine.server.procman.ProcessManagerRepository
+import io.spine.server.route.EventRouting
 
 /**
- * Name of the Mentions bounded context.
+ * Manages instances of [AutoUpdateMentionsProcess].
  */
-public const val NAME: String = "Mentions"
+internal class AutoUpdateMentionsRepository :
+    ProcessManagerRepository<GitHubClientId, AutoUpdateMentionsProcess, AutoUpdateMentions>() {
 
-/**
- * Creates a new builder for the Mentions bounded context.
- *
- * The returned builder instance is already configured
- * to serve the entities which belong to this context.
- *
- * It is expected that the business scenarios
- * of the created context require access to the GitHub API.
- * Therefore, an instance of GitHub client is required
- * as a parameter.
- */
-public fun newMentionsContext(gitHubClientService: GitHubClientService): BoundedContextBuilder =
-    BoundedContext.singleTenant(NAME)
-        .add(GitHubClientRepository(gitHubClientService))
-        .add(AutoUpdateMentionsRepository())
-        .add(MentionRepository())
-        .add(UserMentionsRepository())
+    override fun setupEventRouting(routing: EventRouting<GitHubClientId>) {
+        super.setupEventRouting(routing)
+        routing.route(TimePassed::class.java) { _, _ -> toAll() }
+    }
+
+    /**
+     * Returns a set of identifiers of records in the process manager storage.
+     */
+    private fun toAll(): Set<GitHubClientId> =
+        storage().index()
+            .asSequence()
+            .toSet()
+}
