@@ -36,6 +36,9 @@ import io.spine.examples.pingh.client.PinghApplication
  * Adds the application icon to the platform taskbar.
  *
  * This icon allows the user to show or hide the Pingh window and quit the application.
+ *
+ * @param state State of the application icon, located in the platform taskbar.
+ * @param app Manages the logic for the Pingh app.
  */
 @Composable
 internal fun ApplicationScope.Tray(state: TrayState, app: PinghApplication) {
@@ -57,8 +60,8 @@ internal fun ApplicationScope.Tray(state: TrayState, app: PinghApplication) {
 /**
  * State of [Tray].
  *
- * @param window the state of the Pingh platform window.
- * @param composeTray the built-in state for Compose trays.
+ * @property window The state of the Pingh platform window.
+ * @property composeTray The built-in state for Compose trays.
  * @param settings The settings of the operating system on which the application is running.
  */
 internal class TrayState(

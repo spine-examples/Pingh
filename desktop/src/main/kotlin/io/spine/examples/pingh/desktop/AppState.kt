@@ -71,9 +71,9 @@ internal class AppState(settings: SystemSettings) {
  *
  * Notifications will only be sent if the window is hidden but the application is run.
  *
- * @param composeTray the built-in state for Compose trays.
- * @param isWindowHidden returns `true` if the [window][AppState.window] is hidden;
- *                       returns `false` otherwise.
+ * @property composeTray The built-in state for Compose trays.
+ * @property isWindowHidden Returns `true` if the [window][AppState.window] is hidden;
+ *   returns `false` otherwise.
  */
 private class TrayNotificationSender(
     private val composeTray: ComposeTrayState,
@@ -83,8 +83,8 @@ private class TrayNotificationSender(
     /**
      * Sends the information [Notification] to the system tray.
      *
-     * @param title the notification's title.
-     * @param content the notification's content.
+     * @param title The notification's title.
+     * @param content The notification's content.
      */
     override fun send(title: String, content: String) {
         if (isWindowHidden()) {

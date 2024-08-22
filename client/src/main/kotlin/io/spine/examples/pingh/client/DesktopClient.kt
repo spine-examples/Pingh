@@ -108,9 +108,11 @@ internal class DesktopClient(
     /**
      * Observes the provided event with the specified ID.
      *
-     * @param id the ID of the observed event.
-     * @param type the type of the observed event.
-     * @param onEmit called when the event is emitted.
+     * @param E The type of the observed event.
+     *
+     * @param id The ID of the observed event.
+     * @param type The type of the observed event.
+     * @param onEmit Called when the event is emitted.
      */
     internal fun <E : EventMessage> observeEvent(
         id: Message,
@@ -126,9 +128,11 @@ internal class DesktopClient(
     /**
      * Observes the specified event that meets the `filter` condition.
      *
-     * @param type the type of the observed event.
-     * @param filter selection condition for observed events.
-     * @param onEmit called when the event is emitted.
+     * @param E The type of the observed event.
+     *
+     * @param type The class of the type of the observed event.
+     * @param filter Selection condition for observed events.
+     * @param onEmit Called when the event is emitted.
      */
     internal fun <E : EventMessage> observeEvent(
         type: KClass<E>,

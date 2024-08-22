@@ -44,9 +44,9 @@ import kotlinx.coroutines.launch
  * By default, application opens channel for the client
  * to 'localhost:[50051][DEFAULT_CLIENT_SERVICE_PORT]'.
  *
- * @param notificationSender allows to send notifications.
- * @param address the address of the Pingh server.
- * @param port the port on which the Pingh server is running.
+ * @param notificationSender Allows to send notifications.
+ * @param address The address of the Pingh server.
+ * @param port The port on which the Pingh server is running.
  */
 public class PinghApplication(
     notificationSender: NotificationSender,
