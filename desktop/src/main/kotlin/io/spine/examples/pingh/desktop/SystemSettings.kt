@@ -26,19 +26,38 @@
 
 package io.spine.examples.pingh.desktop
 
-import androidx.compose.runtime.remember
-import androidx.compose.ui.window.application
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
 
 /**
- * Entry point of the desktop application.
+ * Obtains the settings of the operating system on which the application is running.
  */
-public fun main() {
-    application {
-        Theme {
-            val settings = retrieveSystemSettings()
-            val state = remember { AppState(settings) }
-            Window(state.window, state.app)
-            Tray(state.tray, state.app)
-        }
-    }
+@Composable
+internal fun retrieveSystemSettings(): SystemSettings {
+    val theme = if (isSystemInDarkTheme()) SystemTheme.DARK else SystemTheme.LIGHT
+    return SystemSettings(theme)
+}
+
+/**
+ * The settings of the operating system on which the application is running.
+ *
+ * @property theme The theme of the operating system.
+ */
+internal data class SystemSettings(
+    val theme: SystemTheme
+)
+
+/**
+ * Themes of operating system.
+ */
+internal enum class SystemTheme {
+    /**
+     * The 'Light' theme.
+     */
+    LIGHT,
+
+    /**
+     * The 'Dark' theme.
+     */
+    DARK
 }

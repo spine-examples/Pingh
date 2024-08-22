@@ -59,17 +59,21 @@ internal fun ApplicationScope.Tray(state: TrayState, app: PinghApplication) {
  *
  * @param window the state of the Pingh platform window.
  * @param composeTray the built-in state for Compose trays.
- * @param isSystemInDarkTheme whether current system theme is set to 'Dark'.
+ * @param settings The settings of the operating system on which the application is running.
  */
 internal class TrayState(
     private val window: WindowState,
     internal val composeTray: ComposeTrayState,
-    isSystemInDarkTheme: Boolean
+    settings: SystemSettings
 ) {
     /**
      * The tray icon.
      */
-    internal val icon = if (isSystemInDarkTheme) Icons.trayWhite else Icons.trayBlack
+    internal val icon = if (settings.theme == SystemTheme.DARK) {
+        Icons.trayWhite
+    } else {
+        Icons.trayBlack
+    }
 
     /**
      * Application's title.

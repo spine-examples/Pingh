@@ -34,9 +34,9 @@ import io.spine.examples.pingh.client.PinghApplication
 /**
  * The top-level application state.
  *
- * @param isSystemInDarkTheme whether current system theme is set to 'Dark'.
+ * @param settings The settings of the operating system on which the application is running.
  */
-internal class AppState(isSystemInDarkTheme: Boolean) {
+internal class AppState(settings: SystemSettings) {
 
     /**
      * A built-in state for Compose trays.
@@ -53,7 +53,7 @@ internal class AppState(isSystemInDarkTheme: Boolean) {
     /**
      * State of the application icon, located in the platform taskbar.
      */
-    internal val tray = TrayState(window, composeTray, isSystemInDarkTheme)
+    internal val tray = TrayState(window, composeTray, settings)
 
     /**
      * Manages the logic for the Pingh app.
