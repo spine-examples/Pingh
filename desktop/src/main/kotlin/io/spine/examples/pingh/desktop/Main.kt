@@ -35,11 +35,11 @@ import androidx.compose.ui.window.application
  */
 public fun main() {
     application {
-        PinghTheme {
+        Theme {
             val isSystemInDarkTheme = isSystemInDarkTheme()
-            val state = remember { PinghApplicationState(isSystemInDarkTheme) }
-            PinghWindow(state.window, state.app)
-            PinghTray(state.tray, state.app)
+            val state = remember { AppState(isSystemInDarkTheme) }
+            Window(state.window, state.app)
+            Tray(state.tray, state.app)
         }
     }
 }

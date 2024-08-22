@@ -37,7 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.FrameWindowScope
-import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.Window as ComposeWindow
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
 import io.spine.examples.pingh.client.PinghApplication
@@ -48,7 +48,7 @@ import io.spine.examples.pingh.client.PinghApplication
  * @see [PlatformWindow]
  */
 @Composable
-internal fun PinghWindow(state: PinghWindowState, app: PinghApplication) {
+internal fun Window(state: WindowState, app: PinghApplication) {
     PlatformWindow(
         title = state.title,
         isShown = state.isShown,
@@ -85,7 +85,7 @@ private fun PlatformWindow(
         height = 426.dp,
         position = WindowPosition(1200.dp, 30.dp)
     )
-    Window(
+    ComposeWindow(
         onCloseRequest = onClose,
         state = windowState,
         visible = isShown,
@@ -99,9 +99,9 @@ private fun PlatformWindow(
 }
 
 /**
- * State of [PinghWindow].
+ * State of [Window].
  */
-internal class PinghWindowState {
+internal class WindowState {
 
     /**
      * Window's title.

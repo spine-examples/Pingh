@@ -27,7 +27,7 @@
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.ui.window.Notification
-import androidx.compose.ui.window.TrayState
+import androidx.compose.ui.window.TrayState as ComposeTrayState
 import io.spine.examples.pingh.client.NotificationSender
 import io.spine.examples.pingh.client.PinghApplication
 
@@ -36,24 +36,24 @@ import io.spine.examples.pingh.client.PinghApplication
  *
  * @param isSystemInDarkTheme whether current system theme is set to 'Dark'.
  */
-internal class PinghApplicationState(isSystemInDarkTheme: Boolean) {
+internal class AppState(isSystemInDarkTheme: Boolean) {
 
     /**
      * A built-in state for Compose trays.
      *
      * Enables sending notifications.
      */
-    private val composeTray = TrayState()
+    private val composeTray = ComposeTrayState()
 
     /**
      * State of the window.
      */
-    internal val window = PinghWindowState()
+    internal val window = WindowState()
 
     /**
      * State of the application icon, located in the platform taskbar.
      */
-    internal val tray = PinghTrayState(window, composeTray, isSystemInDarkTheme)
+    internal val tray = TrayState(window, composeTray, isSystemInDarkTheme)
 
     /**
      * Manages the logic for the Pingh app.
@@ -72,11 +72,11 @@ internal class PinghApplicationState(isSystemInDarkTheme: Boolean) {
  * Notifications will only be sent if the window is hidden but the application is run.
  *
  * @param composeTray the built-in state for Compose trays.
- * @param isWindowHidden returns `true` if the [window][PinghApplicationState.window] is hidden;
+ * @param isWindowHidden returns `true` if the [window][AppState.window] is hidden;
  *                       returns `false` otherwise.
  */
 private class TrayNotificationSender(
-    private val composeTray: TrayState,
+    private val composeTray: ComposeTrayState,
     private val isWindowHidden: () -> Boolean
 ) : NotificationSender {
 

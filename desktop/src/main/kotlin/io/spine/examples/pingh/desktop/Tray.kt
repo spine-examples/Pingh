@@ -28,8 +28,8 @@ package io.spine.examples.pingh.desktop
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.ApplicationScope
-import androidx.compose.ui.window.TrayState
-import androidx.compose.ui.window.Tray
+import androidx.compose.ui.window.TrayState as ComposeTrayState
+import androidx.compose.ui.window.Tray as ComposeTray
 import io.spine.examples.pingh.client.PinghApplication
 
 /**
@@ -38,8 +38,8 @@ import io.spine.examples.pingh.client.PinghApplication
  * This icon allows the user to show or hide the Pingh window and quit the application.
  */
 @Composable
-internal fun ApplicationScope.PinghTray(state: PinghTrayState, app: PinghApplication) {
-    Tray(
+internal fun ApplicationScope.Tray(state: TrayState, app: PinghApplication) {
+    ComposeTray(
         icon = state.icon,
         state = state.composeTray,
         tooltip = state.title,
@@ -55,15 +55,15 @@ internal fun ApplicationScope.PinghTray(state: PinghTrayState, app: PinghApplica
 }
 
 /**
- * State of [PinghTray].
+ * State of [Tray].
  *
  * @param window the state of the Pingh platform window.
  * @param composeTray the built-in state for Compose trays.
  * @param isSystemInDarkTheme whether current system theme is set to 'Dark'.
  */
-internal class PinghTrayState(
-    private val window: PinghWindowState,
-    internal val composeTray: TrayState,
+internal class TrayState(
+    private val window: WindowState,
+    internal val composeTray: ComposeTrayState,
     isSystemInDarkTheme: Boolean
 ) {
     /**
