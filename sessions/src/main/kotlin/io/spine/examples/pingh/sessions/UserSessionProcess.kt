@@ -40,7 +40,7 @@ import io.spine.server.tuple.EitherOf2
 /**
  * Coordinates session management, that is, user login and logout.
  */
-public class UserSessionProcess :
+internal class UserSessionProcess :
     ProcessManager<SessionId, UserSession, UserSession.Builder>() {
 
     /**

@@ -39,7 +39,7 @@ import io.ktor.http.HttpStatusCode
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.buildFromFragment
+import io.spine.examples.pingh.github.fromFragment
 import io.spine.examples.pingh.github.rest.CommentsResponse
 import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResult
 import io.spine.examples.pingh.github.tag
@@ -51,6 +51,8 @@ import kotlinx.coroutines.runBlocking
  *
  * A user can be mentioned multiple times in comments or in the body of the item itself.
  * Each mention is treated as a separate entity and saved.
+ *
+ * @param engine Engine used to create the HTTP client.
  */
 public class GitHubClientServiceImpl(
     engine: HttpClientEngine
@@ -67,6 +69,9 @@ public class GitHubClientServiceImpl(
      *
      * The default value of `updateAfter` is `Timestamp.getDefaultInstance()`.
      *
+     * @param username The name of the user whose mentions are to be fetched.
+     * @param token The `PersonalAccessToken` to access user's private repositories
+     * @param updatedAfter The time from which the mentions is searched.
      * @see [GitHubClientService.fetchMentions]
      */
     @Throws(CannotFetchMentionsFromGitHubException::class)
@@ -96,10 +101,10 @@ public class GitHubClientServiceImpl(
                 val mentionsInComments = obtainCommentsByUrl(item.commentsUrl, token)
                     .itemList
                     .filter { comment -> comment.body.contains(userTag) }
-                    .map { comment -> Mention::class.buildFromFragment(comment, item.title) }
+                    .map { comment -> Mention::class.fromFragment(comment, item.title) }
 
                 if (item.body.contains(userTag)) {
-                    mentionsInComments.plus(Mention::class.buildFromFragment(item))
+                    mentionsInComments.plus(Mention::class.fromFragment(item))
                 } else {
                     mentionsInComments
                 }
@@ -242,7 +247,7 @@ public class GitHubClientServiceImpl(
         /**
          * Creates and sends request with specified data.
          *
-         * @throws IllegalArgumentException some request data is not specified.
+         * @throws IllegalArgumentException Some request data is not specified.
          */
         suspend fun requestOnBehalfOf(client: HttpClient): HttpResponse {
             checkNotNull(itemType) { "The type of the searched item is not specified." }

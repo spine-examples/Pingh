@@ -27,7 +27,7 @@
 package io.spine.examples.pingh.mentions
 
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.buildBy
+import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
@@ -54,7 +54,7 @@ internal class UserMentionsSpec : ContextAwareTest() {
 
     @BeforeEach
     internal fun emitUserMentionedEvent() {
-        val username = Username::class.buildBy(randomString())
+        val username = Username::class.of(randomString())
         id = UserMentionsId::class.buildBy(username)
         userMentioned = UserMentioned::class.generateWith(username)
         context().receivesEvent(userMentioned)

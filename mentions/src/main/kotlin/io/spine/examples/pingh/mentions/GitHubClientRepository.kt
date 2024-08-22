@@ -35,12 +35,12 @@ import io.spine.server.route.EventRouting
 /**
  * Manages instances of [GitHubClientProcess].
  */
-public class GitHubClientRepository(
+internal class GitHubClientRepository(
     private val gitHubClientService: GitHubClientService,
 ) : ProcessManagerRepository<GitHubClientId, GitHubClientProcess, GitHubClient>() {
 
     @OverridingMethodsMustInvokeSuper
-    protected override fun setupEventRouting(routing: EventRouting<GitHubClientId>) {
+    override fun setupEventRouting(routing: EventRouting<GitHubClientId>) {
         super.setupEventRouting(routing)
         routing
             .route(UserLoggedIn::class.java) { event, _ ->
@@ -49,7 +49,7 @@ public class GitHubClientRepository(
     }
 
     @OverridingMethodsMustInvokeSuper
-    protected override fun configure(processManager: GitHubClientProcess) {
+    override fun configure(processManager: GitHubClientProcess) {
         super.configure(processManager)
         processManager.inject(gitHubClientService)
     }

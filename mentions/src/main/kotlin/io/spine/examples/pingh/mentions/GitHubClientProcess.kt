@@ -55,7 +55,7 @@ import kotlin.reflect.KClass
 /**
  * A process of reading user's mentions from GitHub.
  */
-public class GitHubClientProcess :
+internal class GitHubClientProcess :
     ProcessManager<GitHubClientId, GitHubClient, GitHubClient.Builder>() {
 
     /**

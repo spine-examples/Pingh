@@ -43,6 +43,10 @@ public interface GitHubClientService {
      * Mentions are searched by the name of the mentioned user. Mentions must be within items
      * updated between the `updateAfter` time and the present. The `PersonalAccessToken` is used
      * to access the GitHub API.
+     *
+     * @param username The name of the user whose mentions are to be fetched.
+     * @param token The `PersonalAccessToken` to access user's private repositories
+     * @param updatedAfter The time from which the mentions is searched.
      */
     @Throws(CannotFetchMentionsFromGitHubException::class)
     public fun fetchMentions(

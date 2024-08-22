@@ -27,7 +27,7 @@
 package io.spine.examples.pingh.testing.mentions.given
 
 import io.spine.examples.pingh.github.Mention
-import io.spine.examples.pingh.github.buildFromFragment
+import io.spine.examples.pingh.github.fromFragment
 import io.spine.examples.pingh.mentions.parseCommentsFromJson
 import io.spine.examples.pingh.mentions.parseIssuesAndPullRequestsFromJson
 
@@ -50,7 +50,7 @@ private fun loadMentionsInPr(): Set<Mention> {
     val json = jsonFile.readText(Charsets.UTF_8)
     return parseIssuesAndPullRequestsFromJson(json)
         .itemList
-        .map { fragment -> Mention::class.buildFromFragment(fragment) }
+        .map { fragment -> Mention::class.fromFragment(fragment) }
         .toSet()
 }
 
@@ -70,6 +70,6 @@ private fun loadMentionsInCommentsUnderPr(): Set<Mention> {
     // is just the value of the `item` field.
     return parseCommentsFromJson("{ item: $json }")
         .itemList
-        .map { fragment -> Mention::class.buildFromFragment(fragment, "Comment") }
+        .map { fragment -> Mention::class.fromFragment(fragment, "Comment") }
         .toSet()
 }

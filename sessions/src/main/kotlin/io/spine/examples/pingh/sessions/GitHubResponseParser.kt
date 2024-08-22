@@ -35,6 +35,8 @@ import io.spine.json.Json
 
 /**
  * Parses `VerificationCodesResponse` from the JSON.
+ *
+ * @param json The string containing JSON with the `VerificationCodesResponse`.
  */
 public fun parseVerificationCodesResponse(json: String): VerificationCodesResponse =
     VerificationCodesResponse::class.fromFragment(
@@ -43,6 +45,8 @@ public fun parseVerificationCodesResponse(json: String): VerificationCodesRespon
 
 /**
  * Parses `AccessTokenResponse` from the JSON.
+ *
+ * @param json The string containing JSON with the `AccessTokenResponse`.
  */
 public fun parseAccessTokenResponse(json: String): AccessTokenResponse =
     AccessTokenResponse::class.fromFragment(

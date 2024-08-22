@@ -33,6 +33,7 @@ import io.spine.examples.pingh.github.NodeId
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
+import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionView
 import io.spine.examples.pingh.mentions.UserMentions
@@ -57,7 +58,7 @@ internal fun KClass<UserMentioned>.generateWith(whoWasMentioned: Username): User
         whoMentioned = User::class.buildBy(randomString(), randomString())
         title = randomString()
         whenMentioned = currentTime()
-        url = Url::class.buildBy(randomString())
+        url = Url::class.of(randomString())
         vBuild()
     }
 

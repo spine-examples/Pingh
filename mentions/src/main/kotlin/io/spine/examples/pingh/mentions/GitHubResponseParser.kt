@@ -32,12 +32,16 @@ import io.spine.json.Json
 
 /**
  * Parses `IssuesAndPullRequestsSearchResult` from the JSON.
+ *
+ * @param json The string containing JSON with the `IssuesAndPullRequestsSearchResult`.
  */
 public fun parseIssuesAndPullRequestsFromJson(json: String): IssuesAndPullRequestsSearchResult =
     Json.fromJson(json, IssuesAndPullRequestsSearchResult::class.java)
 
 /**
  * Parses `CommentsGetResult` from the JSON.
+ *
+ * @param json The string containing JSON with the `CommentsGetResult`.
  */
 public fun parseCommentsFromJson(json: String): CommentsResponse =
     Json.fromJson(json, CommentsResponse::class.java)

@@ -31,7 +31,7 @@ import io.ktor.http.HttpStatusCode
 import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.buildBy
+import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
@@ -74,13 +74,13 @@ internal class GitHubClientSpec : ContextAwareTest() {
         gitHubClientService.mentionsAreNotFetched()
         sessionContext = BlackBoxContext
             .from(newSessionsContext(PredefinedGitHubAuthenticationResponses()))
-        val username = Username::class.buildBy(randomString())
+        val username = Username::class.of(randomString())
         gitHubClientId = GitHubClientId::class.buildBy(username)
         emitUserLoggedInEventInSessionsContext()
     }
 
     private fun emitUserLoggedInEventInSessionsContext() {
-        token = PersonalAccessToken::class.buildBy(randomString())
+        token = PersonalAccessToken::class.of(randomString())
         val userLoggedIn = UserLoggedIn::class.buildBy(gitHubClientId.username, token)
         sessionContext.receivesEvent(userLoggedIn)
     }

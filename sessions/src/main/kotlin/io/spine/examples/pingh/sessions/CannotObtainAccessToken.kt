@@ -29,7 +29,7 @@ package io.spine.examples.pingh.sessions
 /**
  * GitHub did not issue an access token for the user.
  *
- * @param errorName the name of the issue that caused the token not to be issued.
+ * @param errorName The name of the issue that caused the token not to be issued.
  * @see <a href="https://shorturl.at/nsfby">Problems that can occur</a>
  */
 public class CannotObtainAccessToken(

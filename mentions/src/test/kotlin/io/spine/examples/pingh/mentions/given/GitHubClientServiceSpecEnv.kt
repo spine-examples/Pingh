@@ -37,6 +37,7 @@ import io.spine.examples.pingh.github.NodeId
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.buildBy
+import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.net.Url
 
@@ -113,7 +114,7 @@ private fun Mention.Builder.setWhenMentioned(value: String): Mention.Builder =
     this.setWhenMentioned(Timestamps.parse(value))
 
 private fun Mention.Builder.setUrl(value: String): Mention.Builder =
-    this.setUrl(Url::class.buildBy(value))
+    this.setUrl(Url::class.of(value))
 
 /**
  * Intercepts requests to GitHub and returns an error response

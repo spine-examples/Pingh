@@ -31,7 +31,7 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.buildBy
+import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.given.expectedMentions
 import io.spine.examples.pingh.mentions.given.mockEngineThatContainsMentions
 import io.spine.examples.pingh.mentions.given.mockEngineThatFailsAllRequest
@@ -44,12 +44,12 @@ import org.junit.jupiter.api.Test
 @DisplayName("`GitHubClientService` should")
 internal class GitHubClientServiceSpec {
 
-    private val username = Username::class.buildBy("MykytaPimonovTD")
+    private val username = Username::class.of("MykytaPimonovTD")
     private lateinit var token: PersonalAccessToken
 
     @BeforeEach
     internal fun generateToken() {
-        token = PersonalAccessToken::class.buildBy(randomString())
+        token = PersonalAccessToken::class.of(randomString())
     }
 
     @Test

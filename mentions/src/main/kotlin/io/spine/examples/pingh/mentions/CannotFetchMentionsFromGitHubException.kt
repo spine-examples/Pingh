@@ -28,6 +28,8 @@ package io.spine.examples.pingh.mentions
 
 /**
  * Fetching user mentions from GitHub failed.
+ *
+ * @property statusCode The HTTP status code of the response.
  */
 public class CannotFetchMentionsFromGitHubException(
     private val statusCode: Int

@@ -35,6 +35,7 @@ import io.spine.examples.pingh.github.NodeId
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.buildBy
+import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.Mention
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionStatus
@@ -55,7 +56,7 @@ import kotlin.reflect.KClass
 internal fun KClass<MentionId>.generate(): MentionId =
     this.buildBy(
         NodeId::class.buildBy(randomString()),
-        Username::class.buildBy(randomString())
+        Username::class.of(randomString())
     )
 
 /**
@@ -66,7 +67,7 @@ internal fun KClass<UserMentioned>.buildBy(id: MentionId): UserMentioned =
     UserMentioned.newBuilder()
         .setId(id)
         .setTitle(randomString())
-        .setUrl(Url::class.buildBy(randomString()))
+        .setUrl(Url::class.of(randomString()))
         .setWhoMentioned(User::class.buildBy(randomString(), randomString()))
         .setWhenMentioned(currentTime())
         .vBuild()

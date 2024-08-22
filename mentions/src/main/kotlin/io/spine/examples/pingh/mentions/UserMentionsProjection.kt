@@ -36,7 +36,7 @@ import io.spine.server.projection.Projection
 /**
  * The view of the mentions that have occurred.
  */
-public class UserMentionsProjection :
+internal class UserMentionsProjection :
     Projection<UserMentionsId, UserMentions, UserMentions.Builder>() {
 
     /**

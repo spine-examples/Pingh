@@ -33,7 +33,7 @@ import io.spine.examples.pingh.github.Username
 import kotlin.reflect.KClass
 
 /**
- * Creates a new [MentionId] with the specified [NodeId] and [Username].
+ * Creates a new `MentionId` with the specified `NodeId` and `Username`.
  */
 public fun KClass<MentionId>.buildBy(nodeId: NodeId, whomMentioned: Username): MentionId =
     MentionId.newBuilder()
@@ -42,7 +42,7 @@ public fun KClass<MentionId>.buildBy(nodeId: NodeId, whomMentioned: Username): M
         .vBuild()
 
 /**
- * Creates a new [GitHubClientId] with the specified [Username].
+ * Creates a new `GitHubClientId` with the specified `Username`.
  */
 public fun KClass<GitHubClientId>.buildBy(username: Username): GitHubClientId =
     GitHubClientId.newBuilder()
