@@ -41,7 +41,7 @@ import "google/protobuf/timestamp.proto";
 // The process of automatically updating user mentions.
 //
 // This process periodically sends `UpdateMentionsFromGitHub` commands with a predefined delay.
-// The process begins when the `GitHubClient` obtains a `PersonalAccessToken`.
+// The process starts when the `GitHubClient` obtains a `PersonalAccessToken`.
 //
 message AutoUpdateMentions {
     option (entity) = { kind: PROCESS_MANAGER };
