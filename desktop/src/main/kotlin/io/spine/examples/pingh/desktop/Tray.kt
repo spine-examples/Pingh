@@ -37,7 +37,7 @@ import io.spine.examples.pingh.client.PinghApplication
  *
  * This icon allows the user to show or hide the Pingh window and quit the application.
  *
- * @param state State of the application icon, located in the platform taskbar.
+ * @param state The state of the application icon, located in the platform taskbar.
  * @param app Manages the logic for the Pingh app.
  */
 @Composable

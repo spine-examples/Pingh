@@ -45,7 +45,7 @@ import io.spine.examples.pingh.client.PinghApplication
 /**
  * Displays Pingh platform window.
  *
- * @param state State of the application window.
+ * @param state The state of the application window.
  * @param app Manages the logic for the Pingh app.
  * @see [PlatformWindow]
  */

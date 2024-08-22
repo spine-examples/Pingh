@@ -44,8 +44,8 @@ import kotlin.reflect.KClass
 /**
  * Interacts with [Pingh server][io.spine.examples.pingh.server] via gRPC.
  *
- * @param channel the channel for the communication with the Pingh server.
- * @param userId user on whose behalf client requests are made.
+ * @param channel The channel for the communication with the Pingh server.
+ * @property userId User on whose behalf client requests are made.
  */
 @Suppress("TooManyFunctions" /* Many functions are required to interact with the server. */)
 internal class DesktopClient(

@@ -39,7 +39,8 @@ public data class AppVersion(
  * Extracts the semantic version from the string, including the major version,
  * and optionally the minor and patch versions. Numbers must be separated by dots.
  *
- * @throws IllegalArgumentException If the passed string does not contain a semantic version.
+ * @receiver The version of the application that contains the semantic version.
+ * @throws IllegalArgumentException If this version does not contain a semantic version.
  * @see <a href="https://semver.org/">Semantic Versioning</a>
  */
 public fun AppVersion.extractSemanticVersion(): AppVersion {
