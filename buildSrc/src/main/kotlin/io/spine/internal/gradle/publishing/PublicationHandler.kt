@@ -42,7 +42,7 @@ import org.gradle.kotlin.dsl.create
  * accepted that a publication with this name contains a Java project published to
  * the Maven Local repository.
  *
- * @param project a published `Project`.
+ * @property project The published `Project`.
  * @see <a href="https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:publications">
  *       Maven Publish Plugin | Publications</a>
  */
