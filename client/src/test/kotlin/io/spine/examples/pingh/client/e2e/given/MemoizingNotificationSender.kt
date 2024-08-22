@@ -33,7 +33,7 @@ import io.spine.examples.pingh.client.NotificationSender
  *
  * Does not send any notifications. Use only for tests.
  */
-internal class MemorableNotificationSender : NotificationSender {
+internal class MemoizingNotificationSender : NotificationSender {
 
     /**
      * The number of notifications that should be sent.
