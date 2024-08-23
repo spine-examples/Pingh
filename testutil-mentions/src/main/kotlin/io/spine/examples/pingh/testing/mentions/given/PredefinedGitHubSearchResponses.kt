@@ -31,18 +31,18 @@ import io.ktor.http.HttpStatusCode
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.mentions.GitHubClientService
 import io.spine.examples.pingh.mentions.CannotFetchMentionsFromGitHubException
+import io.spine.examples.pingh.mentions.GitHubSearch
 import java.lang.Thread.sleep
 import kotlin.jvm.Throws
 
 /**
- * Implementation of [GitHubClientService] that fetches mentions
+ * Implementation of [GitHubSearch] that fetches mentions
  * from a JSON file in the resource folder.
  *
  * Uses exclusively for testing.
  */
-public class PredefinedGitHubResponses : GitHubClientService {
+public class PredefinedGitHubSearchResponses : GitHubSearch {
 
     public companion object {
         /**

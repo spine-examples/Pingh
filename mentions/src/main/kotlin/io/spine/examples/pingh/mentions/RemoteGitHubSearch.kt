@@ -54,9 +54,9 @@ import kotlinx.coroutines.runBlocking
  *
  * @param engine Engine used to create the HTTP client.
  */
-public class GitHubClientServiceImpl(
+public class RemoteGitHubSearch(
     engine: HttpClientEngine
-) : GitHubClientService {
+) : GitHubSearch {
 
     /**
      * HTTP client on behalf of which requests is made.
@@ -72,7 +72,7 @@ public class GitHubClientServiceImpl(
      * @param username The name of the user whose mentions are to be fetched.
      * @param token The `PersonalAccessToken` to access user's private repositories
      * @param updatedAfter The time from which the mentions is searched.
-     * @see [GitHubClientService.fetchMentions]
+     * @see [GitHubSearch.fetchMentions]
      */
     @Throws(CannotFetchMentionsFromGitHubException::class)
     public override fun fetchMentions(

@@ -35,7 +35,7 @@ import kotlin.jvm.Throws
 /**
  * Allows to access GitHub Search API.
  */
-public interface GitHubClientService {
+public interface GitHubSearch {
 
     /**
      * Searches for user `Mention`s on GitHub.

@@ -30,10 +30,10 @@ import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.client.PinghApplication
 import io.spine.examples.pingh.client.e2e.given.MemoizingNotificationSender
 import io.spine.examples.pingh.clock.IntervalClock
-import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.newMentionsContext
 import io.spine.examples.pingh.sessions.GitHubAuthentication
 import io.spine.examples.pingh.sessions.newSessionsContext
+import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.server.Server
 import kotlin.time.Duration.Companion.milliseconds
@@ -57,7 +57,7 @@ internal abstract class IntegrationTest {
         private fun createServer(authenticationService: GitHubAuthentication): Server =
             Server.atPort(port)
                 .add(newSessionsContext(authenticationService))
-                .add(newMentionsContext(PredefinedGitHubResponses()))
+                .add(newMentionsContext(PredefinedGitHubSearchResponses()))
                 .build()
     }
 

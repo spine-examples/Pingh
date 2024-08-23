@@ -45,10 +45,10 @@ public const val NAME: String = "Mentions"
  * Therefore, an instance of GitHub client is required
  * as a parameter.
  *
- * @param gitHubClientService Allows to access GitHub Search API.
+ * @param searchService Allows to access GitHub Search API.
  */
-public fun newMentionsContext(gitHubClientService: GitHubClientService): BoundedContextBuilder =
+public fun newMentionsContext(searchService: GitHubSearch): BoundedContextBuilder =
     BoundedContext.singleTenant(NAME)
-        .add(GitHubClientRepository(gitHubClientService))
+        .add(GitHubClientRepository(searchService))
         .add(MentionRepository())
         .add(UserMentionsRepository())

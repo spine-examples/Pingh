@@ -28,7 +28,6 @@ package io.spine.examples.pingh.server
 
 import io.ktor.client.engine.cio.CIO
 import io.spine.environment.DefaultMode
-import io.spine.examples.pingh.mentions.GitHubClientServiceImpl
 import io.spine.examples.pingh.mentions.newMentionsContext
 import io.spine.server.Server
 import io.spine.server.ServerEnvironment
@@ -38,6 +37,7 @@ import io.spine.server.transport.memory.InMemoryTransportFactory
 import io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT
 import io.spine.examples.pingh.github.ClientId
 import io.spine.examples.pingh.github.of
+import io.spine.examples.pingh.mentions.RemoteGitHubSearch
 import io.spine.examples.pingh.sessions.RemoteGitHubAuthentication
 import io.spine.examples.pingh.sessions.newSessionsContext
 
@@ -70,7 +70,7 @@ private fun createServer(): Server {
     return Server
         .atPort(DEFAULT_CLIENT_SERVICE_PORT)
         .add(newSessionsContext(RemoteGitHubAuthentication(clientId, clientEngine)))
-        .add(newMentionsContext(GitHubClientServiceImpl(clientEngine)))
+        .add(newMentionsContext(RemoteGitHubSearch(clientEngine)))
         .build()
 }
 

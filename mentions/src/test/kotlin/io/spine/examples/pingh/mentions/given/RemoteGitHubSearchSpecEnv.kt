@@ -38,7 +38,7 @@ import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.github.of
-import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
+import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
 import io.spine.net.Url
 
 /**
@@ -167,7 +167,8 @@ private fun sendSameResponseToSearchingRequests(
  * Loads JSON by its name and returns the contents of the file.
  */
 private fun loadJson(name: String): String {
-    val jsonFile = PredefinedGitHubResponses::class.java.getResource("/github-responses/$name")
+    val jsonFile = PredefinedGitHubSearchResponses::class.java
+        .getResource("/github-responses/$name")
     checkNotNull(jsonFile)
     return jsonFile.readText(Charsets.UTF_8)
 }

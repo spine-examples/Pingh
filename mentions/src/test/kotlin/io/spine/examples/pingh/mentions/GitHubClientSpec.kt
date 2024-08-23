@@ -44,7 +44,7 @@ import io.spine.examples.pingh.mentions.given.expectedUserMentionedSet
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.newSessionsContext
-import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
+import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.server.BoundedContextBuilder
 import io.spine.testing.TestValues.randomString
@@ -59,7 +59,7 @@ import org.junit.jupiter.api.Test
 @DisplayName("`GitHubClient` should")
 internal class GitHubClientSpec : ContextAwareTest() {
 
-    private val gitHubClientService = PredefinedGitHubResponses()
+    private val gitHubClientService = PredefinedGitHubSearchResponses()
     private lateinit var sessionContext: BlackBoxContext
     private lateinit var gitHubClientId: GitHubClientId
     private lateinit var token: PersonalAccessToken

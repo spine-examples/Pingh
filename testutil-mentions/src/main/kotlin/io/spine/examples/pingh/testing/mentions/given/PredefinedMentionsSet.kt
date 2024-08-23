@@ -32,7 +32,8 @@ import io.spine.examples.pingh.mentions.parseCommentsFromJson
 import io.spine.examples.pingh.mentions.parseIssuesAndPullRequestsFromJson
 
 /**
- * Returns the set of mentions that [PredefinedGitHubResponses] returns on successful execution.
+ * Returns the set of mentions that [PredefinedGitHubSearchResponses] returns
+ * on successful execution.
  */
 public fun predefinedMentionsSet(): Set<Mention> =
     loadMentionsInPr() + loadMentionsInCommentsUnderPr()
@@ -44,7 +45,7 @@ public fun predefinedMentionsSet(): Set<Mention> =
  * returned by the GitHub API when requesting for mentions in a pull request.
  */
 private fun loadMentionsInPr(): Set<Mention> {
-    val jsonFile = PredefinedGitHubResponses::class.java
+    val jsonFile = PredefinedGitHubSearchResponses::class.java
         .getResource("/github-responses/prs-search-response.json")
     checkNotNull(jsonFile)
     val json = jsonFile.readText(Charsets.UTF_8)
@@ -61,7 +62,7 @@ private fun loadMentionsInPr(): Set<Mention> {
  * returned by the GitHub API when requesting for mentions in comments under a pull request.
  */
 private fun loadMentionsInCommentsUnderPr(): Set<Mention> {
-    val jsonFile = PredefinedGitHubResponses::class.java
+    val jsonFile = PredefinedGitHubSearchResponses::class.java
         .getResource("/github-responses/comments-under-pr-response.json")
     checkNotNull(jsonFile)
     val json = jsonFile.readText(Charsets.UTF_8)

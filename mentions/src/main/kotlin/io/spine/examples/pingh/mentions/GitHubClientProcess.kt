@@ -64,7 +64,7 @@ internal class GitHubClientProcess :
      * It is expected this field is set by calling [inject]
      * right after the instance creation.
      */
-    private lateinit var gitHubClientService: GitHubClientService
+    private lateinit var searchService: GitHubSearch
 
     /**
      * Updates the user's [PersonalAccessToken] each time the user logs in.
@@ -109,7 +109,7 @@ internal class GitHubClientProcess :
         val token = state().token
         val updatedAfter = state().whenLastSuccessfullyUpdated.thisOrLastWorkday()
         val mentions = try {
-            gitHubClientService.fetchMentions(username, token, updatedAfter)
+            searchService.fetchMentions(username, token, updatedAfter)
         } catch (exception: CannotFetchMentionsFromGitHubException) {
             builder().clearWhenStarted()
             return listOf(
@@ -133,8 +133,8 @@ internal class GitHubClientProcess :
      * It is expected this method is called right after the creation of the process instance.
      * Otherwise, the process will not be able to function properly.
      */
-    internal fun inject(gitHubClientService: GitHubClientService) {
-        this.gitHubClientService = gitHubClientService
+    internal fun inject(searchService: GitHubSearch) {
+        this.searchService = searchService
     }
 
     private companion object {
