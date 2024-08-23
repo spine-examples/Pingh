@@ -59,7 +59,7 @@ import org.junit.jupiter.api.Test
  * Therefore, the tests are frozen until the necessary actions take place on the server.
  * The [CompletableFuture] is used for this purpose.
  */
-internal class PersonalInteractionTest : IntegrationTest() {
+internal class PersonalInteractionIgTest : IntegrationTest() {
 
     private val username = Username::class.of("MykytaPimonovTD")
     private lateinit var actual: List<MentionView>

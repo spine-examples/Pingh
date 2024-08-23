@@ -90,8 +90,8 @@ internal class GitHubClientSpec : ContextAwareTest() {
         sessionContext.close()
     }
 
-    @Nested
-    internal inner class `react on 'UserLoggedIn' event in Sessions bounded context, and` {
+    @Nested internal inner class
+    `React on 'UserLoggedIn' event in Sessions bounded context, and` {
 
         @Test
         internal fun `emit 'GitHubTokenUpdated' event`() {
@@ -113,8 +113,8 @@ internal class GitHubClientSpec : ContextAwareTest() {
         }
     }
 
-    @Nested
-    internal inner class `handle 'UpdateMentionsFromGitHub' command, and` {
+    @Nested internal inner class
+    `Handle 'UpdateMentionsFromGitHub' command, and` {
 
         @Test
         internal fun `emit 'MentionsUpdateFromGitHubRequested' event if update process started`() {
@@ -167,8 +167,8 @@ internal class GitHubClientSpec : ContextAwareTest() {
         }
     }
 
-    @Nested
-    internal inner class `react on 'MentionsUpdateFromGitHubRequested' event, and` {
+    @Nested internal inner class
+    `React on 'MentionsUpdateFromGitHubRequested' event, and` {
 
         @Test
         internal fun `emit 'UserMentioned' events for each mentions fetched from GitHub`() {

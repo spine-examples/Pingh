@@ -67,8 +67,8 @@ internal class MentionSpec : ContextAwareTest() {
         context().receivesEvent(userMentioned)
     }
 
-    @Nested
-    internal inner class `react on 'UserMentioned' event, and` {
+    @Nested internal inner class
+    `React on 'UserMentioned' event, and` {
 
         @Test
         internal fun `init 'Mention' state and mark it as unread`() {
@@ -77,8 +77,8 @@ internal class MentionSpec : ContextAwareTest() {
         }
     }
 
-    @Nested
-    internal inner class `handle 'SnoozeMention' command, and` {
+    @Nested internal inner class
+    `Handle 'SnoozeMention' command, and` {
 
         private lateinit var untilWhen: Timestamp
 
@@ -104,8 +104,8 @@ internal class MentionSpec : ContextAwareTest() {
         }
     }
 
-    @Nested
-    internal inner class `handle 'MarkMentionAsRead' command, and` {
+    @Nested internal inner class
+    `Handle 'MarkMentionAsRead' command, and` {
 
         @BeforeEach
         internal fun sendUserMentionAsReadCommand() {
@@ -126,11 +126,11 @@ internal class MentionSpec : ContextAwareTest() {
         }
     }
 
-    @Nested
-    internal inner class `react on 'TimePassed' event, and` {
+    @Nested internal inner class
+    `React on 'TimePassed' event, and` {
 
-        @Nested
-        internal inner class `if mention is snoozed,` {
+        @Nested internal inner class
+        `If mention is snoozed,` {
 
             @BeforeEach
             internal fun setSnoozedStatus() {
