@@ -24,17 +24,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal
+package io.spine.internal.gradle
 
-import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.jetbrains.compose.desktop.application.dsl.InfoPlistSettings
 
 /**
- * This object provides high-level constants, like version of JVM, to be used
- * throughout the project.
+ * Configures this `InfoPlistSettings` to allow the app to run in
+ * the background without appearing in the Dock.
  *
- * It cannot be used in the build script of `buildSrc` itself.
+ * @see <a href="https://developer.apple.com/documentation/bundleresources/information_property_list/lsuielement">
+ *     Apple Developer Docs</a>
  */
-public object BuildSettings {
-    private const val jvmVersion = 17
-    public val javaVersion: JavaLanguageVersion = JavaLanguageVersion.of(jvmVersion)
+public fun InfoPlistSettings.allowBackgroundExecution() {
+    extraKeysRawXml = """
+        <key>LSUIElement</key>
+        <true/>
+    """.trimIndent()
 }

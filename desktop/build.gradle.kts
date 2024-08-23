@@ -31,10 +31,14 @@ import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.Ktor
 import io.spine.internal.dependency.Material3
 import io.spine.internal.dependency.Pingh
+import io.spine.internal.gradle.AppVersion
+import io.spine.internal.gradle.allowBackgroundExecution
+import io.spine.internal.gradle.extractSemanticVersion
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
     kotlin("jvm")
-    id("org.jetbrains.compose").version("1.6.11")
+    id("org.jetbrains.compose")
 
     // Adds dependencies for Dokka and configures it.
     id("dokka-configuration")
@@ -55,10 +59,10 @@ apply(from = "$parentRootDir/version.gradle.kts")
 /**
  * The last version of the Pingh project.
  */
-private val pinghVersion = extra["pinghVersion"]!!
+private val pinghVersion = AppVersion(extra["pinghVersion"] as String)
 
 group = "io.spine.example.pingh"
-version = pinghVersion
+version = pinghVersion.value
 
 repositories {
     mavenLocal()
@@ -93,5 +97,21 @@ dependencies {
 compose.desktop {
     application {
         mainClass = "io.spine.examples.pingh.desktop.MainKt"
+        nativeDistributions {
+            packageName = "Pingh"
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            packageVersion = pinghVersion.extractSemanticVersion().value
+            macOS {
+                iconFile = iconForMacOs()
+                infoPlist {
+                    allowBackgroundExecution()
+                }
+            }
+        }
     }
 }
+
+/**
+ * Returns a `.icns` file containing the Pingh icon.
+ */
+private fun iconForMacOs() = File("distribution-resources/icons/pingh.icns")

@@ -101,11 +101,11 @@ val buildDesktopClient = tasks.register<RunGradleBuild>("buildDesktopClient") {
 }
 
 /**
- * Adds the `buildDesktopClient` task to the `Pingh` build process.
- *
- * For the build of the `Pingh` project, it is necessary to build
- * the nested `desktop` standalone project.
+ * Adds the publishing of modules required for the `desktop` project
+ * to the Local Maven repository as part of the build process.
  */
-tasks.build {
-    dependsOn(buildDesktopClient)
+modulesRequiredForDesktop.forEach { name ->
+    tasks.build {
+        dependsOn(":$name:publishToMavenLocal")
+    }
 }

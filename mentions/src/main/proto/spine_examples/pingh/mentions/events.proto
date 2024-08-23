@@ -35,6 +35,7 @@ option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/mentions/identifiers.proto";
+import "spine_examples/pingh/github/values.proto";
 import "google/protobuf/timestamp.proto";
 
 // The mention has been read.
@@ -59,4 +60,13 @@ message MentionUnsnoozed {
 
     // The ID of the mention.
     MentionId id = 1;
+
+    // The user who created the mention.
+    spine_examples.pingh.github.User who_mentioned = 2 [(required) = true];
+
+    // The title of the GitHub page in which the mention occurred.
+    string title = 3 [(required) = true];
+
+    // The time when the user was mentioned.
+    google.protobuf.Timestamp when_mentioned = 4 [(required) = true];
 }

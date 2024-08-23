@@ -35,6 +35,7 @@ import io.spine.base.EventMessageField
 import io.spine.base.Field
 import io.spine.client.Client
 import io.spine.client.ClientRequest
+import io.spine.client.EventFilter
 import io.spine.client.EventFilter.eq
 import io.spine.client.Subscription
 import io.spine.core.UserId
@@ -43,9 +44,10 @@ import kotlin.reflect.KClass
 /**
  * Interacts with [Pingh server][io.spine.examples.pingh.server] via gRPC.
  *
- * @param channel the channel for the communication with the Pingh server.
- * @param userId user on whose behalf client requests are made.
+ * @param channel The channel for the communication with the Pingh server.
+ * @property userId User on whose behalf client requests are made.
  */
+@Suppress("TooManyFunctions" /* Many functions are required to interact with the server. */)
 internal class DesktopClient(
     channel: ManagedChannel,
     private val userId: UserId? = null
@@ -106,18 +108,40 @@ internal class DesktopClient(
     /**
      * Observes the provided event with the specified ID.
      *
-     * @param id the ID of the observed event.
-     * @param type the type of the observed event.
-     * @param onEmit called when the event is emitted.
+     * @param E The type of the observed event.
+     *
+     * @param id The ID of the observed event.
+     * @param type The type of the observed event.
+     * @param onEmit Called when the event is emitted.
      */
     internal fun <E : EventMessage> observeEvent(
         id: Message,
         type: KClass<E>,
         onEmit: (event: E) -> Unit
     ): Subscription =
+        observeEvent(
+            type,
+            eq(EventMessageField(Field.named("id")), id),
+            onEmit
+        )
+
+    /**
+     * Observes the specified event that meets the `filter` condition.
+     *
+     * @param E The type of the observed event.
+     *
+     * @param type The class of the type of the observed event.
+     * @param filter Selection condition for observed events.
+     * @param onEmit Called when the event is emitted.
+     */
+    internal fun <E : EventMessage> observeEvent(
+        type: KClass<E>,
+        filter: EventFilter,
+        onEmit: (event: E) -> Unit
+    ): Subscription =
         clientRequest()
             .subscribeToEvent(type.java)
-            .where(eq(EventMessageField(Field.named("id")), id))
+            .where(filter)
             .observe(onEmit)
             .post()
 

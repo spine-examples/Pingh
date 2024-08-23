@@ -24,17 +24,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal
-
-import org.gradle.jvm.toolchain.JavaLanguageVersion
+package io.spine.internal.gradle
 
 /**
- * This object provides high-level constants, like version of JVM, to be used
- * throughout the project.
+ * The version of the application.
  *
- * It cannot be used in the build script of `buildSrc` itself.
+ * @property value The string value of the version.
  */
-public object BuildSettings {
-    private const val jvmVersion = 17
-    public val javaVersion: JavaLanguageVersion = JavaLanguageVersion.of(jvmVersion)
+public data class AppVersion(
+    public val value: String
+)
+
+/**
+ * Extracts the semantic version from the string, including the major version,
+ * and optionally the minor and patch versions. Numbers must be separated by dots.
+ *
+ * @receiver The version of the application that contains the semantic version.
+ * @throws IllegalArgumentException If this version does not contain a semantic version.
+ * @see <a href="https://semver.org/">Semantic Versioning</a>
+ */
+public fun AppVersion.extractSemanticVersion(): AppVersion {
+    val pattern = """\d+(.\d+){0,2}""".toRegex()
+    val matchResult = pattern.find(value)
+        ?: throw IllegalArgumentException(
+            "$value does not contain semantic version: ${pattern.pattern}."
+        )
+    return AppVersion(matchResult.value)
 }

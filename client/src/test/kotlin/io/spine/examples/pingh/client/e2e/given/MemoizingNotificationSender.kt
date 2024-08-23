@@ -24,17 +24,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal
+package io.spine.examples.pingh.client.e2e.given
 
-import org.gradle.jvm.toolchain.JavaLanguageVersion
+import io.spine.examples.pingh.client.NotificationSender
 
 /**
- * This object provides high-level constants, like version of JVM, to be used
- * throughout the project.
+ * Memorizes the number of notifications that should be sent.
  *
- * It cannot be used in the build script of `buildSrc` itself.
+ * Does not send any notifications. Use only for tests.
  */
-public object BuildSettings {
-    private const val jvmVersion = 17
-    public val javaVersion: JavaLanguageVersion = JavaLanguageVersion.of(jvmVersion)
+internal class MemoizingNotificationSender : NotificationSender {
+
+    /**
+     * The number of notifications that should be sent.
+     */
+    private var notificationsCount = 0
+
+    /**
+     * Adds a notification to [total number][notificationsCount] that should be sent.
+     */
+    override fun send(title: String, content: String) {
+        notificationsCount++
+    }
+
+    /**
+     * Obtains the count of notifications that should be sent.
+     */
+    internal fun notificationsCount(): Int = notificationsCount
 }

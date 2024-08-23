@@ -24,17 +24,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal
+package io.spine.examples.pingh.desktop
 
-import org.gradle.jvm.toolchain.JavaLanguageVersion
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
 
 /**
- * This object provides high-level constants, like version of JVM, to be used
- * throughout the project.
- *
- * It cannot be used in the build script of `buildSrc` itself.
+ * Obtains the settings of the operating system on which the application is running.
  */
-public object BuildSettings {
-    private const val jvmVersion = 17
-    public val javaVersion: JavaLanguageVersion = JavaLanguageVersion.of(jvmVersion)
+@Composable
+internal fun retrieveSystemSettings(): SystemSettings {
+    val theme = if (isSystemInDarkTheme()) SystemTheme.DARK else SystemTheme.LIGHT
+    return SystemSettings(theme)
+}
+
+/**
+ * The settings of the operating system on which the application is running.
+ *
+ * @property theme The theme of the operating system.
+ */
+internal data class SystemSettings(
+    val theme: SystemTheme
+)
+
+/**
+ * Themes of operating system.
+ */
+internal enum class SystemTheme {
+    /**
+     * The 'Light' theme.
+     */
+    LIGHT,
+
+    /**
+     * The 'Dark' theme.
+     */
+    DARK
 }

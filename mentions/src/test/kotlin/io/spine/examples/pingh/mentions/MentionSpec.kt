@@ -41,6 +41,7 @@ import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.given.buildBy
 import io.spine.examples.pingh.mentions.given.generate
+import io.spine.examples.pingh.mentions.given.onlyWithId
 import io.spine.examples.pingh.mentions.rejection.Rejections.MentionIsAlreadyRead
 import io.spine.server.BoundedContextBuilder
 import io.spine.server.integration.ThirdPartyContext
@@ -54,6 +55,7 @@ import org.junit.jupiter.api.Test
 internal class MentionSpec : ContextAwareTest() {
 
     private lateinit var id: MentionId
+    private lateinit var userMentioned: UserMentioned
 
     override fun contextBuilder(): BoundedContextBuilder =
         newMentionsContext(PredefinedGitHubResponses())
@@ -61,8 +63,8 @@ internal class MentionSpec : ContextAwareTest() {
     @BeforeEach
     internal fun emitUserMentionedEvent() {
         id = MentionId::class.generate()
-        val event = UserMentioned::class.buildBy(id)
-        context().receivesEvent(event)
+        userMentioned = UserMentioned::class.buildBy(id)
+        context().receivesEvent(userMentioned)
     }
 
     @Nested
@@ -70,7 +72,7 @@ internal class MentionSpec : ContextAwareTest() {
 
         @Test
         internal fun `init 'Mention' state and mark it as unread`() {
-            val expected = Mention::class.buildBy(id, MentionStatus.UNREAD)
+            val expected = Mention::class.buildBy(id, MentionStatus.UNREAD, userMentioned)
             context().assertState(id, expected)
         }
     }
@@ -95,7 +97,9 @@ internal class MentionSpec : ContextAwareTest() {
 
         @Test
         internal fun `snooze the target 'Mention', remembering the time until which it is snoozed`() {
-            val expected = Mention::class.buildBy(id, MentionStatus.SNOOZED, untilWhen)
+            val expected = Mention::class.buildBy(
+                id, MentionStatus.SNOOZED, userMentioned, untilWhen
+            )
             context().assertState(id, expected)
         }
     }
@@ -117,7 +121,7 @@ internal class MentionSpec : ContextAwareTest() {
 
         @Test
         internal fun `read the target 'Mention'`() {
-            val expected = Mention::class.buildBy(id, MentionStatus.READ)
+            val expected = Mention::class.buildBy(id, MentionStatus.READ, userMentioned)
             context().assertState(id, expected)
         }
     }
@@ -137,13 +141,13 @@ internal class MentionSpec : ContextAwareTest() {
 
             @Test
             internal fun `emit 'MentionUnsnoozed' event`() {
-                val expected = MentionUnsnoozed::class.buildBy(id)
+                val expected = MentionUnsnoozed::class.onlyWithId(id)
                 context().assertEvent(expected)
             }
 
             @Test
             internal fun `mark the target 'Mention' as unread`() {
-                val expected = Mention::class.buildBy(id, MentionStatus.UNREAD)
+                val expected = Mention::class.buildBy(id, MentionStatus.UNREAD, userMentioned)
                 context().assertState(id, expected)
             }
         }
@@ -181,7 +185,7 @@ internal class MentionSpec : ContextAwareTest() {
             context().assertEvents()
                 .withType(MentionUnsnoozed::class.java)
                 .hasSize(0)
-            val expected = Mention::class.buildBy(id, initialStatus)
+            val expected = Mention::class.buildBy(id, initialStatus, userMentioned)
             context().assertState(id, expected)
         }
     }

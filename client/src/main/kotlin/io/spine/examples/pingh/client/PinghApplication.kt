@@ -44,10 +44,12 @@ import kotlinx.coroutines.launch
  * By default, application opens channel for the client
  * to 'localhost:[50051][DEFAULT_CLIENT_SERVICE_PORT]'.
  *
- * @param address the address of the Pingh server.
- * @param port the port on which the Pingh server is running.
+ * @param notificationSender Allows to send notifications.
+ * @param address The address of the Pingh server.
+ * @param port The port on which the Pingh server is running.
  */
 public class PinghApplication(
+    notificationSender: NotificationSender,
     address: String = "localhost",
     port: Int = DEFAULT_CLIENT_SERVICE_PORT
 ) {
@@ -89,6 +91,11 @@ public class PinghApplication(
     private var mentionsFlow: MentionsFlow? = null
 
     /**
+     * Flow that manages the sending of notifications within the app.
+     */
+    private val notificationsFlow = NotificationsFlow(notificationSender, settings)
+
+    /**
      * Asynchronously updates the state of the Pingh application after the [session] is updated.
      *
      * If the `session` is closed:
@@ -96,7 +103,8 @@ public class PinghApplication(
      * - the [mentions flow][mentionsFlow] for previous session is deleted.
      *
      * If a new `session` is established:
-     * - a `client` is created to make requests on behalf of the user.
+     * - a `client` is created to make requests on behalf of the user;
+     * - notifications are enabled for the newly created client.
      *
      * In all cases, prior to creating a new `client`, all subscriptions of
      * the previous `client` are closed.
@@ -106,6 +114,7 @@ public class PinghApplication(
             client.close()
             if (value != null) {
                 client = DesktopClient(channel, value.asUserId())
+                notificationsFlow.enableNotifications(client, value.username)
             } else {
                 client = DesktopClient(channel)
                 mentionsFlow = null

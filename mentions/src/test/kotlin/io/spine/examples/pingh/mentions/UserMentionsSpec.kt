@@ -34,6 +34,7 @@ import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
 import io.spine.examples.pingh.mentions.given.buildBy
+import io.spine.examples.pingh.mentions.given.from
 import io.spine.examples.pingh.mentions.given.generateWith
 import io.spine.server.BoundedContextBuilder
 import io.spine.testing.TestValues.randomString
@@ -74,7 +75,7 @@ internal class UserMentionsSpec : ContextAwareTest() {
     @Test
     internal fun `react on 'MentionUnsnoozed', and mark the target mention as unread`() {
         val snoozedEvent = MentionSnoozed::class.buildBy(userMentioned.id)
-        val unsnoozedEvent = MentionUnsnoozed::class.buildBy(userMentioned.id)
+        val unsnoozedEvent = MentionUnsnoozed::class.from(userMentioned)
         context()
             .receivesEvent(snoozedEvent)
             .receivesEvent(unsnoozedEvent)

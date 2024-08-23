@@ -118,7 +118,7 @@ internal class PersonalInteractionTest : IntegrationTest() {
      *
      * 1. Logs in to the Pingh app.
      * 2. Updates their mentions from GitHub.
-     * 3. Snoozes a random mention for 100 milliseconds.
+     * 3. Snoozes a random mention for 500 milliseconds.
      * 4. Waits until the snooze time is over.
      * 5. Checks that the snoozed mention is already unsnoozed.
      */
@@ -169,6 +169,27 @@ internal class PersonalInteractionTest : IntegrationTest() {
         actual = mentionsFlow.allMentions()
         actual shouldBe expected
         future.complete(null)
+    }
+
+    /**
+     * End-to-end test that describes such a scenario:
+     *
+     * The user:
+     *
+     * 1. Logs in to the Pingh app.
+     * 2. Updates their mentions from GitHub.
+     * 3. Obtains notifications of new mentions.
+     * 4. Snoozes a random mention for 500 milliseconds.
+     * 5. Waits until the snooze time is over.
+     * 6. Obtains notification of the mention that has been unsnoozed.
+     */
+    @Test
+    internal fun `notifications about new and unsnoozed mentions should be sent to the user`() {
+        notificationsCount() shouldBe expected.size
+        val mentionsFlow = app().startMentionsFlow()
+        mentionsFlow.snoozeRandomMention(milliseconds(500))
+        sleep(1000)
+        notificationsCount() shouldBe (expected.size + 1)
     }
 
     private fun MentionsFlow.snoozeRandomMention(snoozeTime: Duration = hours(2)): MentionId {
