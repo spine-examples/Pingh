@@ -27,7 +27,6 @@
 package io.spine.examples.pingh.mentions
 
 import com.google.protobuf.Timestamp
-import com.google.protobuf.util.Timestamps.add
 import io.spine.base.Time.currentTime
 import io.spine.core.UserId
 import io.spine.examples.pingh.clock.buildBy
@@ -64,7 +63,7 @@ internal class AutoUpdateMentionsSpec : ContextAwareTest() {
     /**
      * Initializes the [GitHubClient] entity.
      *
-     * This also emits the `GitHubTokenUpdated` event.
+     * The `GitHubTokenUpdated` event is [emitted][GitHubClientProcess.on].
      */
     @BeforeEach
     internal fun emitUserLoggedInEvent() {
@@ -105,7 +104,7 @@ internal class AutoUpdateMentionsSpec : ContextAwareTest() {
     `React on 'TimePassed' event, and` {
 
         @Nested internal inner class
-        `If enough time has passed since the last update,` {
+        `If no update request has been made yet,` {
 
             @Test
             internal fun `send 'UpdateMentionsFromGitHub' command`() {
@@ -120,10 +119,40 @@ internal class AutoUpdateMentionsSpec : ContextAwareTest() {
             }
 
             @Test
-            internal fun `update last mentions request time`() {
+            internal fun `set last mentions request time`() {
                 val time = currentTime()
                 emitTimePassedEvent(time)
                 val expected = AutoUpdateMentions::class.with(id, time)
+                context().assertState(id, expected)
+            }
+        }
+
+        @Nested internal inner class
+        `If required time between updates has passed since the last update,` {
+
+            private lateinit var lastRequestTime: Timestamp
+
+            @BeforeEach
+            internal fun emitTwoTimePassedEvents() {
+                val firstRequestTime = currentTime()
+                lastRequestTime = firstRequestTime.add(mentionsUpdateInterval)
+                emitTimePassedEvent(firstRequestTime)
+                emitTimePassedEvent(lastRequestTime)
+            }
+
+            @Test
+            internal fun `send 'UpdateMentionsFromGitHub' command`() {
+                val expected = UpdateMentionsFromGitHub::class.buildBy(id, lastRequestTime)
+                val commandSubject = context().assertCommands()
+                    .withType(UpdateMentionsFromGitHub::class.java)
+                commandSubject.hasSize(2)
+                commandSubject.message(1)
+                    .isEqualTo(expected)
+            }
+
+            @Test
+            internal fun `update last mentions request time`() {
+                val expected = AutoUpdateMentions::class.with(id, lastRequestTime)
                 context().assertState(id, expected)
             }
         }
@@ -132,10 +161,12 @@ internal class AutoUpdateMentionsSpec : ContextAwareTest() {
         internal fun `do nothing if the required time between updates has not elapsed`() {
             val time = currentTime()
             emitTimePassedEvent(time)
-            emitTimePassedEvent(add(time, seconds(1)))
+            emitTimePassedEvent(time.add(seconds(1)))
+            val expected = AutoUpdateMentions::class.with(id, time)
             context().assertCommands()
                 .withType(UpdateMentionsFromGitHub::class.java)
                 .hasSize(1)
+            context().assertState(id, expected)
         }
     }
 

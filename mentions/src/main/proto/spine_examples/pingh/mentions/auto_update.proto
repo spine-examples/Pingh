@@ -51,7 +51,7 @@ message AutoUpdateMentions {
 
     // The time when a mention update was last requested.
     //
-    // If no requests have been made yet, this field will be empty.
+    // If no requests have been made yet, this field is empty.
     //
     google.protobuf.Timestamp when_last_requested = 2;
 }

@@ -45,7 +45,7 @@ import java.util.Optional
 /**
  * The time interval between automatic requests to update mentions.
  */
-private val mentionsUpdateInterval: Duration = minutes(1)
+internal val mentionsUpdateInterval: Duration = minutes(1)
 
 /**
  * Manages the automatic update of user mentions.
@@ -78,7 +78,7 @@ internal class AutoUpdateMentionsProcess :
     internal fun on(@External event: TimePassed): Optional<UpdateMentionsFromGitHub> {
         val currentTime = event.time
         val difference = between(state().whenLastRequested, currentTime)
-        if (!state().hasWhenLastRequested() || difference > mentionsUpdateInterval) {
+        if (!state().hasWhenLastRequested() || difference >= mentionsUpdateInterval) {
             builder().setWhenLastRequested(currentTime)
             return Optional.of(UpdateMentionsFromGitHub::class.buildBy(state().id, currentTime))
         }

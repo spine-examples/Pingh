@@ -138,7 +138,7 @@ public fun KClass<UserMentioned>.buildBy(mention: Mention, whoWasMentioned: User
         .vBuild()
 
 /**
- * Creates a new `AutoUpdateMentionsStarted` event with the provided `GitHubClientID`.
+ * Creates a new `AutoUpdateMentionsStarted` event with the passed `GitHubClientID`.
  */
 internal fun KClass<AutoUpdateMentionsStarted>.withId(id: GitHubClientId):
         AutoUpdateMentionsStarted =
