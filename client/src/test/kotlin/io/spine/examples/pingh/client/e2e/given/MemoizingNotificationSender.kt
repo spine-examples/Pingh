@@ -24,21 +24,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop
+package io.spine.examples.pingh.client.e2e.given
 
-import androidx.compose.runtime.remember
-import androidx.compose.ui.window.application
+import io.spine.examples.pingh.client.NotificationSender
 
 /**
- * Entry point of the desktop application.
+ * Memorizes the number of notifications that should be sent.
+ *
+ * Does not send any notifications. Use only for tests.
  */
-public fun main() {
-    application {
-        Theme {
-            val settings = retrieveSystemSettings()
-            val state = remember { AppState(settings) }
-            Window(state.window, state.app)
-            Tray(state.tray, state.app)
-        }
+internal class MemoizingNotificationSender : NotificationSender {
+
+    /**
+     * The number of notifications that should be sent.
+     */
+    private var notificationsCount = 0
+
+    /**
+     * Adds a notification to [total number][notificationsCount] that should be sent.
+     */
+    override fun send(title: String, content: String) {
+        notificationsCount++
     }
+
+    /**
+     * Obtains the count of notifications that should be sent.
+     */
+    internal fun notificationsCount(): Int = notificationsCount
 }

@@ -28,18 +28,21 @@ package io.spine.examples.pingh.desktop
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.ApplicationScope
-import androidx.compose.ui.window.TrayState
-import androidx.compose.ui.window.Tray
+import androidx.compose.ui.window.TrayState as ComposeTrayState
+import androidx.compose.ui.window.Tray as ComposeTray
 import io.spine.examples.pingh.client.PinghApplication
 
 /**
  * Adds the application icon to the platform taskbar.
  *
  * This icon allows the user to show or hide the Pingh window and quit the application.
+ *
+ * @param state The state of the application icon, located in the platform taskbar.
+ * @param app Manages the logic for the Pingh app.
  */
 @Composable
-internal fun ApplicationScope.PinghTray(state: PinghTrayState, app: PinghApplication) {
-    Tray(
+internal fun ApplicationScope.Tray(state: TrayState, app: PinghApplication) {
+    ComposeTray(
         icon = state.icon,
         state = state.composeTray,
         tooltip = state.title,
@@ -55,21 +58,25 @@ internal fun ApplicationScope.PinghTray(state: PinghTrayState, app: PinghApplica
 }
 
 /**
- * State of [PinghTray].
+ * State of [Tray].
  *
- * @param window the state of the Pingh platform window.
- * @param composeTray the built-in state for Compose trays.
- * @param isSystemInDarkTheme whether current system theme is set to 'Dark'.
+ * @property window The state of the Pingh platform window.
+ * @property composeTray The built-in state for Compose trays.
+ * @param settings The settings of the operating system on which the application is running.
  */
-internal class PinghTrayState(
-    private val window: PinghWindowState,
-    internal val composeTray: TrayState,
-    isSystemInDarkTheme: Boolean
+internal class TrayState(
+    private val window: WindowState,
+    internal val composeTray: ComposeTrayState,
+    settings: SystemSettings
 ) {
     /**
      * The tray icon.
      */
-    internal val icon = if (isSystemInDarkTheme) Icons.trayWhite else Icons.trayBlack
+    internal val icon = if (settings.theme == SystemTheme.DARK) {
+        Icons.trayWhite
+    } else {
+        Icons.trayBlack
+    }
 
     /**
      * Application's title.

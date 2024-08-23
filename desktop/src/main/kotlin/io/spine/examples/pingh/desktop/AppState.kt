@@ -27,33 +27,33 @@
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.ui.window.Notification
-import androidx.compose.ui.window.TrayState
+import androidx.compose.ui.window.TrayState as ComposeTrayState
 import io.spine.examples.pingh.client.NotificationSender
 import io.spine.examples.pingh.client.PinghApplication
 
 /**
  * The top-level application state.
  *
- * @param isSystemInDarkTheme whether current system theme is set to 'Dark'.
+ * @param settings The settings of the operating system on which the application is running.
  */
-internal class PinghApplicationState(isSystemInDarkTheme: Boolean) {
+internal class AppState(settings: SystemSettings) {
 
     /**
      * A built-in state for Compose trays.
      *
      * Enables sending notifications.
      */
-    private val composeTray = TrayState()
+    private val composeTray = ComposeTrayState()
 
     /**
      * State of the window.
      */
-    internal val window = PinghWindowState()
+    internal val window = WindowState()
 
     /**
      * State of the application icon, located in the platform taskbar.
      */
-    internal val tray = PinghTrayState(window, composeTray, isSystemInDarkTheme)
+    internal val tray = TrayState(window, composeTray, settings)
 
     /**
      * Manages the logic for the Pingh app.
@@ -71,20 +71,20 @@ internal class PinghApplicationState(isSystemInDarkTheme: Boolean) {
  *
  * Notifications will only be sent if the window is hidden but the application is run.
  *
- * @param composeTray the built-in state for Compose trays.
- * @param isWindowHidden returns `true` if the [window][PinghApplicationState.window] is hidden;
- *                       returns `false` otherwise.
+ * @property composeTray The built-in state for Compose trays.
+ * @property isWindowHidden Returns `true` if the [window][AppState.window] is hidden;
+ *   returns `false` otherwise.
  */
 private class TrayNotificationSender(
-    private val composeTray: TrayState,
+    private val composeTray: ComposeTrayState,
     private val isWindowHidden: () -> Boolean
 ) : NotificationSender {
 
     /**
      * Sends the information [Notification] to the system tray.
      *
-     * @param title the notification's title.
-     * @param content the notification's content.
+     * @param title The notification's title.
+     * @param content The notification's content.
      */
     override fun send(title: String, content: String) {
         if (isWindowHidden()) {

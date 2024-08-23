@@ -45,8 +45,8 @@ public interface NotificationSender {
     /**
      * Creates and sends a notification with the given title and content.
      *
-     * @param title the notification's title.
-     * @param content the notification's content.
+     * @param title The notification's title.
+     * @param content The notification's content.
      */
     public fun send(title: String, content: String)
 }
@@ -65,8 +65,8 @@ public interface NotificationSender {
  * Ensure the previous [client][DesktopClient] is properly [closed][DesktopClient.close]
  * before initiating notifications for a new `client`.
  *
- * @param sender allows to send notifications.
- * @param settings the state of application settings.
+ * @property sender Allows to send notifications.
+ * @property settings The state of application settings.
  */
 internal class NotificationsFlow(
     private val sender: NotificationSender,
@@ -93,8 +93,8 @@ internal class NotificationsFlow(
     /**
      * Enables the sending of notifications for the provided client with the given username.
      *
-     * @param client enables subscription to events emitted by the Pingh server.
-     * @param username the username for which mentions will be sent.
+     * @param client Enables subscription to events emitted by the Pingh server.
+     * @param username The username for which mentions will be sent.
      */
     internal fun enableNotifications(client: DesktopClient, username: Username) {
         notifications.forEach { notification ->
@@ -130,9 +130,11 @@ internal class NotificationsFlow(
     /**
      * Information about available notification.
      *
-     * @param onEvent the event that triggers the sending of a notification.
-     * @param title the notification's title.
-     * @param content the notification's content.
+     * @param E The type of the event that triggers the sending of a notification.
+     *
+     * @property onEvent The event that triggers the sending of a notification.
+     * @property title The notification's title.
+     * @property content The notification's content.
      */
     private data class NotificationInfo<E : EventMessage>(
         val onEvent: KClass<E>,

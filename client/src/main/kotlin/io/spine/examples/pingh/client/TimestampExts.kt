@@ -64,7 +64,7 @@ internal fun Timestamp.add(duration: com.google.protobuf.Duration): Timestamp =
  * - If the difference is exactly one day, returns the string `"yesterday"`;
  * - In all other cases, returns the day and month.
  *
- * @throws IllegalArgumentException if the `Timestamp` is not from the past.
+ * @throws IllegalArgumentException If the `Timestamp` is not from the past.
  */
 public fun Timestamp.howMuchTimeHasPassed(): String {
     val thisDatetime = LocalDateTime.ofEpochSecond(this.seconds, this.nanos, ZoneOffset.UTC)

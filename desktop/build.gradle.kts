@@ -31,8 +31,9 @@ import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.Ktor
 import io.spine.internal.dependency.Material3
 import io.spine.internal.dependency.Pingh
+import io.spine.internal.gradle.AppVersion
 import io.spine.internal.gradle.allowBackgroundExecution
-import io.spine.internal.gradle.extractVersion
+import io.spine.internal.gradle.extractSemanticVersion
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -58,10 +59,10 @@ apply(from = "$parentRootDir/version.gradle.kts")
 /**
  * The last version of the Pingh project.
  */
-private val pinghVersion = extra["pinghVersion"] as String
+private val pinghVersion = AppVersion(extra["pinghVersion"] as String)
 
 group = "io.spine.example.pingh"
-version = pinghVersion
+version = pinghVersion.value
 
 repositories {
     mavenLocal()
@@ -99,7 +100,7 @@ compose.desktop {
         nativeDistributions {
             packageName = "Pingh"
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageVersion = extractVersion(pinghVersion)
+            packageVersion = pinghVersion.extractSemanticVersion().value
             macOS {
                 iconFile = iconForMacOs()
                 infoPlist {

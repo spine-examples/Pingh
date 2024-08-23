@@ -24,31 +24,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.client.e2e.given
+package io.spine.examples.pingh.desktop
 
-import io.spine.examples.pingh.client.NotificationSender
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
 
 /**
- * Memorizes the number of notifications that should be sent.
- *
- * Does not send any notifications. Use only for tests.
+ * Obtains the settings of the operating system on which the application is running.
  */
-internal class MemorableNotificationSender : NotificationSender {
+@Composable
+internal fun retrieveSystemSettings(): SystemSettings {
+    val theme = if (isSystemInDarkTheme()) SystemTheme.DARK else SystemTheme.LIGHT
+    return SystemSettings(theme)
+}
+
+/**
+ * The settings of the operating system on which the application is running.
+ *
+ * @property theme The theme of the operating system.
+ */
+internal data class SystemSettings(
+    val theme: SystemTheme
+)
+
+/**
+ * Themes of operating system.
+ */
+internal enum class SystemTheme {
+    /**
+     * The 'Light' theme.
+     */
+    LIGHT,
 
     /**
-     * The number of notifications that should be sent.
+     * The 'Dark' theme.
      */
-    private var notificationsCount = 0
-
-    /**
-     * Adds a notification to [total number][notificationsCount] that should be sent.
-     */
-    override fun send(title: String, content: String) {
-        notificationsCount++
-    }
-
-    /**
-     * Obtains the count of notifications that should be sent.
-     */
-    internal fun notificationsCount(): Int = notificationsCount
+    DARK
 }
