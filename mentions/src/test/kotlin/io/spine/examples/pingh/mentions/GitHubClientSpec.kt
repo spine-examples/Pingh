@@ -75,7 +75,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
         sessionContext = BlackBoxContext
             .from(newSessionsContext(PredefinedGitHubAuthenticationResponses()))
         val username = Username::class.of(randomString())
-        gitHubClientId = GitHubClientId::class.buildBy(username)
+        gitHubClientId = GitHubClientId::class.of(username)
         emitUserLoggedInEventInSessionsContext()
     }
 

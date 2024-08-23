@@ -35,6 +35,7 @@ import io.spine.examples.pingh.mentions.MentionView
 import io.spine.examples.pingh.mentions.UserMentions
 import io.spine.examples.pingh.mentions.UserMentionsId
 import io.spine.examples.pingh.mentions.buildBy
+import io.spine.examples.pingh.mentions.of
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
 import io.spine.examples.pingh.mentions.command.SnoozeMention
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
@@ -75,7 +76,7 @@ public class MentionsFlow internal constructor(
      */
     private fun subscribeToMentionsUpdates() {
         ensureLoggedIn()
-        val id = UserMentionsId::class.buildBy(session.value!!.username)
+        val id = UserMentionsId::class.of(session.value!!.username)
         client.observeEntity(id, UserMentions::class) { entity ->
             mentions.value = entity.mentionList
         }
@@ -91,7 +92,7 @@ public class MentionsFlow internal constructor(
     public fun updateMentions() {
         ensureLoggedIn()
         val command = UpdateMentionsFromGitHub::class.buildBy(
-            GitHubClientId::class.buildBy(session.value!!.username)
+            GitHubClientId::class.of(session.value!!.username)
         )
         client.send(command)
     }
@@ -104,7 +105,7 @@ public class MentionsFlow internal constructor(
     public fun allMentions(): List<MentionView> {
         ensureLoggedIn()
         val userMentions = client.readById(
-            UserMentionsId::class.buildBy(session.value!!.username),
+            UserMentionsId::class.of(session.value!!.username),
             UserMentions::class
         )
         return userMentions

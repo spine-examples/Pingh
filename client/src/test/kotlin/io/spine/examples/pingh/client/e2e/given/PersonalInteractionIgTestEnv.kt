@@ -30,7 +30,7 @@ import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
-import io.spine.examples.pingh.mentions.buildBy
+import io.spine.examples.pingh.mentions.of
 import io.spine.examples.pingh.testing.mentions.given.predefinedMentionsSet
 
 /**
@@ -42,7 +42,7 @@ internal fun expectedMentionsList(whoWasMentioned: Username): List<MentionView> 
     predefinedMentionsSet()
         .map { mention ->
             with(MentionView.newBuilder()) {
-                id = MentionId::class.buildBy(mention.id, whoWasMentioned)
+                id = MentionId::class.of(mention.id, whoWasMentioned)
                 whoMentioned = mention.author
                 title = mention.title
                 whenMentioned = mention.whenMentioned

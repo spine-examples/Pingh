@@ -74,7 +74,7 @@ public fun KClass<Url>.of(spec: String): Url =
 /**
  * Creates a new `User` with the specified `Username` and avatar `Url`.
  */
-public fun KClass<User>.buildBy(username: Username, avatarUrl: Url): User =
+public fun KClass<User>.of(username: Username, avatarUrl: Url): User =
     User.newBuilder()
         .setUsername(username)
         .setAvatarUrl(avatarUrl)
@@ -83,8 +83,8 @@ public fun KClass<User>.buildBy(username: Username, avatarUrl: Url): User =
 /**
  * Creates a new `User` with the specified username and avatar URL.
  */
-public fun KClass<User>.buildBy(username: String, avatarUrl: String): User =
-    this.buildBy(
+public fun KClass<User>.of(username: String, avatarUrl: String): User =
+    of(
         Username::class.of(username),
         Url::class.of(avatarUrl)
     )
@@ -94,8 +94,8 @@ public fun KClass<User>.buildBy(username: String, avatarUrl: String): User =
  */
 public fun KClass<Mention>.fromFragment(fragment: IssueOrPullRequestFragment): Mention =
     with(Mention.newBuilder()) {
-        id = NodeId::class.buildBy(fragment.nodeId)
-        author = User::class.buildBy(
+        id = NodeId::class.of(fragment.nodeId)
+        author = User::class.of(
             fragment.whoCreated.username,
             fragment.whoCreated.avatarUrl
         )
@@ -119,8 +119,8 @@ public fun KClass<Mention>.fromFragment(
     itemTitle: String
 ): Mention =
     with(Mention.newBuilder()) {
-        id = NodeId::class.buildBy(fragment.nodeId)
-        author = User::class.buildBy(
+        id = NodeId::class.of(fragment.nodeId)
+        author = User::class.of(
             fragment.whoCreated.username,
             fragment.whoCreated.avatarUrl
         )

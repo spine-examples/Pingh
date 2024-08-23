@@ -55,7 +55,7 @@ internal class UserMentionsSpec : ContextAwareTest() {
     @BeforeEach
     internal fun emitUserMentionedEvent() {
         val username = Username::class.of(randomString())
-        id = UserMentionsId::class.buildBy(username)
+        id = UserMentionsId::class.of(username)
         userMentioned = UserMentioned::class.generateWith(username)
         context().receivesEvent(userMentioned)
     }

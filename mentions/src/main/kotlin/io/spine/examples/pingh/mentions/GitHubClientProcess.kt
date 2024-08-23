@@ -73,7 +73,7 @@ internal class GitHubClientProcess :
     internal fun on(@External event: UserLoggedIn): GitHubTokenUpdated {
         builder().setToken(event.token)
         return GitHubTokenUpdated::class.buildBy(
-            GitHubClientId::class.buildBy(event.id.username),
+            GitHubClientId::class.of(event.id.username),
             event.token
         )
     }

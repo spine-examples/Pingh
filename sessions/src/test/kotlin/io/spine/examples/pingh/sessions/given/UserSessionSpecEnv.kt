@@ -35,6 +35,7 @@ import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.UserSession
 import io.spine.examples.pingh.sessions.buildBy
+import io.spine.examples.pingh.sessions.of
 import io.spine.examples.pingh.sessions.buildWith
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
@@ -47,8 +48,7 @@ import kotlin.reflect.KClass
  * Creates a new `SessionId` with a randomly generated `Username`
  * and creation time specified as now.
  */
-internal fun KClass<SessionId>.generate(): SessionId =
-    this.buildBy(Username::class.of(randomString()))
+internal fun KClass<SessionId>.generate(): SessionId = of(Username::class.of(randomString()))
 
 /**
  * Creates a new `UserSession` with the specified session ID.

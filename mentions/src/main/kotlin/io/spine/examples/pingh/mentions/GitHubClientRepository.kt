@@ -58,6 +58,6 @@ internal class GitHubClientRepository(
      * Returns a set with a single GitHub client ID, that corresponds to the passed user session.
      */
     private fun toGitHubClientId(session: SessionId): Set<GitHubClientId> {
-        return setOf(GitHubClientId::class.buildBy(session.username))
+        return setOf(GitHubClientId::class.of(session.username))
     }
 }

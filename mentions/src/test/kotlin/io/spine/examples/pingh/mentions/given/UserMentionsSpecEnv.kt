@@ -32,13 +32,12 @@ import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.github.NodeId
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionView
 import io.spine.examples.pingh.mentions.UserMentions
 import io.spine.examples.pingh.mentions.UserMentionsId
-import io.spine.examples.pingh.mentions.buildBy
+import io.spine.examples.pingh.mentions.of
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.net.Url
@@ -51,11 +50,11 @@ import kotlin.reflect.KClass
  */
 internal fun KClass<UserMentioned>.generateWith(whoWasMentioned: Username): UserMentioned =
     with(UserMentioned.newBuilder()) {
-        id = MentionId::class.buildBy(
-            NodeId::class.buildBy(randomString()),
+        id = MentionId::class.of(
+            NodeId::class.of(randomString()),
             whoWasMentioned
         )
-        whoMentioned = User::class.buildBy(randomString(), randomString())
+        whoMentioned = User::class.of(randomString(), randomString())
         title = randomString()
         whenMentioned = currentTime()
         url = Url::class.of(randomString())

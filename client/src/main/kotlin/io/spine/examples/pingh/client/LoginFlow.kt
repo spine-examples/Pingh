@@ -30,7 +30,7 @@ import com.google.protobuf.Duration
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.SessionId
-import io.spine.examples.pingh.sessions.buildBy
+import io.spine.examples.pingh.sessions.of
 import io.spine.examples.pingh.sessions.withSession
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
@@ -144,7 +144,7 @@ public class EnterUsername internal constructor(
         onSuccess: (event: UserCodeReceived) -> Unit = {}
     ) {
         val command = LogUserIn::class.withSession(
-            SessionId::class.buildBy(username)
+            SessionId::class.of(username)
         )
         client.observeEvent(command.id, UserCodeReceived::class) { event ->
             session.value = UserSession(event.id)
@@ -298,7 +298,7 @@ private fun DesktopClient.requestUserCode(
     onSuccess: (event: UserCodeReceived) -> Unit = {}
 ) {
     val command = LogUserIn::class.withSession(
-        SessionId::class.buildBy(username)
+        SessionId::class.of(username)
     )
     observeEventOnce(command.id, UserCodeReceived::class, onSuccess)
     send(command)

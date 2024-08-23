@@ -33,7 +33,7 @@ import kotlin.reflect.KClass
 /**
  * Creates a new `NodeId` with the specified string value.
  */
-public fun KClass<NodeId>.buildBy(value: String): NodeId =
+public fun KClass<NodeId>.of(value: String): NodeId =
     NodeId.newBuilder()
         .setValue(value)
         .vBuild()

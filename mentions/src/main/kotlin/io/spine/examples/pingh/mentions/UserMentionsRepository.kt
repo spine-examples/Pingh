@@ -55,6 +55,6 @@ internal class UserMentionsRepository :
      * the name of the mentioned user from the passed `MentionId`.
      */
     private fun toUserMentions(mentionId: MentionId): Set<UserMentionsId> {
-        return setOf(UserMentionsId::class.buildBy(mentionId.user))
+        return setOf(UserMentionsId::class.of(mentionId.user))
     }
 }

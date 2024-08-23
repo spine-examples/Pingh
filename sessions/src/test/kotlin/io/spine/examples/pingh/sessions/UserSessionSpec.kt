@@ -159,7 +159,7 @@ internal class UserSessionSpec : ContextAwareTest() {
     @Test
     internal fun `support simultaneous sessions`() {
         val firstSession = SessionId::class.generate()
-        val secondSession = SessionId::class.buildBy(firstSession.username)
+        val secondSession = SessionId::class.of(firstSession.username)
         logIn(firstSession)
         logIn(secondSession)
 
@@ -172,7 +172,7 @@ internal class UserSessionSpec : ContextAwareTest() {
     @Test
     internal fun `create new session when user logs in again`() {
         val firstSession = SessionId::class.generate()
-        val secondSession = SessionId::class.buildBy(firstSession.username)
+        val secondSession = SessionId::class.of(firstSession.username)
         logIn(firstSession)
         context().receivesCommand(LogUserOut::class.withSession(firstSession))
         logIn(secondSession)

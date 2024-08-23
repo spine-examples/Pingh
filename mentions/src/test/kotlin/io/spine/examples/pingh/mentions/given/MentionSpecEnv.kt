@@ -34,12 +34,12 @@ import io.spine.core.UserId
 import io.spine.examples.pingh.github.NodeId
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.buildBy
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.Mention
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.buildBy
+import io.spine.examples.pingh.mentions.of
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
@@ -54,8 +54,8 @@ import kotlin.reflect.KClass
  * Creates a new `MentionId` with random ID of node and name of user that was mentioned.
  */
 internal fun KClass<MentionId>.generate(): MentionId =
-    this.buildBy(
-        NodeId::class.buildBy(randomString()),
+    of(
+        NodeId::class.of(randomString()),
         Username::class.of(randomString())
     )
 
@@ -68,7 +68,7 @@ internal fun KClass<UserMentioned>.buildBy(id: MentionId): UserMentioned =
         .setId(id)
         .setTitle(randomString())
         .setUrl(Url::class.of(randomString()))
-        .setWhoMentioned(User::class.buildBy(randomString(), randomString()))
+        .setWhoMentioned(User::class.of(randomString(), randomString()))
         .setWhenMentioned(currentTime())
         .vBuild()
 

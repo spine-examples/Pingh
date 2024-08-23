@@ -35,7 +35,7 @@ import kotlin.reflect.KClass
 /**
  * Creates a new `MentionId` with the specified `NodeId` and `Username`.
  */
-public fun KClass<MentionId>.buildBy(nodeId: NodeId, whomMentioned: Username): MentionId =
+public fun KClass<MentionId>.of(nodeId: NodeId, whomMentioned: Username): MentionId =
     MentionId.newBuilder()
         .setWhere(nodeId)
         .setUser(whomMentioned)
@@ -44,7 +44,7 @@ public fun KClass<MentionId>.buildBy(nodeId: NodeId, whomMentioned: Username): M
 /**
  * Creates a new `GitHubClientId` with the specified `Username`.
  */
-public fun KClass<GitHubClientId>.buildBy(username: Username): GitHubClientId =
+public fun KClass<GitHubClientId>.of(username: Username): GitHubClientId =
     GitHubClientId.newBuilder()
         .setUsername(username)
         .vBuild()
@@ -52,7 +52,7 @@ public fun KClass<GitHubClientId>.buildBy(username: Username): GitHubClientId =
 /**
  * Creates a new `UserMentionsId` with the specified GitHub username.
  */
-public fun KClass<UserMentionsId>.buildBy(username: Username): UserMentionsId =
+public fun KClass<UserMentionsId>.of(username: Username): UserMentionsId =
     UserMentionsId.newBuilder()
         .setUsername(username)
         .vBuild()

@@ -33,7 +33,7 @@ import io.spine.protobuf.AnyPacker
 /**
  * Unpacks this `Any` into the given message type.
  *
- * @param T the concrete type of the message stored in the `Any`.
+ * @param T The concrete type of the message stored in the `Any`.
  */
 public inline fun <reified T : Message> Any.unpack(): T {
     val cls = T::class

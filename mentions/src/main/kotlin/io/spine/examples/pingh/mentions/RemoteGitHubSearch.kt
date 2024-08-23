@@ -71,7 +71,7 @@ public class RemoteGitHubSearch(
      *
      * @param username The name of the user whose mentions are to be fetched.
      * @param token The `PersonalAccessToken` to access user's private repositories
-     * @param updatedAfter The time from which the mentions is searched.
+     * @param updatedAfter The time from which the mentions are searched.
      * @see [GitHubSearch.fetchMentions]
      */
     @Throws(CannotFetchMentionsFromGitHubException::class)
