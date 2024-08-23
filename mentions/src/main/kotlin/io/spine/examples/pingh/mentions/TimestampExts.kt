@@ -32,4 +32,4 @@ import com.google.protobuf.util.Timestamps.compare
 /**
  * Tells whether this point in time is after the passed one.
  */
-internal fun Timestamp.isAfter(time: Timestamp): Boolean = compare(this, time) > 0
+public fun Timestamp.isAfter(time: Timestamp): Boolean = compare(this, time) > 0

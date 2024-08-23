@@ -57,8 +57,8 @@ internal class AutoUpdateMentionsProcess :
      * Starts an automatic update of mentions as soon as the [GitHubClient] receives
      * an access token to make requests.
      *
-     * @return a `AutoUpdateMentionsStarted` event if no updates have been made;
-     * otherwise, `Nothing`.
+     * @return `AutoUpdateMentionsStarted` event if no updates have been made;
+     *   otherwise, `Nothing`.
      */
     @React
     internal fun on(event: GitHubTokenUpdated): EitherOf2<AutoUpdateMentionsStarted, Nothing> =
@@ -77,7 +77,7 @@ internal class AutoUpdateMentionsProcess :
     @Command
     internal fun on(@External event: TimePassed): Optional<UpdateMentionsFromGitHub> {
         val currentTime = event.time
-        val difference = between(currentTime, state().whenLastRequested)
+        val difference = between(state().whenLastRequested, currentTime)
         if (!state().hasWhenLastRequested() || difference > mentionsUpdateInterval) {
             builder().setWhenLastRequested(currentTime)
             return Optional.of(UpdateMentionsFromGitHub::class.buildBy(state().id, currentTime))

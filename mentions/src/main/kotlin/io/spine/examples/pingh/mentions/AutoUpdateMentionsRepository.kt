@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.server.procman.ProcessManagerRepository
 import io.spine.server.route.EventRouting
@@ -36,6 +37,7 @@ import io.spine.server.route.EventRouting
 internal class AutoUpdateMentionsRepository :
     ProcessManagerRepository<GitHubClientId, AutoUpdateMentionsProcess, AutoUpdateMentions>() {
 
+    @OverridingMethodsMustInvokeSuper
     override fun setupEventRouting(routing: EventRouting<GitHubClientId>) {
         super.setupEventRouting(routing)
         routing.route(TimePassed::class.java) { _, _ -> toAll() }
