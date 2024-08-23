@@ -83,7 +83,7 @@ import io.spine.examples.pingh.client.EnterUsername
 import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.buildBy
+import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.github.validateUsernameValue
 import io.spine.net.Url
 import io.spine.protobuf.Durations2.toMinutes
@@ -154,7 +154,7 @@ private fun UsernameEnteringPage(
         LoginButton(
             enabled = wasChanged && !isError.value
         ) {
-            val name = Username::class.buildBy(username)
+            val name = Username::class.of(username)
             flow.requestUserCode(name)
         }
     }
