@@ -64,14 +64,15 @@ public class RemoteGitHubSearch(
     private val client = HttpClient(engine)
 
     /**
-     * Searches for user `Mention`s on GitHub in issues and pull requests,
+     * Searches for user `Mention`s made by others on GitHub in issues and pull requests,
      * as well as in comments under those items.
      *
      * The default value of `updateAfter` is `Timestamp.getDefaultInstance()`.
      *
      * @param username The name of the user whose mentions are to be fetched.
-     * @param token The `PersonalAccessToken` to access user's private repositories
-     * @param updatedAfter The time from which the mentions are searched.
+     * @param token The `PersonalAccessToken` to access user's private repositories.
+     * @param updatedAfter The time after which GitHub items containing the searched mentions
+     *   should have been updated.
      * @see [GitHubSearch.searchMentions]
      */
     @Throws(CannotObtainMentionsException::class)

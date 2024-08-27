@@ -60,7 +60,7 @@ public class IntervalClock(pauseTime: Duration) {
     }
 
     /**
-     * Stops the clock and waits while [clock thread][clockThread] shutdowns.
+     * Stops the clock and waits until [clock thread][clockThread] is shut down.
      */
     public fun stop() {
         isRunning = false
