@@ -24,18 +24,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("UnusedReceiverParameter" /* Class extensions don't use class as a parameter. */)
+
 package io.spine.examples.pingh.mentions
 
 import io.spine.examples.pingh.github.rest.CommentsResponse
 import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResult
 import io.spine.json.Json
+import kotlin.reflect.KClass
 
 /**
  * Parses `IssuesAndPullRequestsSearchResult` from the JSON.
  *
  * @param json The string containing JSON with the `IssuesAndPullRequestsSearchResult`.
  */
-public fun parseIssuesAndPullRequestsFromJson(json: String): IssuesAndPullRequestsSearchResult =
+public fun KClass<IssuesAndPullRequestsSearchResult>.parseJson(json: String):
+        IssuesAndPullRequestsSearchResult =
     Json.fromJson(json, IssuesAndPullRequestsSearchResult::class.java)
 
 /**
@@ -43,5 +47,5 @@ public fun parseIssuesAndPullRequestsFromJson(json: String): IssuesAndPullReques
  *
  * @param json The string containing JSON with the `CommentsGetResult`.
  */
-public fun parseCommentsFromJson(json: String): CommentsResponse =
+public fun KClass<CommentsResponse>.parseJson(json: String): CommentsResponse =
     Json.fromJson(json, CommentsResponse::class.java)

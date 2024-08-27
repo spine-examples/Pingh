@@ -28,8 +28,9 @@ package io.spine.examples.pingh.testing.mentions.given
 
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.fromFragment
-import io.spine.examples.pingh.mentions.parseCommentsFromJson
-import io.spine.examples.pingh.mentions.parseIssuesAndPullRequestsFromJson
+import io.spine.examples.pingh.github.rest.CommentsResponse
+import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResult
+import io.spine.examples.pingh.mentions.parseJson
 
 /**
  * Returns the set of mentions that [PredefinedGitHubSearchResponses] returns
@@ -49,7 +50,7 @@ private fun loadMentionsInPr(): Set<Mention> {
         .getResource("/github-responses/prs-search-response.json")
     checkNotNull(jsonFile)
     val json = jsonFile.readText(Charsets.UTF_8)
-    return parseIssuesAndPullRequestsFromJson(json)
+    return IssuesAndPullRequestsSearchResult::class.parseJson(json)
         .itemList
         .map { fragment -> Mention::class.fromFragment(fragment) }
         .toSet()
@@ -69,7 +70,7 @@ private fun loadMentionsInCommentsUnderPr(): Set<Mention> {
     // The received JSON contains only an array, but Protobuf JSON Parser
     // cannot process it. So the array is converted to JSON, where the result
     // is just the value of the `item` field.
-    return parseCommentsFromJson("{ item: $json }")
+    return CommentsResponse::class.parseJson("{ item: $json }")
         .itemList
         .map { fragment -> Mention::class.fromFragment(fragment, "Comment") }
         .toSet()

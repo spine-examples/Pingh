@@ -67,7 +67,7 @@ public class RemoteGitHubAuthentication(
                 .authenticationRequest("https://github.com/login/device/code")
                 .with(clientId)
                 .post()
-            parseVerificationCodesResponse(response.body())
+            VerificationCodesResponse::class.parseJson(response.body())
         }
 
     /**
@@ -95,7 +95,7 @@ public class RemoteGitHubAuthentication(
                 .post()
             val body = response.body<String>()
             checkError(response.status, body)
-            parseAccessTokenResponse(body)
+            AccessTokenResponse::class.parseJson(body)
         }
 
     /**

@@ -142,7 +142,7 @@ public class RemoteGitHubSearch(
             if (response.status != HttpStatusCode.OK) {
                 throw CannotFetchMentionsFromGitHubException(response.status.value)
             }
-            parseIssuesAndPullRequestsFromJson(response.body())
+            IssuesAndPullRequestsSearchResult::class.parseJson(response.body())
         }
 
     /**
@@ -161,7 +161,7 @@ public class RemoteGitHubSearch(
             // The received JSON contains only an array, but Protobuf JSON Parser
             // cannot process it. So the array is converted to JSON, where the result
             // is just the value of the `item` field.
-            parseCommentsFromJson("{ item: $json }")
+            CommentsResponse::class.parseJson("{ item: $json }")
         }
 
     /**

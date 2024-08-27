@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("UnusedReceiverParameter" /* Class extensions don't use class as a parameter. */)
+
 package io.spine.examples.pingh.sessions
 
 import io.spine.examples.pingh.github.fromFragment
@@ -32,13 +34,14 @@ import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.VerificationCodesFragment
 import io.spine.examples.pingh.github.rest.VerificationCodesResponse
 import io.spine.json.Json
+import kotlin.reflect.KClass
 
 /**
  * Parses `VerificationCodesResponse` from the JSON.
  *
  * @param json The string containing JSON with the `VerificationCodesResponse`.
  */
-public fun parseVerificationCodesResponse(json: String): VerificationCodesResponse =
+public fun KClass<VerificationCodesResponse>.parseJson(json: String): VerificationCodesResponse =
     VerificationCodesResponse::class.fromFragment(
         Json.fromJson(json, VerificationCodesFragment::class.java)
     )
@@ -48,7 +51,7 @@ public fun parseVerificationCodesResponse(json: String): VerificationCodesRespon
  *
  * @param json The string containing JSON with the `AccessTokenResponse`.
  */
-public fun parseAccessTokenResponse(json: String): AccessTokenResponse =
+public fun KClass<AccessTokenResponse>.parseJson(json: String): AccessTokenResponse =
     AccessTokenResponse::class.fromFragment(
         Json.fromJson(json, AccessTokenFragment::class.java)
     )

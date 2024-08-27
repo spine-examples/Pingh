@@ -62,7 +62,7 @@ internal class DesktopClient(
     /**
      * Sends a command to the server on behalf of the user.
      *
-     * @param command The command is to be sent.
+     * @param command The command to be sent.
      */
     internal fun send(command: CommandMessage) {
         clientRequest()
