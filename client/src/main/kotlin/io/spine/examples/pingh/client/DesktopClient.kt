@@ -139,7 +139,7 @@ internal class DesktopClient(
      * @param E The type of the observed event.
      *
      * @param type The class of the type of the observed event.
-     * @param filter Selection condition for observed events.
+     * @param filter The selection condition for observed events.
      * @param onEmit Called when the event is emitted.
      */
     internal fun <E : EventMessage> observeEvent(

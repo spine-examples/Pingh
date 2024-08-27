@@ -84,7 +84,7 @@ import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
-import io.spine.examples.pingh.github.validateUsernameValue
+import io.spine.examples.pingh.github.isValidUsername
 import io.spine.net.Url
 import io.spine.protobuf.Durations2.toMinutes
 
@@ -227,7 +227,7 @@ private fun UsernameInput(
         value = value,
         onValueChange = { changedValue ->
             onChange(changedValue)
-            isError.value = !validateUsernameValue(changedValue)
+            isError.value = !isValidUsername(changedValue)
         },
         modifier = Modifier
             .width(180.dp)
@@ -664,7 +664,7 @@ private fun NoResponseErrorMessage(
  * @param clickablePartOfText The substring of `text` that is a link.
  * @param onClick Called when `clickablePartOfText` is clicked.
  * @param modifier The modifier to be applied to this error message.
- * @throws IllegalArgumentException If `clickablePartOfText` is not substring of the `text`.
+ * @throws IllegalArgumentException if `clickablePartOfText` is not substring of the `text`.
  */
 @Composable
 private fun ClickableErrorMessage(

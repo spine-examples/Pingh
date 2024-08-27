@@ -44,7 +44,7 @@ import kotlin.reflect.KClass
  * @param id The ID of the session.
  * @param userCode The verification code that displays so that the user can enter
  *   the code in a browser.
- * @param verificationUrl The URL where users need to enter their `UserCode`.
+ * @param verificationUrl The GitHub page where users need to enter their `UserCode`.
  * @param expiresIn The duration after which `UserCode` expires.
  * @param interval The minimum duration that must pass before user can make
  *   a new access token request.

@@ -34,7 +34,7 @@ import io.spine.validate.Validate
  *
  * @param value The string to be validated against the `Username` value.
  */
-public fun validateUsernameValue(value: String): Boolean {
+public fun isValidUsername(value: String): Boolean {
     val unvalidatedUsername = Username.newBuilder()
         .setValue(value)
         .buildPartial()

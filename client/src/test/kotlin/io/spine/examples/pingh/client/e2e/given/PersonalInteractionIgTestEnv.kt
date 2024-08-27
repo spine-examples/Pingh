@@ -70,7 +70,7 @@ internal fun List<MentionView>.updateStatusById(id: MentionId, status: MentionSt
 /**
  * Returns a random `MentionView` with `UNREAD` status from this list.
  *
- * @throws NoSuchElementException If this list has no unread mentions.
+ * @throws NoSuchElementException if this list has no unread mentions.
  * @see [Collection.random]
  */
 internal fun List<MentionView>.randomUnread(): MentionView =

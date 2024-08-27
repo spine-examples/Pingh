@@ -40,7 +40,7 @@ public data class AppVersion(
  * and optionally the minor and patch versions. Numbers must be separated by dots.
  *
  * @receiver The version of the application that contains the semantic version.
- * @throws IllegalArgumentException If this version does not contain a semantic version.
+ * @throws IllegalArgumentException if this version does not contain a semantic version.
  * @see <a href="https://semver.org/">Semantic Versioning</a>
  */
 public fun AppVersion.extractSemanticVersion(): AppVersion {

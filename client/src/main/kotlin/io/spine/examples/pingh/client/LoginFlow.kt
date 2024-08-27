@@ -92,7 +92,7 @@ public class LoginFlow internal constructor(
     /**
      * Switches the current stage to the passed one.
      *
-     * @throws IllegalStateException If the transition of their current [stage]
+     * @throws IllegalStateException if the transition of their current [stage]
      *   to the passed stage is not [allowed][possibleTransitions].
      */
     private fun moveToNextStage(stage: LoginStage) {
@@ -161,7 +161,7 @@ public class EnterUsername internal constructor(
  *
  * @property client Enables interaction with the Pingh server.
  * @property session Provides information about the current user session.
- * @param event Event received after the user enters their name.
+ * @param event The event received after the user enters their name.
  */
 @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
 public class VerifyLogin internal constructor(

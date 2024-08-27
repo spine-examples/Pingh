@@ -46,7 +46,7 @@ import kotlinx.coroutines.runBlocking
  * Using the GitHub REST API generates access tokens for the user.
  *
  * @property clientId The client ID for the Pingh GitHub App.
- * @param engine Engine used to create the HTTP client.
+ * @param engine The engine used to create the HTTP client.
  */
 public class RemoteGitHubAuthentication(
     private val clientId: ClientId,
@@ -81,7 +81,7 @@ public class RemoteGitHubAuthentication(
      * should also be checked to ensure the request was successful.
      *
      * @param deviceCode The code used to verify the device.
-     * @throws CannotObtainAccessToken If GitHub returns an error response
+     * @throws CannotObtainAccessToken if GitHub returns an error response
      *   when trying to get an access token.
      */
     @Throws(CannotObtainAccessToken::class)
@@ -170,7 +170,7 @@ private class AuthenticationRequestBuilder(
     /**
      * Creates and sends request with specified data.
      *
-     * @throws IllegalArgumentException If the client ID request data is not specified.
+     * @throws IllegalArgumentException if the client ID request data is not specified.
      */
     suspend fun post(): HttpResponse {
         checkNotNull(clientId) { "Client ID must be set." }

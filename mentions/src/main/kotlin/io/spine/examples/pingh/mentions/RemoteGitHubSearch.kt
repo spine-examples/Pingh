@@ -52,7 +52,7 @@ import kotlinx.coroutines.runBlocking
  * A user can be mentioned multiple times in comments or in the body of the item itself.
  * Each mention is treated as a separate entity and saved.
  *
- * @param engine Engine used to create the HTTP client.
+ * @param engine The engine used to create the HTTP client.
  */
 public class RemoteGitHubSearch(
     engine: HttpClientEngine
@@ -247,7 +247,7 @@ public class RemoteGitHubSearch(
         /**
          * Creates and sends request with specified data.
          *
-         * @throws IllegalArgumentException Some request data is not specified.
+         * @throws IllegalArgumentException some request data is not specified.
          */
         suspend fun requestOnBehalfOf(client: HttpClient): HttpResponse {
             checkNotNull(itemType) { "The type of the searched item is not specified." }
