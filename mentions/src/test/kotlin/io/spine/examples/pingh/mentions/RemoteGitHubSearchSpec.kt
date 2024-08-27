@@ -55,7 +55,7 @@ internal class RemoteGitHubSearchSpec {
     @Test
     internal fun `fetch mentions from GitHub`() {
         val service = RemoteGitHubSearch(mockEngineThatContainsMentions(token))
-        val mentions = service.fetchMentions(username, token)
+        val mentions = service.searchMentions(username, token)
         val expected = expectedMentions()
         mentions shouldBe expected
     }
@@ -63,8 +63,8 @@ internal class RemoteGitHubSearchSpec {
     @Test
     internal fun `throw exception if fetching from GitHub failed`() {
         val service = RemoteGitHubSearch(mockEngineThatFailsAllRequest(token))
-        val exception = shouldThrow<CannotFetchMentionsFromGitHubException> {
-            service.fetchMentions(username, token)
+        val exception = shouldThrow<CannotObtainMentionsException> {
+            service.searchMentions(username, token)
         }
         exception.statusCode() shouldBe 422
     }
@@ -72,7 +72,7 @@ internal class RemoteGitHubSearchSpec {
     @Test
     internal fun `return empty set if the user has not been mentioned`() {
         val service = RemoteGitHubSearch(mockEngineThatDoesNotContainMentions(token))
-        val mentions = service.fetchMentions(username, token)
+        val mentions = service.searchMentions(username, token)
         mentions.shouldBeEmpty()
     }
 }

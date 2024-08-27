@@ -48,8 +48,8 @@ public interface GitHubSearch {
      * @param token The `PersonalAccessToken` to access user's private repositories
      * @param updatedAfter The time from which the mentions are searched.
      */
-    @Throws(CannotFetchMentionsFromGitHubException::class)
-    public fun fetchMentions(
+    @Throws(CannotObtainMentionsException::class)
+    public fun searchMentions(
         username: Username,
         token: PersonalAccessToken,
         updatedAfter: Timestamp = Timestamp.getDefaultInstance()

@@ -72,10 +72,10 @@ public class RemoteGitHubSearch(
      * @param username The name of the user whose mentions are to be fetched.
      * @param token The `PersonalAccessToken` to access user's private repositories
      * @param updatedAfter The time from which the mentions are searched.
-     * @see [GitHubSearch.fetchMentions]
+     * @see [GitHubSearch.searchMentions]
      */
-    @Throws(CannotFetchMentionsFromGitHubException::class)
-    public override fun fetchMentions(
+    @Throws(CannotObtainMentionsException::class)
+    public override fun searchMentions(
         username: Username,
         token: PersonalAccessToken,
         updatedAfter: Timestamp
@@ -87,7 +87,7 @@ public class RemoteGitHubSearch(
      * Requests GitHub for mentions of a user in issues or pull requests,
      * then looks for where the user was specifically mentioned in that item.
      */
-    @Throws(CannotFetchMentionsFromGitHubException::class)
+    @Throws(CannotObtainMentionsException::class)
     private fun findMentions(
         username: Username,
         token: PersonalAccessToken,
@@ -123,7 +123,7 @@ public class RemoteGitHubSearch(
      * @see <a href="https://docs.github.com/en/rest/search/search#search-issues-and-pull-requests">
      *     Search issues and pull requests</a>
      */
-    @Throws(CannotFetchMentionsFromGitHubException::class)
+    @Throws(CannotObtainMentionsException::class)
     private fun searchIssuesOrPullRequests(
         username: Username,
         token: PersonalAccessToken,
@@ -140,7 +140,7 @@ public class RemoteGitHubSearch(
                 .requestOnBehalfOf(client)
 
             if (response.status != HttpStatusCode.OK) {
-                throw CannotFetchMentionsFromGitHubException(response.status.value)
+                throw CannotObtainMentionsException(response.status.value)
             }
             IssuesAndPullRequestsSearchResult::class.parseJson(response.body())
         }
@@ -148,14 +148,14 @@ public class RemoteGitHubSearch(
     /**
      * Sends a request to GitHub API to obtain comments on their URL previously received.
      */
-    @Throws(CannotFetchMentionsFromGitHubException::class)
+    @Throws(CannotObtainMentionsException::class)
     private fun obtainCommentsByUrl(url: String, token: PersonalAccessToken): CommentsResponse =
         runBlocking {
             val response = client.get(url) {
                 configureHeaders(token)
             }
             if (response.status != HttpStatusCode.OK) {
-                throw CannotFetchMentionsFromGitHubException(response.status.value)
+                throw CannotObtainMentionsException(response.status.value)
             }
             val json = response.body<String>()
             // The received JSON contains only an array, but Protobuf JSON Parser

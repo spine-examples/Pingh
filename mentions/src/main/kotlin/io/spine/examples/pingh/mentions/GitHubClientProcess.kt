@@ -109,8 +109,8 @@ internal class GitHubClientProcess :
         val token = state().token
         val updatedAfter = state().whenLastSuccessfullyUpdated.thisOrLastWorkday()
         val mentions = try {
-            searchService.fetchMentions(username, token, updatedAfter)
-        } catch (exception: CannotFetchMentionsFromGitHubException) {
+            searchService.searchMentions(username, token, updatedAfter)
+        } catch (exception: CannotObtainMentionsException) {
             builder().clearWhenStarted()
             return listOf(
                 RequestMentionsFromGitHubFailed::class.buildBy(event.id, exception.statusCode())

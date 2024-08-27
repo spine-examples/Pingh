@@ -60,7 +60,7 @@ private const val iconSizeMultiplier = 0.75f
  * @param icon The painter to draw icon.
  * @param onClick Called when this icon button is clicked.
  * @param modifier The modifier to be applied to this icon button.
- * @param colors `IconButtonColors` that is used to resolve the colors used for this icon button
+ * @param colors The `IconButtonColors` that is used to resolve the colors used for this icon button
  *   in different states.
  */
 @Composable

@@ -31,7 +31,7 @@ import io.ktor.http.HttpStatusCode
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.mentions.CannotFetchMentionsFromGitHubException
+import io.spine.examples.pingh.mentions.CannotObtainMentionsException
 import io.spine.examples.pingh.mentions.GitHubSearch
 import java.lang.Thread.sleep
 import kotlin.jvm.Throws
@@ -53,7 +53,7 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
     }
 
     /**
-     * Indicates whether to freeze the execution of the [fetchMentions] method.
+     * Indicates whether to freeze the execution of the [searchMentions] method.
      *
      * If `true`, the method will be executed indefinitely, if `false`,
      * it will terminate without problems. The value can be changed during execution.
@@ -63,7 +63,7 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
     /**
      * The HTTP status response code from GitHub.
      *
-     * If the value differs from `200 OK`, an [CannotFetchMentionsFromGitHubException] is thrown.
+     * If the value differs from `200 OK`, an [CannotObtainMentionsException] is thrown.
      */
     private var responseStatusCode = HttpStatusCode.OK
 
@@ -73,7 +73,7 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
      * Once mentions are successfully fetched, this value is set to `true`. To reset the value,
      * use the [mentionsAreNotFetched] method.
      *
-     * This variable helps prevent duplicate mentions when [fetching][fetchMentions] them again.
+     * This variable helps prevent duplicate mentions when [fetching][searchMentions] them again.
      */
     private var areMentionsFetched = false
 
@@ -81,14 +81,14 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
      * Returns set of [Mention]s retrieved from a JSON file in the resource folder,
      * or empty set if mentions have already been fetched.
      */
-    @Throws(CannotFetchMentionsFromGitHubException::class)
-    public override fun fetchMentions(
+    @Throws(CannotObtainMentionsException::class)
+    public override fun searchMentions(
         username: Username,
         token: PersonalAccessToken,
         updatedAfter: Timestamp
     ): Set<Mention> {
         if (responseStatusCode != HttpStatusCode.OK) {
-            throw CannotFetchMentionsFromGitHubException(responseStatusCode.value)
+            throw CannotObtainMentionsException(responseStatusCode.value)
         }
         if (areMentionsFetched) {
             return emptySet()
