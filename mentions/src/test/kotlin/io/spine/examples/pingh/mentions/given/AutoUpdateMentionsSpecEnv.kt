@@ -31,11 +31,12 @@ package io.spine.examples.pingh.mentions.given
 import com.google.protobuf.Timestamp
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.buildBy
+import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.AutoUpdateMentions
 import io.spine.examples.pingh.mentions.GitHubClientId
 import io.spine.examples.pingh.mentions.buildBy
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
+import io.spine.examples.pingh.mentions.of
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.testing.TestValues.randomString
 import java.util.*
@@ -45,21 +46,21 @@ import kotlin.reflect.KClass
  * Creates a new `GitHubClientId` with a randomly generated `Username`.
  */
 internal fun KClass<GitHubClientId>.generate(): GitHubClientId =
-    GitHubClientId::class.buildBy(Username::class.buildBy(randomString()))
+    GitHubClientId::class.of(Username::class.of(randomString()))
 
 /**
  * Creates a new `UserLoggedIn` event with ID of the `GitHubClient`
  * and randomly generated `PersonalAccessToken`.
  */
 internal fun KClass<UserLoggedIn>.withId(id: GitHubClientId): UserLoggedIn =
-    buildBy(id.username, PersonalAccessToken::class.buildBy(randomString()))
+    buildBy(id.username, PersonalAccessToken::class.of(randomString()))
 
 /**
  * Creates a new `GitHubTokenUpdated` event with the passed `GitHubClientId`
  * and randomly generated `PersonalAccessToken`.
  */
 internal fun KClass<GitHubTokenUpdated>.withId(id: GitHubClientId): GitHubTokenUpdated =
-    buildBy(id, PersonalAccessToken::class.buildBy(randomString()))
+    buildBy(id, PersonalAccessToken::class.of(randomString()))
 
 /**
  * Creates a new `AutoUpdateMentions` with the passed `GitHubClientId`.

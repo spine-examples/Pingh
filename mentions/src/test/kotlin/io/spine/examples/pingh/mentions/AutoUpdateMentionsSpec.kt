@@ -40,7 +40,7 @@ import io.spine.examples.pingh.mentions.given.with
 import io.spine.examples.pingh.mentions.given.withId
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.newSessionsContext
-import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
+import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.protobuf.Durations2.seconds
 import io.spine.server.BoundedContextBuilder
@@ -58,7 +58,7 @@ internal class AutoUpdateMentionsSpec : ContextAwareTest() {
     private lateinit var id: GitHubClientId
 
     override fun contextBuilder(): BoundedContextBuilder =
-        newMentionsContext(PredefinedGitHubResponses())
+        newMentionsContext(PredefinedGitHubSearchResponses())
 
     /**
      * Initializes the [GitHubClient] entity.
