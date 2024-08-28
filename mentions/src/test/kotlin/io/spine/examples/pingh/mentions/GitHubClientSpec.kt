@@ -26,9 +26,13 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.protobuf.Timestamp
 import io.kotest.matchers.shouldBe
 import io.ktor.http.HttpStatusCode
 import io.spine.base.Time.currentTime
+import io.spine.core.UserId
+import io.spine.examples.pingh.clock.buildBy
+import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
@@ -41,12 +45,15 @@ import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.given.buildBy
 import io.spine.examples.pingh.mentions.given.buildWithDefaultWhenStartedField
 import io.spine.examples.pingh.mentions.given.expectedUserMentionedSet
+import io.spine.examples.pingh.mentions.given.generate
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
+import io.spine.protobuf.Durations2.seconds
 import io.spine.server.BoundedContextBuilder
+import io.spine.server.integration.ThirdPartyContext
 import io.spine.testing.TestValues.randomString
 import io.spine.testing.server.blackbox.BlackBoxContext
 import io.spine.testing.server.blackbox.ContextAwareTest
@@ -110,6 +117,53 @@ internal class GitHubClientSpec : ContextAwareTest() {
             emitUserLoggedInEventInSessionsContext()
             val expected = GitHubClient::class.buildBy(gitHubClientId, token)
             context().assertState(gitHubClientId, expected)
+        }
+    }
+
+    @Nested internal inner class
+    `React on 'TimePassed' event, and` {
+
+        @Test
+        internal fun `send update command if no updates have been made yet`() {
+            val time = currentTime()
+            emitTimePassedEvent(time)
+            val expected = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId, time)
+            val commandSubject = context().assertCommands()
+                .withType(UpdateMentionsFromGitHub::class.java)
+            commandSubject.hasSize(1)
+            commandSubject.message(0)
+                .isEqualTo(expected)
+        }
+
+        @Test
+        internal fun `send update command if required time since the last update has passed`() {
+            val firstRequestTime = currentTime()
+            val lastRequestTime = firstRequestTime.add(mentionsUpdateInterval)
+            emitTimePassedEvent(firstRequestTime)
+            emitTimePassedEvent(lastRequestTime)
+            val expected = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId, lastRequestTime)
+            val commandSubject = context().assertCommands()
+                .withType(UpdateMentionsFromGitHub::class.java)
+            commandSubject.hasSize(2)
+            commandSubject.message(1)
+                .isEqualTo(expected)
+        }
+
+        @Test
+        internal fun `do nothing if the required time between updates has not passed`() {
+            val time = currentTime()
+            emitTimePassedEvent(time)
+            emitTimePassedEvent(time.add(seconds(1)))
+            context().assertCommands()
+                .withType(UpdateMentionsFromGitHub::class.java)
+                .hasSize(1)
+        }
+
+        private fun emitTimePassedEvent(time: Timestamp) {
+            val clockContext = ThirdPartyContext.singleTenant("Clock")
+            val event = TimePassed::class.buildBy(time)
+            val actor = UserId::class.generate()
+            clockContext.emittedEvent(event, actor)
         }
     }
 
