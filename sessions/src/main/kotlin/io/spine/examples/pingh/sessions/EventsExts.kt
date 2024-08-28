@@ -84,11 +84,13 @@ public fun KClass<UserIsNotLoggedIntoGitHub>.withSession(id: SessionId): UserIsN
         .vBuild()
 
 /**
- * Creates a new `TokenRefreshed` event with the specified ID of the session.
+ * Creates a new `TokenRefreshed` event with the specified ID of the session
+ * and `PersonalAccessToken`.
  */
-public fun KClass<TokenRefreshed>.withSession(id: SessionId): TokenRefreshed =
+public fun KClass<TokenRefreshed>.with(id: SessionId, token: PersonalAccessToken): TokenRefreshed =
     TokenRefreshed.newBuilder()
         .setId(id)
+        .setToken(token)
         .vBuild()
 
 /**

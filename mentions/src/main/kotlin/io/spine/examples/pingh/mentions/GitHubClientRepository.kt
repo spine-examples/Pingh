@@ -29,6 +29,7 @@ package io.spine.examples.pingh.mentions
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.sessions.SessionId
+import io.spine.examples.pingh.sessions.event.TokenRefreshed
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.server.procman.ProcessManagerRepository
 import io.spine.server.route.EventRouting
@@ -45,6 +46,9 @@ internal class GitHubClientRepository(
         super.setupEventRouting(routing)
         routing
             .route(UserLoggedIn::class.java) { event, _ ->
+                toGitHubClientId(event.id)
+            }
+            .route(TokenRefreshed::class.java) { event, _ ->
                 toGitHubClientId(event.id)
             }
             .route(TimePassed::class.java) { _, _ -> toAll() }

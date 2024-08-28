@@ -38,10 +38,6 @@ import io.spine.examples.pingh.mentions.of
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
-import io.spine.examples.pingh.sessions.SessionId
-import io.spine.examples.pingh.sessions.buildBy
-import io.spine.examples.pingh.sessions.of
-import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.testing.mentions.given.predefinedMentionsSet
 import kotlin.reflect.KClass
 
@@ -79,16 +75,6 @@ internal fun KClass<GitHubClient>.buildWithDefaultWhenStartedField(): GitHubClie
         // Building the message partially to include
         // only the tested fields.
         .buildPartial()
-
-/**
- * Creates a new `UserLoggedIn` event with the specified `Username` and `PersonalAccessToken`.
- */
-internal fun KClass<UserLoggedIn>.buildBy(username: Username, token: PersonalAccessToken):
-        UserLoggedIn =
-    this.buildBy(
-        SessionId::class.of(username),
-        token
-    )
 
 /**
  * Creates a new `UpdateMentionsFromGitHub` command with the specified ID of the `GitHubClient`
