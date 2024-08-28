@@ -52,6 +52,13 @@ message VerifyUserLoginToGitHub {
     SessionId id = 1;
 }
 
+// Tells to refresh GitHub personal access token.
+message RefreshToken {
+
+    // The ID of the user session.
+    SessionId id = 1;
+}
+
 // Tells to log user out.
 message LogUserOut {
 

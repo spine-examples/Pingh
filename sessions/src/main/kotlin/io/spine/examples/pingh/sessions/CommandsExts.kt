@@ -30,6 +30,7 @@ package io.spine.examples.pingh.sessions
 
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
+import io.spine.examples.pingh.sessions.command.RefreshToken
 import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
 import kotlin.reflect.KClass
 
@@ -46,6 +47,14 @@ public fun KClass<LogUserIn>.withSession(id: SessionId): LogUserIn =
  */
 public fun KClass<VerifyUserLoginToGitHub>.withSession(id: SessionId): VerifyUserLoginToGitHub =
     VerifyUserLoginToGitHub.newBuilder()
+        .setId(id)
+        .vBuild()
+
+/**
+ * Creates a new `RefreshToken` command with the specified ID of the session.
+ */
+public fun KClass<RefreshToken>.withSession(id: SessionId): RefreshToken =
+    RefreshToken.newBuilder()
         .setId(id)
         .vBuild()
 
