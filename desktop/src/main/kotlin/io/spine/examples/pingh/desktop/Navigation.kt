@@ -34,7 +34,7 @@ import io.spine.examples.pingh.client.PinghApplication
 /**
  * Displays the current page of the application.
  *
- * @param application manages the logic for the Pingh app.
+ * @param application Manages the logic for the Pingh app.
  */
 @Composable
 internal fun CurrentPage(application: PinghApplication) {

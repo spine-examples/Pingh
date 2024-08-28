@@ -37,7 +37,7 @@ import io.spine.examples.pingh.client.e2e.given.observeUserMentions
 import io.spine.examples.pingh.client.e2e.given.randomUnread
 import io.spine.examples.pingh.client.e2e.given.updateStatusById
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.buildBy
+import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
@@ -59,9 +59,9 @@ import org.junit.jupiter.api.Test
  * Therefore, the tests are frozen until the necessary actions take place on the server.
  * The [CompletableFuture] is used for this purpose.
  */
-internal class PersonalInteractionTest : IntegrationTest() {
+internal class PersonalInteractionIgTest : IntegrationTest() {
 
-    private val username = Username::class.buildBy("MykytaPimonovTD")
+    private val username = Username::class.of("MykytaPimonovTD")
     private lateinit var actual: List<MentionView>
     private lateinit var expected: List<MentionView>
 

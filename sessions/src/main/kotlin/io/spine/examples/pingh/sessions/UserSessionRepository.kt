@@ -30,7 +30,7 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
 import io.spine.server.procman.ProcessManagerRepository
 
 /**
- * Manages instances of `UserSession`.
+ * Manages instances of [UserSessionProcess].
  */
 internal class UserSessionRepository(
     private val authenticationService: GitHubAuthentication

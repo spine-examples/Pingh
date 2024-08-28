@@ -30,7 +30,7 @@ import io.spine.examples.pingh.client.DesktopClient
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.UserMentions
 import io.spine.examples.pingh.mentions.UserMentionsId
-import io.spine.examples.pingh.mentions.buildBy
+import io.spine.examples.pingh.mentions.of
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -46,7 +46,7 @@ import java.util.concurrent.TimeoutException
  */
 internal fun DesktopClient.observeUserMentions(id: MentionId): UserMentionsObserver {
     val future = CompletableFuture<Void>()
-    val entityId = UserMentionsId::class.buildBy(id.user)
+    val entityId = UserMentionsId::class.of(id.user)
     this.observeEntityOnce(entityId, UserMentions::class) {
         future.complete(null)
     }

@@ -34,17 +34,13 @@ import io.spine.examples.pingh.github.Username
 import kotlin.reflect.KClass
 
 /**
- * Creates a new `SessionId` with the specified name of the user to which the session belongs.
- * The time of the session creation is the current time.
- */
-public fun KClass<SessionId>.buildBy(username: Username): SessionId =
-    this.buildBy(username, currentTime())
-
-/**
  * Creates a new `SessionId` with the specified name of the user to which the session belongs
  * and the time when the session is created.
  */
-public fun KClass<SessionId>.buildBy(username: Username, whenCreated: Timestamp): SessionId =
+public fun KClass<SessionId>.of(
+    username: Username,
+    whenCreated: Timestamp = currentTime()
+): SessionId =
     SessionId.newBuilder()
         .setUsername(username)
         .setWhenCreated(whenCreated)

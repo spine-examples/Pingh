@@ -57,8 +57,7 @@ val detektVersion = "1.15.0"
 /**
  * The version of Dokka Gradle Plugins.
  *
- * @see <a href="https://github.com/Kotlin/dokka/releases">
- *     Dokka Releases</a>
+ * @see <a href="https://github.com/Kotlin/dokka/releases">Dokka Releases</a>
  */
 val dokkaVersion = "1.9.20"
 

@@ -61,6 +61,8 @@ internal class DesktopClient(
 
     /**
      * Sends a command to the server on behalf of the user.
+     *
+     * @param command The command to be sent.
      */
     internal fun send(command: CommandMessage) {
         clientRequest()
@@ -71,9 +73,12 @@ internal class DesktopClient(
     /**
      * Reads the entity state by the specified ID.
      *
-     * @param id the ID of the entity state.
-     * @param type the type of the entity state.
-     * @return the entity state if it exists, or `null` otherwise.
+     * @param I The type of ID of the entity being read.
+     * @param E The type of the entity being read.
+     *
+     * @param id The ID of the entity state.
+     * @param type The class of the type of the entity state.
+     * @return The entity state if it exists, or `null` otherwise.
      */
     internal fun <I : Message, E : EntityState> readById(id: I, type: KClass<E>): E? =
         clientRequest()
@@ -87,8 +92,11 @@ internal class DesktopClient(
      *
      * When either the first or second event is emitted, all subscriptions are cancelled.
      *
-     * @param first the information on the observation of the first event.
-     * @param second the information on the observation of the second event.
+     * @param F The type of the first observed event.
+     * @param S The type of the second observed event.
+     *
+     * @param first The information on the observation of the first event.
+     * @param second The information on the observation of the second event.
      */
     internal fun <F : EventMessage, S : EventMessage> observeEither(
         first: EventObserver<F>,
@@ -111,7 +119,7 @@ internal class DesktopClient(
      * @param E The type of the observed event.
      *
      * @param id The ID of the observed event.
-     * @param type The type of the observed event.
+     * @param type The class of the type of the observed event.
      * @param onEmit Called when the event is emitted.
      */
     internal fun <E : EventMessage> observeEvent(
@@ -131,7 +139,7 @@ internal class DesktopClient(
      * @param E The type of the observed event.
      *
      * @param type The class of the type of the observed event.
-     * @param filter Selection condition for observed events.
+     * @param filter The selection condition for observed events.
      * @param onEmit Called when the event is emitted.
      */
     internal fun <E : EventMessage> observeEvent(
@@ -149,9 +157,11 @@ internal class DesktopClient(
      * Subscribes to the event of the provided type and cancels itself after
      * the observer has worked.
      *
-     * @param id the ID of the observed event.
-     * @param type the type of the observed event.
-     * @param onEmit called when the event is emitted.
+     * @param E The type of the observed event.
+     *
+     * @param id The ID of the observed event.
+     * @param type The class of the type of the observed event.
+     * @param onEmit Called when the event is emitted.
      */
     internal fun <E : EventMessage> observeEventOnce(
         id: Message,
@@ -169,9 +179,11 @@ internal class DesktopClient(
     /**
      * Subscribes to the update of the entity with the specified type and ID.
      *
-     * @param id the ID of the observed entity.
-     * @param type the type of the observed entity.
-     * @param onUpdated called when the entity is updated.
+     * @param E The type of the observed entity.
+     *
+     * @param id The ID of the observed entity.
+     * @param type The class of the type of the observed entity.
+     * @param onUpdated Called when the entity is updated.
      */
     internal fun <E : EntityState> observeEntity(
         id: Message,
@@ -189,9 +201,11 @@ internal class DesktopClient(
      *
      * The subscription cancels itself after the observer has completed its work.
      *
-     * @param id the ID of the observed entity.
-     * @param type the type of the observed entity.
-     * @param onUpdated called when the entity is updated.
+     * @param E The type of the observed entity.
+     *
+     * @param id The ID of the observed entity.
+     * @param type The class of the type of the observed entity.
+     * @param onUpdated Called when the entity is updated.
      */
     internal fun <E : EntityState> observeEntityOnce(
         id: Message,
@@ -237,9 +251,11 @@ internal class DesktopClient(
 /**
  * Holds details about the observation of the event.
  *
- * @param id the ID of the observed event.
- * @param type the type of the observed event.
- * @param callback called when the event is emitted.
+ * @param E The type of the observed event.
+ *
+ * @property id The ID of the observed event.
+ * @property type The class of the type of the observed event.
+ * @property callback Called when the event is emitted.
  */
 internal data class EventObserver<E : EventMessage> internal constructor(
     internal val id: Message,

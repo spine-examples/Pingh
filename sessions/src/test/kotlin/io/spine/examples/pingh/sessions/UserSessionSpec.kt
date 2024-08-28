@@ -47,8 +47,8 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-@DisplayName("Sessions Context should")
-internal class SessionsContextSpec : ContextAwareTest() {
+@DisplayName("`UserSession` should")
+internal class UserSessionSpec : ContextAwareTest() {
 
     private val authenticationService = PredefinedGitHubAuthenticationResponses()
 
@@ -60,8 +60,8 @@ internal class SessionsContextSpec : ContextAwareTest() {
         authenticationService.clean()
     }
 
-    @Nested
-    internal inner class `handle 'LogUserIn' command, and` {
+    @Nested internal inner class
+    `Handle 'LogUserIn' command, and` {
 
         private lateinit var sessionId: SessionId
 
@@ -85,8 +85,8 @@ internal class SessionsContextSpec : ContextAwareTest() {
         }
     }
 
-    @Nested
-    internal inner class `handle 'VerifyUserLoginToGitHub' command, and` {
+    @Nested internal inner class
+    `Handle 'VerifyUserLoginToGitHub' command, and` {
 
         private lateinit var sessionId: SessionId
 
@@ -130,8 +130,8 @@ internal class SessionsContextSpec : ContextAwareTest() {
         }
     }
 
-    @Nested
-    internal inner class `handle 'LogUserOut' command, and` {
+    @Nested internal inner class
+    `Handle 'LogUserOut' command, and` {
 
         private lateinit var sessionId: SessionId
 
@@ -159,7 +159,7 @@ internal class SessionsContextSpec : ContextAwareTest() {
     @Test
     internal fun `support simultaneous sessions`() {
         val firstSession = SessionId::class.generate()
-        val secondSession = SessionId::class.buildBy(firstSession.username)
+        val secondSession = SessionId::class.of(firstSession.username)
         logIn(firstSession)
         logIn(secondSession)
 
@@ -172,7 +172,7 @@ internal class SessionsContextSpec : ContextAwareTest() {
     @Test
     internal fun `create new session when user logs in again`() {
         val firstSession = SessionId::class.generate()
-        val secondSession = SessionId::class.buildBy(firstSession.username)
+        val secondSession = SessionId::class.of(firstSession.username)
         logIn(firstSession)
         context().receivesCommand(LogUserOut::class.withSession(firstSession))
         logIn(secondSession)

@@ -31,6 +31,8 @@ import io.spine.examples.pingh.sessions.SessionId
 
 /**
  * Information about the current user session.
+ *
+ * @property id The ID of current session.
  */
 internal class UserSession(
     internal val id: SessionId

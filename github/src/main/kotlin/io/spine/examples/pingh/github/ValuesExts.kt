@@ -41,9 +41,9 @@ import io.spine.protobuf.Durations2.seconds
 import kotlin.reflect.KClass
 
 /**
- * Creates a new [Username] with the specified string value.
+ * Creates a new `Username` with the specified string value.
  */
-public fun KClass<Username>.buildBy(value: String): Username =
+public fun KClass<Username>.of(value: String): Username =
     Username.newBuilder()
         .setValue(value)
         .vBuild()
@@ -56,52 +56,52 @@ public fun KClass<Username>.buildBy(value: String): Username =
 public fun Username.tag(): String = "@${this.value}"
 
 /**
- * Creates a new [PersonalAccessToken] with the specified string value.
+ * Creates a new `PersonalAccessToken` with the specified string value.
  */
-public fun KClass<PersonalAccessToken>.buildBy(value: String): PersonalAccessToken =
+public fun KClass<PersonalAccessToken>.of(value: String): PersonalAccessToken =
     PersonalAccessToken.newBuilder()
         .setValue(value)
         .vBuild()
 
 /**
- * Creates a new [Url] with the specified string value.
+ * Creates a new `Url` with the specified string value.
  */
-public fun KClass<Url>.buildBy(spec: String): Url =
+public fun KClass<Url>.of(spec: String): Url =
     Url.newBuilder()
         .setSpec(spec)
         .vBuild()
 
 /**
- * Creates a new [User] with the specified [Username] and avatar [Url].
+ * Creates a new `User` with the specified `Username` and avatar `Url`.
  */
-public fun KClass<User>.buildBy(username: Username, avatarUrl: Url): User =
+public fun KClass<User>.of(username: Username, avatarUrl: Url): User =
     User.newBuilder()
         .setUsername(username)
         .setAvatarUrl(avatarUrl)
         .vBuild()
 
 /**
- * Creates a new [User] with the specified username and avatar URL.
+ * Creates a new `User` with the specified username and avatar URL.
  */
-public fun KClass<User>.buildBy(username: String, avatarUrl: String): User =
-    this.buildBy(
-        Username::class.buildBy(username),
-        Url::class.buildBy(avatarUrl)
+public fun KClass<User>.of(username: String, avatarUrl: String): User =
+    of(
+        Username::class.of(username),
+        Url::class.of(avatarUrl)
     )
 
 /**
  * Creates a new `Mention` with the data specified in the `IssueOrPullRequestFragment`.
  */
-public fun KClass<Mention>.buildFromFragment(fragment: IssueOrPullRequestFragment): Mention =
+public fun KClass<Mention>.fromFragment(fragment: IssueOrPullRequestFragment): Mention =
     with(Mention.newBuilder()) {
-        id = NodeId::class.buildBy(fragment.nodeId)
-        author = User::class.buildBy(
+        id = NodeId::class.of(fragment.nodeId)
+        author = User::class.of(
             fragment.whoCreated.username,
             fragment.whoCreated.avatarUrl
         )
         title = fragment.title
         whenMentioned = Timestamps.parse(fragment.whenCreated)
-        url = Url::class.buildBy(fragment.htmlUrl)
+        url = Url::class.of(fragment.htmlUrl)
         vBuild()
     }
 
@@ -114,19 +114,19 @@ public fun KClass<Mention>.buildFromFragment(fragment: IssueOrPullRequestFragmen
  * a mention's title. It is recommended to use the GitHub title of the item
  * under which the comment is made.
  */
-public fun KClass<Mention>.buildFromFragment(
+public fun KClass<Mention>.fromFragment(
     fragment: CommentFragment,
     itemTitle: String
 ): Mention =
     with(Mention.newBuilder()) {
-        id = NodeId::class.buildBy(fragment.nodeId)
-        author = User::class.buildBy(
+        id = NodeId::class.of(fragment.nodeId)
+        author = User::class.of(
             fragment.whoCreated.username,
             fragment.whoCreated.avatarUrl
         )
         title = itemTitle
         whenMentioned = Timestamps.parse(fragment.whenCreated)
-        url = Url::class.buildBy(fragment.htmlUrl)
+        url = Url::class.of(fragment.htmlUrl)
         vBuild()
     }
 
@@ -164,7 +164,7 @@ public fun KClass<VerificationCodesResponse>.fromFragment(
     with(VerificationCodesResponse.newBuilder()) {
         deviceCode = DeviceCode::class.of(fragment.deviceCode)
         userCode = UserCode::class.of(fragment.userCode)
-        verificationUrl = Url::class.buildBy(fragment.verificationUri)
+        verificationUrl = Url::class.of(fragment.verificationUri)
         expiresIn = seconds(fragment.expiresIn)
         interval = seconds(fragment.interval)
         vBuild()
@@ -178,7 +178,7 @@ public fun KClass<AccessTokenResponse>.fromFragment(
     fragment: AccessTokenFragment
 ): AccessTokenResponse =
     with(AccessTokenResponse.newBuilder()) {
-        accessToken = PersonalAccessToken::class.buildBy(fragment.accessToken)
+        accessToken = PersonalAccessToken::class.of(fragment.accessToken)
         whenExpires = Timestamps.add(currentTime(), seconds(fragment.expiresIn))
         refreshToken = RefreshToken::class.of(fragment.refreshToken)
         vBuild()

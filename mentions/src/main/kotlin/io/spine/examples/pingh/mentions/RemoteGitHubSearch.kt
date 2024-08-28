@@ -39,7 +39,7 @@ import io.ktor.http.HttpStatusCode
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.buildFromFragment
+import io.spine.examples.pingh.github.fromFragment
 import io.spine.examples.pingh.github.rest.CommentsResponse
 import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResult
 import io.spine.examples.pingh.github.tag
@@ -51,10 +51,12 @@ import kotlinx.coroutines.runBlocking
  *
  * A user can be mentioned multiple times in comments or in the body of the item itself.
  * Each mention is treated as a separate entity and saved.
+ *
+ * @param engine The engine used to create the HTTP client.
  */
-public class GitHubClientServiceImpl(
+public class RemoteGitHubSearch(
     engine: HttpClientEngine
-) : GitHubClientService {
+) : GitHubSearch {
 
     /**
      * HTTP client on behalf of which requests is made.
@@ -62,15 +64,19 @@ public class GitHubClientServiceImpl(
     private val client = HttpClient(engine)
 
     /**
-     * Searches for user `Mention`s on GitHub in issues and pull requests,
+     * Searches for user `Mention`s made by others on GitHub in issues and pull requests,
      * as well as in comments under those items.
      *
      * The default value of `updateAfter` is `Timestamp.getDefaultInstance()`.
      *
-     * @see [GitHubClientService.fetchMentions]
+     * @param username The name of the user whose mentions are to be fetched.
+     * @param token The `PersonalAccessToken` to access user's private repositories.
+     * @param updatedAfter The time after which GitHub items containing the searched mentions
+     *   should have been updated.
+     * @see [GitHubSearch.searchMentions]
      */
-    @Throws(CannotFetchMentionsFromGitHubException::class)
-    public override fun fetchMentions(
+    @Throws(CannotObtainMentionsException::class)
+    public override fun searchMentions(
         username: Username,
         token: PersonalAccessToken,
         updatedAfter: Timestamp
@@ -82,7 +88,7 @@ public class GitHubClientServiceImpl(
      * Requests GitHub for mentions of a user in issues or pull requests,
      * then looks for where the user was specifically mentioned in that item.
      */
-    @Throws(CannotFetchMentionsFromGitHubException::class)
+    @Throws(CannotObtainMentionsException::class)
     private fun findMentions(
         username: Username,
         token: PersonalAccessToken,
@@ -96,10 +102,10 @@ public class GitHubClientServiceImpl(
                 val mentionsInComments = obtainCommentsByUrl(item.commentsUrl, token)
                     .itemList
                     .filter { comment -> comment.body.contains(userTag) }
-                    .map { comment -> Mention::class.buildFromFragment(comment, item.title) }
+                    .map { comment -> Mention::class.fromFragment(comment, item.title) }
 
                 if (item.body.contains(userTag)) {
-                    mentionsInComments.plus(Mention::class.buildFromFragment(item))
+                    mentionsInComments.plus(Mention::class.fromFragment(item))
                 } else {
                     mentionsInComments
                 }
@@ -118,7 +124,7 @@ public class GitHubClientServiceImpl(
      * @see <a href="https://docs.github.com/en/rest/search/search#search-issues-and-pull-requests">
      *     Search issues and pull requests</a>
      */
-    @Throws(CannotFetchMentionsFromGitHubException::class)
+    @Throws(CannotObtainMentionsException::class)
     private fun searchIssuesOrPullRequests(
         username: Username,
         token: PersonalAccessToken,
@@ -135,28 +141,28 @@ public class GitHubClientServiceImpl(
                 .requestOnBehalfOf(client)
 
             if (response.status != HttpStatusCode.OK) {
-                throw CannotFetchMentionsFromGitHubException(response.status.value)
+                throw CannotObtainMentionsException(response.status.value)
             }
-            parseIssuesAndPullRequestsFromJson(response.body())
+            IssuesAndPullRequestsSearchResult::class.parseJson(response.body())
         }
 
     /**
      * Sends a request to GitHub API to obtain comments on their URL previously received.
      */
-    @Throws(CannotFetchMentionsFromGitHubException::class)
+    @Throws(CannotObtainMentionsException::class)
     private fun obtainCommentsByUrl(url: String, token: PersonalAccessToken): CommentsResponse =
         runBlocking {
             val response = client.get(url) {
                 configureHeaders(token)
             }
             if (response.status != HttpStatusCode.OK) {
-                throw CannotFetchMentionsFromGitHubException(response.status.value)
+                throw CannotObtainMentionsException(response.status.value)
             }
             val json = response.body<String>()
             // The received JSON contains only an array, but Protobuf JSON Parser
             // cannot process it. So the array is converted to JSON, where the result
             // is just the value of the `item` field.
-            parseCommentsFromJson("{ item: $json }")
+            CommentsResponse::class.parseJson("{ item: $json }")
         }
 
     /**

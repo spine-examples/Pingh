@@ -28,8 +28,7 @@ package io.spine.examples.pingh.testing.sessions.given
 
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.VerificationCodesResponse
-import io.spine.examples.pingh.sessions.parseAccessTokenResponse
-import io.spine.examples.pingh.sessions.parseVerificationCodesResponse
+import io.spine.examples.pingh.sessions.parseJson
 
 /**
  * Returns the response provided by [PredefinedGitHubAuthenticationResponses]
@@ -40,7 +39,7 @@ public fun predefinedVerificationCodes(): VerificationCodesResponse {
         .getResource("/github-responses/authentication-codes-response.json")
     checkNotNull(jsonFile)
     val json = jsonFile.readText()
-    return parseVerificationCodesResponse(json)
+    return VerificationCodesResponse::class.parseJson(json)
 }
 
 /**
@@ -52,5 +51,5 @@ public fun predefinedAccessTokenResponse(): AccessTokenResponse {
         .getResource("/github-responses/access-token-response.json")
     checkNotNull(jsonFile)
     val json = jsonFile.readText()
-    return parseAccessTokenResponse(json)
+    return AccessTokenResponse::class.parseJson(json)
 }

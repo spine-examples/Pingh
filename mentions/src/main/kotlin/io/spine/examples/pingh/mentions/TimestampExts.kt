@@ -28,7 +28,7 @@ package io.spine.examples.pingh.mentions
 
 import com.google.protobuf.Duration
 import com.google.protobuf.Timestamp
-import com.google.protobuf.util.Timestamps.add
+import com.google.protobuf.util.Timestamps
 import com.google.protobuf.util.Timestamps.compare
 
 /**
@@ -39,4 +39,4 @@ internal fun Timestamp.isAfter(time: Timestamp): Boolean = compare(this, time) >
 /**
  * Adds the passed duration to this timestamp.
  */
-internal fun Timestamp.add(duration: Duration): Timestamp = add(this, duration)
+internal fun Timestamp.add(duration: Duration): Timestamp = Timestamps.add(this, duration)

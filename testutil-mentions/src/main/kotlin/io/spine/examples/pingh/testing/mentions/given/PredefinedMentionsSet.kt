@@ -27,12 +27,14 @@
 package io.spine.examples.pingh.testing.mentions.given
 
 import io.spine.examples.pingh.github.Mention
-import io.spine.examples.pingh.github.buildFromFragment
-import io.spine.examples.pingh.mentions.parseCommentsFromJson
-import io.spine.examples.pingh.mentions.parseIssuesAndPullRequestsFromJson
+import io.spine.examples.pingh.github.fromFragment
+import io.spine.examples.pingh.github.rest.CommentsResponse
+import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResult
+import io.spine.examples.pingh.mentions.parseJson
 
 /**
- * Returns the set of mentions that [PredefinedGitHubResponses] returns on successful execution.
+ * Returns the set of mentions that [PredefinedGitHubSearchResponses] returns
+ * on successful execution.
  */
 public fun predefinedMentionsSet(): Set<Mention> =
     loadMentionsInPr() + loadMentionsInCommentsUnderPr()
@@ -44,13 +46,13 @@ public fun predefinedMentionsSet(): Set<Mention> =
  * returned by the GitHub API when requesting for mentions in a pull request.
  */
 private fun loadMentionsInPr(): Set<Mention> {
-    val jsonFile = PredefinedGitHubResponses::class.java
+    val jsonFile = PredefinedGitHubSearchResponses::class.java
         .getResource("/github-responses/prs-search-response.json")
     checkNotNull(jsonFile)
     val json = jsonFile.readText(Charsets.UTF_8)
-    return parseIssuesAndPullRequestsFromJson(json)
+    return IssuesAndPullRequestsSearchResult::class.parseJson(json)
         .itemList
-        .map { fragment -> Mention::class.buildFromFragment(fragment) }
+        .map { fragment -> Mention::class.fromFragment(fragment) }
         .toSet()
 }
 
@@ -61,15 +63,15 @@ private fun loadMentionsInPr(): Set<Mention> {
  * returned by the GitHub API when requesting for mentions in comments under a pull request.
  */
 private fun loadMentionsInCommentsUnderPr(): Set<Mention> {
-    val jsonFile = PredefinedGitHubResponses::class.java
+    val jsonFile = PredefinedGitHubSearchResponses::class.java
         .getResource("/github-responses/comments-under-pr-response.json")
     checkNotNull(jsonFile)
     val json = jsonFile.readText(Charsets.UTF_8)
     // The received JSON contains only an array, but Protobuf JSON Parser
     // cannot process it. So the array is converted to JSON, where the result
     // is just the value of the `item` field.
-    return parseCommentsFromJson("{ item: $json }")
+    return CommentsResponse::class.parseJson("{ item: $json }")
         .itemList
-        .map { fragment -> Mention::class.buildFromFragment(fragment, "Comment") }
+        .map { fragment -> Mention::class.fromFragment(fragment, "Comment") }
         .toSet()
 }

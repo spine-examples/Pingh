@@ -41,13 +41,13 @@ import kotlin.reflect.KClass
 /**
  * Creates a new `UserTokenReceived` event with the specified data.
  *
- * @param id the ID of the session.
- * @param userCode the verification code that displays so that the user can enter
- *                 the code in a browser.
- * @param verificationUrl the URL where users need to enter their `UserCode`.
- * @param expiresIn the duration after which `UserCode` expires.
- * @param interval the minimum duration that must pass before user can make
- *                 a new access token request.
+ * @param id The ID of the session.
+ * @param userCode The verification code that displays so that the user can enter
+ *   the code in a browser.
+ * @param verificationUrl The GitHub page where users need to enter their `UserCode`.
+ * @param expiresIn The duration after which `UserCode` expires.
+ * @param interval The minimum duration that must pass before user can make
+ *   a new access token request.
  */
 public fun KClass<UserCodeReceived>.buildWith(
     id: SessionId,

@@ -35,6 +35,7 @@ import io.spine.examples.pingh.mentions.MentionView
 import io.spine.examples.pingh.mentions.UserMentions
 import io.spine.examples.pingh.mentions.UserMentionsId
 import io.spine.examples.pingh.mentions.buildBy
+import io.spine.examples.pingh.mentions.of
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
 import io.spine.examples.pingh.mentions.command.SnoozeMention
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
@@ -50,9 +51,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * - whenever the user acts in relation to some mention, propagates these actions
  *  as commands to the server-side.
  *
- * @param client enables interaction with the Pingh server.
- * @param session the information about the current user session.
- * @param settings the state of application settings.
+ * @property client Enables interaction with the Pingh server.
+ * @property session The information about the current user session.
+ * @property settings The state of application settings.
  */
 public class MentionsFlow internal constructor(
     private val client: DesktopClient,
@@ -75,7 +76,7 @@ public class MentionsFlow internal constructor(
      */
     private fun subscribeToMentionsUpdates() {
         ensureLoggedIn()
-        val id = UserMentionsId::class.buildBy(session.value!!.username)
+        val id = UserMentionsId::class.of(session.value!!.username)
         client.observeEntity(id, UserMentions::class) { entity ->
             mentions.value = entity.mentionList
         }
@@ -91,7 +92,7 @@ public class MentionsFlow internal constructor(
     public fun updateMentions() {
         ensureLoggedIn()
         val command = UpdateMentionsFromGitHub::class.buildBy(
-            GitHubClientId::class.buildBy(session.value!!.username)
+            GitHubClientId::class.of(session.value!!.username)
         )
         client.send(command)
     }
@@ -99,12 +100,12 @@ public class MentionsFlow internal constructor(
     /**
      * Finds mentions of the user by their ID.
      *
-     * @return list of `MentionView`s sorted by descending time of creation.
+     * @return List of `MentionView`s sorted by descending time of creation.
      */
     public fun allMentions(): List<MentionView> {
         ensureLoggedIn()
         val userMentions = client.readById(
-            UserMentionsId::class.buildBy(session.value!!.username),
+            UserMentionsId::class.of(session.value!!.username),
             UserMentions::class
         )
         return userMentions
@@ -119,7 +120,7 @@ public class MentionsFlow internal constructor(
      * The duration for which a mention is snoozed is determined
      * by the app's [settings][SettingsState.snoozeTime].
      *
-     * @param id the identifier of the mention to be snoozed.
+     * @param id The identifier of the mention to be snoozed.
      */
     public fun snooze(id: MentionId) {
         snooze(id, settings.snoozeTime.value.value)
@@ -128,8 +129,8 @@ public class MentionsFlow internal constructor(
     /**
      * Snoozes the mention.
      *
-     * @param id the identifier of the mention to be snoozed.
-     * @param snoozeTime the duration of mention snooze.
+     * @param id The identifier of the mention to be snoozed.
+     * @param snoozeTime The duration of mention snooze.
      */
     internal fun snooze(id: MentionId, snoozeTime: Duration) {
         ensureLoggedIn()
@@ -140,7 +141,7 @@ public class MentionsFlow internal constructor(
     /**
      * Marks the mention as read.
      *
-     * @param id the identifier of the mention that is marked as read.
+     * @param id The identifier of the mention that is marked as read.
      */
     public fun markAsRead(id: MentionId) {
         ensureLoggedIn()

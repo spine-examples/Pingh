@@ -130,7 +130,7 @@ public fun KClass<RequestMentionsFromGitHubFailed>.buildBy(id: GitHubClientId, s
 public fun KClass<UserMentioned>.buildBy(mention: Mention, whoWasMentioned: Username):
         UserMentioned =
     UserMentioned.newBuilder()
-        .setId(MentionId::class.buildBy(mention.id, whoWasMentioned))
+        .setId(MentionId::class.of(mention.id, whoWasMentioned))
         .setWhoMentioned(mention.author)
         .setTitle(mention.title)
         .setWhenMentioned(mention.whenMentioned)
