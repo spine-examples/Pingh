@@ -26,10 +26,13 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.protobuf.Duration
 import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Timestamps
+import com.google.protobuf.util.Timestamps.between
 import io.spine.base.EventMessage
 import io.spine.core.External
+import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
@@ -41,7 +44,10 @@ import io.spine.examples.pingh.mentions.event.RequestMentionsFromGitHubFailed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
+import io.spine.protobuf.Durations2.minutes
+import io.spine.protobuf.Durations2.toNanos
 import io.spine.server.command.Assign
+import io.spine.server.command.Command
 import io.spine.server.event.React
 import io.spine.server.procman.ProcessManager
 import java.time.DayOfWeek
@@ -49,8 +55,14 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
+import java.util.*
 import kotlin.jvm.Throws
 import kotlin.reflect.KClass
+
+/**
+ * The time interval between automatic requests to update mentions.
+ */
+internal val mentionsUpdateInterval: Duration = minutes(1)
 
 /**
  * A process of reading user's mentions from GitHub.
@@ -76,6 +88,22 @@ internal class GitHubClientProcess :
             GitHubClientId::class.of(event.id.username),
             event.token
         )
+    }
+
+    /**
+     * Sends a `UpdateMentionsFromGitHub` command if the time elapsed since
+     * the last successful update exceeds the required [interval][mentionsUpdateInterval].
+     *
+     * If no updates have been made yet, the command will be sent regardless.
+     */
+    @Command
+    internal fun on(@External event: TimePassed): Optional<UpdateMentionsFromGitHub> {
+        val currentTime = event.time
+        val difference = between(state().whenLastSuccessfullyUpdated, currentTime)
+        if (!state().hasWhenLastSuccessfullyUpdated() || difference >= mentionsUpdateInterval) {
+            return Optional.of(UpdateMentionsFromGitHub::class.buildBy(state().id, currentTime))
+        }
+        return Optional.empty()
     }
 
     /**
@@ -178,3 +206,9 @@ public fun KClass<Timestamp>.identifyLastWorkday(): Timestamp {
     }
     return Timestamps.fromSeconds(localDateTime.toEpochSecond(ZoneOffset.UTC))
 }
+
+/**
+ * Compares this `Duration` with the passed one.
+ */
+private operator fun Duration.compareTo(other: Duration): Int =
+    toNanos(this).compareTo(toNanos(other))

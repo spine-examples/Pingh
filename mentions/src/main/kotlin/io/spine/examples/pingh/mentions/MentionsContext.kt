@@ -50,6 +50,5 @@ public const val NAME: String = "Mentions"
 public fun newMentionsContext(searchService: GitHubSearch): BoundedContextBuilder =
     BoundedContext.singleTenant(NAME)
         .add(GitHubClientRepository(searchService))
-        .add(AutoUpdateMentionsRepository())
         .add(MentionRepository())
         .add(UserMentionsRepository())

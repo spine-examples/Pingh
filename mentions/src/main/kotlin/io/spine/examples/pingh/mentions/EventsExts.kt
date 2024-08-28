@@ -33,7 +33,6 @@ import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.mentions.event.AutoUpdateMentionsStarted
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
@@ -135,13 +134,4 @@ public fun KClass<UserMentioned>.buildBy(mention: Mention, whoWasMentioned: User
         .setTitle(mention.title)
         .setWhenMentioned(mention.whenMentioned)
         .setUrl(mention.url)
-        .vBuild()
-
-/**
- * Creates a new `AutoUpdateMentionsStarted` event with the passed `GitHubClientID`.
- */
-internal fun KClass<AutoUpdateMentionsStarted>.withId(id: GitHubClientId):
-        AutoUpdateMentionsStarted =
-    AutoUpdateMentionsStarted.newBuilder()
-        .setId(id)
         .vBuild()

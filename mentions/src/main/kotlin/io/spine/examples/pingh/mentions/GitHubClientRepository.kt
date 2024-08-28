@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.mentions
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
+import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.server.procman.ProcessManagerRepository
@@ -46,6 +47,7 @@ internal class GitHubClientRepository(
             .route(UserLoggedIn::class.java) { event, _ ->
                 toGitHubClientId(event.id)
             }
+            .route(TimePassed::class.java) { _, _ -> toAll() }
     }
 
     @OverridingMethodsMustInvokeSuper
@@ -60,4 +62,12 @@ internal class GitHubClientRepository(
     private fun toGitHubClientId(session: SessionId): Set<GitHubClientId> {
         return setOf(GitHubClientId::class.of(session.username))
     }
+
+    /**
+     * Returns a set of identifiers of records in the process manager storage.
+     */
+    private fun toAll(): Set<GitHubClientId> =
+        storage().index()
+            .asSequence()
+            .toSet()
 }
