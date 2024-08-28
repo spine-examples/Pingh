@@ -40,9 +40,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
  *
  * Allows changing application settings and logging out.
  *
- * @param client enables interaction with the Pingh server.
- * @param session the information about the current user session.
- * @param settings the state of application settings.
+ * @property client Enables interaction with the Pingh server.
+ * @property session The information about the current user session.
+ * @property settings The state of application settings.
  */
 public class SettingsFlow internal constructor(
     private val client: DesktopClient,
@@ -59,7 +59,7 @@ public class SettingsFlow internal constructor(
     /**
      * Logs the user out, cancels all subscriptions and clears the session ID.
      *
-     * @param onSuccess called when the user successfully logs out.
+     * @param onSuccess Called when the user successfully logs out.
      */
     public fun logOut(onSuccess: (event: UserLoggedOut) -> Unit = {}) {
         val command = LogUserOut::class.withSession(session.value!!.id)
@@ -91,8 +91,8 @@ public class SettingsState {
 /**
  * Time after which the notification about the new mention is repeated.
  *
- * @param label the text corresponding to this interval.
- * @param value the duration corresponding to this interval.
+ * @property label The text corresponding to this interval.
+ * @property value The duration corresponding to this interval.
  */
 @Suppress("MagicNumber" /* The durations are specified using numbers. */)
 public enum class SnoozeTime(

@@ -34,12 +34,13 @@ import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.GitHubClient
 import io.spine.examples.pingh.mentions.GitHubClientId
 import io.spine.examples.pingh.mentions.MentionId
-import io.spine.examples.pingh.mentions.buildBy
+import io.spine.examples.pingh.mentions.of
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.buildBy
+import io.spine.examples.pingh.sessions.of
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.testing.mentions.given.predefinedMentionsSet
 import kotlin.reflect.KClass
@@ -85,7 +86,7 @@ internal fun KClass<GitHubClient>.buildWithDefaultWhenStartedField(): GitHubClie
 internal fun KClass<UserLoggedIn>.buildBy(username: Username, token: PersonalAccessToken):
         UserLoggedIn =
     this.buildBy(
-        SessionId::class.buildBy(username),
+        SessionId::class.of(username),
         token
     )
 
@@ -117,7 +118,7 @@ internal fun expectedUserMentionedSet(whoWasMentioned: Username): Set<UserMentio
     predefinedMentionsSet()
         .map { mention ->
             with(UserMentioned.newBuilder()) {
-                id = MentionId::class.buildBy(
+                id = MentionId::class.of(
                     mention.id,
                     whoWasMentioned
                 )

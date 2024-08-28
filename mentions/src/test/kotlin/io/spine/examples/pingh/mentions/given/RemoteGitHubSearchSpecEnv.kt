@@ -36,8 +36,8 @@ import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.NodeId
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.User
-import io.spine.examples.pingh.github.buildBy
-import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
+import io.spine.examples.pingh.github.of
+import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
 import io.spine.net.Url
 
 /**
@@ -104,16 +104,16 @@ internal fun expectedMentions(): Set<Mention> =
     )
 
 private fun Mention.Builder.setId(value: String): Mention.Builder =
-    this.setId(NodeId::class.buildBy(value))
+    this.setId(NodeId::class.of(value))
 
 private fun Mention.Builder.setAuthor(username: String, avatarUrl: String): Mention.Builder =
-    this.setAuthor(User::class.buildBy(username, avatarUrl))
+    this.setAuthor(User::class.of(username, avatarUrl))
 
 private fun Mention.Builder.setWhenMentioned(value: String): Mention.Builder =
     this.setWhenMentioned(Timestamps.parse(value))
 
 private fun Mention.Builder.setUrl(value: String): Mention.Builder =
-    this.setUrl(Url::class.buildBy(value))
+    this.setUrl(Url::class.of(value))
 
 /**
  * Intercepts requests to GitHub and returns an error response
@@ -166,7 +166,8 @@ private fun sendSameResponseToSearchingRequests(
  * Loads JSON by its name and returns the contents of the file.
  */
 private fun loadJson(name: String): String {
-    val jsonFile = PredefinedGitHubResponses::class.java.getResource("/github-responses/$name")
+    val jsonFile = PredefinedGitHubSearchResponses::class.java
+        .getResource("/github-responses/$name")
     checkNotNull(jsonFile)
     return jsonFile.readText(Charsets.UTF_8)
 }

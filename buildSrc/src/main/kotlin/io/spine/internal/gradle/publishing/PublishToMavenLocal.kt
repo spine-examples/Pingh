@@ -56,6 +56,7 @@ import org.gradle.kotlin.dsl.findByType
  * In each of published modules, the extension will create a [publication][PublicationHandler]
  * named `"mavenJava"`. All artifacts, published by this extension belong to this publication.
  *
+ * @param block Configures the `PublishToMavenLocal` extension.
  * @see [PublicationHandler]
  */
 public fun Project.publishToMavenLocal(block: PublishToMavenLocal.() -> Unit) {
@@ -74,7 +75,7 @@ public fun Project.publishToMavenLocal(block: PublishToMavenLocal.() -> Unit) {
  * A Gradle extension for setting up publishing of modules to Maven Local repository
  * using `maven-publish` plugin.
  *
- * @param project a project in which extension is opened.
+ * @property project The project in which extension is opened.
  * @see [publishToMavenLocal]
  */
 public open class PublishToMavenLocal(

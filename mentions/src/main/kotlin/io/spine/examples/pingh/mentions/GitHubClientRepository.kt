@@ -35,12 +35,12 @@ import io.spine.server.route.EventRouting
 /**
  * Manages instances of [GitHubClientProcess].
  */
-public class GitHubClientRepository(
-    private val gitHubClientService: GitHubClientService,
+internal class GitHubClientRepository(
+    private val searchService: GitHubSearch,
 ) : ProcessManagerRepository<GitHubClientId, GitHubClientProcess, GitHubClient>() {
 
     @OverridingMethodsMustInvokeSuper
-    protected override fun setupEventRouting(routing: EventRouting<GitHubClientId>) {
+    override fun setupEventRouting(routing: EventRouting<GitHubClientId>) {
         super.setupEventRouting(routing)
         routing
             .route(UserLoggedIn::class.java) { event, _ ->
@@ -49,15 +49,15 @@ public class GitHubClientRepository(
     }
 
     @OverridingMethodsMustInvokeSuper
-    protected override fun configure(processManager: GitHubClientProcess) {
+    override fun configure(processManager: GitHubClientProcess) {
         super.configure(processManager)
-        processManager.inject(gitHubClientService)
+        processManager.inject(searchService)
     }
 
     /**
      * Returns a set with a single GitHub client ID, that corresponds to the passed user session.
      */
     private fun toGitHubClientId(session: SessionId): Set<GitHubClientId> {
-        return setOf(GitHubClientId::class.buildBy(session.username))
+        return setOf(GitHubClientId::class.of(session.username))
     }
 }

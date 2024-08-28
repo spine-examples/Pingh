@@ -35,17 +35,22 @@ import kotlin.jvm.Throws
 /**
  * Allows to access GitHub Search API.
  */
-public interface GitHubClientService {
+public interface GitHubSearch {
 
     /**
-     * Searches for user `Mention`s on GitHub.
+     * Searches for `Mention`s of the user made by others on GitHub.
      *
      * Mentions are searched by the name of the mentioned user. Mentions must be within items
      * updated between the `updateAfter` time and the present. The `PersonalAccessToken` is used
      * to access the GitHub API.
+     *
+     * @param username The name of the user whose mentions are to be fetched.
+     * @param token The `PersonalAccessToken` to access user's private repositories.
+     * @param updatedAfter The time after which GitHub items containing the searched mentions
+     *   should have been updated.
      */
-    @Throws(CannotFetchMentionsFromGitHubException::class)
-    public fun fetchMentions(
+    @Throws(CannotObtainMentionsException::class)
+    public fun searchMentions(
         username: Username,
         token: PersonalAccessToken,
         updatedAfter: Timestamp = Timestamp.getDefaultInstance()

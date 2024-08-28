@@ -55,7 +55,7 @@ import kotlin.reflect.KClass
 /**
  * A process of reading user's mentions from GitHub.
  */
-public class GitHubClientProcess :
+internal class GitHubClientProcess :
     ProcessManager<GitHubClientId, GitHubClient, GitHubClient.Builder>() {
 
     /**
@@ -64,7 +64,7 @@ public class GitHubClientProcess :
      * It is expected this field is set by calling [inject]
      * right after the instance creation.
      */
-    private lateinit var gitHubClientService: GitHubClientService
+    private lateinit var searchService: GitHubSearch
 
     /**
      * Updates the user's [PersonalAccessToken] each time the user logs in.
@@ -73,7 +73,7 @@ public class GitHubClientProcess :
     internal fun on(@External event: UserLoggedIn): GitHubTokenUpdated {
         builder().setToken(event.token)
         return GitHubTokenUpdated::class.buildBy(
-            GitHubClientId::class.buildBy(event.id.username),
+            GitHubClientId::class.of(event.id.username),
             event.token
         )
     }
@@ -109,8 +109,8 @@ public class GitHubClientProcess :
         val token = state().token
         val updatedAfter = state().whenLastSuccessfullyUpdated.thisOrLastWorkday()
         val mentions = try {
-            gitHubClientService.fetchMentions(username, token, updatedAfter)
-        } catch (exception: CannotFetchMentionsFromGitHubException) {
+            searchService.searchMentions(username, token, updatedAfter)
+        } catch (exception: CannotObtainMentionsException) {
             builder().clearWhenStarted()
             return listOf(
                 RequestMentionsFromGitHubFailed::class.buildBy(event.id, exception.statusCode())
@@ -133,8 +133,8 @@ public class GitHubClientProcess :
      * It is expected this method is called right after the creation of the process instance.
      * Otherwise, the process will not be able to function properly.
      */
-    internal fun inject(gitHubClientService: GitHubClientService) {
-        this.gitHubClientService = gitHubClientService
+    internal fun inject(searchService: GitHubSearch) {
+        this.searchService = searchService
     }
 
     private companion object {

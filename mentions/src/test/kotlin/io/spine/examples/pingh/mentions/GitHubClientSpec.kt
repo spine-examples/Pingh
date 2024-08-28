@@ -31,7 +31,7 @@ import io.ktor.http.HttpStatusCode
 import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.buildBy
+import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
@@ -44,7 +44,7 @@ import io.spine.examples.pingh.mentions.given.expectedUserMentionedSet
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.newSessionsContext
-import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubResponses
+import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.server.BoundedContextBuilder
 import io.spine.testing.TestValues.randomString
@@ -59,7 +59,7 @@ import org.junit.jupiter.api.Test
 @DisplayName("`GitHubClient` should")
 internal class GitHubClientSpec : ContextAwareTest() {
 
-    private val gitHubClientService = PredefinedGitHubResponses()
+    private val gitHubClientService = PredefinedGitHubSearchResponses()
     private lateinit var sessionContext: BlackBoxContext
     private lateinit var gitHubClientId: GitHubClientId
     private lateinit var token: PersonalAccessToken
@@ -74,13 +74,13 @@ internal class GitHubClientSpec : ContextAwareTest() {
         gitHubClientService.mentionsAreNotFetched()
         sessionContext = BlackBoxContext
             .from(newSessionsContext(PredefinedGitHubAuthenticationResponses()))
-        val username = Username::class.buildBy(randomString())
-        gitHubClientId = GitHubClientId::class.buildBy(username)
+        val username = Username::class.of(randomString())
+        gitHubClientId = GitHubClientId::class.of(username)
         emitUserLoggedInEventInSessionsContext()
     }
 
     private fun emitUserLoggedInEventInSessionsContext() {
-        token = PersonalAccessToken::class.buildBy(randomString())
+        token = PersonalAccessToken::class.of(randomString())
         val userLoggedIn = UserLoggedIn::class.buildBy(gitHubClientId.username, token)
         sessionContext.receivesEvent(userLoggedIn)
     }
@@ -90,8 +90,8 @@ internal class GitHubClientSpec : ContextAwareTest() {
         sessionContext.close()
     }
 
-    @Nested
-    internal inner class `react on 'UserLoggedIn' event in Sessions bounded context, and` {
+    @Nested internal inner class
+    `React on 'UserLoggedIn' event in Sessions bounded context, and` {
 
         @Test
         internal fun `emit 'GitHubTokenUpdated' event`() {
@@ -113,8 +113,8 @@ internal class GitHubClientSpec : ContextAwareTest() {
         }
     }
 
-    @Nested
-    internal inner class `handle 'UpdateMentionsFromGitHub' command, and` {
+    @Nested internal inner class
+    `Handle 'UpdateMentionsFromGitHub' command, and` {
 
         @Test
         internal fun `emit 'MentionsUpdateFromGitHubRequested' event if update process started`() {
@@ -167,8 +167,8 @@ internal class GitHubClientSpec : ContextAwareTest() {
         }
     }
 
-    @Nested
-    internal inner class `react on 'MentionsUpdateFromGitHubRequested' event, and` {
+    @Nested internal inner class
+    `React on 'MentionsUpdateFromGitHubRequested' event, and` {
 
         @Test
         internal fun `emit 'UserMentioned' events for each mentions fetched from GitHub`() {

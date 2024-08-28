@@ -36,11 +36,11 @@ import io.spine.server.route.EventRouting
 /**
  * Manages instances of [MentionProcess].
  */
-public class MentionRepository :
+internal class MentionRepository :
     ProcessManagerRepository<MentionId, MentionProcess, Mention>() {
 
     @OverridingMethodsMustInvokeSuper
-    protected override fun setupEventRouting(routing: EventRouting<MentionId>) {
+    override fun setupEventRouting(routing: EventRouting<MentionId>) {
         super.setupEventRouting(routing)
         routing
             .route(UserMentioned::class.java) { event, _ -> withId(event.id) }

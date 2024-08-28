@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
@@ -36,10 +37,11 @@ import io.spine.server.route.EventRouting
 /**
  * Manages instances of [UserMentionsProjection].
  */
-public class UserMentionsRepository :
+internal class UserMentionsRepository :
     ProjectionRepository<UserMentionsId, UserMentionsProjection, UserMentions>() {
 
-    protected override fun setupEventRouting(routing: EventRouting<UserMentionsId>) {
+    @OverridingMethodsMustInvokeSuper
+    override fun setupEventRouting(routing: EventRouting<UserMentionsId>) {
         super.setupEventRouting(routing)
         routing
             .route(UserMentioned::class.java) { event, _ -> toUserMentions(event.id) }
@@ -53,6 +55,6 @@ public class UserMentionsRepository :
      * the name of the mentioned user from the passed `MentionId`.
      */
     private fun toUserMentions(mentionId: MentionId): Set<UserMentionsId> {
-        return setOf(UserMentionsId::class.buildBy(mentionId.user))
+        return setOf(UserMentionsId::class.of(mentionId.user))
     }
 }

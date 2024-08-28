@@ -30,7 +30,7 @@ import com.google.protobuf.Duration
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.SessionId
-import io.spine.examples.pingh.sessions.buildBy
+import io.spine.examples.pingh.sessions.of
 import io.spine.examples.pingh.sessions.withSession
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
@@ -59,8 +59,8 @@ import kotlinx.coroutines.launch
  * The flow is considered completed whenever the login is successfully
  * [confirmed][VerifyLogin.confirm] in the Pingh app.
  *
- * @param client enables interaction with the Pingh server.
- * @param session the information about the current user session.
+ * @property client Enables interaction with the Pingh server.
+ * @property session The information about the current user session.
  */
 public class LoginFlow internal constructor(
     private val client: DesktopClient,
@@ -93,7 +93,7 @@ public class LoginFlow internal constructor(
      * Switches the current stage to the passed one.
      *
      * @throws IllegalStateException if the transition of their current [stage]
-     * to the passed stage is not [allowed][possibleTransitions].
+     *   to the passed stage is not [allowed][possibleTransitions].
      */
     private fun moveToNextStage(stage: LoginStage) {
         val current = this.stage.value::class
@@ -123,9 +123,9 @@ private typealias LoginStageType = KClass<out LoginStage>
  * A stage of the login flow on which the user enters their GitHub username
  * and receives a user code in return.
  *
- * @param client enables interaction with the Pingh server.
- * @param session the information about the current user session.
- * @param moveToNextStage updates value of the current login stage.
+ * @property client Enables interaction with the Pingh server.
+ * @property session The information about the current user session.
+ * @property moveToNextStage Updates value of the current login stage.
  */
 public class EnterUsername internal constructor(
     private val client: DesktopClient,
@@ -136,15 +136,15 @@ public class EnterUsername internal constructor(
     /**
      * Starts the GitHub login process and requests `UserCode`.
      *
-     * @param username the username of the user logging in.
-     * @param onSuccess called when the user code is successfully received.
+     * @param username The username of the user logging in.
+     * @param onSuccess Called when the user code is successfully received.
      */
     public fun requestUserCode(
         username: Username,
         onSuccess: (event: UserCodeReceived) -> Unit = {}
     ) {
         val command = LogUserIn::class.withSession(
-            SessionId::class.buildBy(username)
+            SessionId::class.of(username)
         )
         client.observeEvent(command.id, UserCodeReceived::class) { event ->
             session.value = UserSession(event.id)
@@ -159,9 +159,9 @@ public class EnterUsername internal constructor(
  * A stage of the login flow on which the user enters the received user code
  * into GitHub to verify their login.
  *
- * @param client enables interaction with the Pingh server.
- * @param session provides information about the current user session.
- * @param event event received after the user enters their name.
+ * @property client Enables interaction with the Pingh server.
+ * @property session Provides information about the current user session.
+ * @param event The event received after the user enters their name.
  */
 @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
 public class VerifyLogin internal constructor(
@@ -235,8 +235,8 @@ public class VerifyLogin internal constructor(
     /**
      * Checks whether the user has completed the login on GitHub and entered their user code.
      *
-     * @param onSuccess called when the login is successfully verified.
-     * @param onFail called when login verification fails.
+     * @param onSuccess Called when the login is successfully verified.
+     * @param onFail Called when login verification fails.
      */
     public fun confirm(
         onSuccess: (event: UserLoggedIn) -> Unit = {},
@@ -272,7 +272,7 @@ public class VerifyLogin internal constructor(
      * Resets the current stage to its initial state by canceling all active tasks
      * and updating fields values with data from the `UserCodeReceived` event.
      *
-     * @param onSuccess called when the user code is successfully received.
+     * @param onSuccess Called when the user code is successfully received.
      */
     public fun requestNewUserCode(
         onSuccess: (event: UserCodeReceived) -> Unit = {}
@@ -298,7 +298,7 @@ private fun DesktopClient.requestUserCode(
     onSuccess: (event: UserCodeReceived) -> Unit = {}
 ) {
     val command = LogUserIn::class.withSession(
-        SessionId::class.buildBy(username)
+        SessionId::class.of(username)
     )
     observeEventOnce(command.id, UserCodeReceived::class, onSuccess)
     send(command)

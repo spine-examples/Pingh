@@ -45,7 +45,7 @@ import kotlin.jvm.Throws
 /**
  * Coordinates the lifecycle of the mention, namely snoozing and reading.
  */
-public class MentionProcess :
+internal class MentionProcess :
     ProcessManager<MentionId, Mention, Mention.Builder>() {
 
     /**

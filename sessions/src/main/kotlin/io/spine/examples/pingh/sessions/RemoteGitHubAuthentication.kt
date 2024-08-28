@@ -45,8 +45,8 @@ import kotlinx.coroutines.runBlocking
 /**
  * Using the GitHub REST API generates access tokens for the user.
  *
- * @param clientId the client ID for the Pingh GitHub App.
- * @param engine engine used to create the HTTP client.
+ * @property clientId The client ID for the Pingh GitHub App.
+ * @param engine The engine used to create the HTTP client.
  */
 public class RemoteGitHubAuthentication(
     private val clientId: ClientId,
@@ -67,7 +67,7 @@ public class RemoteGitHubAuthentication(
                 .authenticationRequest("https://github.com/login/device/code")
                 .with(clientId)
                 .post()
-            parseVerificationCodesResponse(response.body())
+            VerificationCodesResponse::class.parseJson(response.body())
         }
 
     /**
@@ -80,9 +80,9 @@ public class RemoteGitHubAuthentication(
      * similar to a successful request. Therefore, the content of the response body
      * should also be checked to ensure the request was successful.
      *
-     * @param deviceCode the code used to verify the device.
+     * @param deviceCode The code used to verify the device.
      * @throws CannotObtainAccessToken if GitHub returns an error response
-     *                                 when trying to get an access token.
+     *   when trying to get an access token.
      */
     @Throws(CannotObtainAccessToken::class)
     public override fun requestAccessToken(deviceCode: DeviceCode): AccessTokenResponse =
@@ -95,7 +95,7 @@ public class RemoteGitHubAuthentication(
                 .post()
             val body = response.body<String>()
             checkError(response.status, body)
-            parseAccessTokenResponse(body)
+            AccessTokenResponse::class.parseJson(body)
         }
 
     /**

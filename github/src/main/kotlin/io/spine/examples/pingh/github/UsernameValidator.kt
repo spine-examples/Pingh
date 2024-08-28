@@ -29,12 +29,12 @@ package io.spine.examples.pingh.github
 import io.spine.validate.Validate
 
 /**
- * Returns `true` if the specified value is the valid `Username` value;
+ * Returns `true` if the specified value is the valid [Username] value;
  * otherwise, returns `false`.
  *
- * @see [Username]
+ * @param value The string to be validated against the `Username` value.
  */
-public fun validateUsernameValue(value: String): Boolean {
+public fun isValidUsername(value: String): Boolean {
     val unvalidatedUsername = Username.newBuilder()
         .setValue(value)
         .buildPartial()

@@ -79,9 +79,9 @@ import io.spine.examples.pingh.github.Username
  *
  * All changes are saved automatically and applied immediately.
  *
- * @param flow the application settings control flow.
- * @param toMentionsPage the navigation to the 'Mentions' page.
- * @param toLoginPage the navigation to the 'Login' page.
+ * @param flow The application settings control flow.
+ * @param toMentionsPage The navigation to the 'Mentions' page.
+ * @param toLoginPage The navigation to the 'Login' page.
  */
 @Composable
 internal fun SettingsPage(
@@ -108,7 +108,7 @@ internal fun SettingsPage(
  *
  * Includes a button to return to the `Mentions` page.
  *
- * @param toMentionsPage the navigation to the 'Mentions' page.
+ * @param toMentionsPage The navigation to the 'Mentions' page.
  */
 @Composable
 private fun SettingsHeader(
@@ -142,7 +142,7 @@ private fun SettingsHeader(
 /**
  * Displays a container for settings.
  *
- * @param content the composable function that displays settings options.
+ * @param content The composable function that displays settings options.
  */
 @Composable
 private fun SettingsBox(
@@ -175,8 +175,8 @@ private fun SettingsBox(
 /**
  * Displays user information and provides an option to log out of the account.
  *
- * @param flow the application settings control flow.
- * @param toLoginPage the navigation to the 'Login' page.
+ * @param flow The application settings control flow.
+ * @param toLoginPage The navigation to the 'Login' page.
  */
 @Composable
 private fun Profile(
@@ -203,9 +203,9 @@ private fun Profile(
 /**
  * Displays a username and a button to log out of the account.
  *
- * @param flow the application settings control flow.
- * @param toLoginPage the navigation to the 'Login' page.
- * @param username the name of the user to whom the current session belongs.
+ * @param flow The application settings control flow.
+ * @param toLoginPage The navigation to the 'Login' page.
+ * @param username The name of the user to whom the current session belongs.
  */
 @Composable
 private fun ProfileControl(
@@ -237,7 +237,7 @@ private fun ProfileControl(
 /**
  * Displays a button to log out of the account.
  *
- * @param onClick called when this button is clicked.
+ * @param onClick Called when this button is clicked.
  */
 @Composable
 private fun LogOutButton(
@@ -264,7 +264,7 @@ private fun LogOutButton(
 /**
  * Displays a setting option for specifying the snooze time.
  *
- * @param state the state of the application settings.
+ * @param state The state of the application settings.
  */
 @Composable
 private fun SnoozeTimeOption(state: SettingsState) {
@@ -280,8 +280,8 @@ private fun SnoozeTimeOption(state: SettingsState) {
 /**
  * Displays a setting option for toggling 'Do not disturb' mode.
  *
- * @param state the state of the application settings.
- * @param switchScale the multiplier to scale switch along the horizontal and vertical axis.
+ * @param state The state of the application settings.
+ * @param switchScale The multiplier to scale switch along the horizontal and vertical axis.
  */
 @Composable
 private fun DndOption(
@@ -318,10 +318,10 @@ private fun DndOption(
 /**
  * Displays a setting option that contains a title, description, and a control element.
  *
- * @param title the string with the name of the option.
- * @param description the string with the description of the option.
- * @param titleWight the width that the title occupies.
- * @param control the composable function that displays control element of this option.
+ * @param title The string with the name of the option.
+ * @param description The string with the description of the option.
+ * @param titleWight The width that the title occupies.
+ * @param control The composable function that displays control element of this option.
  */
 @Composable
 private fun Option(
@@ -359,10 +359,10 @@ private fun Option(
 /**
  * Displays a row of segmented buttons that allow specifying the snooze time value.
  *
- * @param state the state of the application settings.
+ * @param state The state of the application settings.
  */
 @Composable
-@OptIn(ExperimentalMaterial3Api::class) // Required for `SegmentedButtonDefaults.itemShape()`.
+@OptIn(ExperimentalMaterial3Api::class /* Required for `SegmentedButtonDefaults.itemShape()` */)
 private fun SnoozeTimeSegmentedButtonRow(state: SettingsState) {
     val snoozeTimeOptions = SnoozeTime.entries
     val currentSnoozeTime by state.snoozeTime.collectAsState()
@@ -391,10 +391,10 @@ private fun SnoozeTimeSegmentedButtonRow(state: SettingsState) {
 /**
  * Displays a button from the [SnoozeTimeSegmentedButtonRow].
  *
- * @param selected whether this button is selected.
- * @param onClick called when this button is clicked.
- * @param shape the shape of this button.
- * @param label the composable function that displays the label of this button.
+ * @param selected Whether this button is selected.
+ * @param onClick Called when this button is clicked.
+ * @param shape The shape of this button.
+ * @param label The composable function that displays the label of this button.
  */
 @Composable
 private fun SegmentedButton(
