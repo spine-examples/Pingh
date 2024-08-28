@@ -57,7 +57,7 @@ internal class AutoUpdateMentionsProcess :
      * Starts an automatic update of mentions as soon as the [GitHubClient] receives
      * an access token to make requests.
      *
-     * @return `AutoUpdateMentionsStarted` event if no updates have been made;
+     * @return The `AutoUpdateMentionsStarted` event if no updates have been made;
      *   otherwise, `Nothing`.
      */
     @React

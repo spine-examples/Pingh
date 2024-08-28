@@ -158,7 +158,7 @@ internal class AutoUpdateMentionsSpec : ContextAwareTest() {
         }
         
         @Test
-        internal fun `do nothing if the required time between updates has not elapsed`() {
+        internal fun `do nothing if the required time between updates has not passed`() {
             val time = currentTime()
             emitTimePassedEvent(time)
             emitTimePassedEvent(time.add(seconds(1)))
