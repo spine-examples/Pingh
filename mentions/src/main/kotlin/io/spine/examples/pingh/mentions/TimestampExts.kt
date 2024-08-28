@@ -26,10 +26,17 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.protobuf.Duration
 import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Timestamps
 import com.google.protobuf.util.Timestamps.compare
 
 /**
  * Tells whether this point in time is after the passed one.
  */
 internal fun Timestamp.isAfter(time: Timestamp): Boolean = compare(this, time) > 0
+
+/**
+ * Adds the passed duration to this timestamp.
+ */
+internal fun Timestamp.add(duration: Duration): Timestamp = Timestamps.add(this, duration)
