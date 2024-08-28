@@ -34,6 +34,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
 import io.spine.examples.pingh.github.ClientId
+import io.spine.examples.pingh.github.ClientSecret
 import io.spine.examples.pingh.github.DeviceCode
 import io.spine.examples.pingh.github.RefreshToken
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
@@ -47,10 +48,12 @@ import kotlinx.coroutines.runBlocking
  * Using the GitHub REST API generates access tokens for the user.
  *
  * @property clientId The client ID for the Pingh GitHub App.
+ * @property clientSecret The client secret of the Pingh GitHub App.
  * @param engine The engine used to create the HTTP client.
  */
 public class RemoteGitHubAuthentication(
     private val clientId: ClientId,
+    private val clientSecret: ClientSecret,
     engine: HttpClientEngine
 ): GitHubAuthentication {
 
@@ -92,7 +95,6 @@ public class RemoteGitHubAuthentication(
                 .authenticationRequest("https://github.com/login/oauth/access_token")
                 .with(clientId)
                 .with(deviceCode)
-                .includeGrantType()
                 .post()
             val body = response.body<String>()
             checkError(response.status, body)
@@ -115,11 +117,18 @@ public class RemoteGitHubAuthentication(
     }
 
     /**
-     *
+     * Requests the GitHub REST API to generate a new user access token using the `RefreshToken`.
      */
-    override fun refreshAccessToken(refreshToken: RefreshToken): AccessTokenResponse {
-        TODO("Not yet implemented")
-    }
+    override fun refreshAccessToken(refreshToken: RefreshToken): AccessTokenResponse =
+        runBlocking {
+            val response = client
+                .authenticationRequest("https://github.com/login/oauth/access_token")
+                .with(clientId)
+                .with(clientSecret)
+                .with(refreshToken)
+                .post()
+            AccessTokenResponse::class.parseJson(response.body())
+        }
 }
 
 /**
@@ -142,14 +151,24 @@ private class AuthenticationRequestBuilder(
     private var clientId: ClientId? = null
 
     /**
+     * The client secret of the Pingh GitHub App.
+     */
+    private var clientSecret: ClientSecret? = null
+
+    /**
      * The verification code that is used to verify the device.
      */
     private var deviceCode: DeviceCode? = null
 
     /**
-     * Indicates whether the grant type parameter is added to the query.
+     * The method name by which the app obtains the access token.
      */
-    private var isGrantTypeIncluded: Boolean = false
+    private var grantType: GrantType? = null
+
+    /**
+     * The token to renew the `PersonalAccessToken` when it expires.
+     */
+    private var refreshToken: RefreshToken? = null
 
     /**
      * Sets the client ID for the Pingh GitHub App.
@@ -160,18 +179,28 @@ private class AuthenticationRequestBuilder(
     }
 
     /**
-     * Sets the verification code that is used to verify the device.
+     * Sets the client secret of the Pingh GitHub App.
      */
-    fun with(deviceCode: DeviceCode): AuthenticationRequestBuilder {
-        this.deviceCode = deviceCode
+    fun with(clientSecret: ClientSecret): AuthenticationRequestBuilder {
+        this.clientSecret = clientSecret
         return this
     }
 
     /**
-     * Specifies that the grant type parameter is added to the query.
+     * Sets the verification code that is used to verify the device.
      */
-    fun includeGrantType(): AuthenticationRequestBuilder {
-        isGrantTypeIncluded = true
+    fun with(deviceCode: DeviceCode): AuthenticationRequestBuilder {
+        this.deviceCode = deviceCode
+        grantType = GrantType.DEVICE_CODE
+        return this
+    }
+
+    /**
+     * Sets the token to renew the `PersonalAccessToken` when it expires.
+     */
+    fun with(refreshToken: RefreshToken): AuthenticationRequestBuilder {
+        this.refreshToken = refreshToken
+        grantType = GrantType.REFRESH_TOKEN
         return this
     }
 
@@ -193,11 +222,27 @@ private class AuthenticationRequestBuilder(
      */
     private fun URLBuilder.configureParameters() {
         parameters.append("client_id", clientId!!.value)
+        if (clientSecret != null) {
+            parameters.append("client_secret", clientSecret!!.value)
+        }
         if (deviceCode != null) {
             parameters.append("device_code", deviceCode!!.value)
         }
-        if (isGrantTypeIncluded) {
-            parameters.append("grant_type", "urn:ietf:params:oauth:grant-type:device_code")
+        if (grantType != null) {
+            parameters.append("grant_type", grantType!!.value)
+        }
+        if (refreshToken != null) {
+            parameters.append("refresh_token", refreshToken!!.value)
         }
     }
+}
+
+/**
+ * The names of the methods by which the application obtains the access token.
+ *
+ * @see <a href="https://oauth.net/2/grant-types/">Grant types</a>
+ */
+private enum class GrantType(val value: String) {
+    DEVICE_CODE("urn:ietf:params:oauth:grant-type:device_code"),
+    REFRESH_TOKEN("refresh_token")
 }

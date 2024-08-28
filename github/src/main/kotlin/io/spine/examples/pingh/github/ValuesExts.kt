@@ -183,3 +183,11 @@ public fun KClass<AccessTokenResponse>.fromFragment(
         refreshToken = RefreshToken::class.of(fragment.refreshToken)
         vBuild()
     }
+
+/**
+ * Creates a new `ClientSecret` with the specified string value.
+ */
+public fun KClass<ClientSecret>.of(value: String): ClientSecret =
+    ClientSecret.newBuilder()
+        .setValue(value)
+        .vBuild()
