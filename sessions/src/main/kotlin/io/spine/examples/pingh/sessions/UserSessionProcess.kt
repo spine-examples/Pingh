@@ -106,13 +106,13 @@ internal class UserSessionProcess :
     }
 
     /**
-     * Sends a `RefreshToken` command if the process is user logged in
-     * and the personal access token has already expired.
+     * Sends a `RefreshToken` command if the user is logged in
+     * and the personal access token is expired.
      */
     @Command
     internal fun on(@External event: TimePassed): Optional<RefreshToken> {
-        val isLoggedIn = isActive && state().hasRefreshToken()
-        return if (isLoggedIn && event.time >= state().whenAccessTokenExpires) {
+        val isUserLoggedIn = isActive && state().hasRefreshToken()
+        return if (isUserLoggedIn && event.time >= state().whenAccessTokenExpires) {
             Optional.of(RefreshToken::class.withSession(state().id))
         } else {
             Optional.empty()

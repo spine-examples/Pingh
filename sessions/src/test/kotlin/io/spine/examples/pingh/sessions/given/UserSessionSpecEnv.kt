@@ -98,7 +98,7 @@ internal fun expectedUserSessionWithRefreshToken(id: SessionId): UserSession =
     }
 
 /**
- * Creates a new `UserSession` with the specified session ID and refresh token
+ * Creates a new `UserSession` with the passed session ID and refresh token
  * from the predefined GitHub response to the token update request.
  */
 internal fun expectedUserSessionAfterTokenRefresh(id: SessionId): UserSession =
@@ -125,7 +125,7 @@ internal fun expectedUserLoggedInEvent(id: SessionId): UserLoggedIn =
     }
 
 /**
- * Creates a new `TokenRefreshed` event with the specified session ID and
+ * Creates a new `TokenRefreshed` event with the passed session ID and
  * data from the predefined GitHub response.
  */
 internal fun expectedTokenRefreshedEvent(id: SessionId): TokenRefreshed =

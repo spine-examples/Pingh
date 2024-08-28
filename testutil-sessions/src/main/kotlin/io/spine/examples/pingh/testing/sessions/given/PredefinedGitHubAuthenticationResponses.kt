@@ -49,7 +49,7 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
     private var isUserCodeEntered = false
 
     /**
-     * The expiration time when the personal access token issued by GitHub.
+     * The time when the personal access token issued by GitHub expires.
      */
     public var whenReceivedAccessTokenExpires: Timestamp? = null
         private set

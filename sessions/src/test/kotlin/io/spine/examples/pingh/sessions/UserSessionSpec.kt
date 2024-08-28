@@ -213,7 +213,7 @@ internal class UserSessionSpec : ContextAwareTest() {
         }
 
         @Test
-        internal fun `update refresh token and access token expiration time in 'UserSession'`() {
+        internal fun `update refresh token in 'UserSession' entity`() {
             val expected = expectedUserSessionAfterTokenRefresh(id)
             context().assertState(id, expected)
         }
