@@ -120,11 +120,16 @@ internal class UserSessionProcess :
     }
 
     /**
-     *
+     * Renews GitHub access tokens using the refresh token.
      */
     @Assign
     internal fun handle(command: RefreshToken): TokenRefreshed {
-        TODO("Not implemented yet.")
+        val tokens = authenticationService.refreshAccessToken(state().refreshToken)
+        with(builder()) {
+            whenAccessTokenExpires = tokens.whenExpires
+            refreshToken = tokens.refreshToken
+        }
+        return TokenRefreshed::class.with(command.id, tokens.accessToken)
     }
 
     /**

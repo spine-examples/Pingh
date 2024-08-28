@@ -28,6 +28,7 @@ package io.spine.examples.pingh.testing.sessions.given
 
 import com.google.protobuf.Timestamp
 import io.spine.examples.pingh.github.DeviceCode
+import io.spine.examples.pingh.github.RefreshToken
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.VerificationCodesResponse
 import io.spine.examples.pingh.sessions.CannotObtainAccessToken
@@ -75,6 +76,15 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
         }
 
     /**
+     * Returns the `AccessTokenResponse` retrieved from a JSON file in the resource folder.
+     */
+    override fun refreshAccessToken(refreshToken: RefreshToken): AccessTokenResponse {
+        val tokens = predefinedRefreshedAccessTokenResponse()
+        whenReceivedAccessTokenExpires = tokens.whenExpires
+        return tokens
+    }
+
+    /**
      * Marks that the user has entered their user code.
      *
      * After calling this method, the login verification will be successful.
@@ -90,5 +100,6 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
      */
     public fun clean() {
         isUserCodeEntered = false
+        whenReceivedAccessTokenExpires = null
     }
 }

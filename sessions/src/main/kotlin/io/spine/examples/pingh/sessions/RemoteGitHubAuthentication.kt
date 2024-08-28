@@ -35,6 +35,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
 import io.spine.examples.pingh.github.ClientId
 import io.spine.examples.pingh.github.DeviceCode
+import io.spine.examples.pingh.github.RefreshToken
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.ErrorResponse
 import io.spine.examples.pingh.github.rest.VerificationCodesResponse
@@ -111,6 +112,13 @@ public class RemoteGitHubAuthentication(
         if (possibleErrorMessage.error.isNotEmpty()) {
             throw CannotObtainAccessToken(possibleErrorMessage.error)
         }
+    }
+
+    /**
+     *
+     */
+    override fun refreshAccessToken(refreshToken: RefreshToken): AccessTokenResponse {
+        TODO("Not yet implemented")
     }
 }
 

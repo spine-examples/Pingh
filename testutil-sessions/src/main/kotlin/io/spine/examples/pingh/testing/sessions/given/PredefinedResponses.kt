@@ -53,3 +53,15 @@ public fun predefinedAccessTokenResponse(): AccessTokenResponse {
     val json = jsonFile.readText()
     return AccessTokenResponse::class.parseJson(json)
 }
+
+/**
+ * Returns the response provided by [PredefinedGitHubAuthenticationResponses]
+ * upon successful execution of the request for refresh access token.
+ */
+public fun predefinedRefreshedAccessTokenResponse(): AccessTokenResponse {
+    val jsonFile = PredefinedGitHubAuthenticationResponses::class.java
+        .getResource("/github-responses/refreshed-access-token-response.json")
+    checkNotNull(jsonFile)
+    val json = jsonFile.readText()
+    return AccessTokenResponse::class.parseJson(json)
+}

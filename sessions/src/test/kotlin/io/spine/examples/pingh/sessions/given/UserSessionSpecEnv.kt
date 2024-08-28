@@ -42,9 +42,12 @@ import io.spine.examples.pingh.sessions.UserSession
 import io.spine.examples.pingh.sessions.buildBy
 import io.spine.examples.pingh.sessions.of
 import io.spine.examples.pingh.sessions.buildWith
+import io.spine.examples.pingh.sessions.event.TokenRefreshed
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
+import io.spine.examples.pingh.sessions.with
 import io.spine.examples.pingh.testing.sessions.given.predefinedAccessTokenResponse
+import io.spine.examples.pingh.testing.sessions.given.predefinedRefreshedAccessTokenResponse
 import io.spine.examples.pingh.testing.sessions.given.predefinedVerificationCodes
 import io.spine.testing.TestValues.randomString
 import kotlin.reflect.KClass
@@ -95,6 +98,15 @@ internal fun expectedUserSessionWithRefreshToken(id: SessionId): UserSession =
     }
 
 /**
+ * Creates a new `UserSession` with the specified session ID and refresh token
+ * from the predefined GitHub response to the token update request.
+ */
+internal fun expectedUserSessionAfterTokenRefresh(id: SessionId): UserSession =
+    with(predefinedRefreshedAccessTokenResponse()) {
+        UserSession::class.with(id, refreshToken = refreshToken)
+    }
+
+/**
  * Creates a new `UserCodeReceived` event with the specified session ID and
  * data from the predefined GitHub response.
  */
@@ -110,6 +122,15 @@ internal fun expectedUserCodeReceivedEvent(id: SessionId): UserCodeReceived =
 internal fun expectedUserLoggedInEvent(id: SessionId): UserLoggedIn =
     with(predefinedAccessTokenResponse()) {
         UserLoggedIn::class.buildBy(id, accessToken)
+    }
+
+/**
+ * Creates a new `TokenRefreshed` event with the specified session ID and
+ * data from the predefined GitHub response.
+ */
+internal fun expectedTokenRefreshedEvent(id: SessionId): TokenRefreshed =
+    with(predefinedRefreshedAccessTokenResponse()) {
+        TokenRefreshed::class.with(id, accessToken)
     }
 
 /**

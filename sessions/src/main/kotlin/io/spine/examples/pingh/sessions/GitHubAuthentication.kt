@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.sessions
 
 import io.spine.examples.pingh.github.DeviceCode
+import io.spine.examples.pingh.github.RefreshToken
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.VerificationCodesResponse
@@ -50,4 +51,11 @@ public interface GitHubAuthentication {
      */
     @Throws(CannotObtainAccessToken::class)
     public fun requestAccessToken(deviceCode: DeviceCode): AccessTokenResponse
+
+    /**
+     * Requests a new access token for the user using the `RefreshToken`.
+     *
+     * @param refreshToken The token to renew the `PersonalAccessToken` when it expires.
+     */
+    public fun refreshAccessToken(refreshToken: RefreshToken): AccessTokenResponse
 }

@@ -39,9 +39,11 @@ import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.examples.pingh.sessions.given.add
+import io.spine.examples.pingh.sessions.given.expectedTokenRefreshedEvent
 import io.spine.examples.pingh.sessions.given.with
 import io.spine.examples.pingh.sessions.given.expectedUserCodeReceivedEvent
 import io.spine.examples.pingh.sessions.given.expectedUserLoggedInEvent
+import io.spine.examples.pingh.sessions.given.expectedUserSessionAfterTokenRefresh
 import io.spine.examples.pingh.sessions.given.expectedUserSessionWithDeviceCode
 import io.spine.examples.pingh.sessions.given.expectedUserSessionWithRefreshToken
 import io.spine.examples.pingh.sessions.given.generate
@@ -188,6 +190,32 @@ internal class UserSessionSpec : ContextAwareTest() {
             val event = TimePassed::class.buildBy(time)
             val actor = UserId::class.generate()
             clockContext.emittedEvent(event, actor)
+        }
+    }
+
+    @Nested internal inner class
+    `Handle 'RefreshToken' command, and` {
+
+        private lateinit var id: SessionId
+
+        @BeforeEach
+        internal fun sendRefreshTokenCommand() {
+            id = SessionId::class.generate()
+            logIn(id)
+            val command = RefreshToken::class.withSession(id)
+            context().receivesCommand(command)
+        }
+
+        @Test
+        internal fun `emit 'TokenRefreshed' event`() {
+            val expected = expectedTokenRefreshedEvent(id)
+            context().assertEvent(expected)
+        }
+
+        @Test
+        internal fun `update refresh token and access token expiration time in 'UserSession'`() {
+            val expected = expectedUserSessionAfterTokenRefresh(id)
+            context().assertState(id, expected)
         }
     }
 
