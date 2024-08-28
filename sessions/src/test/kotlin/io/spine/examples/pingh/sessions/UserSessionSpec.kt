@@ -26,20 +26,30 @@
 
 package io.spine.examples.pingh.sessions
 
+import com.google.protobuf.Timestamp
+import io.spine.base.Time.currentTime
+import io.spine.core.UserId
+import io.spine.examples.pingh.clock.buildBy
+import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
+import io.spine.examples.pingh.sessions.command.RefreshToken
 import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
+import io.spine.examples.pingh.sessions.given.add
 import io.spine.examples.pingh.sessions.given.with
 import io.spine.examples.pingh.sessions.given.expectedUserCodeReceivedEvent
 import io.spine.examples.pingh.sessions.given.expectedUserLoggedInEvent
 import io.spine.examples.pingh.sessions.given.expectedUserSessionWithDeviceCode
 import io.spine.examples.pingh.sessions.given.expectedUserSessionWithRefreshToken
 import io.spine.examples.pingh.sessions.given.generate
+import io.spine.examples.pingh.sessions.given.subtract
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
+import io.spine.protobuf.Durations2.minutes
 import io.spine.server.BoundedContextBuilder
+import io.spine.server.integration.ThirdPartyContext
 import io.spine.testing.server.blackbox.ContextAwareTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -127,6 +137,57 @@ internal class UserSessionSpec : ContextAwareTest() {
         private fun sendCommand() {
             val command = VerifyUserLoginToGitHub::class.withSession(sessionId)
             context().receivesCommand(command)
+        }
+    }
+
+    @Nested internal inner class
+    `React on 'TimePassed' event, and` {
+
+        private lateinit var id: SessionId
+
+        @BeforeEach
+        internal fun generateId() {
+            id = SessionId::class.generate()
+        }
+
+        @Test
+        internal fun `do nothing if user is not logged in`() {
+            val logIn = LogUserIn::class.withSession(id)
+            context().receivesCommand(logIn)
+            emitTimePassedEvent()
+            context().assertCommands()
+                .withType(RefreshToken::class.java)
+                .hasSize(0)
+        }
+
+        @Test
+        internal fun `do nothing if access token is not expired`() {
+            logIn(id)
+            val time = authenticationService.whenReceivedAccessTokenExpires!!.subtract(minutes(1))
+            emitTimePassedEvent(time)
+            context().assertCommands()
+                .withType(RefreshToken::class.java)
+                .hasSize(0)
+        }
+
+        @Test
+        internal fun `send 'RefreshToken' command if access token is expired`() {
+            logIn(id)
+            val time = authenticationService.whenReceivedAccessTokenExpires!!.add(minutes(1))
+            emitTimePassedEvent(time)
+            val expected = RefreshToken::class.withSession(id)
+            val commandSubject = context().assertCommands()
+                .withType(RefreshToken::class.java)
+            commandSubject.hasSize(1)
+            commandSubject.message(0)
+                .isEqualTo(expected)
+        }
+
+        private fun emitTimePassedEvent(time: Timestamp = currentTime()) {
+            val clockContext = ThirdPartyContext.singleTenant("Clock")
+            val event = TimePassed::class.buildBy(time)
+            val actor = UserId::class.generate()
+            clockContext.emittedEvent(event, actor)
         }
     }
 

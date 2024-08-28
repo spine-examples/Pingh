@@ -26,16 +26,24 @@
 
 package io.spine.examples.pingh.sessions
 
+import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Timestamps
+import io.spine.core.External
+import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
+import io.spine.examples.pingh.sessions.command.RefreshToken
 import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
+import io.spine.examples.pingh.sessions.event.TokenRefreshed
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.server.command.Assign
+import io.spine.server.command.Command
 import io.spine.server.procman.ProcessManager
 import io.spine.server.tuple.EitherOf2
+import java.util.Optional
 
 /**
  * Coordinates session management, that is, user login and logout.
@@ -98,6 +106,28 @@ internal class UserSessionProcess :
     }
 
     /**
+     * Sends a `RefreshToken` command if the process is user logged in
+     * and the personal access token has already expired.
+     */
+    @Command
+    internal fun on(@External event: TimePassed): Optional<RefreshToken> {
+        val isLoggedIn = isActive && state().hasRefreshToken()
+        return if (isLoggedIn && event.time >= state().whenAccessTokenExpires) {
+            Optional.of(RefreshToken::class.withSession(state().id))
+        } else {
+            Optional.empty()
+        }
+    }
+
+    /**
+     *
+     */
+    @Assign
+    internal fun handle(command: RefreshToken): TokenRefreshed {
+        TODO("Not implemented yet.")
+    }
+
+    /**
      * Emits event when a user logs out.
      */
     @Assign
@@ -117,3 +147,8 @@ internal class UserSessionProcess :
         this.authenticationService = authenticationService
     }
 }
+
+/**
+ * Compares this `Timestamp` with the passed one.
+ */
+private operator fun Timestamp.compareTo(other: Timestamp): Int = Timestamps.compare(this, other)

@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.testing.sessions.given
 
+import com.google.protobuf.Timestamp
 import io.spine.examples.pingh.github.DeviceCode
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.VerificationCodesResponse
@@ -47,6 +48,12 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
     private var isUserCodeEntered = false
 
     /**
+     * The expiration time when the personal access token issued by GitHub.
+     */
+    public var whenReceivedAccessTokenExpires: Timestamp? = null
+        private set
+
+    /**
      * Returns `VerificationCodesResponse` retrieved from a JSON file in the resource folder.
      */
     public override fun requestVerificationCodes(): VerificationCodesResponse =
@@ -60,7 +67,9 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
     @Throws(CannotObtainAccessToken::class)
     public override fun requestAccessToken(deviceCode: DeviceCode): AccessTokenResponse =
         if (isUserCodeEntered) {
-            predefinedAccessTokenResponse()
+            val tokens = predefinedAccessTokenResponse()
+            whenReceivedAccessTokenExpires = tokens.whenExpires
+            tokens
         } else {
             throw CannotObtainAccessToken("authorization_pending")
         }

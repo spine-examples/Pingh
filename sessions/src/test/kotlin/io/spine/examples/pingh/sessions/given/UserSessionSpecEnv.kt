@@ -28,6 +28,11 @@
 
 package io.spine.examples.pingh.sessions.given
 
+import com.google.protobuf.Duration
+import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Timestamps.add
+import com.google.protobuf.util.Timestamps.subtract
+import io.spine.core.UserId
 import io.spine.examples.pingh.github.DeviceCode
 import io.spine.examples.pingh.github.RefreshToken
 import io.spine.examples.pingh.github.Username
@@ -106,3 +111,21 @@ internal fun expectedUserLoggedInEvent(id: SessionId): UserLoggedIn =
     with(predefinedAccessTokenResponse()) {
         UserLoggedIn::class.buildBy(id, accessToken)
     }
+
+/**
+ * Creates a new `UserId` with the randomly specified value.
+ */
+internal fun KClass<UserId>.generate(): UserId =
+    UserId.newBuilder()
+        .setValue(randomString())
+        .vBuild()
+
+/**
+ * Subtracts the passed duration from this timestamp.
+ */
+internal fun Timestamp.subtract(duration: Duration): Timestamp = subtract(this, duration)
+
+/**
+ * Adds the passed duration to this timestamp.
+ */
+internal fun Timestamp.add(duration: Duration): Timestamp = add(this, duration)
