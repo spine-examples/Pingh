@@ -34,7 +34,7 @@ import io.spine.examples.pingh.sessions.parseJson
  * Returns the response provided by [PredefinedGitHubAuthenticationResponses]
  * upon successful execution of the request for generate verification codes.
  */
-public fun predefinedVerificationCodes(): VerificationCodesResponse {
+public fun loadVerificationCodes(): VerificationCodesResponse {
     val jsonFile = PredefinedGitHubAuthenticationResponses::class.java
         .getResource("/github-responses/authentication-codes-response.json")
     checkNotNull(jsonFile)
@@ -46,7 +46,7 @@ public fun predefinedVerificationCodes(): VerificationCodesResponse {
  * Returns the response provided by [PredefinedGitHubAuthenticationResponses]
  * upon successful execution of the request for generate access token.
  */
-public fun predefinedAccessTokenResponse(): AccessTokenResponse {
+public fun loadAccessToken(): AccessTokenResponse {
     val jsonFile = PredefinedGitHubAuthenticationResponses::class.java
         .getResource("/github-responses/access-token-response.json")
     checkNotNull(jsonFile)
@@ -58,7 +58,7 @@ public fun predefinedAccessTokenResponse(): AccessTokenResponse {
  * Returns the response provided by [PredefinedGitHubAuthenticationResponses]
  * upon successful execution of the request for refresh access token.
  */
-public fun predefinedRefreshedAccessTokenResponse(): AccessTokenResponse {
+public fun loadRefreshedAccessToken(): AccessTokenResponse {
     val jsonFile = PredefinedGitHubAuthenticationResponses::class.java
         .getResource("/github-responses/refreshed-access-token-response.json")
     checkNotNull(jsonFile)

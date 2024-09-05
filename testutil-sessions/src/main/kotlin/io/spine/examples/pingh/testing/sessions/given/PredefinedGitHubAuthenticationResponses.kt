@@ -58,7 +58,7 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
      * Returns `VerificationCodesResponse` retrieved from a JSON file in the resource folder.
      */
     public override fun requestVerificationCodes(): VerificationCodesResponse =
-        predefinedVerificationCodes()
+        loadVerificationCodes()
 
     /**
      * Returns the `AccessTokenResponse` retrieved from a JSON file in the resource folder
@@ -68,7 +68,7 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
     @Throws(CannotObtainAccessToken::class)
     public override fun requestAccessToken(deviceCode: DeviceCode): AccessTokenResponse =
         if (isUserCodeEntered) {
-            val tokens = predefinedAccessTokenResponse()
+            val tokens = loadAccessToken()
             whenReceivedAccessTokenExpires = tokens.whenExpires
             tokens
         } else {
@@ -79,7 +79,7 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
      * Returns the `AccessTokenResponse` retrieved from a JSON file in the resource folder.
      */
     override fun refreshAccessToken(refreshToken: RefreshToken): AccessTokenResponse {
-        val tokens = predefinedRefreshedAccessTokenResponse()
+        val tokens = loadRefreshedAccessToken()
         whenReceivedAccessTokenExpires = tokens.whenExpires
         return tokens
     }

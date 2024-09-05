@@ -26,8 +26,6 @@
 
 package io.spine.examples.pingh.sessions
 
-import com.google.protobuf.Timestamp
-import com.google.protobuf.util.Timestamps
 import io.spine.core.External
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.sessions.command.LogUserIn
@@ -152,8 +150,3 @@ internal class UserSessionProcess :
         this.authenticationService = authenticationService
     }
 }
-
-/**
- * Compares this `Timestamp` with the passed one.
- */
-private operator fun Timestamp.compareTo(other: Timestamp): Int = Timestamps.compare(this, other)

@@ -46,9 +46,9 @@ import io.spine.examples.pingh.sessions.event.TokenRefreshed
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.with
-import io.spine.examples.pingh.testing.sessions.given.predefinedAccessTokenResponse
-import io.spine.examples.pingh.testing.sessions.given.predefinedRefreshedAccessTokenResponse
-import io.spine.examples.pingh.testing.sessions.given.predefinedVerificationCodes
+import io.spine.examples.pingh.testing.sessions.given.loadAccessToken
+import io.spine.examples.pingh.testing.sessions.given.loadRefreshedAccessToken
+import io.spine.examples.pingh.testing.sessions.given.loadVerificationCodes
 import io.spine.testing.TestValues.randomString
 import kotlin.reflect.KClass
 
@@ -84,7 +84,7 @@ internal fun KClass<UserSession>.with(
  * from the predefined GitHub response.
  */
 internal fun expectedUserSessionWithDeviceCode(id: SessionId): UserSession =
-    with(predefinedVerificationCodes()) {
+    with(loadVerificationCodes()) {
         UserSession::class.with(id, deviceCode)
     }
 
@@ -93,7 +93,7 @@ internal fun expectedUserSessionWithDeviceCode(id: SessionId): UserSession =
  * from the predefined GitHub response.
  */
 internal fun expectedUserSessionWithRefreshToken(id: SessionId): UserSession =
-    with(predefinedAccessTokenResponse()) {
+    with(loadAccessToken()) {
         UserSession::class.with(id, refreshToken = refreshToken)
     }
 
@@ -102,7 +102,7 @@ internal fun expectedUserSessionWithRefreshToken(id: SessionId): UserSession =
  * from the predefined GitHub response to the token update request.
  */
 internal fun expectedUserSessionAfterTokenRefresh(id: SessionId): UserSession =
-    with(predefinedRefreshedAccessTokenResponse()) {
+    with(loadRefreshedAccessToken()) {
         UserSession::class.with(id, refreshToken = refreshToken)
     }
 
@@ -111,7 +111,7 @@ internal fun expectedUserSessionAfterTokenRefresh(id: SessionId): UserSession =
  * data from the predefined GitHub response.
  */
 internal fun expectedUserCodeReceivedEvent(id: SessionId): UserCodeReceived =
-    with(predefinedVerificationCodes()) {
+    with(loadVerificationCodes()) {
         UserCodeReceived::class.buildWith(id, userCode, verificationUrl, expiresIn, interval)
     }
 
@@ -120,7 +120,7 @@ internal fun expectedUserCodeReceivedEvent(id: SessionId): UserCodeReceived =
  * data from the predefined GitHub response.
  */
 internal fun expectedUserLoggedInEvent(id: SessionId): UserLoggedIn =
-    with(predefinedAccessTokenResponse()) {
+    with(loadAccessToken()) {
         UserLoggedIn::class.buildBy(id, accessToken)
     }
 
@@ -129,7 +129,7 @@ internal fun expectedUserLoggedInEvent(id: SessionId): UserLoggedIn =
  * data from the predefined GitHub response.
  */
 internal fun expectedTokenRefreshedEvent(id: SessionId): TokenRefreshed =
-    with(predefinedRefreshedAccessTokenResponse()) {
+    with(loadRefreshedAccessToken()) {
         TokenRefreshed::class.with(id, accessToken)
     }
 
