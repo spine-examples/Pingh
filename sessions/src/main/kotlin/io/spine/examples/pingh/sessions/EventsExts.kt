@@ -29,6 +29,7 @@
 package io.spine.examples.pingh.sessions
 
 import com.google.protobuf.Duration
+import com.google.protobuf.Timestamp
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.sessions.event.TokenRefreshed
@@ -84,13 +85,18 @@ public fun KClass<UserIsNotLoggedIntoGitHub>.withSession(id: SessionId): UserIsN
         .vBuild()
 
 /**
- * Creates a new `TokenRefreshed` event with the specified ID of the session
- * and `PersonalAccessToken`.
+ * Creates a new `TokenRefreshed` event with the specified ID of the session, `PersonalAccessToken`,
+ * and the time the refresh occurred.
  */
-public fun KClass<TokenRefreshed>.with(id: SessionId, token: PersonalAccessToken): TokenRefreshed =
+public fun KClass<TokenRefreshed>.with(
+    id: SessionId,
+    token: PersonalAccessToken,
+    whenRefreshed: Timestamp
+): TokenRefreshed =
     TokenRefreshed.newBuilder()
         .setId(id)
         .setToken(token)
+        .setWhenRefreshed(whenRefreshed)
         .vBuild()
 
 /**

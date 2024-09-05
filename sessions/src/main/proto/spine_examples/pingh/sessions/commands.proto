@@ -36,6 +36,7 @@ option java_multiple_files = true;
 
 import "spine_examples/pingh/sessions/identifiers.proto";
 import "spine_examples/pingh/github/values.proto";
+import "google/protobuf/timestamp.proto";
 
 // Tells to start the login process for a Pingh app via GitHub.
 message LogUserIn {
@@ -57,6 +58,9 @@ message RefreshToken {
 
     // The ID of the user session.
     SessionId id = 1;
+
+    // The time when the access token refresh is requested.
+    google.protobuf.Timestamp when_requested = 2 [(required) = true];
 }
 
 // Tells to log user out.

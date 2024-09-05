@@ -177,7 +177,7 @@ internal class UserSessionSpec : ContextAwareTest() {
             logIn(id)
             val time = authenticationService.whenReceivedAccessTokenExpires!!.add(minutes(1))
             emitTimePassedEvent(time)
-            val expected = RefreshToken::class.withSession(id)
+            val expected = RefreshToken::class.with(id, time)
             val commandSubject = context().assertCommands()
                 .withType(RefreshToken::class.java)
             commandSubject.hasSize(1)
@@ -197,18 +197,20 @@ internal class UserSessionSpec : ContextAwareTest() {
     `Handle 'RefreshToken' command, and` {
 
         private lateinit var id: SessionId
+        private lateinit var whenRequested: Timestamp
 
         @BeforeEach
         internal fun sendRefreshTokenCommand() {
             id = SessionId::class.generate()
             logIn(id)
-            val command = RefreshToken::class.withSession(id)
+            whenRequested = currentTime()
+            val command = RefreshToken::class.with(id, whenRequested)
             context().receivesCommand(command)
         }
 
         @Test
         internal fun `emit 'TokenRefreshed' event`() {
-            val expected = expectedTokenRefreshedEvent(id)
+            val expected = expectedTokenRefreshedEvent(id, whenRequested)
             context().assertEvent(expected)
         }
 

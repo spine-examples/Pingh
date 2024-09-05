@@ -111,7 +111,7 @@ internal class UserSessionProcess :
     internal fun on(@External event: TimePassed): Optional<RefreshToken> {
         val isUserLoggedIn = isActive && state().hasRefreshToken()
         return if (isUserLoggedIn && event.time >= state().whenAccessTokenExpires) {
-            Optional.of(RefreshToken::class.withSession(state().id))
+            Optional.of(RefreshToken::class.with(state().id, event.time))
         } else {
             Optional.empty()
         }
@@ -127,7 +127,7 @@ internal class UserSessionProcess :
             whenAccessTokenExpires = tokens.whenExpires
             refreshToken = tokens.refreshToken
         }
-        return TokenRefreshed::class.with(command.id, tokens.accessToken)
+        return TokenRefreshed::class.with(command.id, tokens.accessToken, command.whenRequested)
     }
 
     /**

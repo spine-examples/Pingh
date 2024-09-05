@@ -125,12 +125,12 @@ internal fun expectedUserLoggedInEvent(id: SessionId): UserLoggedIn =
     }
 
 /**
- * Creates a new `TokenRefreshed` event with the passed session ID and
- * data from the predefined GitHub response.
+ * Creates a new `TokenRefreshed` event with the passed session ID,
+ * the time the access token was refreshed, and data from the predefined GitHub response.
  */
-internal fun expectedTokenRefreshedEvent(id: SessionId): TokenRefreshed =
+internal fun expectedTokenRefreshedEvent(id: SessionId, whenRefreshed: Timestamp): TokenRefreshed =
     with(loadRefreshedAccessToken()) {
-        TokenRefreshed::class.with(id, accessToken)
+        TokenRefreshed::class.with(id, accessToken, whenRefreshed)
     }
 
 /**
