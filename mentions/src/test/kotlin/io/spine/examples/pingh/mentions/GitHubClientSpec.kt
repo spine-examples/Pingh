@@ -135,7 +135,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
         @BeforeEach
         internal fun emitTokenRefreshedEvent() {
             newToken = PersonalAccessToken::class.of(randomString())
-            val event = TokenRefreshed::class.with(sessionId, newToken)
+            val event = TokenRefreshed::class.with(sessionId, newToken, currentTime())
             sessionContext.receivesEvent(event)
         }
 

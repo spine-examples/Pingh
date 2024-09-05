@@ -38,7 +38,6 @@ import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
-import io.spine.examples.pingh.sessions.given.add
 import io.spine.examples.pingh.sessions.given.expectedTokenRefreshedEvent
 import io.spine.examples.pingh.sessions.given.with
 import io.spine.examples.pingh.sessions.given.expectedUserCodeReceivedEvent
@@ -47,7 +46,6 @@ import io.spine.examples.pingh.sessions.given.expectedUserSessionAfterTokenRefre
 import io.spine.examples.pingh.sessions.given.expectedUserSessionWithDeviceCode
 import io.spine.examples.pingh.sessions.given.expectedUserSessionWithRefreshToken
 import io.spine.examples.pingh.sessions.given.generate
-import io.spine.examples.pingh.sessions.given.subtract
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.protobuf.Durations2.minutes
 import io.spine.server.BoundedContextBuilder

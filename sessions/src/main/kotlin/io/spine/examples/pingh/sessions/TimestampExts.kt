@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.sessions
 
+import com.google.protobuf.Duration
 import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Timestamps
 
@@ -33,3 +34,13 @@ import com.google.protobuf.util.Timestamps
  * Compares this `Timestamp` with the passed one.
  */
 internal operator fun Timestamp.compareTo(other: Timestamp): Int = Timestamps.compare(this, other)
+
+/**
+ * Subtracts the passed duration from this timestamp.
+ */
+internal fun Timestamp.subtract(duration: Duration): Timestamp = Timestamps.subtract(this, duration)
+
+/**
+ * Adds the passed duration to this timestamp.
+ */
+internal fun Timestamp.add(duration: Duration): Timestamp = Timestamps.add(this, duration)
