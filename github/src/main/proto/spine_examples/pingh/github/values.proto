@@ -111,3 +111,13 @@ message RefreshToken {
     // A valid GitHub refresh token starts with 'ghr_'.
     string value = 1 [(required) = true, (pattern).regex = "^ghr_.+$"];
 }
+
+// The client secret of a GitHub App.
+//
+// This secret is created and issued by GitHub when a GitHub App is set up.
+// The client secret is used in the authentication flow to refresh access tokens.
+//
+message ClientSecret {
+
+    string value = 1 [(required) = true];
+}

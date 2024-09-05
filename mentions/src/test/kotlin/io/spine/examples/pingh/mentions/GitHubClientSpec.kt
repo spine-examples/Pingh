@@ -47,8 +47,13 @@ import io.spine.examples.pingh.mentions.given.buildWithDefaultWhenStartedField
 import io.spine.examples.pingh.mentions.given.expectedUserMentionedSet
 import io.spine.examples.pingh.mentions.given.generate
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
+import io.spine.examples.pingh.sessions.SessionId
+import io.spine.examples.pingh.sessions.buildBy
+import io.spine.examples.pingh.sessions.event.TokenRefreshed
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.newSessionsContext
+import io.spine.examples.pingh.sessions.of
+import io.spine.examples.pingh.sessions.with
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.protobuf.Durations2.seconds
@@ -69,6 +74,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
     private val gitHubClientService = PredefinedGitHubSearchResponses()
     private lateinit var sessionContext: BlackBoxContext
     private lateinit var gitHubClientId: GitHubClientId
+    private lateinit var sessionId: SessionId
     private lateinit var token: PersonalAccessToken
 
     override fun contextBuilder(): BoundedContextBuilder =
@@ -88,7 +94,8 @@ internal class GitHubClientSpec : ContextAwareTest() {
 
     private fun emitUserLoggedInEventInSessionsContext() {
         token = PersonalAccessToken::class.of(randomString())
-        val userLoggedIn = UserLoggedIn::class.buildBy(gitHubClientId.username, token)
+        sessionId = SessionId::class.of(gitHubClientId.username)
+        val userLoggedIn = UserLoggedIn::class.buildBy(sessionId, token)
         sessionContext.receivesEvent(userLoggedIn)
     }
 
@@ -116,6 +123,35 @@ internal class GitHubClientSpec : ContextAwareTest() {
         internal fun `update token in existing 'GitHubClient' entity`() {
             emitUserLoggedInEventInSessionsContext()
             val expected = GitHubClient::class.buildBy(gitHubClientId, token)
+            context().assertState(gitHubClientId, expected)
+        }
+    }
+
+    @Nested internal inner class
+    `React on 'TokenRefreshed' event in Sessions bounded context, and` {
+
+        private lateinit var newToken: PersonalAccessToken
+
+        @BeforeEach
+        internal fun emitTokenRefreshedEvent() {
+            newToken = PersonalAccessToken::class.of(randomString())
+            val event = TokenRefreshed::class.with(sessionId, newToken, currentTime())
+            sessionContext.receivesEvent(event)
+        }
+
+        @Test
+        internal fun `emit 'GitHubTokenUpdated' event`() {
+            val expected = GitHubTokenUpdated::class.buildBy(gitHubClientId, newToken)
+            val eventSubject = context().assertEvents()
+                .withType(GitHubTokenUpdated::class.java)
+            eventSubject.hasSize(2)
+            eventSubject.message(1)
+                .isEqualTo(expected)
+        }
+
+        @Test
+        internal fun `update token in 'GitHubClient' entity`() {
+            val expected = GitHubClient::class.buildBy(gitHubClientId, newToken)
             context().assertState(gitHubClientId, expected)
         }
     }

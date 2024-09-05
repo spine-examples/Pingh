@@ -26,16 +26,22 @@
 
 package io.spine.examples.pingh.sessions
 
+import io.spine.core.External
+import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
+import io.spine.examples.pingh.sessions.command.RefreshToken
 import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
+import io.spine.examples.pingh.sessions.event.TokenRefreshed
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.server.command.Assign
+import io.spine.server.command.Command
 import io.spine.server.procman.ProcessManager
 import io.spine.server.tuple.EitherOf2
+import java.util.Optional
 
 /**
  * Coordinates session management, that is, user login and logout.
@@ -95,6 +101,33 @@ internal class UserSessionProcess :
             clearDeviceCode()
         }
         return EitherOf2.withA(UserLoggedIn::class.buildBy(command.id, tokens.accessToken))
+    }
+
+    /**
+     * Sends a `RefreshToken` command if the user is logged in
+     * and the personal access token is expired.
+     */
+    @Command
+    internal fun on(@External event: TimePassed): Optional<RefreshToken> {
+        val isUserLoggedIn = isActive && state().hasRefreshToken()
+        return if (isUserLoggedIn && event.time >= state().whenAccessTokenExpires) {
+            Optional.of(RefreshToken::class.with(state().id, event.time))
+        } else {
+            Optional.empty()
+        }
+    }
+
+    /**
+     * Renews GitHub access tokens using the refresh token.
+     */
+    @Assign
+    internal fun handle(command: RefreshToken): TokenRefreshed {
+        val tokens = authenticationService.refreshAccessToken(state().refreshToken)
+        with(builder()) {
+            whenAccessTokenExpires = tokens.whenExpires
+            refreshToken = tokens.refreshToken
+        }
+        return TokenRefreshed::class.with(command.id, tokens.accessToken, command.whenRequested)
     }
 
     /**

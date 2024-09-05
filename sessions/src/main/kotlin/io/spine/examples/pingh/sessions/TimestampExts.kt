@@ -26,36 +26,21 @@
 
 package io.spine.examples.pingh.sessions
 
-import io.spine.examples.pingh.github.DeviceCode
-import io.spine.examples.pingh.github.RefreshToken
-import io.spine.examples.pingh.github.UserCode
-import io.spine.examples.pingh.github.rest.AccessTokenResponse
-import io.spine.examples.pingh.github.rest.VerificationCodesResponse
-import kotlin.jvm.Throws
+import com.google.protobuf.Duration
+import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Timestamps
 
 /**
- * Allows to access GitHub authentication API.
+ * Compares this `Timestamp` with the passed one.
  */
-public interface GitHubAuthentication {
+internal operator fun Timestamp.compareTo(other: Timestamp): Int = Timestamps.compare(this, other)
 
-    /**
-     * Requests the [UserCode] and [DeviceCode] required for verification.
-     */
-    public fun requestVerificationCodes(): VerificationCodesResponse
+/**
+ * Subtracts the passed duration from this timestamp.
+ */
+internal fun Timestamp.subtract(duration: Duration): Timestamp = Timestamps.subtract(this, duration)
 
-    /**
-     * Requests an access token for the user using the `DeviceCode`.
-     *
-     * @param deviceCode The code used to verify the device.
-     * @throws CannotObtainAccessToken if failed to obtain the access token.
-     */
-    @Throws(CannotObtainAccessToken::class)
-    public fun requestAccessToken(deviceCode: DeviceCode): AccessTokenResponse
-
-    /**
-     * Requests a new access token for the user using the `RefreshToken`.
-     *
-     * @param refreshToken The token to renew the `PersonalAccessToken` when it expires.
-     */
-    public fun refreshAccessToken(refreshToken: RefreshToken): AccessTokenResponse
-}
+/**
+ * Adds the passed duration to this timestamp.
+ */
+internal fun Timestamp.add(duration: Duration): Timestamp = Timestamps.add(this, duration)

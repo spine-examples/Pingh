@@ -26,7 +26,9 @@
 
 package io.spine.examples.pingh.testing.sessions.given
 
+import com.google.protobuf.Timestamp
 import io.spine.examples.pingh.github.DeviceCode
+import io.spine.examples.pingh.github.RefreshToken
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.VerificationCodesResponse
 import io.spine.examples.pingh.sessions.CannotObtainAccessToken
@@ -47,10 +49,16 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
     private var isUserCodeEntered = false
 
     /**
+     * The time when the personal access token issued by GitHub expires.
+     */
+    public var whenReceivedAccessTokenExpires: Timestamp? = null
+        private set
+
+    /**
      * Returns `VerificationCodesResponse` retrieved from a JSON file in the resource folder.
      */
     public override fun requestVerificationCodes(): VerificationCodesResponse =
-        predefinedVerificationCodes()
+        loadVerificationCodes()
 
     /**
      * Returns the `AccessTokenResponse` retrieved from a JSON file in the resource folder
@@ -60,10 +68,21 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
     @Throws(CannotObtainAccessToken::class)
     public override fun requestAccessToken(deviceCode: DeviceCode): AccessTokenResponse =
         if (isUserCodeEntered) {
-            predefinedAccessTokenResponse()
+            val tokens = loadAccessToken()
+            whenReceivedAccessTokenExpires = tokens.whenExpires
+            tokens
         } else {
             throw CannotObtainAccessToken("authorization_pending")
         }
+
+    /**
+     * Returns the `AccessTokenResponse` retrieved from a JSON file in the resource folder.
+     */
+    override fun refreshAccessToken(refreshToken: RefreshToken): AccessTokenResponse {
+        val tokens = loadRefreshedAccessToken()
+        whenReceivedAccessTokenExpires = tokens.whenExpires
+        return tokens
+    }
 
     /**
      * Marks that the user has entered their user code.
@@ -81,5 +100,6 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
      */
     public fun clean() {
         isUserCodeEntered = false
+        whenReceivedAccessTokenExpires = null
     }
 }

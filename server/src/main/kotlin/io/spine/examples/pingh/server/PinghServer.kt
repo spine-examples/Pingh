@@ -36,6 +36,7 @@ import io.spine.server.storage.memory.InMemoryStorageFactory
 import io.spine.server.transport.memory.InMemoryTransportFactory
 import io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT
 import io.spine.examples.pingh.github.ClientId
+import io.spine.examples.pingh.github.ClientSecret
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.RemoteGitHubSearch
 import io.spine.examples.pingh.sessions.RemoteGitHubAuthentication
@@ -47,6 +48,13 @@ import io.spine.examples.pingh.sessions.newSessionsContext
 // TODO:2024-07-29:mykyta.pimonov: Load a key from the Google Secret Manager
 //  after deployment to the Google Cloud.
 private val clientId = ClientId::class.of("client_id")
+
+/**
+ * The client secret of the Pingh GitHub App.
+ */
+// TODO:2024-08-28:mykyta.pimonov: Load a key from the Google Secret Manager
+//  after deployment to the Google Cloud.
+private val clientSecret = ClientSecret::class.of("client_id")
 
 /**
  * The entry point of the server application.
@@ -69,7 +77,7 @@ private fun createServer(): Server {
     val clientEngine = CIO.create()
     return Server
         .atPort(DEFAULT_CLIENT_SERVICE_PORT)
-        .add(newSessionsContext(RemoteGitHubAuthentication(clientId, clientEngine)))
+        .add(newSessionsContext(RemoteGitHubAuthentication(clientId, clientSecret, clientEngine)))
         .add(newMentionsContext(RemoteGitHubSearch(clientEngine)))
         .build()
 }

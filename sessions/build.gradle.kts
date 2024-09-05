@@ -47,6 +47,7 @@ spine {
 
 dependencies {
     implementation(project(":github"))
+    implementation(project(":clock"))
     implementation(JavaX.annotations)
     implementation(Ktor.Client.core)
 

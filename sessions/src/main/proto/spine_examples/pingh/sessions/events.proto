@@ -81,6 +81,19 @@ message UserIsNotLoggedIntoGitHub {
     SessionId id = 1;
 }
 
+// The personal access token was refreshed.
+message TokenRefreshed {
+
+    // The ID of user session.
+    SessionId id = 1;
+
+    // The GitHub token obtained as a result of the token refresh.
+    spine_examples.pingh.github.PersonalAccessToken token = 2 [(required) = true];
+
+    // The time when the access token was refreshed.
+    google.protobuf.Timestamp when_refreshed = 3 [(required) = true];
+}
+
 // The user logged out.
 message UserLoggedOut {
 

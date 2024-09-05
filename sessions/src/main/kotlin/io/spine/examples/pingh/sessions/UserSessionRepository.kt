@@ -27,7 +27,9 @@
 package io.spine.examples.pingh.sessions
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
+import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.server.procman.ProcessManagerRepository
+import io.spine.server.route.EventRouting
 
 /**
  * Manages instances of [UserSessionProcess].
@@ -37,8 +39,22 @@ internal class UserSessionRepository(
 ) : ProcessManagerRepository<SessionId, UserSessionProcess, UserSession>() {
 
     @OverridingMethodsMustInvokeSuper
+    override fun setupEventRouting(routing: EventRouting<SessionId>) {
+        super.setupEventRouting(routing)
+        routing.route(TimePassed::class.java) { _, _ -> toAll() }
+    }
+
+    @OverridingMethodsMustInvokeSuper
     override fun configure(processManager: UserSessionProcess) {
         super.configure(processManager)
         processManager.inject(authenticationService)
     }
+
+    /**
+     * Returns a set of identifiers of records in the process manager storage.
+     */
+    private fun toAll(): Set<SessionId> =
+        storage().index()
+            .asSequence()
+            .toSet()
 }
