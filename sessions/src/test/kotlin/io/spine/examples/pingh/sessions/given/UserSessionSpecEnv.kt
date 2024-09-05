@@ -29,7 +29,6 @@
 package io.spine.examples.pingh.sessions.given
 
 import com.google.protobuf.Timestamp
-import io.spine.core.UserId
 import io.spine.examples.pingh.github.DeviceCode
 import io.spine.examples.pingh.github.RefreshToken
 import io.spine.examples.pingh.github.Username
@@ -129,11 +128,3 @@ internal fun expectedTokenRefreshedEvent(id: SessionId, whenRefreshed: Timestamp
     with(loadRefreshedAccessToken()) {
         TokenRefreshed::class.with(id, accessToken, whenRefreshed)
     }
-
-/**
- * Creates a new `UserId` with the randomly specified value.
- */
-internal fun KClass<UserId>.generate(): UserId =
-    UserId.newBuilder()
-        .setValue(randomString())
-        .vBuild()

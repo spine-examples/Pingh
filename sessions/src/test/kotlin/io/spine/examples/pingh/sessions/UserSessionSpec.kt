@@ -28,7 +28,6 @@ package io.spine.examples.pingh.sessions
 
 import com.google.protobuf.Timestamp
 import io.spine.base.Time.currentTime
-import io.spine.core.UserId
 import io.spine.examples.pingh.clock.buildBy
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.sessions.command.LogUserIn
@@ -50,6 +49,7 @@ import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthentica
 import io.spine.protobuf.Durations2.minutes
 import io.spine.server.BoundedContextBuilder
 import io.spine.server.integration.ThirdPartyContext
+import io.spine.testing.core.given.GivenUserId
 import io.spine.testing.server.blackbox.ContextAwareTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -186,7 +186,7 @@ internal class UserSessionSpec : ContextAwareTest() {
         private fun emitTimePassedEvent(time: Timestamp = currentTime()) {
             val clockContext = ThirdPartyContext.singleTenant("Clock")
             val event = TimePassed::class.buildBy(time)
-            val actor = UserId::class.generate()
+            val actor = GivenUserId.generated()
             clockContext.emittedEvent(event, actor)
         }
     }
