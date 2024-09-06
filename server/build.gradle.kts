@@ -27,6 +27,8 @@
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.Ktor
+import io.spine.internal.dependency.Spine
+import io.spine.internal.dependency.Testcontainers
 
 plugins {
     // Add the Gradle plugin for bootstrapping projects built with Spine.
@@ -54,6 +56,9 @@ dependencies {
     implementation(Guava.lib)
     implementation(Grpc.netty)
     implementation(Grpc.inprocess)
+    implementation(Spine.GCloud.datastore)
+    implementation(Testcontainers.lib)
+    implementation(Testcontainers.gcloud)
 }
 
 application {
