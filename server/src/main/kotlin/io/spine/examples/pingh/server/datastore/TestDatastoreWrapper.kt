@@ -41,9 +41,9 @@ internal class TestDatastoreWrapper(datastore: Datastore) :
     DatastoreWrapper(datastore, NamespaceSupplier.singleTenant()) {
 
     /**
-     * List of entity [kinds][Kind] stored in the Datastore.
+     * Set of entity [kinds][Kind] stored in the Datastore.
      */
-    private val kinds: MutableList<Kind> = mutableListOf()
+    private val kinds: MutableSet<Kind> = mutableSetOf()
 
     /**
      * Retrieves an instance of `KeyFactory` unique for given [Kind]
