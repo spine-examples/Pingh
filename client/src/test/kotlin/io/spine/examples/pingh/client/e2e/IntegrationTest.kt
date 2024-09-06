@@ -26,16 +26,21 @@
 
 package io.spine.examples.pingh.client.e2e
 
+import io.spine.environment.Tests
 import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.client.PinghApplication
 import io.spine.examples.pingh.client.e2e.given.MemoizingNotificationSender
 import io.spine.examples.pingh.clock.IntervalClock
 import io.spine.examples.pingh.mentions.newMentionsContext
+import io.spine.examples.pingh.server.datastore.TestDatastoreStorageFactory
 import io.spine.examples.pingh.sessions.GitHubAuthentication
 import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.server.Server
+import io.spine.server.ServerEnvironment
+import io.spine.server.delivery.Delivery
+import io.spine.server.transport.memory.InMemoryTransportFactory
 import kotlin.time.Duration.Companion.milliseconds
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -61,6 +66,15 @@ internal abstract class IntegrationTest {
                 .build()
     }
 
+    private val storage = TestDatastoreStorageFactory.local()
+
+    init {
+        ServerEnvironment.`when`(Tests::class.java)
+            .use(storage)
+            .use(Delivery.localAsync())
+            .use(InMemoryTransportFactory.newInstance())
+    }
+
     private val authenticationService = PredefinedGitHubAuthenticationResponses()
     private lateinit var notificationSender: MemoizingNotificationSender
     private lateinit var clock: IntervalClock
@@ -83,6 +97,7 @@ internal abstract class IntegrationTest {
         application.close()
         clock.stop()
         server.shutdown()
+        storage.clear()
     }
 
     /**
