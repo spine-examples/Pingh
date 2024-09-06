@@ -40,7 +40,8 @@ import org.testcontainers.utility.DockerImageName
  *
  * @param name The name of the Docker `google-cloud-sdk` or `google-cloud-cli` image.
  * @property projectId The ID of the project interacting with the Datastore emulator.
- * @property port The port on which the emulator will be exposed.
+ * @property port The port used to access the Datastore emulator within
+ *   the Docker container machine.
  */
 internal class EmulatorContainer internal constructor(
     name: DockerImageName,
