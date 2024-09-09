@@ -40,10 +40,12 @@ import io.spine.server.storage.datastore.tenant.NamespaceSupplier
 internal class TestDatastoreWrapper(datastore: Datastore) :
     DatastoreWrapper(datastore, NamespaceSupplier.singleTenant()) {
 
-    /**
-     * Set of entity [kinds][Kind] stored in the Datastore.
-     */
-    private val kinds: MutableSet<Kind> = mutableSetOf()
+    private companion object {
+        /**
+         * Set of entity [kinds][Kind] stored in the Datastore.
+         */
+        private val kinds: MutableList<Kind> = mutableListOf()
+    }
 
     /**
      * Retrieves an instance of `KeyFactory` unique for given [Kind]
@@ -58,7 +60,9 @@ internal class TestDatastoreWrapper(datastore: Datastore) :
      * Deletes all records from the Datastore.
      */
     internal fun dropAllTables() {
-        kinds.forEach { dropTable(it) }
+        for (i in 0..<kinds.size) {
+            dropTable(kinds[i])
+        }
         kinds.clear()
     }
 }

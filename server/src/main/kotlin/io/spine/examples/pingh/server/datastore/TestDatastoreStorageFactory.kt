@@ -90,7 +90,6 @@ public class TestDatastoreStorageFactory private constructor(datastore: Datastor
      */
     public fun clear() {
         wrappers.forEach { it.dropAllTables() }
-        wrappers.clear()
     }
 }
 
