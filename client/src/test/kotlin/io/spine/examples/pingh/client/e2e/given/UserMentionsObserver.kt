@@ -26,8 +26,8 @@
 
 package io.spine.examples.pingh.client.e2e.given
 
-import io.spine.examples.pingh.client.DesktopClient
-import io.spine.examples.pingh.mentions.MentionId
+import io.spine.examples.pingh.client.PinghApplication
+import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.UserMentions
 import io.spine.examples.pingh.mentions.UserMentionsId
 import io.spine.examples.pingh.mentions.of
@@ -41,16 +41,27 @@ import java.util.concurrent.TimeoutException
  * Subscribes to updates on the `UserMentions` entity.
  * A [CompletableFuture] is used to track these updates.
  *
+ * A passed [number][expectedUpdatesCount] of entity updates must occur for the observation
+ * to be considered successful.
+ *
  * It's crucial to begin observing the entity before sending a change command.
  * Otherwise, you might wait the update an entity that has already been modified.
  */
-internal fun DesktopClient.observeUserMentions(id: MentionId): UserMentionsObserver {
+internal fun PinghApplication.observeUserMentions(
+    user: Username,
+    expectedUpdatesCount: Int = 1
+): UserMentionsObserver {
+    require(expectedUpdatesCount > 0) { "Expected count of updates has to be positive." }
     val future = CompletableFuture<Void>()
-    val entityId = UserMentionsId::class.of(id.user)
-    this.observeEntityOnce(entityId, UserMentions::class) {
-        future.complete(null)
+    val entityId = UserMentionsId::class.of(user)
+    var current = 0
+    val subscription = client.observeEntity(entityId, UserMentions::class) {
+        current++
+        if (current == expectedUpdatesCount) {
+            future.complete(null)
+        }
     }
-    return UserMentionsObserver(future)
+    return UserMentionsObserver(future) { client.stopObservation(subscription) }
 }
 
 /**
@@ -60,9 +71,12 @@ internal fun DesktopClient.observeUserMentions(id: MentionId): UserMentionsObser
  * the projection is updated. This class is suitable for observing a single update because
  * after the first update, the `CompletableFuture` will be marked as `completed`.
  *
- * @see [DesktopClient.observeUserMentions]
+ * @see [PinghApplication.observeUserMentions]
  */
-internal class UserMentionsObserver(private val future: CompletableFuture<Void>) {
+internal class UserMentionsObserver(
+    private val future: CompletableFuture<Void>,
+    private val stopObservation: () -> Unit
+) {
 
     /**
      * Waits for the projection update to occur.
@@ -73,6 +87,10 @@ internal class UserMentionsObserver(private val future: CompletableFuture<Void>)
      * @see [CompletableFuture.get]
      */
     internal fun waitUntilUpdate() {
-        future.get(2, TimeUnit.SECONDS)
+        try {
+            future.get(2, TimeUnit.SECONDS)
+        } finally {
+            stopObservation()
+        }
     }
 }

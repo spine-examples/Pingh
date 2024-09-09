@@ -197,33 +197,9 @@ internal class DesktopClient(
             .post()
 
     /**
-     * Subscribes to the update of the entity with the specified type and ID.
-     *
-     * The subscription cancels itself after the observer has completed its work.
-     *
-     * @param E The type of the observed entity.
-     *
-     * @param id The ID of the observed entity.
-     * @param type The class of the type of the observed entity.
-     * @param onUpdated Called when the entity is updated.
-     */
-    internal fun <E : EntityState> observeEntityOnce(
-        id: Message,
-        type: KClass<E>,
-        onUpdated: (entity: E) -> Unit
-    ): Subscription {
-        var subscription: Subscription? = null
-        subscription = observeEntity(id, type) { entity ->
-            stopObservation(subscription!!)
-            onUpdated(entity)
-        }
-        return subscription
-    }
-
-    /**
      * Stops observation of the provided subscription.
      */
-    private fun stopObservation(subscription: Subscription) {
+    internal fun stopObservation(subscription: Subscription) {
         client.subscriptions()
             .cancel(subscription)
     }
