@@ -150,4 +150,13 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
     public fun mentionsAreNotFetched() {
         areMentionsFetched = false
     }
+
+    /**
+     * Resets the instance to its initial state.
+     */
+    public fun clean() {
+        unfreeze()
+        setDefaultResponseStatusCode()
+        mentionsAreNotFetched()
+    }
 }

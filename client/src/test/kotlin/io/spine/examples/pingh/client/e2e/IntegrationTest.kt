@@ -31,6 +31,7 @@ import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.client.PinghApplication
 import io.spine.examples.pingh.client.e2e.given.MemoizingNotificationSender
 import io.spine.examples.pingh.clock.IntervalClock
+import io.spine.examples.pingh.mentions.GitHubSearch
 import io.spine.examples.pingh.mentions.newMentionsContext
 import io.spine.examples.pingh.server.datastore.TestDatastoreStorageFactory
 import io.spine.examples.pingh.sessions.GitHubAuthentication
@@ -42,7 +43,9 @@ import io.spine.server.ServerEnvironment
 import io.spine.server.delivery.Delivery
 import io.spine.server.transport.memory.InMemoryTransportFactory
 import kotlin.time.Duration.Companion.milliseconds
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 
 /**
@@ -52,51 +55,71 @@ import org.junit.jupiter.api.BeforeEach
  */
 internal abstract class IntegrationTest {
 
-    private companion object {
+    internal companion object {
+
         private const val port = 4242
         private const val address = "localhost"
+
+        private val storage = TestDatastoreStorageFactory.local()
+        private val authenticationService = PredefinedGitHubAuthenticationResponses()
+        private val searchService = PredefinedGitHubSearchResponses()
+        private val clock = IntervalClock(100.milliseconds)
+
+        private lateinit var server: Server
+
+        @BeforeAll
+        @JvmStatic
+        internal fun startServer() {
+            configureEnvironment()
+            server = createServer(authenticationService, searchService)
+            server.start()
+            clock.start()
+        }
+
+        /**
+         * Configures the server environment.
+         */
+        private fun configureEnvironment() {
+            ServerEnvironment.`when`(Tests::class.java)
+                .use(storage)
+                .use(Delivery.localAsync())
+                .use(InMemoryTransportFactory.newInstance())
+        }
 
         /**
          * Creates a new test Pingh `Server`.
          */
-        private fun createServer(authenticationService: GitHubAuthentication): Server =
+        private fun createServer(
+            authenticationService: GitHubAuthentication,
+            searchService: GitHubSearch
+        ): Server =
             Server.atPort(port)
                 .add(newSessionsContext(authenticationService))
-                .add(newMentionsContext(PredefinedGitHubSearchResponses()))
+                .add(newMentionsContext(searchService))
                 .build()
+
+        @AfterAll
+        @JvmStatic
+        internal fun shutdownServer() {
+            clock.stop()
+            server.shutdown()
+        }
     }
 
-    private val storage = TestDatastoreStorageFactory.local()
-
-    init {
-        ServerEnvironment.`when`(Tests::class.java)
-            .use(storage)
-            .use(Delivery.localAsync())
-            .use(InMemoryTransportFactory.newInstance())
-    }
-
-    private val authenticationService = PredefinedGitHubAuthenticationResponses()
     private lateinit var notificationSender: MemoizingNotificationSender
-    private lateinit var clock: IntervalClock
-    private lateinit var server: Server
     private lateinit var application: PinghApplication
 
     @BeforeEach
-    internal fun runServer() {
+    internal fun createApplication() {
         notificationSender = MemoizingNotificationSender()
-        clock = IntervalClock(100.milliseconds)
-        clock.start()
-        server = createServer(authenticationService)
-        server.start()
         application = PinghApplication(notificationSender, address, port)
     }
 
     @AfterEach
-    internal fun shutdownServer() {
-        authenticationService.clean()
+    internal fun clearDataFromPreviousTest() {
         application.close()
-        clock.stop()
-        server.shutdown()
+        authenticationService.clean()
+        searchService.clean()
         storage.clear()
     }
 
