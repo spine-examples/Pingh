@@ -32,9 +32,9 @@ import kotlin.time.Duration
 /**
  * The system clock that continuously emits `TimePassed` events at the specified interval.
  *
- * @param pauseTime The time interval between emitting `TimePassed` events.
+ * @property pauseTime The time interval between emitting `TimePassed` events.
  */
-public class IntervalClock(pauseTime: Duration) {
+public class IntervalClock(private val pauseTime: Duration) {
 
     /**
      * Whether the clock is currently running. Used to control the [clockThread].
@@ -44,18 +44,19 @@ public class IntervalClock(pauseTime: Duration) {
     /**
      * The clock thread emits a `TimePassed` event after passing each time interval.
      */
-    private val clockThread: Thread = Thread {
-        while (isRunning) {
-            sleep(pauseTime.inWholeMilliseconds)
-            emitTimePassedEvent()
-        }
-    }
+    private lateinit var clockThread: Thread
 
     /**
      * Starts the clock.
      */
     public fun start() {
         isRunning = true
+        clockThread = Thread {
+            while (isRunning) {
+                sleep(pauseTime.inWholeMilliseconds)
+                emitTimePassedEvent()
+            }
+        }
         clockThread.start()
     }
 

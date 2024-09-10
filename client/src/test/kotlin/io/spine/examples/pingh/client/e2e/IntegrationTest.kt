@@ -73,7 +73,6 @@ internal abstract class IntegrationTest {
             configureEnvironment()
             server = createServer(authenticationService, searchService)
             server.start()
-            clock.start()
         }
 
         /**
@@ -111,12 +110,14 @@ internal abstract class IntegrationTest {
 
     @BeforeEach
     internal fun createApplication() {
+        clock.start()
         notificationSender = MemoizingNotificationSender()
         application = PinghApplication(notificationSender, address, port)
     }
 
     @AfterEach
     internal fun clearDataFromPreviousTest() {
+        clock.stop()
         application.close()
         authenticationService.clean()
         searchService.clean()
