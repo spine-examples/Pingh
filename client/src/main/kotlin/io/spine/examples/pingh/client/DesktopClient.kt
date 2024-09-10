@@ -198,6 +198,8 @@ internal class DesktopClient(
 
     /**
      * Stops observation of the provided subscription.
+     *
+     * @param subscription The subscription to be discontinued.
      */
     internal fun stopObservation(subscription: Subscription) {
         client.subscriptions()

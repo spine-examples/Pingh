@@ -42,8 +42,8 @@ import java.util.concurrent.TimeoutException
  * Subscribes to updates on the `UserMentions` entity.
  * A [CompletableFuture] is used to track these updates.
  *
- * A passed [number][expectedUpdatesCount] of entity updates must occur for the observation
- * to be considered successful.
+ * The passed [number][expectedUpdatesCount] of entity updates must occur
+ * for the observation to be considered successfully completed.
  *
  * It's crucial to begin observing the entity before sending a change command.
  * Otherwise, you might wait the update an entity that has already been modified.
@@ -52,7 +52,7 @@ internal fun PinghApplication.observeUserMentions(
     user: Username,
     expectedUpdatesCount: Int = 1
 ): UserMentionsObserver {
-    require(expectedUpdatesCount > 0) { "Expected count of updates has to be positive." }
+    require(expectedUpdatesCount > 0) { "Expected count of updates must be positive." }
     val future = CompletableFuture<Void>()
     val entityId = UserMentionsId::class.of(user)
     var current = 0

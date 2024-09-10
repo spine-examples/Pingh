@@ -53,7 +53,7 @@ public class TestDatastoreStorageFactory private constructor(datastore: Datastor
         private val defaultLocalProjectId = ProjectId.of("test-project")
 
         /**
-         * Creates a new TestDatastoreStorageFactory instance that works with
+         * Creates a new `TestDatastoreStorageFactory` instance that works with
          * a local Datastore emulator running in a Docker container.
          */
         public fun local(): TestDatastoreStorageFactory {
