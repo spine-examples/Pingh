@@ -58,4 +58,5 @@ dependencies {
     testImplementation(project(":clock"))
     testImplementation(Spine.Server.lib)
     testImplementation(Spine.GCloud.datastore)
+    testImplementation(Spine.GCloud.testutil)
 }

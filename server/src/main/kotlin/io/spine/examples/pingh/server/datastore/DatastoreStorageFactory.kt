@@ -26,43 +26,32 @@
 
 package io.spine.examples.pingh.server.datastore
 
-import com.google.cloud.datastore.Datastore
-import com.google.cloud.datastore.KeyFactory
-import io.spine.server.storage.datastore.DatastoreWrapper
-import io.spine.server.storage.datastore.Kind
-import io.spine.server.storage.datastore.tenant.NamespaceSupplier
+import io.spine.server.storage.datastore.ProjectId
+import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory
 
 /**
- * A custom extension of the [DatastoreWrapper] for the integration testing.
- *
- * @param datastore The `Datastore` to wrap.
+ * A factory for Datastore storages.
  */
-internal class TestDatastoreWrapper(datastore: Datastore) :
-    DatastoreWrapper(datastore, NamespaceSupplier.singleTenant()) {
-
-    private companion object {
-        /**
-         * Set of entity [kinds][Kind] stored in the Datastore.
-         */
-        private val kinds: MutableList<Kind> = mutableListOf()
-    }
+public object DatastoreStorageFactory {
 
     /**
-     * Retrieves an instance of `KeyFactory` unique for given [Kind]
-     * of data regarding the current namespace and caches it.
+     * The default port to which the local Datastore emulator is bound.
      */
-    override fun keyFactory(kind: Kind): KeyFactory {
-        kinds.add(kind)
-        return super.keyFactory(kind)
-    }
+    private const val port = 8081
 
     /**
-     * Deletes all records from the Datastore.
+     * The default project ID to use when running on a local Datastore emulator.
      */
-    internal fun dropAllTables() {
-        for (i in 0..<kinds.size) {
-            dropTable(kinds[i])
-        }
-        kinds.clear()
+    private val defaultLocalProjectId = ProjectId.of("test-project")
+
+    /**
+     * Creates a new `TestDatastoreStorageFactory` instance that works with
+     * a local Datastore emulator running in a Docker container.
+     */
+    public fun local(): TestDatastoreStorageFactory {
+        val datastore = Emulator
+            .at(defaultLocalProjectId, port)
+            .service
+        return TestDatastoreStorageFactory.basedOn(datastore)
     }
 }

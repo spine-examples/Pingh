@@ -57,6 +57,7 @@ dependencies {
     implementation(Grpc.netty)
     implementation(Grpc.inprocess)
     implementation(Spine.GCloud.datastore)
+    implementation(Spine.GCloud.testutil)
     implementation(Testcontainers.lib)
     implementation(Testcontainers.gcloud)
 }

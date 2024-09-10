@@ -42,5 +42,6 @@ public object Spine {
     // https://github.com/SpineEventEngine/gcloud-java
     public object GCloud {
         public const val datastore: String = "io.spine.gcloud:spine-datastore:$version"
+        public const val testutil: String = "io.spine.gcloud:spine-testutil-gcloud:$version"
     }
 }

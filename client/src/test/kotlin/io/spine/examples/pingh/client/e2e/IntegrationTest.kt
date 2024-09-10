@@ -33,7 +33,7 @@ import io.spine.examples.pingh.client.e2e.given.MemoizingNotificationSender
 import io.spine.examples.pingh.clock.IntervalClock
 import io.spine.examples.pingh.mentions.GitHubSearch
 import io.spine.examples.pingh.mentions.newMentionsContext
-import io.spine.examples.pingh.server.datastore.TestDatastoreStorageFactory
+import io.spine.examples.pingh.server.datastore.DatastoreStorageFactory
 import io.spine.examples.pingh.sessions.GitHubAuthentication
 import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
@@ -60,7 +60,7 @@ internal abstract class IntegrationTest {
         private const val port = 4242
         private const val address = "localhost"
 
-        private val storage = TestDatastoreStorageFactory.local()
+        private val storage = DatastoreStorageFactory.local()
         private val authenticationService = PredefinedGitHubAuthenticationResponses()
         private val searchService = PredefinedGitHubSearchResponses()
         private val clock = IntervalClock(100.milliseconds)
