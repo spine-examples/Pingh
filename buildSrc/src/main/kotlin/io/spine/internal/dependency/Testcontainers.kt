@@ -26,10 +26,9 @@
 
 package io.spine.internal.dependency
 
-// https://github.com/testcontainers/testcontainers-java
 // https://java.testcontainers.org/#maven-dependencies
 public object Testcontainers {
-    private const val version = "1.19.0"
+    private const val version = "1.20.1"
     private const val group = "org.testcontainers"
 
     public const val lib: String = "$group:testcontainers:$version"
