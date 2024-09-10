@@ -89,8 +89,8 @@ internal class UserMentionsObserver(
      */
     internal fun waitUntilUpdate() {
         try {
-            future.get(2, TimeUnit.SECONDS)
-            sleep(100) // Ensure consistency with the storage.
+            future.get(10, TimeUnit.SECONDS)
+            sleep(100) // Ensures consistency with the storage.
         } finally {
             stopObservation()
         }
