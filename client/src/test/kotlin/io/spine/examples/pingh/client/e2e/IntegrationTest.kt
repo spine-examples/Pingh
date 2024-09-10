@@ -111,8 +111,8 @@ internal abstract class IntegrationTest {
     internal fun clearDataFromPreviousTest() {
         clock.stop()
         application.close()
-        auth.clean()
-        search.clean()
+        auth.reset()
+        search.reset()
         storage.clear()
     }
 

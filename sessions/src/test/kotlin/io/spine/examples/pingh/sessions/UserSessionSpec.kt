@@ -66,8 +66,8 @@ internal class UserSessionSpec : ContextAwareTest() {
         newSessionsContext(authenticationService)
 
     @AfterEach
-    internal fun cleanAuthenticationService() {
-        authenticationService.clean()
+    internal fun resetAuthenticationService() {
+        authenticationService.reset()
     }
 
     @Nested internal inner class

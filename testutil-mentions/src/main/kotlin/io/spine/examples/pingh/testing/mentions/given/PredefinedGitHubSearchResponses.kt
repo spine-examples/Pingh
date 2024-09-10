@@ -153,8 +153,10 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
 
     /**
      * Resets the instance to its initial state.
+     *
+     * Indicates that the service is not frozen and no mentions have been received yet.
      */
-    public fun clean() {
+    public fun reset() {
         unfreeze()
         setDefaultResponseStatusCode()
         mentionsAreNotFetched()

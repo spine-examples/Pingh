@@ -82,9 +82,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
 
     @BeforeEach
     internal fun prepareSessionsContextAndEmitEvent() {
-        gitHubClientService.unfreeze()
-        gitHubClientService.setDefaultResponseStatusCode()
-        gitHubClientService.mentionsAreNotFetched()
+        gitHubClientService.reset()
         sessionContext = BlackBoxContext
             .from(newSessionsContext(PredefinedGitHubAuthenticationResponses()))
         val username = Username::class.of(randomString())
