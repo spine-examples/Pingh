@@ -62,7 +62,7 @@ internal fun PinghApplication.observeUserMentions(
             future.complete(null)
         }
     }
-    return UserMentionsObserver(future) { client.stopObservation(subscription) }
+    return UserMentionsObserver(future) { client.cancel(subscription) }
 }
 
 /**
@@ -76,7 +76,7 @@ internal fun PinghApplication.observeUserMentions(
  */
 internal class UserMentionsObserver(
     private val future: CompletableFuture<Void>,
-    private val stopObservation: () -> Unit
+    private val cancelSubscription: () -> Unit
 ) {
 
     /**
@@ -92,7 +92,7 @@ internal class UserMentionsObserver(
             future.get(10, TimeUnit.SECONDS)
             sleep(100) // Ensures consistency with the storage.
         } finally {
-            stopObservation()
+            cancelSubscription()
         }
     }
 }

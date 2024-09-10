@@ -104,11 +104,11 @@ internal class DesktopClient(
     ) {
         var subscriptionOnSecond: Subscription? = null
         val subscriptionOnFirst = observeEventOnce(first.id, first.type) { event ->
-            stopObservation(subscriptionOnSecond!!)
+            cancel(subscriptionOnSecond!!)
             first.callback(event)
         }
         subscriptionOnSecond = observeEventOnce(second.id, second.type) { event ->
-            stopObservation(subscriptionOnFirst)
+            cancel(subscriptionOnFirst)
             second.callback(event)
         }
     }
@@ -170,7 +170,7 @@ internal class DesktopClient(
     ): Subscription {
         var subscription: Subscription? = null
         subscription = observeEvent(id, type) { event ->
-            stopObservation(subscription!!)
+            cancel(subscription!!)
             onEmit(event)
         }
         return subscription
@@ -197,11 +197,11 @@ internal class DesktopClient(
             .post()
 
     /**
-     * Stops observation of the provided subscription.
+     * Cancels the passed subscription.
      *
-     * @param subscription The subscription to be discontinued.
+     * @param subscription The subscription to be canceled.
      */
-    internal fun stopObservation(subscription: Subscription) {
+    internal fun cancel(subscription: Subscription) {
         client.subscriptions()
             .cancel(subscription)
     }
