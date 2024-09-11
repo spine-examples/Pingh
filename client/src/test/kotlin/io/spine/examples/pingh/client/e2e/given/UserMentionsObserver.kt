@@ -89,7 +89,7 @@ internal class UserMentionsObserver(
      */
     internal fun waitUntilUpdate() {
         try {
-            future.get(10, TimeUnit.SECONDS)
+            future.get(2, TimeUnit.SECONDS)
             sleep(100) // Ensures consistency with the storage.
         } finally {
             cancelSubscription()

@@ -37,7 +37,7 @@ public object DatastoreStorageFactory {
     /**
      * The default port to which the local Datastore emulator is bound.
      */
-    private const val port = 8081
+    private const val defaultLocalPort = 8081
 
     /**
      * The default project ID to use when running on a local Datastore emulator.
@@ -50,7 +50,7 @@ public object DatastoreStorageFactory {
      */
     public fun local(): TestDatastoreStorageFactory {
         val datastore = Emulator
-            .at(defaultLocalProjectId, port)
+            .at(defaultLocalProjectId, defaultLocalPort)
             .service
         return TestDatastoreStorageFactory.basedOn(datastore)
     }

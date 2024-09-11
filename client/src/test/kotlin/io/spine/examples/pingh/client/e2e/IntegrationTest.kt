@@ -38,6 +38,7 @@ import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResp
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.server.Server
 import io.spine.server.ServerEnvironment
+import io.spine.server.delivery.Delivery
 import kotlin.time.Duration.Companion.milliseconds
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -77,6 +78,7 @@ internal abstract class IntegrationTest {
         private fun configureEnvironment() {
             ServerEnvironment.`when`(Tests::class.java)
                 .use(storage)
+                .use(Delivery.localAsync())
         }
 
         /**
