@@ -39,7 +39,8 @@ public class IntervalClock(private val pauseTime: Duration) {
     /**
      * Whether the clock is currently running. Used to control the [clockThread].
      */
-    private var isRunning = false
+    public var isRunning: Boolean = false
+        private set
 
     /**
      * The clock thread emits a `TimePassed` event after passing each time interval.
@@ -48,8 +49,13 @@ public class IntervalClock(private val pauseTime: Duration) {
 
     /**
      * Starts the clock.
+     *
+     * Does nothing if the clock is already running.
      */
     public fun start() {
+        if (isRunning) {
+            return
+        }
         isRunning = true
         clockThread = Thread {
             while (isRunning) {
