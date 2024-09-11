@@ -18,3 +18,26 @@ Currently, this is a work-in-progress example.
 * Spine Event Engine.
 * Kotlin.
 * Google Cloud.
+
+## Run locally
+
+### Prerequisites
+
+* [Docker Desktop](https://docs.docker.com/desktop/) installed;
+* JDK 11 and 17 installed.
+
+### Steps
+
+1. Start Docker Desktop.
+2. Ensure the terminal is opened in the project's root directory.
+
+3. Launch the web server on the `localhost:50051`:
+```shell
+./gradlew build run
+```
+
+4. Build and run the client application distribution:
+```shell
+cd desktop
+./gradlew build runDistributable
+```
