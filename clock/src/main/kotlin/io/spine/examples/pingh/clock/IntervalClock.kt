@@ -68,8 +68,13 @@ public class IntervalClock(private val pauseTime: Duration) {
 
     /**
      * Stops the clock and waits until [clock thread][clockThread] is shut down.
+     *
+     * Does nothing if the clock is not running.
      */
     public fun stop() {
+        if (!isRunning) {
+            return
+        }
         isRunning = false
         clockThread.join()
     }

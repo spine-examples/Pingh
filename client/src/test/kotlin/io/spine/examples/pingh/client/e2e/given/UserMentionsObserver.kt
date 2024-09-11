@@ -31,7 +31,6 @@ import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.UserMentions
 import io.spine.examples.pingh.mentions.UserMentionsId
 import io.spine.examples.pingh.mentions.of
-import java.lang.Thread.sleep
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -90,7 +89,6 @@ internal class UserMentionsObserver(
     internal fun waitUntilUpdate() {
         try {
             future.get(2, TimeUnit.SECONDS)
-            sleep(100) // Ensures consistency with the storage.
         } finally {
             cancelSubscription()
         }

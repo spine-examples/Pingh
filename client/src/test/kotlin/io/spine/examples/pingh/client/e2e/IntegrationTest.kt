@@ -38,7 +38,6 @@ import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResp
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.server.Server
 import io.spine.server.ServerEnvironment
-import io.spine.server.delivery.Delivery
 import kotlin.time.Duration.Companion.milliseconds
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -57,10 +56,9 @@ internal abstract class IntegrationTest {
         private const val port = 4242
         private const val address = "localhost"
 
-        private val storage = DatastoreStorageFactory.local()
+        private val storageFactory = DatastoreStorageFactory.local()
         private val auth = PredefinedGitHubAuthenticationResponses()
         private val search = PredefinedGitHubSearchResponses()
-        private val clock = IntervalClock(100.milliseconds)
 
         private lateinit var server: Server
 
@@ -77,8 +75,7 @@ internal abstract class IntegrationTest {
          */
         private fun configureEnvironment() {
             ServerEnvironment.`when`(Tests::class.java)
-                .use(storage)
-                .use(Delivery.localAsync())
+                .use(storageFactory)
         }
 
         /**
@@ -93,35 +90,55 @@ internal abstract class IntegrationTest {
         @AfterAll
         @JvmStatic
         internal fun shutdownServer() {
-            clock.stop()
             server.shutdown()
             ServerEnvironment.instance().reset()
         }
     }
+
+    private val clock = IntervalClock(250.milliseconds)
 
     private lateinit var notificationSender: MemoizingNotificationSender
     private lateinit var application: PinghApplication
 
     @BeforeEach
     internal fun createApplication() {
-        clock.start()
         notificationSender = MemoizingNotificationSender()
         application = PinghApplication(notificationSender, address, port)
     }
 
     @AfterEach
     internal fun clearDataFromPreviousTest() {
-        clock.stop()
+        if (clock.isRunning) {
+            clock.stop()
+        }
         application.close()
         auth.reset()
         search.reset()
-        storage.clear()
+        storageFactory.clear()
     }
 
     /**
      * Returns the `PinghApplication` connected to the server.
      */
     protected fun app(): PinghApplication = application
+
+    /**
+     * Start a clock that continuously emits a `TimePassed` event at a certain interval.
+     *
+     * Use this method for tests that require automatic changes after a specified time,
+     * such as verifying if a mention exits snooze mode after the allotted time has passed.
+     *
+     * **Note**, that a `GitHubClient` entity has a method that automatically updates mentions
+     * from GitHub if they haven't been retrieved yet. Therefore, if you're testing
+     * the retrieval of mentions from GitHub, ensure the clock is started **only after**
+     * the mentions have been received.
+     *
+     * There is no need to manually stop the clock; it will automatically
+     * [turn off][clearDataFromPreviousTest] at the end of the test if the clock was started.
+     */
+    protected fun startClock() {
+        clock.start()
+    }
 
     /**
      * Marks that the user has entered their user code.
