@@ -33,7 +33,6 @@ import io.spine.examples.pingh.client.EnterUsername
 import io.spine.examples.pingh.client.MentionsFlow
 import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.client.e2e.given.expectedMentionsList
-import io.spine.examples.pingh.client.e2e.given.observeUserMentions
 import io.spine.examples.pingh.client.e2e.given.randomUnread
 import io.spine.examples.pingh.client.e2e.given.updateStatusById
 import io.spine.examples.pingh.clock.emitTimePassedEvent
@@ -74,9 +73,7 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
     internal fun logInAndUpdateMentions() {
         logIn()
         expected = expectedMentionsList(username)
-        val observer = app().observeUserMentions(username, expected.size)
         val mentionsFlow = app().startMentionsFlow()
-        observer.waitUntilUpdate()
         mentionsFlow.actual shouldBe expected
     }
 
@@ -109,9 +106,7 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
         val mentionsFlow = app().startMentionsFlow()
         val snoozedMentionId = mentionsFlow.snoozeRandomMention()
         mentionsFlow.actual shouldBe expected
-        val observer = app().observeUserMentions(snoozedMentionId.user)
         mentionsFlow.markAsRead(snoozedMentionId)
-        observer.waitUntilUpdate()
         expected = expected.updateStatusById(snoozedMentionId, MentionStatus.READ)
         mentionsFlow.actual shouldBe expected
     }
@@ -199,9 +194,7 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
 
     private fun MentionsFlow.snoozeRandomMention(snoozeTime: Duration = hours(2)): MentionId {
         val mention = actual.randomUnread()
-        val observer = app().observeUserMentions(mention.id.user)
         snooze(mention.id, snoozeTime)
-        observer.waitUntilUpdate()
         expected = expected.updateStatusById(mention.id, MentionStatus.SNOOZED)
         return mention.id
     }
