@@ -30,6 +30,7 @@ import io.spine.base.Time.currentTime
 import io.spine.core.UserId
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.server.integration.ThirdPartyContext
+import org.jetbrains.annotations.TestOnly
 
 /**
  * The Clock bounded context that is designed to notify the system of the current time.
@@ -46,7 +47,8 @@ private val actor = UserId.newBuilder()
 /**
  * Emits the `TimePassed` event that contains the current time.
  */
-internal fun emitTimePassedEvent() {
+@TestOnly
+public fun emitTimePassedEvent() {
     val event = TimePassed::class.buildBy(currentTime())
     context.emittedEvent(event, actor)
 }

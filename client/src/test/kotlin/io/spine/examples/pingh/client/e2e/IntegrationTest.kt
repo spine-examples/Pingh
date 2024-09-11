@@ -30,7 +30,6 @@ import io.spine.environment.Tests
 import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.client.PinghApplication
 import io.spine.examples.pingh.client.e2e.given.MemoizingNotificationSender
-import io.spine.examples.pingh.clock.IntervalClock
 import io.spine.examples.pingh.mentions.newMentionsContext
 import io.spine.examples.pingh.server.datastore.DatastoreStorageFactory
 import io.spine.examples.pingh.sessions.newSessionsContext
@@ -38,7 +37,6 @@ import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResp
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.server.Server
 import io.spine.server.ServerEnvironment
-import kotlin.time.Duration.Companion.milliseconds
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -95,8 +93,6 @@ internal abstract class IntegrationTest {
         }
     }
 
-    private val clock = IntervalClock(250.milliseconds)
-
     private lateinit var notificationSender: MemoizingNotificationSender
     private lateinit var application: PinghApplication
 
@@ -108,9 +104,6 @@ internal abstract class IntegrationTest {
 
     @AfterEach
     internal fun clearDataFromPreviousTest() {
-        if (clock.isRunning) {
-            clock.stop()
-        }
         application.close()
         auth.reset()
         search.reset()
@@ -121,24 +114,6 @@ internal abstract class IntegrationTest {
      * Returns the `PinghApplication` connected to the server.
      */
     protected fun app(): PinghApplication = application
-
-    /**
-     * Start a clock that continuously emits a `TimePassed` event at a certain interval.
-     *
-     * Use this method for tests that require automatic changes after a specified time,
-     * such as verifying if a mention exits snooze mode after the allotted time has passed.
-     *
-     * **Note**, that a `GitHubClient` entity has a method that automatically updates mentions
-     * from GitHub if they haven't been retrieved yet. Therefore, if you're testing
-     * the retrieval of mentions from GitHub, ensure the clock is started **only after**
-     * the mentions have been received.
-     *
-     * There is no need to manually stop the clock; it will automatically
-     * [turn off][clearDataFromPreviousTest] at the end of the test if the clock was started.
-     */
-    protected fun startClock() {
-        clock.start()
-    }
 
     /**
      * Marks that the user has entered their user code.

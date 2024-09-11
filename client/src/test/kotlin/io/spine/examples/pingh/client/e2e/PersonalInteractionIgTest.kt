@@ -36,6 +36,7 @@ import io.spine.examples.pingh.client.e2e.given.expectedMentionsList
 import io.spine.examples.pingh.client.e2e.given.observeUserMentions
 import io.spine.examples.pingh.client.e2e.given.randomUnread
 import io.spine.examples.pingh.client.e2e.given.updateStatusById
+import io.spine.examples.pingh.clock.emitTimePassedEvent
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.MentionId
@@ -122,17 +123,17 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
      *
      * 1. Logs in to the Pingh app.
      * 2. Updates their mentions from GitHub.
-     * 3. Snoozes a random mention for 1 second.
+     * 3. Snoozes a random mention for 500 milliseconds.
      * 4. Waits until the snooze time is over.
      * 5. Checks that the snoozed mention is already unsnoozed.
      */
     @Test
     internal fun `the user should snooze the mention and wait until the snooze time is over`() {
-        startClock()
         val mentionsFlow = app().startMentionsFlow()
-        val snoozedMentionId = mentionsFlow.snoozeRandomMention(milliseconds(1000))
+        val snoozedMentionId = mentionsFlow.snoozeRandomMention(milliseconds(500))
         mentionsFlow.actual shouldBe expected
-        sleep(2000)
+        sleep(1000)
+        emitTimePassedEvent()
         expected = expected.updateStatusById(snoozedMentionId, MentionStatus.UNREAD)
         mentionsFlow.actual shouldBe expected
     }
@@ -170,7 +171,7 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
     private fun logInAgainAndCheckMentions(future: CompletableFuture<Void>) {
         logIn()
         val mentionsFlow = app().startMentionsFlow()
-        mentionsFlow.actual shouldBe  expected
+        mentionsFlow.actual shouldBe expected
         future.complete(null)
     }
 
@@ -188,11 +189,11 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
      */
     @Test
     internal fun `notifications about new and unsnoozed mentions should be sent to the user`() {
-        startClock()
         notificationsCount() shouldBe expected.size
         val mentionsFlow = app().startMentionsFlow()
         mentionsFlow.snoozeRandomMention(milliseconds(500))
         sleep(1000)
+        emitTimePassedEvent()
         notificationsCount() shouldBe (expected.size + 1)
     }
 
