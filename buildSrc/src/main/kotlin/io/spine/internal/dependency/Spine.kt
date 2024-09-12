@@ -36,12 +36,14 @@ public object Spine {
 
     // https://github.com/SpineEventEngine/core-java
     public object Server {
-        public const val lib: String = "io.spine:spine-server:$version"
+        private const val group = "io.spine"
+        public const val lib: String = "$group:spine-server:$version"
     }
 
     // https://github.com/SpineEventEngine/gcloud-java
     public object GCloud {
-        public const val datastore: String = "io.spine.gcloud:spine-datastore:$version"
-        public const val testutil: String = "io.spine.gcloud:spine-testutil-gcloud:$version"
+        private const val group = "io.spine.gcloud"
+        public const val datastore: String = "$group:spine-datastore:$version"
+        public const val testutil: String = "$group:spine-testutil-gcloud:$version"
     }
 }
