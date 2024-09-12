@@ -24,44 +24,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.dependency.Guava
-import io.spine.internal.dependency.Ktor
-import io.spine.internal.dependency.Spine
-import io.spine.internal.dependency.Testcontainers
+package io.spine.internal.dependency
 
-plugins {
-    // Add the Gradle plugin for bootstrapping projects built with Spine.
-    // See: https://github.com/SpineEventEngine/bootstrap
-    id("io.spine.tools.gradle.bootstrap").version("1.9.0")
+// https://java.testcontainers.org/#maven-dependencies
+public object Testcontainers {
+    private const val version = "1.20.1"
+    private const val group = "org.testcontainers"
 
-    application
-}
-
-forceGrpcDependencies(configurations)
-
-spine {
-    // Add and configure required dependencies for developing a Spine-based Java server.
-    // See: https://github.com/SpineEventEngine/bootstrap#java-projects
-    enableJava().server()
-    forceDependencies = true
-}
-
-dependencies {
-    api(project(":github"))
-    api(project(":sessions"))
-    api(project(":mentions"))
-
-    implementation(Ktor.Client.cio)
-    implementation(Guava.lib)
-    implementation(Grpc.netty)
-    implementation(Grpc.inprocess)
-    implementation(Spine.GCloud.datastore)
-    implementation(Spine.GCloud.testutil)
-    implementation(Testcontainers.lib)
-    implementation(Testcontainers.gcloud)
-}
-
-application {
-    mainClass.set("io.spine.examples.pingh.server.PinghServerKt")
+    public const val lib: String = "$group:testcontainers:$version"
+    public const val gcloud: String = "$group:gcloud:$version"
 }

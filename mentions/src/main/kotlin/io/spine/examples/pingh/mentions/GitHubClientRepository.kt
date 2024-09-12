@@ -38,7 +38,7 @@ import io.spine.server.route.EventRouting
  * Manages instances of [GitHubClientProcess].
  */
 internal class GitHubClientRepository(
-    private val searchService: GitHubSearch,
+    private val search: GitHubSearch,
 ) : ProcessManagerRepository<GitHubClientId, GitHubClientProcess, GitHubClient>() {
 
     @OverridingMethodsMustInvokeSuper
@@ -57,7 +57,7 @@ internal class GitHubClientRepository(
     @OverridingMethodsMustInvokeSuper
     override fun configure(processManager: GitHubClientProcess) {
         super.configure(processManager)
-        processManager.inject(searchService)
+        processManager.inject(search)
     }
 
     /**

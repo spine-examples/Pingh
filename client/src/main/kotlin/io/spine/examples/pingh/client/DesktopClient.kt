@@ -104,11 +104,11 @@ internal class DesktopClient(
     ) {
         var subscriptionOnSecond: Subscription? = null
         val subscriptionOnFirst = observeEventOnce(first.id, first.type) { event ->
-            stopObservation(subscriptionOnSecond!!)
+            cancel(subscriptionOnSecond!!)
             first.callback(event)
         }
         subscriptionOnSecond = observeEventOnce(second.id, second.type) { event ->
-            stopObservation(subscriptionOnFirst)
+            cancel(subscriptionOnFirst)
             second.callback(event)
         }
     }
@@ -170,7 +170,7 @@ internal class DesktopClient(
     ): Subscription {
         var subscription: Subscription? = null
         subscription = observeEvent(id, type) { event ->
-            stopObservation(subscription!!)
+            cancel(subscription!!)
             onEmit(event)
         }
         return subscription
@@ -197,33 +197,11 @@ internal class DesktopClient(
             .post()
 
     /**
-     * Subscribes to the update of the entity with the specified type and ID.
+     * Cancels the passed subscription.
      *
-     * The subscription cancels itself after the observer has completed its work.
-     *
-     * @param E The type of the observed entity.
-     *
-     * @param id The ID of the observed entity.
-     * @param type The class of the type of the observed entity.
-     * @param onUpdated Called when the entity is updated.
+     * @param subscription The subscription to be canceled.
      */
-    internal fun <E : EntityState> observeEntityOnce(
-        id: Message,
-        type: KClass<E>,
-        onUpdated: (entity: E) -> Unit
-    ): Subscription {
-        var subscription: Subscription? = null
-        subscription = observeEntity(id, type) { entity ->
-            stopObservation(subscription!!)
-            onUpdated(entity)
-        }
-        return subscription
-    }
-
-    /**
-     * Stops observation of the provided subscription.
-     */
-    private fun stopObservation(subscription: Subscription) {
+    private fun cancel(subscription: Subscription) {
         client.subscriptions()
             .cancel(subscription)
     }

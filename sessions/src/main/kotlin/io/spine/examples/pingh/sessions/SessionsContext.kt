@@ -44,8 +44,8 @@ public const val NAME: String = "Sessions"
  * to the GitHub REST API. Therefore, an instance of GitHub authentication server is required
  * as a parameter.
  *
- * @param authenticationService The service that allows to access GitHub authentication API.
+ * @param auth The service that allows to access GitHub authentication API.
  */
-public fun newSessionsContext(authenticationService: GitHubAuthentication): BoundedContextBuilder =
+public fun newSessionsContext(auth: GitHubAuthentication): BoundedContextBuilder =
     BoundedContext.singleTenant(NAME)
-        .add(UserSessionRepository(authenticationService))
+        .add(UserSessionRepository(auth))

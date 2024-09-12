@@ -60,14 +60,14 @@ import org.junit.jupiter.api.Test
 @DisplayName("`UserSession` should")
 internal class UserSessionSpec : ContextAwareTest() {
 
-    private val authenticationService = PredefinedGitHubAuthenticationResponses()
+    private val auth = PredefinedGitHubAuthenticationResponses()
 
     override fun contextBuilder(): BoundedContextBuilder =
-        newSessionsContext(authenticationService)
+        newSessionsContext(auth)
 
     @AfterEach
-    internal fun cleanAuthenticationService() {
-        authenticationService.clean()
+    internal fun resetAuthentication() {
+        auth.reset()
     }
 
     @Nested internal inner class
@@ -117,7 +117,7 @@ internal class UserSessionSpec : ContextAwareTest() {
 
         @Test
         internal fun `emit 'UserLoggedIn' if user code has been entered`() {
-            authenticationService.enterUserCode()
+            auth.enterUserCode()
             sendCommand()
             val expected = expectedUserLoggedInEvent(sessionId)
             context().assertEvent(expected)
@@ -128,7 +128,7 @@ internal class UserSessionSpec : ContextAwareTest() {
 
         @Test
         internal fun `set refresh token in 'UserSession' entity if user code has been entered`() {
-            authenticationService.enterUserCode()
+            auth.enterUserCode()
             sendCommand()
             val expected = expectedUserSessionWithRefreshToken(sessionId)
             context().assertState(sessionId, expected)
@@ -163,7 +163,7 @@ internal class UserSessionSpec : ContextAwareTest() {
         @Test
         internal fun `do nothing if access token is not expired`() {
             logIn(id)
-            val time = authenticationService.whenReceivedAccessTokenExpires!!.subtract(minutes(1))
+            val time = auth.whenReceivedAccessTokenExpires!!.subtract(minutes(1))
             emitTimePassedEvent(time)
             context().assertCommands()
                 .withType(RefreshToken::class.java)
@@ -173,7 +173,7 @@ internal class UserSessionSpec : ContextAwareTest() {
         @Test
         internal fun `send 'RefreshToken' command if access token is expired`() {
             logIn(id)
-            val time = authenticationService.whenReceivedAccessTokenExpires!!.add(minutes(1))
+            val time = auth.whenReceivedAccessTokenExpires!!.add(minutes(1))
             emitTimePassedEvent(time)
             val expected = RefreshToken::class.with(id, time)
             val commandSubject = context().assertCommands()
@@ -275,7 +275,7 @@ internal class UserSessionSpec : ContextAwareTest() {
 
     private fun logIn(id: SessionId) {
         context().receivesCommand(LogUserIn::class.withSession(id))
-        authenticationService.enterUserCode()
+        auth.enterUserCode()
         context().receivesCommand(VerifyUserLoginToGitHub::class.withSession(id))
     }
 }

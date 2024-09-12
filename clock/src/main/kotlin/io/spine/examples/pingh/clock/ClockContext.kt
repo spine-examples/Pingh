@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.clock
 
+import com.google.common.annotations.VisibleForTesting
 import io.spine.base.Time.currentTime
 import io.spine.core.UserId
 import io.spine.examples.pingh.clock.event.TimePassed
@@ -46,7 +47,8 @@ private val actor = UserId.newBuilder()
 /**
  * Emits the `TimePassed` event that contains the current time.
  */
-internal fun emitTimePassedEvent() {
+@VisibleForTesting
+public fun emitTimePassedEvent() {
     val event = TimePassed::class.buildBy(currentTime())
     context.emittedEvent(event, actor)
 }

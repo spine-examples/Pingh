@@ -24,46 +24,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.clock
+package io.spine.examples.pingh.server.datastore
 
-import java.lang.Thread.sleep
-import kotlin.time.Duration
+import io.spine.server.storage.datastore.ProjectId
+import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory
 
 /**
- * The system clock that continuously emits `TimePassed` events at the specified interval.
- *
- * @param pauseTime The time interval between emitting `TimePassed` events.
+ * A factory for Datastore storages.
  */
-public class IntervalClock(pauseTime: Duration) {
+public object DatastoreStorageFactory {
 
     /**
-     * Whether the clock is currently running. Used to control the [clockThread].
+     * The default port to which the local Datastore emulator is bound.
      */
-    private var isRunning = false
+    private const val defaultLocalPort = 8081
 
     /**
-     * The clock thread emits a `TimePassed` event after passing each time interval.
+     * The default project ID to use when running on a local Datastore emulator.
      */
-    private val clockThread: Thread = Thread {
-        while (isRunning) {
-            sleep(pauseTime.inWholeMilliseconds)
-            emitTimePassedEvent()
-        }
-    }
+    private val defaultLocalProjectId = ProjectId.of("test-project")
 
     /**
-     * Starts the clock.
+     * Creates a new `TestDatastoreStorageFactory` instance that works with
+     * a local Datastore emulator running in a Docker container.
      */
-    public fun start() {
-        isRunning = true
-        clockThread.start()
-    }
-
-    /**
-     * Stops the clock and waits until [clock thread][clockThread] is shut down.
-     */
-    public fun stop() {
-        isRunning = false
-        clockThread.join()
+    public fun local(): TestDatastoreStorageFactory {
+        val datastore = Emulator
+            .at(defaultLocalProjectId, defaultLocalPort)
+            .service
+        return TestDatastoreStorageFactory.basedOn(datastore)
     }
 }

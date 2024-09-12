@@ -26,18 +26,20 @@
 
 package io.spine.examples.pingh.client.e2e
 
+import io.spine.environment.Tests
 import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.client.PinghApplication
 import io.spine.examples.pingh.client.e2e.given.MemoizingNotificationSender
-import io.spine.examples.pingh.clock.IntervalClock
 import io.spine.examples.pingh.mentions.newMentionsContext
-import io.spine.examples.pingh.sessions.GitHubAuthentication
+import io.spine.examples.pingh.server.datastore.DatastoreStorageFactory
 import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.server.Server
-import kotlin.time.Duration.Companion.milliseconds
+import io.spine.server.ServerEnvironment
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 
 /**
@@ -47,42 +49,65 @@ import org.junit.jupiter.api.BeforeEach
  */
 internal abstract class IntegrationTest {
 
-    private companion object {
+    internal companion object {
+
         private const val port = 4242
         private const val address = "localhost"
+
+        private val storageFactory = DatastoreStorageFactory.local()
+        private val auth = PredefinedGitHubAuthenticationResponses()
+        private val search = PredefinedGitHubSearchResponses()
+
+        private lateinit var server: Server
+
+        @BeforeAll
+        @JvmStatic
+        internal fun startServer() {
+            configureEnvironment()
+            server = createServer()
+            server.start()
+        }
+
+        /**
+         * Configures the server environment.
+         */
+        private fun configureEnvironment() {
+            ServerEnvironment.`when`(Tests::class.java)
+                .use(storageFactory)
+        }
 
         /**
          * Creates a new test Pingh `Server`.
          */
-        private fun createServer(authenticationService: GitHubAuthentication): Server =
+        private fun createServer(): Server =
             Server.atPort(port)
-                .add(newSessionsContext(authenticationService))
-                .add(newMentionsContext(PredefinedGitHubSearchResponses()))
+                .add(newSessionsContext(auth))
+                .add(newMentionsContext(search))
                 .build()
+
+        @AfterAll
+        @JvmStatic
+        internal fun shutdownServer() {
+            server.shutdown()
+            ServerEnvironment.instance().reset()
+        }
     }
 
-    private val authenticationService = PredefinedGitHubAuthenticationResponses()
     private lateinit var notificationSender: MemoizingNotificationSender
-    private lateinit var clock: IntervalClock
-    private lateinit var server: Server
     private lateinit var application: PinghApplication
 
     @BeforeEach
-    internal fun runServer() {
+    internal fun createApplication() {
         notificationSender = MemoizingNotificationSender()
-        clock = IntervalClock(100.milliseconds)
-        clock.start()
-        server = createServer(authenticationService)
-        server.start()
         application = PinghApplication(notificationSender, address, port)
     }
 
     @AfterEach
-    internal fun shutdownServer() {
-        authenticationService.clean()
+    internal fun clearDataFromPreviousTest() {
         application.close()
-        clock.stop()
-        server.shutdown()
+        auth.reset()
+        search.reset()
+        storageFactory.clear()
     }
 
     /**
@@ -98,7 +123,7 @@ internal abstract class IntegrationTest {
      * the [VerifyLogin.confirm] method.
      */
     protected fun enterUserCode() {
-        authenticationService.enterUserCode()
+        auth.enterUserCode()
     }
 
     /**

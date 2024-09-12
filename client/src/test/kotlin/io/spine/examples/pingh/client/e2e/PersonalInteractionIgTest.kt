@@ -33,9 +33,9 @@ import io.spine.examples.pingh.client.EnterUsername
 import io.spine.examples.pingh.client.MentionsFlow
 import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.client.e2e.given.expectedMentionsList
-import io.spine.examples.pingh.client.e2e.given.observeUserMentions
 import io.spine.examples.pingh.client.e2e.given.randomUnread
 import io.spine.examples.pingh.client.e2e.given.updateStatusById
+import io.spine.examples.pingh.clock.emitTimePassedEvent
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.MentionId
@@ -62,16 +62,19 @@ import org.junit.jupiter.api.Test
 internal class PersonalInteractionIgTest : IntegrationTest() {
 
     private val username = Username::class.of("MykytaPimonovTD")
-    private lateinit var actual: List<MentionView>
     private lateinit var expected: List<MentionView>
+    /**
+     * Actual user mentions.
+     */
+    private val MentionsFlow.actual: List<MentionView>
+        get() = allMentions()
 
     @BeforeEach
     internal fun logInAndUpdateMentions() {
         logIn()
-        val mentionsFlow = app().startMentionsFlow()
-        actual = mentionsFlow.allMentions()
         expected = expectedMentionsList(username)
-        actual shouldBe expected
+        val mentionsFlow = app().startMentionsFlow()
+        mentionsFlow.actual shouldBe expected
     }
 
     private fun logIn() {
@@ -102,13 +105,10 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
     internal fun `the user should snooze the mention, and then read this mention`() {
         val mentionsFlow = app().startMentionsFlow()
         val snoozedMentionId = mentionsFlow.snoozeRandomMention()
-        actual shouldBe expected
-        val observer = app().client.observeUserMentions(snoozedMentionId)
+        mentionsFlow.actual shouldBe expected
         mentionsFlow.markAsRead(snoozedMentionId)
-        observer.waitUntilUpdate()
-        actual = mentionsFlow.allMentions()
         expected = expected.updateStatusById(snoozedMentionId, MentionStatus.READ)
-        actual shouldBe expected
+        mentionsFlow.actual shouldBe expected
     }
 
     /**
@@ -126,11 +126,11 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
     internal fun `the user should snooze the mention and wait until the snooze time is over`() {
         val mentionsFlow = app().startMentionsFlow()
         val snoozedMentionId = mentionsFlow.snoozeRandomMention(milliseconds(500))
-        actual shouldBe expected
+        mentionsFlow.actual shouldBe expected
         sleep(1000)
-        actual = mentionsFlow.allMentions()
+        emitTimePassedEvent()
         expected = expected.updateStatusById(snoozedMentionId, MentionStatus.UNREAD)
-        actual shouldBe expected
+        mentionsFlow.actual shouldBe expected
     }
 
     /**
@@ -166,8 +166,7 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
     private fun logInAgainAndCheckMentions(future: CompletableFuture<Void>) {
         logIn()
         val mentionsFlow = app().startMentionsFlow()
-        actual = mentionsFlow.allMentions()
-        actual shouldBe expected
+        mentionsFlow.actual shouldBe expected
         future.complete(null)
     }
 
@@ -189,15 +188,13 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
         val mentionsFlow = app().startMentionsFlow()
         mentionsFlow.snoozeRandomMention(milliseconds(500))
         sleep(1000)
+        emitTimePassedEvent()
         notificationsCount() shouldBe (expected.size + 1)
     }
 
     private fun MentionsFlow.snoozeRandomMention(snoozeTime: Duration = hours(2)): MentionId {
         val mention = actual.randomUnread()
-        val observer = app().client.observeUserMentions(mention.id)
         snooze(mention.id, snoozeTime)
-        observer.waitUntilUpdate()
-        actual = allMentions()
         expected = expected.updateStatusById(mention.id, MentionStatus.SNOOZED)
         return mention.id
     }

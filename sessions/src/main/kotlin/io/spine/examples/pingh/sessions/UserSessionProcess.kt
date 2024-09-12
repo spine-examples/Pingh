@@ -55,7 +55,7 @@ internal class UserSessionProcess :
      * It is expected this field is set by calling [inject]
      * right after the instance creation.
      */
-    private lateinit var authenticationService: GitHubAuthentication
+    private lateinit var auth: GitHubAuthentication
 
     /**
      * Requests user and device codes from GitHub for authentication.
@@ -66,7 +66,7 @@ internal class UserSessionProcess :
      */
     @Assign
     internal fun handle(command: LogUserIn): UserCodeReceived {
-        val codes = authenticationService.requestVerificationCodes()
+        val codes = auth.requestVerificationCodes()
         with(builder()) {
             deviceCode = codes.deviceCode
         }
@@ -91,7 +91,7 @@ internal class UserSessionProcess :
         command: VerifyUserLoginToGitHub
     ): EitherOf2<UserLoggedIn, UserIsNotLoggedIntoGitHub> {
         val tokens = try {
-            authenticationService.requestAccessToken(state().deviceCode)
+            auth.requestAccessToken(state().deviceCode)
         } catch (exception: CannotObtainAccessToken) {
             return EitherOf2.withB(UserIsNotLoggedIntoGitHub::class.withSession(command.id))
         }
@@ -122,7 +122,7 @@ internal class UserSessionProcess :
      */
     @Assign
     internal fun handle(command: RefreshToken): TokenRefreshed {
-        val tokens = authenticationService.refreshAccessToken(state().refreshToken)
+        val tokens = auth.refreshAccessToken(state().refreshToken)
         with(builder()) {
             whenAccessTokenExpires = tokens.whenExpires
             refreshToken = tokens.refreshToken
@@ -146,7 +146,7 @@ internal class UserSessionProcess :
      * It is expected this method is called right after the creation of the process instance.
      * Otherwise, the process will not be able to function properly.
      */
-    internal fun inject(authenticationService: GitHubAuthentication) {
-        this.authenticationService = authenticationService
+    internal fun inject(auth: GitHubAuthentication) {
+        this.auth = auth
     }
 }

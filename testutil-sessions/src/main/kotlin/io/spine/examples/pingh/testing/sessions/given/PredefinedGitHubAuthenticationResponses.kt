@@ -94,11 +94,13 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
     }
 
     /**
-     * Reset the instance to its initial state.
+     * Resets the instance to its initial state.
      *
-     * Marks that the user has not entered their user code.
+     * Once the instance is reset, the authentication process is also reset.
+     * This means the user code has not been entered, and no responses
+     * have been received from GitHub.
      */
-    public fun clean() {
+    public fun reset() {
         isUserCodeEntered = false
         whenReceivedAccessTokenExpires = null
     }

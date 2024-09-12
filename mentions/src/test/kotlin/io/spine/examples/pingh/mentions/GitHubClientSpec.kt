@@ -71,20 +71,18 @@ import org.junit.jupiter.api.Test
 @DisplayName("`GitHubClient` should")
 internal class GitHubClientSpec : ContextAwareTest() {
 
-    private val gitHubClientService = PredefinedGitHubSearchResponses()
+    private val search = PredefinedGitHubSearchResponses()
     private lateinit var sessionContext: BlackBoxContext
     private lateinit var gitHubClientId: GitHubClientId
     private lateinit var sessionId: SessionId
     private lateinit var token: PersonalAccessToken
 
     override fun contextBuilder(): BoundedContextBuilder =
-        newMentionsContext(gitHubClientService)
+        newMentionsContext(search)
 
     @BeforeEach
     internal fun prepareSessionsContextAndEmitEvent() {
-        gitHubClientService.unfreeze()
-        gitHubClientService.setDefaultResponseStatusCode()
-        gitHubClientService.mentionsAreNotFetched()
+        search.reset()
         sessionContext = BlackBoxContext
             .from(newSessionsContext(PredefinedGitHubAuthenticationResponses()))
         val username = Username::class.of(randomString())
@@ -234,16 +232,16 @@ internal class GitHubClientSpec : ContextAwareTest() {
 
         @Test
         internal fun `reject if the update process is already in progress at this time`() {
-            gitHubClientService.freeze()
+            search.freeze()
             val firstClientThread = Thread {
                 val firstCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
                 context().receivesCommand(firstCommand)
-                gitHubClientService.unfreeze()
+                search.unfreeze()
             }
             val secondClientThread = Thread {
                 val secondCommand = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
                 context().receivesCommand(secondCommand)
-                gitHubClientService.unfreeze()
+                search.unfreeze()
             }
             val expectedRejection =
                 MentionsUpdateIsAlreadyInProgress::class.buildBy(gitHubClientId)
@@ -284,7 +282,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
         @Test
         internal fun `emit 'RequestMentionsFromGitHubFailed' event if request to GitHub failed`() {
             val responseStatusCode = HttpStatusCode.ServiceUnavailable
-            gitHubClientService.setResponseStatusCode(responseStatusCode)
+            search.setResponseStatusCode(responseStatusCode)
             emitMentionsUpdateFromGitHubRequestedEvent()
             val expected = RequestMentionsFromGitHubFailed::class.buildBy(
                 gitHubClientId,
@@ -297,7 +295,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
                 .withType(MentionsUpdateFromGitHubCompleted::class.java)
                 .hasSize(0)
             context().assertEvent(expected)
-            gitHubClientService.setDefaultResponseStatusCode()
+            search.setDefaultResponseStatusCode()
         }
 
         private fun emitMentionsUpdateFromGitHubRequestedEvent() {
