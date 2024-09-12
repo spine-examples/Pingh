@@ -28,7 +28,6 @@ package io.spine.examples.pingh.client
 
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
-import io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT
 import io.spine.core.UserId
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
@@ -163,20 +162,17 @@ public class PinghApplication private constructor(
 
     /**
      * A builder for [PinghApplication].
-     *
-     * By default, creates application that opens channel for the client
-     * to 'localhost:[50051][DEFAULT_CLIENT_SERVICE_PORT]'.
      */
     public class Builder {
         /**
          * The address of the Pingh server.
          */
-        private var address: String = "localhost"
+        private var address: String? = null
 
         /**
          * The port on which the Pingh server is running.
          */
-        private var port: Int = DEFAULT_CLIENT_SERVICE_PORT
+        private var port: Int? = null
 
         /**
          * Allows to send notifications.
@@ -210,11 +206,13 @@ public class PinghApplication private constructor(
         /**
          * Builds a Pingh application with configured data.
          *
-         * @throws IllegalStateException if notification sender is not specified.
+         * @throws IllegalStateException if some application data is missing.
          */
         public fun build(): PinghApplication {
             checkNotNull(notificationSender) { "Notification sender must be specified." }
-            return PinghApplication(notificationSender!!, address, port)
+            checkNotNull(address) { "Address must be specified." }
+            checkNotNull(port) { "Port must be specified." }
+            return PinghApplication(notificationSender!!, address!!, port!!)
         }
     }
 }
