@@ -200,11 +200,11 @@ message OrganizationFragment {
 }
 
 // A response from the GitHub REST API to a request for the organizations the user belongs to.
-message OrganizationResponse {
+message OrganizationsResponse {
 
     // GitHub organizations.
     //
     // If the user is not a member of an organization, the list is empty.
     //
-    repeated OrganizationFragment items = 1 [(validate) = true];
+    repeated OrganizationFragment item = 1 [(validate) = true];
 }
