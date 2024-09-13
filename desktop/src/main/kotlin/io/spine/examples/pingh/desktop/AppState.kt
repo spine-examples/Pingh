@@ -80,7 +80,7 @@ internal class AppState(settings: SystemSettings) {
             properties.load(it)
         }
         check(properties.containsKey("server.address")) {
-            "The Pingh server address must be provided in the configuration file.."
+            "The Pingh server address must be provided in the configuration file."
         }
         check(properties.containsKey("server.port")) {
             "The Pingh server port must be provided in the configuration file."
