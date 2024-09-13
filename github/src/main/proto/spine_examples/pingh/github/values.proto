@@ -121,3 +121,16 @@ message ClientSecret {
 
     string value = 1 [(required) = true];
 }
+
+// A GitHub organization information.
+message Organization {
+
+    // An organization name.
+    OrganizationLogin login = 1 [(required) = true];
+}
+
+// An unique name of the organization on GitHub.
+message OrganizationLogin {
+
+    string value = 1 [(required) = true];
+}

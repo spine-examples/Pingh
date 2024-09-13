@@ -34,6 +34,8 @@ import io.spine.examples.pingh.github.rest.AccessTokenFragment
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.CommentFragment
 import io.spine.examples.pingh.github.rest.IssueOrPullRequestFragment
+import io.spine.examples.pingh.github.rest.OrganizationFragment
+import io.spine.examples.pingh.github.rest.UserFragment
 import io.spine.examples.pingh.github.rest.VerificationCodesFragment
 import io.spine.examples.pingh.github.rest.VerificationCodesResponse
 import io.spine.net.Url
@@ -190,4 +192,26 @@ public fun KClass<AccessTokenResponse>.fromFragment(
 public fun KClass<ClientSecret>.of(value: String): ClientSecret =
     ClientSecret.newBuilder()
         .setValue(value)
+        .vBuild()
+
+/**
+ * Creates a new `User` with the data specified in the `UserFragment`.
+ */
+public fun KClass<User>.fromFragment(fragment: UserFragment): User =
+    this.of(fragment.username, fragment.avatarUrl)
+
+/**
+ * Creates a new `OrganizationLogin` with the passed string value.
+ */
+public fun KClass<OrganizationLogin>.of(value: String): OrganizationLogin =
+    OrganizationLogin.newBuilder()
+        .setValue(value)
+        .vBuild()
+
+/**
+ * Creates a new `Organization` with the data specified in the `OrganizationFragment`.
+ */
+public fun KClass<Organization>.fromFragment(fragment: OrganizationFragment): Organization =
+    Organization.newBuilder()
+        .setLogin(OrganizationLogin::class.of(fragment.login))
         .vBuild()
