@@ -76,14 +76,17 @@ internal class AppState(settings: SystemSettings) {
      */
     private fun loadProperties(): Properties {
         val properties = Properties()
-        javaClass.getResourceAsStream("/config/server.properties").use {
+        val path = "/config/server.properties"
+        javaClass.getResourceAsStream(path).use {
             properties.load(it)
         }
         check(properties.containsKey("server.address")) {
-            "The Pingh server address must be provided in the configuration file."
+            "The Pingh server address must be provided in the configuration file " +
+                    "located at \"resource$path\"."
         }
         check(properties.containsKey("server.port")) {
-            "The Pingh server port must be provided in the configuration file."
+            "The Pingh server port must be provided in the configuration file " +
+                    "located at \"resource$path\"."
         }
         return properties
     }
