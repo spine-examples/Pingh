@@ -40,6 +40,7 @@ import io.spine.examples.pingh.github.ClientSecret
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.RemoteGitHubSearch
 import io.spine.examples.pingh.sessions.RemoteGitHubAuthentication
+import io.spine.examples.pingh.sessions.RemoteGitHubProfile
 import io.spine.examples.pingh.sessions.newSessionsContext
 
 /**
@@ -77,7 +78,12 @@ private fun createServer(): Server {
     val clientEngine = CIO.create()
     return Server
         .atPort(DEFAULT_CLIENT_SERVICE_PORT)
-        .add(newSessionsContext(RemoteGitHubAuthentication(clientId, clientSecret, clientEngine)))
+        .add(
+            newSessionsContext(
+                RemoteGitHubAuthentication(clientId, clientSecret, clientEngine),
+                RemoteGitHubProfile(clientEngine)
+            )
+        )
         .add(newMentionsContext(RemoteGitHubSearch(clientEngine)))
         .build()
 }
