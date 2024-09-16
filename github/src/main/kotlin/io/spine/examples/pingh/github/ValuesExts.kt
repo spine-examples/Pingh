@@ -215,3 +215,11 @@ public fun KClass<Organization>.fromFragment(fragment: OrganizationFragment): Or
     Organization.newBuilder()
         .setLogin(OrganizationLogin::class.of(fragment.login))
         .vBuild()
+
+/**
+ * Creates a new `Organization` with the passed login value.
+ */
+public fun KClass<Organization>.loggedAs(login: String): Organization =
+    Organization.newBuilder()
+        .setLogin(OrganizationLogin::class.of(login))
+        .vBuild()
