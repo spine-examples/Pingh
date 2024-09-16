@@ -28,6 +28,9 @@ package io.spine.examples.pingh.sessions
 
 import io.spine.core.External
 import io.spine.examples.pingh.clock.event.TimePassed
+import io.spine.examples.pingh.github.Organization
+import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.loggedAs
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.command.RefreshToken
@@ -37,11 +40,27 @@ import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
+import io.spine.examples.pingh.sessions.rejection.UserIsNotMemberOfAnyPermittedOrganizations
+import io.spine.examples.pingh.sessions.rejection.UserLoggedInUsingDifferentAccount
 import io.spine.server.command.Assign
 import io.spine.server.command.Command
 import io.spine.server.procman.ProcessManager
 import io.spine.server.tuple.EitherOf2
 import java.util.Optional
+import kotlin.jvm.Throws
+
+/**
+ * Organizations whose members are allowed to authorize with the Pingh app.
+ *
+ * For this to work correctly, the organization must have
+ * the [Pingh application](https://github.com/apps/pingh-tracker-of-github-mentions)
+ * installed on GitHub.
+ */
+internal val permittedOrganizations: Set<Organization> = setOf(
+    Organization::class.loggedAs("SpineEventEngine"),
+    Organization::class.loggedAs("TeamDev-Ltd"),
+    Organization::class.loggedAs("TeamDev-IP")
+)
 
 /**
  * Coordinates session management, that is, user login and logout.
@@ -56,6 +75,14 @@ internal class UserSessionProcess :
      * right after the instance creation.
      */
     private lateinit var auth: GitHubAuthentication
+
+    /**
+     * Service for obtaining user's information via GitHub.
+     *
+     * It is expected this field is set by calling [inject]
+     * right after the instance creation.
+     */
+    private lateinit var profile: GitHubProfile
 
     /**
      * Requests user and device codes from GitHub for authentication.
@@ -85,8 +112,17 @@ internal class UserSessionProcess :
      * If the user has already entered the user code issued with the device code, the login
      * is considered successful, and the `UserLoggedIn` event is emitted. Otherwise,
      * the `UserIsNotLoggedIntoGitHub` event is emitted.
+     *
+     * @throws UserLoggedInUsingDifferentAccount if the logged-in account's username differs
+     *   from the one provided at the start.
+     * @throws UserIsNotMemberOfAnyPermittedOrganizations if the user is not a member
+     *   of any permitted organizations.
      */
     @Assign
+    @Throws(
+        UserLoggedInUsingDifferentAccount::class,
+        UserIsNotMemberOfAnyPermittedOrganizations::class
+    )
     internal fun handle(
         command: VerifyUserLoginToGitHub
     ): EitherOf2<UserLoggedIn, UserIsNotLoggedIntoGitHub> {
@@ -95,12 +131,46 @@ internal class UserSessionProcess :
         } catch (exception: CannotObtainAccessToken) {
             return EitherOf2.withB(UserIsNotLoggedIntoGitHub::class.withSession(command.id))
         }
+        ensureLoggingInWithCorrectAccount(tokens.accessToken)
+        ensureMembershipInAnyPermittedOrganizations(tokens.accessToken)
         with(builder()) {
             refreshToken = tokens.refreshToken
             whenAccessTokenExpires = tokens.whenExpires
             clearDeviceCode()
         }
         return EitherOf2.withA(UserLoggedIn::class.buildBy(command.id, tokens.accessToken))
+    }
+
+    /**
+     * Throws an `UserLoggedInUsingDifferentAccount` exception if the username
+     * of the logged-in account differs from the one entered at the start.
+     *
+     * GitHub's device flow for authentication does not use usernames,
+     * but the initial username is required to start a user session.
+     * Therefore, it's essential to verify that the entered username matches
+     * the account from which the user authenticated.
+     */
+    @Throws(UserLoggedInUsingDifferentAccount::class)
+    private fun ensureLoggingInWithCorrectAccount(token: PersonalAccessToken) {
+        val loggedInUser = profile.requestInfo(token)
+        if (!loggedInUser.username.equals(state().id.username)) {
+            throw UserLoggedInUsingDifferentAccount::class.with(state().id, loggedInUser.username)
+        }
+    }
+
+    /**
+     * Throws an `UserIsNotMemberOfAnyPermittedOrganizations` exception if the user is not a member
+     * of any [permitted organizations][permittedOrganizations].
+     */
+    @Throws(UserIsNotMemberOfAnyPermittedOrganizations::class)
+    private fun ensureMembershipInAnyPermittedOrganizations(token: PersonalAccessToken) {
+        val userOrganizations = profile.requestOrganizations(token)
+        if (!userOrganizations.any { permittedOrganizations.contains(it) }) {
+            throw UserIsNotMemberOfAnyPermittedOrganizations::class.with(
+                state().id,
+                permittedOrganizations
+            )
+        }
     }
 
     /**
@@ -140,13 +210,14 @@ internal class UserSessionProcess :
     }
 
     /**
-     * Supplies this instance of the process with a service for generating verification codes
-     * and access tokens via GitHub.
+     * Supplies this instance with a service for generating GitHub verification codes
+     * and access tokens, as well as a service for retrieving user information from GitHub.
      *
      * It is expected this method is called right after the creation of the process instance.
      * Otherwise, the process will not be able to function properly.
      */
-    internal fun inject(auth: GitHubAuthentication) {
+    internal fun inject(auth: GitHubAuthentication, profile: GitHubProfile) {
         this.auth = auth
+        this.profile = profile
     }
 }
