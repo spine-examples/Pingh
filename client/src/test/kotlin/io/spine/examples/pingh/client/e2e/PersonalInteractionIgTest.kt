@@ -29,9 +29,9 @@ package io.spine.examples.pingh.client.e2e
 import com.google.protobuf.Duration
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import io.spine.examples.pingh.client.EnterUsername
+import io.spine.examples.pingh.client.LoginFlow.EnterUsername
 import io.spine.examples.pingh.client.MentionsFlow
-import io.spine.examples.pingh.client.VerifyLogin
+import io.spine.examples.pingh.client.LoginFlow.VerifyLogin
 import io.spine.examples.pingh.client.e2e.given.expectedMentionsList
 import io.spine.examples.pingh.client.e2e.given.randomUnread
 import io.spine.examples.pingh.client.e2e.given.updateStatusById

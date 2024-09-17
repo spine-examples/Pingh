@@ -27,7 +27,7 @@
 package io.spine.examples.pingh.client.e2e
 
 import io.spine.environment.Tests
-import io.spine.examples.pingh.client.VerifyLogin
+import io.spine.examples.pingh.client.LoginFlow.VerifyLogin
 import io.spine.examples.pingh.client.PinghApplication
 import io.spine.examples.pingh.client.e2e.given.MemoizingNotificationSender
 import io.spine.examples.pingh.mentions.newMentionsContext
