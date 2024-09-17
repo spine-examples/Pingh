@@ -41,6 +41,9 @@ import io.spine.examples.pingh.sessions.buildWith
 import io.spine.examples.pingh.sessions.event.TokenRefreshed
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
+import io.spine.examples.pingh.sessions.permittedOrganizations
+import io.spine.examples.pingh.sessions.rejection.Rejections.UserIsNotMemberOfAnyPermittedOrganizations
+import io.spine.examples.pingh.sessions.rejection.Rejections.UserLoggedInUsingDifferentAccount
 import io.spine.examples.pingh.sessions.with
 import io.spine.examples.pingh.testing.sessions.given.loadAccessToken
 import io.spine.examples.pingh.testing.sessions.given.loadRefreshedAccessToken
@@ -128,3 +131,27 @@ internal fun expectedTokenRefreshedEvent(id: SessionId, whenRefreshed: Timestamp
     with(loadRefreshedAccessToken()) {
         TokenRefreshed::class.with(id, accessToken, whenRefreshed)
     }
+
+/**
+ * Creates a new `UserLoggedInUsingDifferentAccount` rejection  with the passed ID of the session
+ * and name of the user whose account was used for authentication.
+ */
+internal fun KClass<UserLoggedInUsingDifferentAccount>.with(
+    id: SessionId,
+    loggedInUsername: Username
+): UserLoggedInUsingDifferentAccount =
+    UserLoggedInUsingDifferentAccount.newBuilder()
+        .setId(id)
+        .setLoggedInUsername(loggedInUsername)
+        .vBuild()
+
+/**
+ * Creates a new `UserIsNotMemberOfAnyPermittedOrganizations` rejection
+ * with the passed ID of the session.
+ */
+internal fun KClass<UserIsNotMemberOfAnyPermittedOrganizations>.with(id: SessionId):
+        UserIsNotMemberOfAnyPermittedOrganizations =
+    UserIsNotMemberOfAnyPermittedOrganizations.newBuilder()
+        .setId(id)
+        .addAllPermittedOrganization(permittedOrganizations)
+        .vBuild()

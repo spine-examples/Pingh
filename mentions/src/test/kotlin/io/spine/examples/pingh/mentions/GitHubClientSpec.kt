@@ -56,6 +56,7 @@ import io.spine.examples.pingh.sessions.of
 import io.spine.examples.pingh.sessions.with
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
+import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubProfileResponses
 import io.spine.protobuf.Durations2.seconds
 import io.spine.server.BoundedContextBuilder
 import io.spine.server.integration.ThirdPartyContext
@@ -84,7 +85,12 @@ internal class GitHubClientSpec : ContextAwareTest() {
     internal fun prepareSessionsContextAndEmitEvent() {
         search.reset()
         sessionContext = BlackBoxContext
-            .from(newSessionsContext(PredefinedGitHubAuthenticationResponses()))
+            .from(
+                newSessionsContext(
+                    PredefinedGitHubAuthenticationResponses(),
+                    PredefinedGitHubProfileResponses()
+                )
+            )
         val username = Username::class.of(randomString())
         gitHubClientId = GitHubClientId::class.of(username)
         emitUserLoggedInEventInSessionsContext()

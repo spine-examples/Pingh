@@ -30,6 +30,8 @@ import com.google.protobuf.Timestamp
 import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.clock.buildBy
 import io.spine.examples.pingh.clock.event.TimePassed
+import io.spine.examples.pingh.github.Username
+import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.command.RefreshToken
@@ -45,7 +47,10 @@ import io.spine.examples.pingh.sessions.given.expectedUserSessionAfterTokenRefre
 import io.spine.examples.pingh.sessions.given.expectedUserSessionWithDeviceCode
 import io.spine.examples.pingh.sessions.given.expectedUserSessionWithRefreshToken
 import io.spine.examples.pingh.sessions.given.generate
+import io.spine.examples.pingh.sessions.rejection.Rejections.UserIsNotMemberOfAnyPermittedOrganizations
+import io.spine.examples.pingh.sessions.rejection.Rejections.UserLoggedInUsingDifferentAccount
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
+import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubProfileResponses
 import io.spine.protobuf.Durations2.minutes
 import io.spine.server.BoundedContextBuilder
 import io.spine.server.integration.ThirdPartyContext
@@ -61,54 +66,59 @@ import org.junit.jupiter.api.Test
 internal class UserSessionSpec : ContextAwareTest() {
 
     private val auth = PredefinedGitHubAuthenticationResponses()
+    private val profile = PredefinedGitHubProfileResponses()
 
     override fun contextBuilder(): BoundedContextBuilder =
-        newSessionsContext(auth)
+        newSessionsContext(auth, profile)
 
     @AfterEach
-    internal fun resetAuthentication() {
+    internal fun reset() {
         auth.reset()
+        profile.reset()
     }
 
     @Nested internal inner class
     `Handle 'LogUserIn' command, and` {
 
-        private lateinit var sessionId: SessionId
+        private lateinit var id: SessionId
 
         @BeforeEach
         internal fun sendCommand() {
-            sessionId = SessionId::class.generate()
-            val command = LogUserIn::class.withSession(sessionId)
+            id = SessionId::class.generate()
+            val command = LogUserIn::class.withSession(id)
             context().receivesCommand(command)
         }
 
         @Test
         internal fun `emit 'UserCodeReceived' event`() {
-            val expected = expectedUserCodeReceivedEvent(sessionId)
+            val expected = expectedUserCodeReceivedEvent(id)
             context().assertEvent(expected)
         }
 
         @Test
         internal fun `set device code in 'UserSession' entity`() {
-            val expected = expectedUserSessionWithDeviceCode(sessionId)
-            context().assertState(sessionId, expected)
+            val expected = expectedUserSessionWithDeviceCode(id)
+            context().assertState(id, expected)
         }
     }
 
     @Nested internal inner class
     `Handle 'VerifyUserLoginToGitHub' command, and` {
 
-        private lateinit var sessionId: SessionId
+        private lateinit var id: SessionId
 
         @BeforeEach
-        internal fun generateId() {
-            sessionId = SessionId::class.generate()
+        internal fun sendLogUserInCommand() {
+            id = SessionId::class.generate()
+            val command = LogUserIn::class.withSession(id)
+            context().receivesCommand(command)
         }
 
         @Test
         internal fun `emit 'UserIsNotLoggedIntoGitHub' if user code has not been entered`() {
-            sendCommand()
-            val expected = UserIsNotLoggedIntoGitHub::class.withSession(sessionId)
+            profile.username = id.username
+            sendVerificationCommand()
+            val expected = UserIsNotLoggedIntoGitHub::class.withSession(id)
             context().assertEvent(expected)
             context().assertEvents()
                 .withType(UserLoggedIn::class.java)
@@ -118,8 +128,9 @@ internal class UserSessionSpec : ContextAwareTest() {
         @Test
         internal fun `emit 'UserLoggedIn' if user code has been entered`() {
             auth.enterUserCode()
-            sendCommand()
-            val expected = expectedUserLoggedInEvent(sessionId)
+            profile.username = id.username
+            sendVerificationCommand()
+            val expected = expectedUserLoggedInEvent(id)
             context().assertEvent(expected)
             context().assertEvents()
                 .withType(UserIsNotLoggedIntoGitHub::class.java)
@@ -129,13 +140,33 @@ internal class UserSessionSpec : ContextAwareTest() {
         @Test
         internal fun `set refresh token in 'UserSession' entity if user code has been entered`() {
             auth.enterUserCode()
-            sendCommand()
-            val expected = expectedUserSessionWithRefreshToken(sessionId)
-            context().assertState(sessionId, expected)
+            profile.username = id.username
+            sendVerificationCommand()
+            val expected = expectedUserSessionWithRefreshToken(id)
+            context().assertState(id, expected)
         }
 
-        private fun sendCommand() {
-            val command = VerifyUserLoginToGitHub::class.withSession(sessionId)
+        @Test
+        internal fun `reject if the user completes authentication from another account`() {
+            auth.enterUserCode()
+            profile.username = Username::class.of("illegal")
+            sendVerificationCommand()
+            val expected = UserLoggedInUsingDifferentAccount::class.with(id, profile.username)
+            context().assertEvent(expected)
+        }
+
+        @Test
+        internal fun `reject if the user is not a member of the permitted organizations`() {
+            auth.enterUserCode()
+            profile.username = id.username
+            profile.isMemberOfPermittedOrganizations = false
+            sendVerificationCommand()
+            val expected = UserIsNotMemberOfAnyPermittedOrganizations::class.with(id)
+            context().assertEvent(expected)
+        }
+
+        private fun sendVerificationCommand() {
+            val command = VerifyUserLoginToGitHub::class.withSession(id)
             context().receivesCommand(command)
         }
     }
@@ -148,6 +179,7 @@ internal class UserSessionSpec : ContextAwareTest() {
         @BeforeEach
         internal fun generateId() {
             id = SessionId::class.generate()
+            profile.username = id.username
         }
 
         @Test
@@ -222,24 +254,24 @@ internal class UserSessionSpec : ContextAwareTest() {
     @Nested internal inner class
     `Handle 'LogUserOut' command, and` {
 
-        private lateinit var sessionId: SessionId
+        private lateinit var id: SessionId
 
         @BeforeEach
         internal fun sendCommand() {
-            sessionId = SessionId::class.generate()
-            logIn(sessionId)
-            context().receivesCommand(LogUserOut::class.withSession(sessionId))
+            id = SessionId::class.generate()
+            logIn(id)
+            context().receivesCommand(LogUserOut::class.withSession(id))
         }
 
         @Test
         internal fun `emit 'UserLoggedOut' event`() {
-            val expected = UserLoggedOut::class.buildBy(sessionId)
+            val expected = UserLoggedOut::class.buildBy(id)
             context().assertEvent(expected)
         }
 
         @Test
         internal fun `delete 'UserSession' entity`() {
-            context().assertEntity(sessionId, UserSessionProcess::class.java)
+            context().assertEntity(id, UserSessionProcess::class.java)
                 .deletedFlag()
                 .isTrue()
         }
@@ -276,6 +308,7 @@ internal class UserSessionSpec : ContextAwareTest() {
     private fun logIn(id: SessionId) {
         context().receivesCommand(LogUserIn::class.withSession(id))
         auth.enterUserCode()
+        profile.username = id.username
         context().receivesCommand(VerifyUserLoginToGitHub::class.withSession(id))
     }
 }

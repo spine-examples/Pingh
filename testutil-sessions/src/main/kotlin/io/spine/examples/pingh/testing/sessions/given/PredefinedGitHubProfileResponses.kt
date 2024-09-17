@@ -54,10 +54,10 @@ public class PredefinedGitHubProfileResponses : GitHubProfile {
     public var isMemberOfPermittedOrganizations: Boolean = true
 
     /**
-     * Returns the `User` with th [username] and empty avatar URL.
+     * Returns the `User` with the specified [username] and a default avatar URL.
      */
     override fun requestInfo(token: PersonalAccessToken): User =
-        User::class.of(username.value, "")
+        User::class.of(username.value, "https://avatars.githubusercontent.com/u/160486193")
 
     /**
      * Returns the set of `Organization`s retrieved from a JSON file in the resource folder
