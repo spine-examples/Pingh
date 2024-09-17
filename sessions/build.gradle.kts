@@ -45,6 +45,14 @@ spine {
     forceDependencies = true
 }
 
+/**
+ * Kotlin code compilation task waits until
+ * Protobuf files are fully generated and rejections are created.
+ */
+tasks.named("compileKotlin") {
+    dependsOn("generateRejections")
+}
+
 dependencies {
     implementation(project(":github"))
     implementation(project(":clock"))
