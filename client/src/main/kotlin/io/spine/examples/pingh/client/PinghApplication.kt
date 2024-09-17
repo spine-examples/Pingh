@@ -28,7 +28,6 @@ package io.spine.examples.pingh.client
 
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
-import io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT
 import io.spine.core.UserId
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
@@ -41,24 +40,26 @@ import kotlinx.coroutines.launch
  *
  * Stores application states and allows to create different process flows.
  *
- * By default, application opens channel for the client
- * to 'localhost:[50051][DEFAULT_CLIENT_SERVICE_PORT]'.
- *
  * @param notificationSender Allows to send notifications.
  * @param address The address of the Pingh server.
  * @param port The port on which the Pingh server is running.
  */
-public class PinghApplication(
+public class PinghApplication private constructor(
     notificationSender: NotificationSender,
-    address: String = "localhost",
-    port: Int = DEFAULT_CLIENT_SERVICE_PORT
+    address: String,
+    port: Int
 ) {
-    private companion object {
+    public companion object {
         /**
          * The default amount of seconds to wait
          * when [closing][ManagedChannel.shutdown] the channel.
          */
         private const val defaultShutdownTimeout = 5L
+
+        /**
+         * Creates a new builder for Pingh application.
+         */
+        public fun builder(): Builder = Builder()
     }
 
     /**
@@ -157,6 +158,62 @@ public class PinghApplication(
         client.close()
         channel.shutdown()
             .awaitTermination(defaultShutdownTimeout, TimeUnit.SECONDS)
+    }
+
+    /**
+     * A builder for [PinghApplication].
+     */
+    public class Builder {
+        /**
+         * The address of the Pingh server.
+         */
+        private var address: String? = null
+
+        /**
+         * The port on which the Pingh server is running.
+         */
+        private var port: Int? = null
+
+        /**
+         * Allows to send notifications.
+         */
+        private var notificationSender: NotificationSender? = null
+
+        /**
+         * Sets the address of the Pingh server.
+         */
+        public fun withAddress(address: String): Builder {
+            this.address = address
+            return this
+        }
+
+        /**
+         * Sets the port on which the Pingh server is running.
+         */
+        public fun withPort(port: Int): Builder {
+            this.port = port
+            return this
+        }
+
+        /**
+         * Sets sender for notifications.
+         */
+        public fun with(notificationSender: NotificationSender): Builder {
+            this.notificationSender = notificationSender
+            return this
+        }
+
+        /**
+         * Builds a Pingh application with configured data.
+         *
+         * @throws IllegalStateException if some application data is missing.
+         */
+        public fun build(): PinghApplication {
+            checkNotNull(notificationSender) { "Notification sender must be specified." }
+            checkNotNull(address) { "Address must be specified." }
+            checkNotNull(port) { "Port must be specified." }
+            return PinghApplication(notificationSender!!, address!!, port!!)
+        }
     }
 }
 

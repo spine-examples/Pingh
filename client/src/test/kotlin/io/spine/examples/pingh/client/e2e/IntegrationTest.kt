@@ -101,7 +101,11 @@ internal abstract class IntegrationTest {
     @BeforeEach
     internal fun createApplication() {
         notificationSender = MemoizingNotificationSender()
-        application = PinghApplication(notificationSender, address, port)
+        application = PinghApplication.builder()
+            .withAddress(address)
+            .withPort(port)
+            .with(notificationSender)
+            .build()
     }
 
     @AfterEach
