@@ -338,14 +338,14 @@ private fun invoke(delay: Duration, action: () -> Unit): Job =
  * An error message explaining the cause of `UserLoggedInUsingDifferentAccount` rejection.
  */
 private val UserLoggedInUsingDifferentAccount.cause: String
-    get() = "You entered ${id.username.value} username but used the code from account " +
-            "of ${loggedInUsername.value} user. You have to authenticate with " +
-            "the account matching the username you provided initially."
+    get() = "You entered \"${id.username.value}\" as the username but used the code " +
+            "from \"${loggedInUsername.value}\" account. You must authenticate with " +
+            "the account matching the username you initially provided."
 
 /**
  * An error message explaining the cause of `UserIsNotMemberOfAnyPermittedOrganizations` rejection.
  */
 private val UserIsNotMemberOfAnyPermittedOrganizations.cause: String
     get() = "You are not a member of an organization authorized to use the application. " +
-            "You have to belong to one of the following GitHub organizations: " +
-            "${permittedOrganizationList.joinToString()}."
+            "You must belong to one of the following GitHub organizations: " +
+            "${permittedOrganizationList.joinToString { it.login.value }}."
