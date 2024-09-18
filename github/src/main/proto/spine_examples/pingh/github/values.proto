@@ -134,3 +134,13 @@ message OrganizationLogin {
 
     string value = 1 [(required) = true];
 }
+
+// A GitHub repository information.
+message Repo {
+
+    // The name of the GitHub repository.
+    string name = 1 [(required) = true];
+
+    // The name of user or organization which is owner of this repo.
+    string owner = 2 [(required) = true];
+}
