@@ -30,7 +30,7 @@ import io.spine.examples.pingh.github.Organization
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.fromFragment
+import io.spine.examples.pingh.github.from
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.sessions.GitHubProfile
 
@@ -67,7 +67,7 @@ public class PredefinedGitHubProfileResponses : GitHubProfile {
         if (isMemberOfPermittedOrganizations) {
             loadOrganizations()
                 .itemList
-                .map { fragment -> Organization::class.fromFragment(fragment) }
+                .map { fragment -> Organization::class.from(fragment) }
                 .toSet()
         } else {
             setOf()

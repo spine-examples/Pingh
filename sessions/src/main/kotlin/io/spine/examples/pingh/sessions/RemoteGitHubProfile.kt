@@ -34,7 +34,7 @@ import io.ktor.client.request.get
 import io.spine.examples.pingh.github.Organization
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.User
-import io.spine.examples.pingh.github.fromFragment
+import io.spine.examples.pingh.github.from
 import io.spine.examples.pingh.github.rest.OrganizationsResponse
 import kotlinx.coroutines.runBlocking
 
@@ -85,7 +85,7 @@ public class RemoteGitHubProfile(engine: HttpClientEngine) : GitHubProfile {
             // is just the value of the `item` field.
             OrganizationsResponse::class.parseJson("{ item: $json }")
                 .itemList
-                .map {fragment -> Organization::class.fromFragment(fragment) }
+                .map {fragment -> Organization::class.from(fragment) }
                 .toSet()
         }
 }

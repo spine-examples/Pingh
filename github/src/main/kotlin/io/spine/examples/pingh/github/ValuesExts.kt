@@ -197,7 +197,7 @@ public fun KClass<ClientSecret>.of(value: String): ClientSecret =
 /**
  * Creates a new `User` with the data specified in the `UserFragment`.
  */
-public fun KClass<User>.fromFragment(fragment: UserFragment): User =
+public fun KClass<User>.from(fragment: UserFragment): User =
     this.of(fragment.username, fragment.avatarUrl)
 
 /**
@@ -211,7 +211,7 @@ public fun KClass<OrganizationLogin>.of(value: String): OrganizationLogin =
 /**
  * Creates a new `Organization` with the data specified in the `OrganizationFragment`.
  */
-public fun KClass<Organization>.fromFragment(fragment: OrganizationFragment): Organization =
+public fun KClass<Organization>.from(fragment: OrganizationFragment): Organization =
     Organization.newBuilder()
         .setLogin(OrganizationLogin::class.of(fragment.login))
         .vBuild()
