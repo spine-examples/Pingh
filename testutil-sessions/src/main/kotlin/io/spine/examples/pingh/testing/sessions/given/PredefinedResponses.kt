@@ -68,11 +68,11 @@ public fun loadRefreshedAccessToken(): AccessTokenResponse {
 }
 
 /**
- * Returns the response provided by [PredefinedGitHubProfileResponses]
+ * Returns the response provided by [PredefinedGitHubUsersResponses]
  * upon successful execution of the request for organizations in which the user is a member.
  */
 public fun loadOrganizations(): OrganizationsResponse {
-    val jsonFile = PredefinedGitHubAuthenticationResponses::class.java
+    val jsonFile = PredefinedGitHubUsersResponses::class.java
         .getResource("/github-responses/organizations-response.json")
     checkNotNull(jsonFile)
     val json = jsonFile.readText()

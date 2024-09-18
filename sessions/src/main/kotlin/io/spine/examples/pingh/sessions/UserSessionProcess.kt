@@ -82,7 +82,7 @@ internal class UserSessionProcess :
      * It is expected this field is set by calling [inject]
      * right after the instance creation.
      */
-    private lateinit var profile: GitHubProfile
+    private lateinit var users: GitHubUsers
 
     /**
      * Requests user and device codes from GitHub for authentication.
@@ -148,7 +148,7 @@ internal class UserSessionProcess :
      */
     @Throws(UsernameMismatch::class)
     private fun ensureLoggingInWithCorrectAccount(token: PersonalAccessToken) {
-        val loggedInUser = profile.requestInfo(token)
+        val loggedInUser = users.ownerOf(token)
         if (!loggedInUser.username.equals(state().id.username)) {
             throw UsernameMismatch::class.with(state().id, loggedInUser.username)
         }
@@ -160,7 +160,7 @@ internal class UserSessionProcess :
      */
     @Throws(OrgAccessDenied::class)
     private fun ensureMembershipInAnyPermittedOrganizations(token: PersonalAccessToken) {
-        val userOrganizations = profile.requestOrganizations(token)
+        val userOrganizations = users.memberships(token)
         if (!userOrganizations.any { permittedOrganizations.contains(it) }) {
             throw OrgAccessDenied::class.with(state().id, permittedOrganizations.toList())
         }
@@ -209,8 +209,8 @@ internal class UserSessionProcess :
      * It is expected this method is called right after the creation of the process instance.
      * Otherwise, the process will not be able to function properly.
      */
-    internal fun inject(auth: GitHubAuthentication, profile: GitHubProfile) {
+    internal fun inject(auth: GitHubAuthentication, users: GitHubUsers) {
         this.auth = auth
-        this.profile = profile
+        this.users = users
     }
 }

@@ -33,14 +33,13 @@ import io.spine.examples.pingh.github.User
 /**
  * Allows to retrieve user information using the GitHub REST API.
  */
-public interface GitHubProfile {
-
+public interface GitHubUsers {
     /**
      * Requests the user's account information using their token.
      *
      * @param token The token issued to the user whose information is being requested.
      */
-    public fun requestInfo(token: PersonalAccessToken): User
+    public fun ownerOf(token: PersonalAccessToken): User
 
     /**
      * Requests the organizations the user belongs to.
@@ -48,5 +47,5 @@ public interface GitHubProfile {
      * @param token The access token for retrieving organizations
      *   where the user is a private member.
      */
-    public fun requestOrganizations(token: PersonalAccessToken): Set<Organization>
+    public fun memberships(token: PersonalAccessToken): Set<Organization>
 }

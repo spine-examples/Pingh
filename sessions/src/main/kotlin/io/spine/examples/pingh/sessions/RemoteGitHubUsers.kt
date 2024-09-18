@@ -43,7 +43,7 @@ import kotlinx.coroutines.runBlocking
  *
  * @param engine The engine used to create the HTTP client.
  */
-public class RemoteGitHubProfile(engine: HttpClientEngine) : GitHubProfile {
+public class RemoteGitHubUsers(engine: HttpClientEngine) : GitHubUsers {
     /**
      * HTTP client on behalf of which requests is made.
      */
@@ -55,7 +55,7 @@ public class RemoteGitHubProfile(engine: HttpClientEngine) : GitHubProfile {
      * @param token The access token used for performing the search.
      * @see <a href="https://shorturl.at/4LAR2">Get the authenticated user</a>
      */
-    override fun requestInfo(token: PersonalAccessToken): User =
+    override fun ownerOf(token: PersonalAccessToken): User =
         runBlocking {
             val response = client.get("https://api.github.com/user") {
                 configureHeaders(token)
@@ -74,7 +74,7 @@ public class RemoteGitHubProfile(engine: HttpClientEngine) : GitHubProfile {
      * @param token The access token indicating on behalf of which user the request is made.
      * @see <a href="https://shorturl.at/ileD9">List organizations for the authenticated user</a>
      */
-    override fun requestOrganizations(token: PersonalAccessToken): Set<Organization> =
+    override fun memberships(token: PersonalAccessToken): Set<Organization> =
         runBlocking {
             val response = client.get("https://api.github.com/user/orgs") {
                 configureHeaders(token)

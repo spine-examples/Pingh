@@ -32,19 +32,19 @@ import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.from
 import io.spine.examples.pingh.github.of
-import io.spine.examples.pingh.sessions.GitHubProfile
+import io.spine.examples.pingh.sessions.GitHubUsers
 
 /**
- * Implementation of `GitHubProfile` that loads responses from JSON files in the resource folder.
+ * Implementation of `GitHubUsers` that loads responses from JSON files in the resource folder.
  *
  * Uses exclusively for testing.
  */
-public class PredefinedGitHubProfileResponses : GitHubProfile {
+public class PredefinedGitHubUsersResponses : GitHubUsers {
 
     /**
      * The username that is returned when user information is retrieved.
      *
-     * @see requestInfo
+     * @see ownerOf
      */
     public var username: Username = Username::class.of("MykytaPimonovTD")
 
@@ -56,14 +56,14 @@ public class PredefinedGitHubProfileResponses : GitHubProfile {
     /**
      * Returns the `User` with the specified [username] and a default avatar URL.
      */
-    override fun requestInfo(token: PersonalAccessToken): User =
+    override fun ownerOf(token: PersonalAccessToken): User =
         User::class.of(username.value, "https://avatars.githubusercontent.com/u/160486193")
 
     /**
      * Returns the set of `Organization`s retrieved from a JSON file in the resource folder
      * if the user is a member of any permitted organizations. Otherwise, returns empty set.
      */
-    override fun requestOrganizations(token: PersonalAccessToken): Set<Organization> =
+    override fun memberships(token: PersonalAccessToken): Set<Organization> =
         if (isMemberOfPermittedOrganizations) {
             loadOrganizations()
                 .itemList

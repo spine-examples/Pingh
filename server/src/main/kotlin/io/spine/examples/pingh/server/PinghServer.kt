@@ -40,7 +40,7 @@ import io.spine.examples.pingh.github.ClientSecret
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.RemoteGitHubSearch
 import io.spine.examples.pingh.sessions.RemoteGitHubAuthentication
-import io.spine.examples.pingh.sessions.RemoteGitHubProfile
+import io.spine.examples.pingh.sessions.RemoteGitHubUsers
 import io.spine.examples.pingh.sessions.newSessionsContext
 
 /**
@@ -81,7 +81,7 @@ private fun createServer(): Server {
         .add(
             newSessionsContext(
                 RemoteGitHubAuthentication(clientId, clientSecret, clientEngine),
-                RemoteGitHubProfile(clientEngine)
+                RemoteGitHubUsers(clientEngine)
             )
         )
         .add(newMentionsContext(RemoteGitHubSearch(clientEngine)))

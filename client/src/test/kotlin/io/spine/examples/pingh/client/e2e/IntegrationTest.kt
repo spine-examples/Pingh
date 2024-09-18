@@ -35,7 +35,7 @@ import io.spine.examples.pingh.server.datastore.DatastoreStorageFactory
 import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
-import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubProfileResponses
+import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubUsersResponses
 import io.spine.server.Server
 import io.spine.server.ServerEnvironment
 import org.junit.jupiter.api.AfterAll
@@ -58,7 +58,7 @@ internal abstract class IntegrationTest {
         private val storageFactory = DatastoreStorageFactory.local()
         private val auth = PredefinedGitHubAuthenticationResponses()
         private val search = PredefinedGitHubSearchResponses()
-        private val profile = PredefinedGitHubProfileResponses()
+        private val users = PredefinedGitHubUsersResponses()
 
         private lateinit var server: Server
 
@@ -83,7 +83,7 @@ internal abstract class IntegrationTest {
          */
         private fun createServer(): Server =
             Server.atPort(port)
-                .add(newSessionsContext(auth, profile))
+                .add(newSessionsContext(auth, users))
                 .add(newMentionsContext(search))
                 .build()
 

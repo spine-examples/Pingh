@@ -45,11 +45,11 @@ public const val NAME: String = "Sessions"
  * as a parameter.
  *
  * @param auth The service that allows to access GitHub authentication API.
- * @param profile The service that allows to retrieve user information using the GitHub API.
+ * @param users The service that allows to retrieve user information using the GitHub API.
  */
 public fun newSessionsContext(
     auth: GitHubAuthentication,
-    profile: GitHubProfile
+    users: GitHubUsers
 ): BoundedContextBuilder =
     BoundedContext.singleTenant(NAME)
-        .add(UserSessionRepository(auth, profile))
+        .add(UserSessionRepository(auth, users))
