@@ -40,7 +40,6 @@ import io.spine.examples.pingh.sessions.GitHubUsers
  * Uses exclusively for testing.
  */
 public class PredefinedGitHubUsersResponses : GitHubUsers {
-
     /**
      * The username that is returned when user information is retrieved.
      *

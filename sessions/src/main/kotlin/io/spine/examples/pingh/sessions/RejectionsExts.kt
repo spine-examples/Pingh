@@ -35,7 +35,7 @@ import io.spine.examples.pingh.sessions.rejection.UsernameMismatch
 import kotlin.reflect.KClass
 
 /**
- * Creates a new `UsernameMismatch` rejection  with the passed ID of the session
+ * Creates a new `UsernameMismatch` rejection with the passed ID of the session
  * and name of the user whose account was used for authentication.
  */
 internal fun KClass<UsernameMismatch>.with(

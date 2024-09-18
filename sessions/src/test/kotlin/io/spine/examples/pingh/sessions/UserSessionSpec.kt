@@ -68,8 +68,7 @@ internal class UserSessionSpec : ContextAwareTest() {
     private val auth = PredefinedGitHubAuthenticationResponses()
     private val users = PredefinedGitHubUsersResponses()
 
-    override fun contextBuilder(): BoundedContextBuilder =
-        newSessionsContext(auth, users)
+    override fun contextBuilder(): BoundedContextBuilder = newSessionsContext(auth, users)
 
     @AfterEach
     internal fun reset() {

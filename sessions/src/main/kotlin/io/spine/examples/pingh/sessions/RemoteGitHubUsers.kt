@@ -39,7 +39,7 @@ import io.spine.examples.pingh.github.rest.OrganizationsResponse
 import kotlinx.coroutines.runBlocking
 
 /**
- * Using the GitHub API obtains information of a specific user.
+ * Using the GitHub REST API obtains information of a specific user.
  *
  * @param engine The engine used to create the HTTP client.
  */
