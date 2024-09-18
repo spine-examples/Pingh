@@ -76,4 +76,3 @@ public fun KClass<User>.parseJson(json: String): User =
  */
 public fun KClass<OrganizationsResponse>.parseJson(json: String): OrganizationsResponse =
     Json.fromJson(json, OrganizationsResponse::class.java)
-

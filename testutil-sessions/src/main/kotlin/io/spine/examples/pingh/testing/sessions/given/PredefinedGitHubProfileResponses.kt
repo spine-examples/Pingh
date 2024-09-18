@@ -35,7 +35,7 @@ import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.sessions.GitHubProfile
 
 /**
- * Implementation of `GitHubProfile` that get responses from JSON files in the resource folder.
+ * Implementation of `GitHubProfile` that loads responses from JSON files in the resource folder.
  *
  * Uses exclusively for testing.
  */

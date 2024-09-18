@@ -113,8 +113,8 @@ internal class UserSessionProcess :
      * is considered successful, and the `UserLoggedIn` event is emitted. Otherwise,
      * the `UserIsNotLoggedIntoGitHub` event is emitted.
      *
-     * @throws UserLoggedInUsingDifferentAccount if the logged-in account's username differs
-     *   from the one provided at the start.
+     * @throws UserLoggedInUsingDifferentAccount if the username of the logged-in account
+     *   differs from the one provided at the start.
      * @throws UserIsNotMemberOfAnyPermittedOrganizations if the user is not a member
      *   of any permitted organizations.
      */
@@ -168,7 +168,7 @@ internal class UserSessionProcess :
         if (!userOrganizations.any { permittedOrganizations.contains(it) }) {
             throw UserIsNotMemberOfAnyPermittedOrganizations::class.with(
                 state().id,
-                permittedOrganizations
+                permittedOrganizations.toList()
             )
         }
     }

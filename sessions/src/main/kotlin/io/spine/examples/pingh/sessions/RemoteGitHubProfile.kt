@@ -43,10 +43,7 @@ import kotlinx.coroutines.runBlocking
  *
  * @param engine The engine used to create the HTTP client.
  */
-public class RemoteGitHubProfile(
-    engine: HttpClientEngine
-) : GitHubProfile {
-
+public class RemoteGitHubProfile(engine: HttpClientEngine) : GitHubProfile {
     /**
      * HTTP client on behalf of which requests is made.
      */

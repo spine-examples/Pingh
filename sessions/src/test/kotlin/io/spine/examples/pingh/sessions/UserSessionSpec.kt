@@ -179,7 +179,6 @@ internal class UserSessionSpec : ContextAwareTest() {
         @BeforeEach
         internal fun generateId() {
             id = SessionId::class.generate()
-            profile.username = id.username
         }
 
         @Test

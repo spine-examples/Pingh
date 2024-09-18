@@ -133,7 +133,7 @@ internal fun expectedTokenRefreshedEvent(id: SessionId, whenRefreshed: Timestamp
     }
 
 /**
- * Creates a new `UserLoggedInUsingDifferentAccount` rejection  with the passed ID of the session
+ * Creates a new `UserLoggedInUsingDifferentAccount` rejection with the passed ID of the session
  * and name of the user whose account was used for authentication.
  */
 internal fun KClass<UserLoggedInUsingDifferentAccount>.with(

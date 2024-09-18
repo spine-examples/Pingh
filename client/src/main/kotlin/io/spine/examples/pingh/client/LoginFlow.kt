@@ -84,8 +84,7 @@ public class LoginFlow internal constructor(
     /**
      * Current stage of the GitHub login process.
      */
-    private val stage: MutableStateFlow<LoginStage> =
-        MutableStateFlow(EnterUsername())
+    private val stage: MutableStateFlow<LoginStage> = MutableStateFlow(EnterUsername())
 
     /**
      * Returns the immutable state of the current login stage.

@@ -53,10 +53,9 @@ internal fun KClass<UserLoggedInUsingDifferentAccount>.with(
  */
 internal fun KClass<UserIsNotMemberOfAnyPermittedOrganizations>.with(
     id: SessionId,
-    permittedOrganizations: Collection<Organization>
+    permittedOrganizations: List<Organization>
 ): UserIsNotMemberOfAnyPermittedOrganizations =
     UserIsNotMemberOfAnyPermittedOrganizations.newBuilder()
         .setId(id)
-        .addAllPermittedOrganization(permittedOrganizations.toList())
+        .addAllPermittedOrganization(permittedOrganizations)
         .build()
-
