@@ -47,8 +47,8 @@ import io.spine.examples.pingh.sessions.given.expectedUserSessionAfterTokenRefre
 import io.spine.examples.pingh.sessions.given.expectedUserSessionWithDeviceCode
 import io.spine.examples.pingh.sessions.given.expectedUserSessionWithRefreshToken
 import io.spine.examples.pingh.sessions.given.generate
-import io.spine.examples.pingh.sessions.rejection.Rejections.UserIsNotMemberOfAnyPermittedOrganizations
-import io.spine.examples.pingh.sessions.rejection.Rejections.UserLoggedInUsingDifferentAccount
+import io.spine.examples.pingh.sessions.rejection.Rejections.OrgAccessDenied
+import io.spine.examples.pingh.sessions.rejection.Rejections.UsernameMismatch
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubProfileResponses
 import io.spine.protobuf.Durations2.minutes
@@ -151,7 +151,7 @@ internal class UserSessionSpec : ContextAwareTest() {
             auth.enterUserCode()
             profile.username = Username::class.of("illegal")
             sendVerificationCommand()
-            val expected = UserLoggedInUsingDifferentAccount::class.with(id, profile.username)
+            val expected = UsernameMismatch::class.with(id, profile.username)
             context().assertEvent(expected)
         }
 
@@ -161,7 +161,7 @@ internal class UserSessionSpec : ContextAwareTest() {
             profile.username = id.username
             profile.isMemberOfPermittedOrganizations = false
             sendVerificationCommand()
-            val expected = UserIsNotMemberOfAnyPermittedOrganizations::class.with(id)
+            val expected = OrgAccessDenied::class.with(id)
             context().assertEvent(expected)
         }
 

@@ -40,7 +40,7 @@ import "spine_examples/pingh/github/values.proto";
 // The username of the authenticated account differs from
 // the one entered at the start of the authentication process.
 //
-message UserLoggedInUsingDifferentAccount {
+message UsernameMismatch {
 
     // The ID of the session.
     SessionId id = 1 [(required) = true];
@@ -56,7 +56,7 @@ message UserLoggedInUsingDifferentAccount {
 //
 // See: https://github.com/apps/pingh-tracker-of-github-mentions.
 //
-message UserIsNotMemberOfAnyPermittedOrganizations {
+message OrgAccessDenied {
 
     // The ID of the session.
     SessionId id = 1 [(required) = true];

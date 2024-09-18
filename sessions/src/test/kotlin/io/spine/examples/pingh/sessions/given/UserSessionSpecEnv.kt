@@ -42,8 +42,8 @@ import io.spine.examples.pingh.sessions.event.TokenRefreshed
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.permittedOrganizations
-import io.spine.examples.pingh.sessions.rejection.Rejections.UserIsNotMemberOfAnyPermittedOrganizations
-import io.spine.examples.pingh.sessions.rejection.Rejections.UserLoggedInUsingDifferentAccount
+import io.spine.examples.pingh.sessions.rejection.Rejections.UsernameMismatch
+import io.spine.examples.pingh.sessions.rejection.Rejections.OrgAccessDenied
 import io.spine.examples.pingh.sessions.with
 import io.spine.examples.pingh.testing.sessions.given.loadAccessToken
 import io.spine.examples.pingh.testing.sessions.given.loadRefreshedAccessToken
@@ -133,25 +133,24 @@ internal fun expectedTokenRefreshedEvent(id: SessionId, whenRefreshed: Timestamp
     }
 
 /**
- * Creates a new `UserLoggedInUsingDifferentAccount` rejection with the passed ID of the session
+ * Creates a new `UsernameMismatch` rejection with the passed ID of the session
  * and name of the user whose account was used for authentication.
  */
-internal fun KClass<UserLoggedInUsingDifferentAccount>.with(
+internal fun KClass<UsernameMismatch>.with(
     id: SessionId,
     loggedInUsername: Username
-): UserLoggedInUsingDifferentAccount =
-    UserLoggedInUsingDifferentAccount.newBuilder()
+): UsernameMismatch =
+    UsernameMismatch.newBuilder()
         .setId(id)
         .setLoggedInUsername(loggedInUsername)
         .vBuild()
 
 /**
- * Creates a new `UserIsNotMemberOfAnyPermittedOrganizations` rejection
+ * Creates a new `OrgAccessDenied` rejection
  * with the passed ID of the session.
  */
-internal fun KClass<UserIsNotMemberOfAnyPermittedOrganizations>.with(id: SessionId):
-        UserIsNotMemberOfAnyPermittedOrganizations =
-    UserIsNotMemberOfAnyPermittedOrganizations.newBuilder()
+internal fun KClass<OrgAccessDenied>.with(id: SessionId): OrgAccessDenied =
+    OrgAccessDenied.newBuilder()
         .setId(id)
         .addAllPermittedOrganization(permittedOrganizations)
         .vBuild()

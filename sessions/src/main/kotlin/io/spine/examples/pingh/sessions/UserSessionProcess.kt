@@ -40,8 +40,8 @@ import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
-import io.spine.examples.pingh.sessions.rejection.UserIsNotMemberOfAnyPermittedOrganizations
-import io.spine.examples.pingh.sessions.rejection.UserLoggedInUsingDifferentAccount
+import io.spine.examples.pingh.sessions.rejection.OrgAccessDenied
+import io.spine.examples.pingh.sessions.rejection.UsernameMismatch
 import io.spine.server.command.Assign
 import io.spine.server.command.Command
 import io.spine.server.procman.ProcessManager
@@ -113,16 +113,12 @@ internal class UserSessionProcess :
      * is considered successful, and the `UserLoggedIn` event is emitted. Otherwise,
      * the `UserIsNotLoggedIntoGitHub` event is emitted.
      *
-     * @throws UserLoggedInUsingDifferentAccount if the username of the logged-in account
-     *   differs from the one provided at the start.
-     * @throws UserIsNotMemberOfAnyPermittedOrganizations if the user is not a member
-     *   of any permitted organizations.
+     * @throws UsernameMismatch if the username of the logged-in account differs from
+     *   the one provided at the start.
+     * @throws OrgAccessDenied if the user is not a member of any permitted organizations.
      */
     @Assign
-    @Throws(
-        UserLoggedInUsingDifferentAccount::class,
-        UserIsNotMemberOfAnyPermittedOrganizations::class
-    )
+    @Throws(UsernameMismatch::class, OrgAccessDenied::class)
     internal fun handle(
         command: VerifyUserLoginToGitHub
     ): EitherOf2<UserLoggedIn, UserIsNotLoggedIntoGitHub> {
@@ -142,7 +138,7 @@ internal class UserSessionProcess :
     }
 
     /**
-     * Throws an `UserLoggedInUsingDifferentAccount` exception if the username
+     * Throws an `UsernameMismatch` exception if the username
      * of the logged-in account differs from the one entered at the start.
      *
      * GitHub's device flow for authentication does not use usernames,
@@ -150,26 +146,23 @@ internal class UserSessionProcess :
      * Therefore, it's essential to verify that the entered username matches
      * the account from which the user authenticated.
      */
-    @Throws(UserLoggedInUsingDifferentAccount::class)
+    @Throws(UsernameMismatch::class)
     private fun ensureLoggingInWithCorrectAccount(token: PersonalAccessToken) {
         val loggedInUser = profile.requestInfo(token)
         if (!loggedInUser.username.equals(state().id.username)) {
-            throw UserLoggedInUsingDifferentAccount::class.with(state().id, loggedInUser.username)
+            throw UsernameMismatch::class.with(state().id, loggedInUser.username)
         }
     }
 
     /**
-     * Throws an `UserIsNotMemberOfAnyPermittedOrganizations` exception if the user is not a member
+     * Throws an `OrgAccessDenied` exception if the user is not a member
      * of any [permitted organizations][permittedOrganizations].
      */
-    @Throws(UserIsNotMemberOfAnyPermittedOrganizations::class)
+    @Throws(OrgAccessDenied::class)
     private fun ensureMembershipInAnyPermittedOrganizations(token: PersonalAccessToken) {
         val userOrganizations = profile.requestOrganizations(token)
         if (!userOrganizations.any { permittedOrganizations.contains(it) }) {
-            throw UserIsNotMemberOfAnyPermittedOrganizations::class.with(
-                state().id,
-                permittedOrganizations.toList()
-            )
+            throw OrgAccessDenied::class.with(state().id, permittedOrganizations.toList())
         }
     }
 

@@ -37,8 +37,8 @@ import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
-import io.spine.examples.pingh.sessions.rejection.Rejections.UserIsNotMemberOfAnyPermittedOrganizations
-import io.spine.examples.pingh.sessions.rejection.Rejections.UserLoggedInUsingDifferentAccount
+import io.spine.examples.pingh.sessions.rejection.Rejections.OrgAccessDenied
+import io.spine.examples.pingh.sessions.rejection.Rejections.UsernameMismatch
 import io.spine.net.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -234,14 +234,11 @@ public class LoginFlow internal constructor(
                     preventAskingForNewTokens()
                     onFail(event)
                 },
-                EventObserver(command.id, UserLoggedInUsingDifferentAccount::class) { rejection ->
+                EventObserver(command.id, UsernameMismatch::class) { rejection ->
                     codeExpirationJob.cancel()
                     moveToNextStage(LoginFailed(rejection.cause))
                 },
-                EventObserver(
-                    command.id,
-                    UserIsNotMemberOfAnyPermittedOrganizations::class
-                ) { rejection ->
+                EventObserver(command.id, OrgAccessDenied::class) { rejection ->
                     codeExpirationJob.cancel()
                     moveToNextStage(LoginFailed(rejection.cause))
                 }
@@ -334,17 +331,17 @@ private fun invoke(delay: Duration, action: () -> Unit): Job =
     }
 
 /**
- * An error message explaining the cause of `UserLoggedInUsingDifferentAccount` rejection.
+ * An error message explaining the cause of `UsernameMismatch` rejection.
  */
-private val UserLoggedInUsingDifferentAccount.cause: String
+private val UsernameMismatch.cause: String
     get() = "You entered \"${id.username.value}\" as the username but used the code " +
             "from \"${loggedInUsername.value}\" account. You must authenticate with " +
             "the account matching the username you initially provided."
 
 /**
- * An error message explaining the cause of `UserIsNotMemberOfAnyPermittedOrganizations` rejection.
+ * An error message explaining the cause of `OrgAccessDenied` rejection.
  */
-private val UserIsNotMemberOfAnyPermittedOrganizations.cause: String
+private val OrgAccessDenied.cause: String
     get() = "You are not a member of an organization authorized to use the application. " +
             "You must belong to one of the following GitHub organizations: " +
             "${permittedOrganizationList.joinToString { it.login.value }}."
