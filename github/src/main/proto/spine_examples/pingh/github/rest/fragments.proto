@@ -84,11 +84,8 @@ message IssueOrPullRequestFragment {
     //
     string html_url = 6 [(required) = true, json_name = "html_url"];
 
-    // The URL of all comments under this item.
-    string comments_url = 7 [(required) = true, json_name = "comments_url"];
-
     // The number of this item in repository.
-    int64 number = 8 [(required) = true, (min).value = "1"];
+    int64 number = 7 [(required) = true, (min).value = "1"];
 }
 
 // The GitHub API response received when searching for mentions

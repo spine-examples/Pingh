@@ -30,6 +30,7 @@ package io.spine.examples.pingh.mentions
 
 import io.spine.examples.pingh.github.rest.CommentsResponse
 import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResult
+import io.spine.examples.pingh.github.rest.ReviewResponse
 import io.spine.json.Json
 import kotlin.reflect.KClass
 
@@ -43,9 +44,17 @@ public fun KClass<IssuesAndPullRequestsSearchResult>.parseJson(json: String):
     Json.fromJson(json, IssuesAndPullRequestsSearchResult::class.java)
 
 /**
- * Parses `CommentsGetResult` from the JSON.
+ * Parses `CommentsResponse` from the JSON.
  *
- * @param json The string containing JSON with the `CommentsGetResult`.
+ * @param json The string containing JSON with the `CommentsResponse`.
  */
 public fun KClass<CommentsResponse>.parseJson(json: String): CommentsResponse =
     Json.fromJson(json, CommentsResponse::class.java)
+
+/**
+ * Parses `ReviewResponse` from the JSON.
+ *
+ * @param json The string containing JSON with the `ReviewResponse`.
+ */
+public fun KClass<ReviewResponse>.parseJson(json: String): ReviewResponse =
+    Json.fromJson(json, ReviewResponse::class.java)
