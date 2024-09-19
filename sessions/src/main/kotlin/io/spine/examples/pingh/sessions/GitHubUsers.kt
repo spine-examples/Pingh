@@ -42,7 +42,7 @@ public interface GitHubUsers {
     public fun ownerOf(token: PersonalAccessToken): User
 
     /**
-     * Requests the organizations the owner of the passed token belongs to.
+     * Returns organizations the owner of the passed token belongs to.
      *
      * @param token The access token for retrieving organizations
      *   where the user is a private member.

@@ -93,7 +93,7 @@ public class RemoteGitHubUsers(engine: HttpClientEngine) : GitHubUsers {
 }
 
 /**
- * Configures headers for an HTTP request to the GitHub API.
+ * Configures headers for an HTTP request to the GitHub REST API.
  *
  * @see <a href="https://shorturl.at/sPHYj">Authenticating to the GitHub REST API</a>
  */
