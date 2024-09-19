@@ -96,7 +96,7 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
         itemType: ItemType
     ): Set<Mention> {
         val userTag = username.tag()
-        return searchIssuesOrPullRequests(username, token, updatedAfter, itemType)
+        return searchIssuesOrPullRequests(token, updatedAfter, itemType)
             .itemList
             .flatMap { item ->
                 val mentions = client
@@ -127,7 +127,6 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
      */
     @Throws(CannotObtainMentionsException::class)
     private fun searchIssuesOrPullRequests(
-        username: Username,
         token: PersonalAccessToken,
         updatedAfter: Timestamp,
         itemType: ItemType
@@ -136,7 +135,6 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
             val response = client
                 .search("https://api.github.com/search/issues")
                 .by(itemType)
-                .by(username)
                 .by(updatedAfter)
                 .with(token)
                 .get()
@@ -164,21 +162,26 @@ private fun HttpClient.search(url: String): GitHubSearchRequest =
     GitHubSearchRequest(this, url)
 
 /**
- * Builder for creating and sending request to search for mentions on GitHub.
+ * A builder for creating and sending requests to search for issues and pull requests
+ * where the user is involved on GitHub.
+ *
+ * Created search request will find issues and pull requests that were either created
+ * by a certain user, assigned to that user, mention that user, or were commented on by that user.
+ * Searching for mentions using [mentions:username](https://shorturl.at/zQzGL) is insufficient,
+ * as it only captures mentions in issue comments, missing those in pull request reviews
+ * and review comments. Instead, all issues and pull requests where the user was involved
+ * are retrieved. Among them, mentions will then need to be manually selected.
  *
  * @property client The HTTP client on behalf of which requests is made.
  * @property url The GitHub REST API search endpoint.
+ * @see <a href="https://shorturl.at/6z3UB">
+ *     Search by a user that's involved in an issue or pull request</a>
  */
 private class GitHubSearchRequest(private val client: HttpClient, private val url: String) {
     /**
      * The type of the searched item.
      */
     private var itemType: ItemType? = null
-
-    /**
-     * The name of the user whose mentions are requested.
-     */
-    private var username: Username? = null
 
     /**
      * The time after which GitHub items containing the searched mentions
@@ -196,14 +199,6 @@ private class GitHubSearchRequest(private val client: HttpClient, private val ur
      */
     fun by(itemType: ItemType): GitHubSearchRequest {
         this.itemType = itemType
-        return this
-    }
-
-    /**
-     * Sets the name of the user whose mentions are requested.
-     */
-    fun by(username: Username): GitHubSearchRequest {
-        this.username = username
         return this
     }
 
@@ -231,9 +226,6 @@ private class GitHubSearchRequest(private val client: HttpClient, private val ur
      */
     suspend fun get(): HttpResponse {
         checkNotNull(itemType) { "The type of the searched item is not specified." }
-        checkNotNull(username) {
-            "The name of the user whose mentions are requested is not specified."
-        }
         checkNotNull(updatedAfter) {
             "The time after which GitHub items containing the searched mentions " +
                     "should have been updated is not specified."
@@ -242,7 +234,7 @@ private class GitHubSearchRequest(private val client: HttpClient, private val ur
             "The user authentication token on GitHub is not specified."
         }
 
-        val query = "is:${itemType!!.value} mentions:${username!!.value} " +
+        val query = "is:${itemType!!.value} involves:@me " +
                 "updated:>${Timestamps.toString(updatedAfter)}"
         return client.get(url) {
             url {
