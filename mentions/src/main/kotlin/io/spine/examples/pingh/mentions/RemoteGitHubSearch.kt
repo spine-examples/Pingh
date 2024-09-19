@@ -38,10 +38,13 @@ import io.ktor.http.HeadersBuilder
 import io.ktor.http.HttpStatusCode
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.Repo
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.fromFragment
+import io.spine.examples.pingh.github.from
+import io.spine.examples.pingh.github.repo
 import io.spine.examples.pingh.github.rest.CommentsResponse
 import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResult
+import io.spine.examples.pingh.github.rest.ReviewResponse
 import io.spine.examples.pingh.github.tag
 import kotlin.jvm.Throws
 import kotlinx.coroutines.runBlocking
@@ -54,10 +57,7 @@ import kotlinx.coroutines.runBlocking
  *
  * @param engine The engine used to create the HTTP client.
  */
-public class RemoteGitHubSearch(
-    engine: HttpClientEngine
-) : GitHubSearch {
-
+public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
     /**
      * HTTP client on behalf of which requests is made.
      */
@@ -86,7 +86,7 @@ public class RemoteGitHubSearch(
 
     /**
      * Requests GitHub for mentions of a user in issues or pull requests,
-     * then looks for where the user was specifically mentioned in that item.
+     * then looks for where the user was specifically mentioned on that item.
      */
     @Throws(CannotObtainMentionsException::class)
     private fun findMentions(
@@ -99,15 +99,16 @@ public class RemoteGitHubSearch(
         return searchIssuesOrPullRequests(username, token, updatedAfter, itemType)
             .itemList
             .flatMap { item ->
-                val mentionsInComments = obtainCommentsByUrl(item.commentsUrl, token)
-                    .itemList
-                    .filter { comment -> comment.body.contains(userTag) }
-                    .map { comment -> Mention::class.fromFragment(comment, item.title) }
+                val mentions = client
+                    .findMentionsOn(item.repo(), item.number, itemType)
+                    .of(username)
+                    .with(token)
+                    .get()
 
                 if (item.body.contains(userTag)) {
-                    mentionsInComments.plus(Mention::class.fromFragment(item))
+                    mentions.plus(Mention::class.from(item))
                 } else {
-                    mentionsInComments
+                    mentions
                 }
             }
             .toSet()
@@ -132,28 +133,256 @@ public class RemoteGitHubSearch(
         itemType: ItemType
     ): IssuesAndPullRequestsSearchResult =
         runBlocking {
-            val response = GitHubSearchRequest
-                .get("https://api.github.com/search/issues")
+            val response = client
+                .search("https://api.github.com/search/issues")
                 .by(itemType)
                 .by(username)
                 .by(updatedAfter)
                 .with(token)
-                .requestOnBehalfOf(client)
+                .get()
 
             if (response.status != HttpStatusCode.OK) {
                 throw CannotObtainMentionsException(response.status.value)
             }
             IssuesAndPullRequestsSearchResult::class.parseJson(response.body())
         }
+}
+
+/**
+ * GitHub item type. Contains the name by which they can be searching in the GitHub API
+ * using the `is:` filter.
+ */
+private enum class ItemType(val value: String) {
+    ISSUE("issue"),
+    PULL_REQUEST("pull-request")
+}
+
+/**
+ * Creates a search request builder.
+ */
+private fun HttpClient.search(url: String): GitHubSearchRequest =
+    GitHubSearchRequest(this, url)
+
+/**
+ * Builder for creating and sending request to search for mentions on GitHub.
+ *
+ * @property client The HTTP client on behalf of which requests is made.
+ * @property url The GitHub REST API search endpoint.
+ */
+private class GitHubSearchRequest(private val client: HttpClient, private val url: String) {
+    /**
+     * The type of the searched item.
+     */
+    private var itemType: ItemType? = null
 
     /**
-     * Sends a request to GitHub API to obtain comments on their URL previously received.
+     * The name of the user whose mentions are requested.
+     */
+    private var username: Username? = null
+
+    /**
+     * The time after which GitHub items containing the searched mentions
+     * should have been updated.
+     */
+    private var updatedAfter: Timestamp? = null
+
+    /**
+     * The user authentication token on GitHub.
+     */
+    private var token: PersonalAccessToken? = null
+
+    /**
+     * Sets the type of the searched item.
+     */
+    fun by(itemType: ItemType): GitHubSearchRequest {
+        this.itemType = itemType
+        return this
+    }
+
+    /**
+     * Sets the name of the user whose mentions are requested.
+     */
+    fun by(username: Username): GitHubSearchRequest {
+        this.username = username
+        return this
+    }
+
+    /**
+     * Sets the time after which GitHub items containing the searched mentions
+     * should have been updated.
+     */
+    fun by(updatedAfter: Timestamp): GitHubSearchRequest {
+        this.updatedAfter = updatedAfter
+        return this
+    }
+
+    /**
+     * Sets the user authentication token on GitHub
+     */
+    fun with(token: PersonalAccessToken): GitHubSearchRequest {
+        this.token = token
+        return this
+    }
+
+    /**
+     * Creates and sends request with specified data.
+     *
+     * @throws IllegalArgumentException some request data is not specified.
+     */
+    suspend fun get(): HttpResponse {
+        checkNotNull(itemType) { "The type of the searched item is not specified." }
+        checkNotNull(username) {
+            "The name of the user whose mentions are requested is not specified."
+        }
+        checkNotNull(updatedAfter) {
+            "The time after which GitHub items containing the searched mentions " +
+                    "should have been updated is not specified."
+        }
+        checkNotNull(token) {
+            "The user authentication token on GitHub is not specified."
+        }
+
+        val query = "is:${itemType!!.value} mentions:${username!!.value} " +
+                "updated:>${Timestamps.toString(updatedAfter)}"
+        return client.get(url) {
+            url {
+                parameters.append("q", query)
+                parameters.append("per_page", "100")
+                parameters.append("sort", "updated")
+                parameters.append("order", "desc")
+            }
+            configureHeaders(token!!)
+        }
+    }
+}
+
+/**
+ * Creates a builder for request to obtain mentions on a specific issue or pull request.
+ */
+private fun HttpClient.findMentionsOn(repo: Repo, number: Long, itemType: ItemType):
+        MentionsInIssueOrPullRequests =
+    MentionsInIssueOrPullRequests(this, repo, number, itemType)
+
+/**
+ * A builder for creating and sending request to obtain mentions
+ * on particular issue or pull request on GitHub.
+ *
+ * In an issue, a user can only be mentioned in issue comments. In a pull request,
+ * a user can be mentioned in issue comments, reviews, and review comments.
+ *
+ * @property client The HTTP client on behalf of which requests is made.
+ * @property repo The repository containing this issue or pull request.
+ * @property number The number of this issue or pull request in the repository.
+ * @property itemType The GitHub item type.
+ */
+private class MentionsInIssueOrPullRequests(
+    private val client: HttpClient,
+    private val repo: Repo,
+    private val number: Long,
+    private val itemType: ItemType
+) {
+    /**
+     * The name of the user whose mentions are to be found.
+     */
+    private var user: Username? = null
+
+    /**
+     * The user authentication token on GitHub.
+     */
+    private var token: PersonalAccessToken? = null
+
+    /**
+     * Sets the name of the user whose mentions are to be found.
+     */
+    fun of(user: Username): MentionsInIssueOrPullRequests {
+        this.user = user
+        return this
+    }
+
+    /**
+     * Sets the user authentication token on GitHub.
+     */
+    fun with(token: PersonalAccessToken): MentionsInIssueOrPullRequests {
+        this.token = token
+        return this
+    }
+
+    /**
+     * Returns the user mentions on pull request or issue.
+     *
+     * @throws IllegalArgumentException some request data is not specified.
+     * @throws CannotObtainMentionsException if retrieving data from GitHub fails.
      */
     @Throws(CannotObtainMentionsException::class)
-    private fun obtainCommentsByUrl(url: String, token: PersonalAccessToken): CommentsResponse =
+    fun get(): Set<Mention> {
+        checkNotNull(user) {
+            "The name of the user whose mentions are to be found must be specified."
+        }
+        checkNotNull(token) { "The the user authentication token on GitHub must be specified." }
+        return comments(issueCommentsUrl) + when (itemType) {
+            ItemType.ISSUE -> emptySet()
+            ItemType.PULL_REQUEST -> comments(reviewCommentsUrl) + reviews()
+        }
+    }
+
+    /**
+     * Requests issue or review comments from GitHub,
+     * filters for those containing user mentions, and parses them.
+     */
+    @Throws(CannotObtainMentionsException::class)
+    private fun comments(url: String): Set<Mention> =
+        obtainByUrl(url, CommentsResponse::class::parseJson)
+            .itemList
+            .filter { comment -> comment.body.contains(user!!.tag()) }
+            .map { comment -> Mention::class.from(comment, repo.name) }
+            .toSet()
+
+    /**
+     * Requests pull request reviews from GitHub,
+     * filters for those containing user mentions, and parses them.
+     */
+    @Throws(CannotObtainMentionsException::class)
+    private fun reviews(): Set<Mention> =
+        obtainByUrl(reviewsUrl, ReviewResponse::class::parseJson)
+            .itemList
+            .filter { comment -> comment.body.contains(user!!.tag()) }
+            .map { comment -> Mention::class.from(comment, repo.name) }
+            .toSet()
+
+    /**
+     * The GitHub REST API endpoint for retrieving all comments
+     * for the specified issues or pull request.
+     *
+     * @see <a href="https://shorturl.at/kHNu0">List issue comments</a>
+     */
+    private val issueCommentsUrl: String
+        get() = "https://api.github.com/repos/${repo.owner}/${repo.name}/issues/$number/comments"
+
+    /**
+     * The GitHub REST API endpoint for retrieving all review comments
+     * for the specified pull request.
+     *
+     * @see <a href="https://shorturl.at/qI29x">List review comments on a pull request</a>
+     */
+    private val reviewCommentsUrl: String
+        get() = "https://api.github.com/repos/${repo.owner}/${repo.name}/pulls/$number/comments"
+
+    /**
+     * The GitHub REST API endpoint for retrieving all reviews for a specified pull request.
+     *
+     * @see <a href="https://shorturl.at/Q50Bu">List reviews for a pull request</a>
+     */
+    private val reviewsUrl: String
+        get() = "https://api.github.com/repos/${repo.owner}/${repo.name}/pulls/$number/reviews"
+
+    /**
+     * Sends a request to GitHub REST API to obtain comments or reviews on their URL.
+     */
+    @Throws(CannotObtainMentionsException::class)
+    private fun <R> obtainByUrl(url: String, parser: (String) -> R): R =
         runBlocking {
             val response = client.get(url) {
-                configureHeaders(token)
+                configureHeaders(token!!)
             }
             if (response.status != HttpStatusCode.OK) {
                 throw CannotObtainMentionsException(response.status.value)
@@ -162,127 +391,14 @@ public class RemoteGitHubSearch(
             // The received JSON contains only an array, but Protobuf JSON Parser
             // cannot process it. So the array is converted to JSON, where the result
             // is just the value of the `item` field.
-            CommentsResponse::class.parseJson("{ item: $json }")
+            parser("{ item: $json }")
         }
-
-    /**
-     * GitHub item type. Contains the name by which they can be searching in the GitHub API
-     * using the `is:` filter.
-     */
-    private enum class ItemType(private val gitHubName: String) {
-        ISSUE("issue"),
-        PULL_REQUEST("pull-request");
-
-        /**
-         * Returns GitHub name to search for an item of this type.
-         */
-        fun value(): String = gitHubName
-    }
-
-    /**
-     * Builder for creating and sending request to search for mentions on GitHub.
-     */
-    private class GitHubSearchRequest private constructor(private val url: String) {
-
-        companion object {
-            /**
-             * Creates builder and sets the request URL.
-             */
-            fun get(url: String): GitHubSearchRequest = GitHubSearchRequest(url)
-        }
-
-        /**
-         * The type of the searched item.
-         */
-        private var itemType: ItemType? = null
-
-        /**
-         * The name of the user whose mentions are requested.
-         */
-        private var username: Username? = null
-
-        /**
-         * The time after which GitHub items containing the searched mentions
-         * should have been updated.
-         */
-        private var updatedAfter: Timestamp? = null
-
-        /**
-         * The user authentication token on GitHub.
-         */
-        private var token: PersonalAccessToken? = null
-
-        /**
-         * Sets the type of the searched item.
-         */
-        fun by(itemType: ItemType): GitHubSearchRequest {
-            this.itemType = itemType
-            return this
-        }
-
-        /**
-         * Sets the name of the user whose mentions are requested.
-         */
-        fun by(username: Username): GitHubSearchRequest {
-            this.username = username
-            return this
-        }
-
-        /**
-         * Sets the time after which GitHub items containing the searched mentions
-         * should have been updated.
-         */
-        fun by(updatedAfter: Timestamp): GitHubSearchRequest {
-            this.updatedAfter = updatedAfter
-            return this
-        }
-
-        /**
-         * Sets the user authentication token on GitHub
-         */
-        fun with(token: PersonalAccessToken): GitHubSearchRequest {
-            this.token = token
-            return this
-        }
-
-        /**
-         * Creates and sends request with specified data.
-         *
-         * @throws IllegalArgumentException some request data is not specified.
-         */
-        suspend fun requestOnBehalfOf(client: HttpClient): HttpResponse {
-            checkNotNull(itemType) { "The type of the searched item is not specified." }
-            checkNotNull(username) {
-                "The name of the user whose mentions are requested is not specified."
-            }
-            checkNotNull(updatedAfter) {
-                "The time after which GitHub items containing the searched mentions " +
-                        "should have been updated is not specified."
-            }
-            checkNotNull(token) {
-                "The user authentication token on GitHub is not specified."
-            }
-
-            val query = "is:${itemType!!.value()} mentions:${username!!.value} " +
-                    "updated:>${Timestamps.toString(updatedAfter)}"
-            return client.get(url) {
-                url {
-                    parameters.append("q", query)
-                    parameters.append("per_page", "100")
-                    parameters.append("sort", "updated")
-                    parameters.append("order", "desc")
-                }
-                configureHeaders(token!!)
-            }
-        }
-    }
 }
 
 /**
- * Configures headers for an HTTP request to the GitHub API.
+ * Configures headers for an HTTP request to the GitHub REST API.
  *
- * @see <a href="https://docs.github.com/en/rest/authentication/authenticating-to-the-rest-api">
- *     Authenticating to the GitHub REST API</a>
+ * @see <a href="https://shorturl.at/sPHYj">Authenticating to the GitHub REST API</a>
  */
 private fun HttpMessageBuilder.configureHeaders(token: PersonalAccessToken): HeadersBuilder =
     headers.apply {
