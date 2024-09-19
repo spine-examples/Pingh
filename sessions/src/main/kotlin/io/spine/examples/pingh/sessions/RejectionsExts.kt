@@ -40,11 +40,11 @@ import kotlin.reflect.KClass
  */
 internal fun KClass<UsernameMismatch>.with(
     id: SessionId,
-    loggedInUsername: Username
+    loggedInUser: Username
 ): UsernameMismatch =
     UsernameMismatch.newBuilder()
         .setId(id)
-        .setLoggedInUsername(loggedInUsername)
+        .setLoggedInUser(loggedInUser)
         .build()
 
 /**

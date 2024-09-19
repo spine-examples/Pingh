@@ -127,8 +127,8 @@ internal class UserSessionProcess :
         } catch (exception: CannotObtainAccessToken) {
             return EitherOf2.withB(UserIsNotLoggedIntoGitHub::class.withSession(command.id))
         }
-        ensureLoggingInWithCorrectAccount(tokens.accessToken)
-        ensureMembershipInAnyPermittedOrganizations(tokens.accessToken)
+        ensureUsernameMatching(tokens.accessToken)
+        ensureThatOrgHaveAccess(tokens.accessToken)
         with(builder()) {
             refreshToken = tokens.refreshToken
             whenAccessTokenExpires = tokens.whenExpires
@@ -138,7 +138,7 @@ internal class UserSessionProcess :
     }
 
     /**
-     * Throws an `UsernameMismatch` exception if the username
+     * Throws an `UsernameMismatch` rejection if the username
      * of the logged-in account differs from the one entered at the start.
      *
      * GitHub's device flow for authentication does not use usernames,
@@ -147,7 +147,7 @@ internal class UserSessionProcess :
      * the account from which the user authenticated.
      */
     @Throws(UsernameMismatch::class)
-    private fun ensureLoggingInWithCorrectAccount(token: PersonalAccessToken) {
+    private fun ensureUsernameMatching(token: PersonalAccessToken) {
         val loggedInUser = users.ownerOf(token)
         if (!loggedInUser.username.equals(state().id.username)) {
             throw UsernameMismatch::class.with(state().id, loggedInUser.username)
@@ -155,11 +155,11 @@ internal class UserSessionProcess :
     }
 
     /**
-     * Throws an `OrgAccessDenied` exception if the user is not a member
+     * Throws an `OrgAccessDenied` rejection if the user is not a member
      * of any [permitted organizations][permittedOrganizations].
      */
     @Throws(OrgAccessDenied::class)
-    private fun ensureMembershipInAnyPermittedOrganizations(token: PersonalAccessToken) {
+    private fun ensureThatOrgHaveAccess(token: PersonalAccessToken) {
         val userOrganizations = users.memberships(token)
         if (!userOrganizations.any { permittedOrganizations.contains(it) }) {
             throw OrgAccessDenied::class.with(state().id, permittedOrganizations.toList())
@@ -208,6 +208,9 @@ internal class UserSessionProcess :
      *
      * It is expected this method is called right after the creation of the process instance.
      * Otherwise, the process will not be able to function properly.
+     *
+     * @param auth The service that allows to access GitHub authentication API.
+     * @param users The service that allows to retrieve user information using the GitHub API.
      */
     internal fun inject(auth: GitHubAuthentication, users: GitHubUsers) {
         this.auth = auth

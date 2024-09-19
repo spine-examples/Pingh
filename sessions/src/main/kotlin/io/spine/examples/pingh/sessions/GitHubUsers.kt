@@ -35,14 +35,14 @@ import io.spine.examples.pingh.github.User
  */
 public interface GitHubUsers {
     /**
-     * Requests the user's account information using their token.
+     * Returns the owner of the passed token.
      *
-     * @param token The token issued to the user whose information is being requested.
+     * @param token The token issued to the user whose information are being retrieved.
      */
     public fun ownerOf(token: PersonalAccessToken): User
 
     /**
-     * Requests the organizations the user belongs to.
+     * Requests the organizations the owner of the passed token belongs to.
      *
      * @param token The access token for retrieving organizations
      *   where the user is a private member.
