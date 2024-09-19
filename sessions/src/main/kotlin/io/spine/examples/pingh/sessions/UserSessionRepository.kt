@@ -33,6 +33,9 @@ import io.spine.server.route.EventRouting
 
 /**
  * Manages instances of [UserSessionProcess].
+ *
+ * @property auth The service that allows to access GitHub authentication API.
+ * @property users The service that allows to retrieve user information using the GitHub API.
  */
 internal class UserSessionRepository(
     private val auth: GitHubAuthentication,

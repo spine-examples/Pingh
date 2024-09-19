@@ -50,9 +50,9 @@ public class RemoteGitHubUsers(engine: HttpClientEngine) : GitHubUsers {
     private val client = HttpClient(engine)
 
     /**
-     * Requests user information using their personal access token.
+     * Returns the owner of the provided access token.
      *
-     * @param token The access token used for performing the search.
+     * @param token The access token used to retrieve its owner.
      * @see <a href="https://shorturl.at/4LAR2">Get the authenticated user</a>
      */
     override fun ownerOf(token: PersonalAccessToken): User =
@@ -64,14 +64,16 @@ public class RemoteGitHubUsers(engine: HttpClientEngine) : GitHubUsers {
         }
 
     /**
-     * Requests the organizations of which the user is a member.
+     * Returns the organizations of which the user owning
+     * the provided access token is a member.
      *
      * Note that all organizations where the user is a public member are returned.
      * Organizations where the user is a private member are only obtained
      * if they have installed the
      * [Pingh GitHub App](https://github.com/apps/pingh-tracker-of-github-mentions).
      *
-     * @param token The access token indicating on behalf of which user the request is made.
+     * @param token The access token used to access organizations where
+     *   the user is a private member.
      * @see <a href="https://shorturl.at/ileD9">List organizations for the authenticated user</a>
      */
     override fun memberships(token: PersonalAccessToken): Set<Organization> =
@@ -91,7 +93,7 @@ public class RemoteGitHubUsers(engine: HttpClientEngine) : GitHubUsers {
 }
 
 /**
- * Configures headers for an HTTP request to the GitHub API.
+ * Configures headers for an HTTP request to the GitHub REST API.
  *
  * @see <a href="https://shorturl.at/sPHYj">Authenticating to the GitHub REST API</a>
  */

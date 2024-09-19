@@ -46,7 +46,7 @@ message UsernameMismatch {
     SessionId id = 1 [(required) = true];
 
     // The name of the user whose account completed the authentication.
-    spine_examples.pingh.github.Username logged_in_username = 2 [(required) = true];
+    spine_examples.pingh.github.Username logged_in_user = 2 [(required) = true];
 }
 
 // The user is not a member of an organization authorized to use the Pingh application.
