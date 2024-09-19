@@ -43,8 +43,8 @@ import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.from
 import io.spine.examples.pingh.github.repo
 import io.spine.examples.pingh.github.rest.CommentsResponse
-import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResult
-import io.spine.examples.pingh.github.rest.ReviewResponse
+import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResponse
+import io.spine.examples.pingh.github.rest.ReviewsResponse
 import io.spine.examples.pingh.github.tag
 import kotlin.jvm.Throws
 import kotlinx.coroutines.runBlocking
@@ -130,7 +130,7 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
         token: PersonalAccessToken,
         updatedAfter: Timestamp,
         itemType: ItemType
-    ): IssuesAndPullRequestsSearchResult =
+    ): IssuesAndPullRequestsSearchResponse =
         runBlocking {
             val response = client
                 .search("https://api.github.com/search/issues")
@@ -142,7 +142,7 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
             if (response.status != HttpStatusCode.OK) {
                 throw CannotObtainMentionsException(response.status.value)
             }
-            IssuesAndPullRequestsSearchResult::class.parseJson(response.body())
+            IssuesAndPullRequestsSearchResponse::class.parseJson(response.body())
         }
 }
 
@@ -335,7 +335,7 @@ private class MentionsInIssueOrPullRequests(
      */
     @Throws(CannotObtainMentionsException::class)
     private fun reviews(): Set<Mention> =
-        obtainByUrl(reviewsUrl, ReviewResponse::class::parseJson)
+        obtainByUrl(reviewsUrl, ReviewsResponse::class::parseJson)
             .itemList
             .filter { comment -> comment.body.contains(user!!.tag()) }
             .map { comment -> Mention::class.from(comment, repo.name) }

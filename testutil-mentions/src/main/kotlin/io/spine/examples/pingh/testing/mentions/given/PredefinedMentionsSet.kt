@@ -29,7 +29,7 @@ package io.spine.examples.pingh.testing.mentions.given
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.from
 import io.spine.examples.pingh.github.rest.CommentsResponse
-import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResult
+import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResponse
 import io.spine.examples.pingh.mentions.parseJson
 
 /**
@@ -50,7 +50,7 @@ private fun loadMentionsInPr(): Set<Mention> {
         .getResource("/github-responses/prs-search-response.json")
     checkNotNull(jsonFile)
     val json = jsonFile.readText(Charsets.UTF_8)
-    return IssuesAndPullRequestsSearchResult::class.parseJson(json)
+    return IssuesAndPullRequestsSearchResponse::class.parseJson(json)
         .itemList
         .map { fragment -> Mention::class.from(fragment) }
         .toSet()

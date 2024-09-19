@@ -29,19 +29,19 @@
 package io.spine.examples.pingh.mentions
 
 import io.spine.examples.pingh.github.rest.CommentsResponse
-import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResult
-import io.spine.examples.pingh.github.rest.ReviewResponse
+import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResponse
+import io.spine.examples.pingh.github.rest.ReviewsResponse
 import io.spine.json.Json
 import kotlin.reflect.KClass
 
 /**
- * Parses `IssuesAndPullRequestsSearchResult` from the JSON.
+ * Parses `IssuesAndPullRequestsSearchResponse` from the JSON.
  *
- * @param json The string containing JSON with the `IssuesAndPullRequestsSearchResult`.
+ * @param json The string containing JSON with the `IssuesAndPullRequestsSearchResponse`.
  */
-public fun KClass<IssuesAndPullRequestsSearchResult>.parseJson(json: String):
-        IssuesAndPullRequestsSearchResult =
-    Json.fromJson(json, IssuesAndPullRequestsSearchResult::class.java)
+public fun KClass<IssuesAndPullRequestsSearchResponse>.parseJson(json: String):
+        IssuesAndPullRequestsSearchResponse =
+    Json.fromJson(json, IssuesAndPullRequestsSearchResponse::class.java)
 
 /**
  * Parses `CommentsResponse` from the JSON.
@@ -52,9 +52,9 @@ public fun KClass<CommentsResponse>.parseJson(json: String): CommentsResponse =
     Json.fromJson(json, CommentsResponse::class.java)
 
 /**
- * Parses `ReviewResponse` from the JSON.
+ * Parses `ReviewsResponse` from the JSON.
  *
- * @param json The string containing JSON with the `ReviewResponse`.
+ * @param json The string containing JSON with the `ReviewsResponse`.
  */
-public fun KClass<ReviewResponse>.parseJson(json: String): ReviewResponse =
-    Json.fromJson(json, ReviewResponse::class.java)
+public fun KClass<ReviewsResponse>.parseJson(json: String): ReviewsResponse =
+    Json.fromJson(json, ReviewsResponse::class.java)

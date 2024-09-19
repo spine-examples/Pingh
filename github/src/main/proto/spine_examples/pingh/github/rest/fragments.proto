@@ -95,7 +95,7 @@ message IssueOrPullRequestFragment {
 // Request to the GitHub API to retrieve them is the same and returns a list containing
 // both issues and pull requests.
 //
-message IssuesAndPullRequestsSearchResult {
+message IssuesAndPullRequestsSearchResponse {
 
     // GitHub items on which the mention occurred.
     //
@@ -169,7 +169,7 @@ message ReviewFragment {
 }
 
 // The GitHub REST API response received when obtaining pull request reviews by the URL.
-message ReviewResponse {
+message ReviewsResponse {
 
     // GitHub pull request reviews.
     //
