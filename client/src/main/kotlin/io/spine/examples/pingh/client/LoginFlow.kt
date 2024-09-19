@@ -37,7 +37,7 @@ import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
-import io.spine.examples.pingh.sessions.rejection.Rejections.OrgAccessDenied
+import io.spine.examples.pingh.sessions.rejection.Rejections.NotMemberOfPermittedOrgs
 import io.spine.examples.pingh.sessions.rejection.Rejections.UsernameMismatch
 import io.spine.net.Url
 import kotlinx.coroutines.CoroutineScope
@@ -238,7 +238,7 @@ public class LoginFlow internal constructor(
                     codeExpirationJob.cancel()
                     moveToNextStage(LoginFailed(rejection.cause))
                 },
-                EventObserver(command.id, OrgAccessDenied::class) { rejection ->
+                EventObserver(command.id, NotMemberOfPermittedOrgs::class) { rejection ->
                     codeExpirationJob.cancel()
                     moveToNextStage(LoginFailed(rejection.cause))
                 }
@@ -334,14 +334,12 @@ private fun invoke(delay: Duration, action: () -> Unit): Job =
  * An error message explaining the cause of `UsernameMismatch` rejection.
  */
 private val UsernameMismatch.cause: String
-    get() = "You entered \"${id.username.value}\" as the username but used the code " +
+    get() = "You entered \"${expectedUser.value}\" as the username but used the code " +
             "from \"${loggedInUser.value}\" account. You must authenticate with " +
             "the account matching the username you initially provided."
 
 /**
- * An error message explaining the cause of `OrgAccessDenied` rejection.
+ * An error message explaining the cause of `NotMemberOfPermittedOrgs` rejection.
  */
-private val OrgAccessDenied.cause: String
-    get() = "You are not a member of an organization authorized to use the application. " +
-            "You must belong to one of the following GitHub organizations: " +
-            "${permittedOrganizationList.joinToString { it.login.value }}."
+private val NotMemberOfPermittedOrgs.cause: String
+    get() = "You are not a member of an organization authorized to use the application."

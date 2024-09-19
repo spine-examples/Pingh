@@ -40,7 +40,7 @@ import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
-import io.spine.examples.pingh.sessions.rejection.OrgAccessDenied
+import io.spine.examples.pingh.sessions.rejection.NotMemberOfPermittedOrgs
 import io.spine.examples.pingh.sessions.rejection.UsernameMismatch
 import io.spine.server.command.Assign
 import io.spine.server.command.Command
@@ -56,7 +56,7 @@ import kotlin.jvm.Throws
  * the [Pingh application](https://github.com/apps/pingh-tracker-of-github-mentions)
  * installed on GitHub.
  */
-internal val permittedOrganizations: Set<Organization> = setOf(
+private val permittedOrganizations: Set<Organization> = setOf(
     Organization::class.loggedAs("SpineEventEngine"),
     Organization::class.loggedAs("TeamDev-Ltd"),
     Organization::class.loggedAs("TeamDev-IP")
@@ -115,10 +115,10 @@ internal class UserSessionProcess :
      *
      * @throws UsernameMismatch if the username of the logged-in account differs from
      *   the one provided at the start.
-     * @throws OrgAccessDenied if the user is not a member of any permitted organizations.
+     * @throws NotMemberOfPermittedOrgs if the user is not a member of any permitted organizations.
      */
     @Assign
-    @Throws(UsernameMismatch::class, OrgAccessDenied::class)
+    @Throws(UsernameMismatch::class, NotMemberOfPermittedOrgs::class)
     internal fun handle(
         command: VerifyUserLoginToGitHub
     ): EitherOf2<UserLoggedIn, UserIsNotLoggedIntoGitHub> {
@@ -148,21 +148,22 @@ internal class UserSessionProcess :
      */
     @Throws(UsernameMismatch::class)
     private fun ensureUsernameMatching(token: PersonalAccessToken) {
+        val expectedUsername = state().id.username
         val loggedInUser = users.ownerOf(token)
-        if (!loggedInUser.username.equals(state().id.username)) {
-            throw UsernameMismatch::class.with(state().id, loggedInUser.username)
+        if (!expectedUsername.equals(loggedInUser.username)) {
+            throw UsernameMismatch::class.with(state().id, expectedUsername, loggedInUser.username)
         }
     }
 
     /**
-     * Throws an `OrgAccessDenied` rejection if the user is not a member
+     * Throws an `NotMemberOfPermittedOrgs` rejection if the user is not a member
      * of any [permitted organizations][permittedOrganizations].
      */
-    @Throws(OrgAccessDenied::class)
+    @Throws(NotMemberOfPermittedOrgs::class)
     private fun ensureThatOrgHaveAccess(token: PersonalAccessToken) {
         val userOrganizations = users.memberships(token)
         if (!userOrganizations.any { permittedOrganizations.contains(it) }) {
-            throw OrgAccessDenied::class.with(state().id, permittedOrganizations.toList())
+            throw NotMemberOfPermittedOrgs::class.with(state().id)
         }
     }
 
