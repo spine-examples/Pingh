@@ -33,9 +33,13 @@ import io.spine.server.route.EventRouting
 
 /**
  * Manages instances of [UserSessionProcess].
+ *
+ * @property auth The service that allows to access GitHub authentication API.
+ * @property users The service that allows to retrieve user information using the GitHub API.
  */
 internal class UserSessionRepository(
-    private val auth: GitHubAuthentication
+    private val auth: GitHubAuthentication,
+    private val users: GitHubUsers
 ) : ProcessManagerRepository<SessionId, UserSessionProcess, UserSession>() {
 
     @OverridingMethodsMustInvokeSuper
@@ -47,7 +51,7 @@ internal class UserSessionRepository(
     @OverridingMethodsMustInvokeSuper
     override fun configure(processManager: UserSessionProcess) {
         super.configure(processManager)
-        processManager.inject(auth)
+        processManager.inject(auth, users)
     }
 
     /**

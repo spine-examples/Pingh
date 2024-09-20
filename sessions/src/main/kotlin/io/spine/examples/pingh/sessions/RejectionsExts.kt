@@ -24,40 +24,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.JavaX
-import io.spine.internal.dependency.Ktor
+@file:Suppress("UnusedReceiverParameter" /* Class extensions don't use class as a parameter. */)
 
-plugins {
-    // Add the Gradle plugin for bootstrapping projects built with Spine.
-    // See: https://github.com/SpineEventEngine/bootstrap
-    id("io.spine.tools.gradle.bootstrap").version("1.9.0")
-}
+package io.spine.examples.pingh.sessions
 
-spine {
-    // Enable the code generation for the elements of the ubiquitous language,
-    // declared in Proto files.
-    assembleModel()
-    enableJava()
-
-    // Add and configure required dependencies for developing a Spine-based Java server.
-    // See: https://github.com/SpineEventEngine/bootstrap#java-projects
-    enableJava().server()
-    forceDependencies = true
-}
+import io.spine.examples.pingh.github.Username
+import io.spine.examples.pingh.sessions.rejection.NotMemberOfPermittedOrgs
+import io.spine.examples.pingh.sessions.rejection.UsernameMismatch
+import kotlin.reflect.KClass
 
 /**
- * Kotlin code compilation task waits until
- * Protobuf files are fully generated and rejections are created.
+ * Creates a new `UsernameMismatch` rejection with the passed ID of the session,
+ * name entered at the start of the login process, and name of the user whose account
+ * was used for authentication.
  */
-tasks.named("compileKotlin") {
-    dependsOn("generateRejections")
-}
+internal fun KClass<UsernameMismatch>.with(
+    id: SessionId,
+    expectedUser: Username,
+    loggedInUser: Username
+): UsernameMismatch =
+    UsernameMismatch.newBuilder()
+        .setId(id)
+        .setExpectedUser(expectedUser)
+        .setLoggedInUser(loggedInUser)
+        .build()
 
-dependencies {
-    implementation(project(":github"))
-    implementation(project(":clock"))
-    implementation(JavaX.annotations)
-    implementation(Ktor.Client.core)
-
-    testImplementation(project(":testutil-sessions"))
-}
+/**
+ * Creates a new `NotMemberOfPermittedOrgs` rejection with the passed ID of the session.
+ */
+internal fun KClass<NotMemberOfPermittedOrgs>.with(id: SessionId): NotMemberOfPermittedOrgs =
+    NotMemberOfPermittedOrgs.newBuilder()
+        .setId(id)
+        .build()

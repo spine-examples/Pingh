@@ -88,28 +88,20 @@ internal class DesktopClient(
             .getOrNull(0)
 
     /**
-     * Observes both events until one is emitted.
+     * Observes all provided events and cancels all subscriptions once any event is emitted.
      *
-     * When either the first or second event is emitted, all subscriptions are cancelled.
-     *
-     * @param F The type of the first observed event.
-     * @param S The type of the second observed event.
-     *
-     * @param first The information on the observation of the first event.
-     * @param second The information on the observation of the second event.
+     * @param observers The information on the observation of events.
      */
-    internal fun <F : EventMessage, S : EventMessage> observeEither(
-        first: EventObserver<F>,
-        second: EventObserver<S>
-    ) {
-        var subscriptionOnSecond: Subscription? = null
-        val subscriptionOnFirst = observeEventOnce(first.id, first.type) { event ->
-            cancel(subscriptionOnSecond!!)
-            first.callback(event)
-        }
-        subscriptionOnSecond = observeEventOnce(second.id, second.type) { event ->
-            cancel(subscriptionOnFirst)
-            second.callback(event)
+    internal fun observeEither(vararg observers: EventObserver<out EventMessage>) {
+        val subscriptions = mutableListOf<Subscription>()
+        val castedObservers = observers.toList().filterIsInstance<EventObserver<EventMessage>>()
+        castedObservers.forEach { observer ->
+            subscriptions.add(
+                observeEvent(observer.id, observer.type) { event ->
+                    observer.callback(event)
+                    subscriptions.forEach { cancel(it) }
+                }
+            )
         }
     }
 

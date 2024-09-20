@@ -27,7 +27,7 @@
 package io.spine.examples.pingh.client.e2e
 
 import io.spine.environment.Tests
-import io.spine.examples.pingh.client.VerifyLogin
+import io.spine.examples.pingh.client.LoginFlow.Verify
 import io.spine.examples.pingh.client.PinghApplication
 import io.spine.examples.pingh.client.e2e.given.MemoizingNotificationSender
 import io.spine.examples.pingh.mentions.newMentionsContext
@@ -35,6 +35,7 @@ import io.spine.examples.pingh.server.datastore.DatastoreStorageFactory
 import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
+import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubUsersResponses
 import io.spine.server.Server
 import io.spine.server.ServerEnvironment
 import org.junit.jupiter.api.AfterAll
@@ -57,6 +58,7 @@ internal abstract class IntegrationTest {
         private val storageFactory = DatastoreStorageFactory.local()
         private val auth = PredefinedGitHubAuthenticationResponses()
         private val search = PredefinedGitHubSearchResponses()
+        private val users = PredefinedGitHubUsersResponses()
 
         private lateinit var server: Server
 
@@ -81,7 +83,7 @@ internal abstract class IntegrationTest {
          */
         private fun createServer(): Server =
             Server.atPort(port)
-                .add(newSessionsContext(auth))
+                .add(newSessionsContext(auth, users))
                 .add(newMentionsContext(search))
                 .build()
 
@@ -124,7 +126,7 @@ internal abstract class IntegrationTest {
      *
      * After calling this method, the login verification will be successful,
      * which will allow to use login to the application after calling
-     * the [VerifyLogin.confirm] method.
+     * the [Verify.confirm] method.
      */
     protected fun enterUserCode() {
         auth.enterUserCode()

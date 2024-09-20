@@ -24,40 +24,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.JavaX
-import io.spine.internal.dependency.Ktor
+package io.spine.examples.pingh.sessions
 
-plugins {
-    // Add the Gradle plugin for bootstrapping projects built with Spine.
-    // See: https://github.com/SpineEventEngine/bootstrap
-    id("io.spine.tools.gradle.bootstrap").version("1.9.0")
-}
-
-spine {
-    // Enable the code generation for the elements of the ubiquitous language,
-    // declared in Proto files.
-    assembleModel()
-    enableJava()
-
-    // Add and configure required dependencies for developing a Spine-based Java server.
-    // See: https://github.com/SpineEventEngine/bootstrap#java-projects
-    enableJava().server()
-    forceDependencies = true
-}
+import io.spine.examples.pingh.github.Organization
+import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.User
 
 /**
- * Kotlin code compilation task waits until
- * Protobuf files are fully generated and rejections are created.
+ * Allows to retrieve user information using the GitHub REST API.
  */
-tasks.named("compileKotlin") {
-    dependsOn("generateRejections")
-}
+public interface GitHubUsers {
+    /**
+     * Returns the owner of the passed token.
+     *
+     * @param token The token issued to the user whose information are being retrieved.
+     */
+    public fun ownerOf(token: PersonalAccessToken): User
 
-dependencies {
-    implementation(project(":github"))
-    implementation(project(":clock"))
-    implementation(JavaX.annotations)
-    implementation(Ktor.Client.core)
-
-    testImplementation(project(":testutil-sessions"))
+    /**
+     * Returns organizations the owner of the passed token belongs to.
+     *
+     * @param token The access token for retrieving organizations
+     *   where the user is a private member.
+     */
+    public fun memberships(token: PersonalAccessToken): Set<Organization>
 }
