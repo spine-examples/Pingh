@@ -43,11 +43,19 @@ import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.from
 import io.spine.examples.pingh.github.repo
 import io.spine.examples.pingh.github.rest.CommentsResponse
+import io.spine.examples.pingh.github.rest.IssueOrPullRequestFragment
 import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResponse
 import io.spine.examples.pingh.github.rest.ReviewsResponse
 import io.spine.examples.pingh.github.tag
 import kotlin.jvm.Throws
 import kotlinx.coroutines.runBlocking
+
+/**
+ * The number of search results on a single page.
+ *
+ * @see <a href="https://shorturl.at/w35Ao">Changing the number of items per page</a>
+ */
+private const val perPage = 100
 
 /**
  * Using the GitHub API fetches mentions of a specific user.
@@ -87,6 +95,9 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
     /**
      * Requests GitHub for mentions of a user in issues or pull requests,
      * then looks for where the user was specifically mentioned on that item.
+     *
+     * Accounts for pagination during the search. If not all results are retrieved in
+     * a single request, additional requests are made to ensure all results are fetched.
      */
     @Throws(CannotObtainMentionsException::class)
     private fun findMentions(
@@ -95,23 +106,15 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
         updatedAfter: Timestamp,
         itemType: ItemType
     ): Set<Mention> {
-        val userTag = username.tag()
-        return searchIssuesOrPullRequests(token, updatedAfter, itemType)
-            .itemList
-            .flatMap { item ->
-                val mentions = client
-                    .findMentionsOn(item.repo(), item.number, itemType)
-                    .of(username)
-                    .with(token)
-                    .get()
-
-                if (item.body.contains(userTag)) {
-                    mentions.plus(Mention::class.from(item))
-                } else {
-                    mentions
-                }
-            }
-            .toSet()
+        var page = 1
+        val firstResult = searchIssuesOrPullRequests(token, updatedAfter, itemType, page)
+        val totalCount = firstResult.totalCount
+        val items = firstResult.itemList.toMutableSet()
+        while (perPage * page < totalCount) {
+            page++
+            items += searchIssuesOrPullRequests(token, updatedAfter, itemType, page).itemList
+        }
+        return items.filterMentions(username, token, itemType)
     }
 
     /**
@@ -129,7 +132,8 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
     private fun searchIssuesOrPullRequests(
         token: PersonalAccessToken,
         updatedAfter: Timestamp,
-        itemType: ItemType
+        itemType: ItemType,
+        page: Int
     ): IssuesAndPullRequestsSearchResponse =
         runBlocking {
             val response = client
@@ -137,6 +141,7 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
                 .by(itemType)
                 .by(updatedAfter)
                 .with(token)
+                .onPage(page)
                 .get()
 
             if (response.status != HttpStatusCode.OK) {
@@ -144,6 +149,29 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
             }
             IssuesAndPullRequestsSearchResponse::class.parseJson(response.body())
         }
+
+    /**
+     * Selects items where the user is mentioned and searches for mentions
+     * in comments and reviews, if available.
+     */
+    private fun Set<IssueOrPullRequestFragment>.filterMentions(
+        user: Username,
+        token: PersonalAccessToken,
+        itemType: ItemType
+    ): Set<Mention> =
+        this.flatMap { item ->
+            val mentions = client
+                .findMentionsOn(item.repo(), item.number, itemType)
+                .of(user)
+                .with(token)
+                .get()
+            if (item.body.contains(user.tag())) {
+                mentions.plus(Mention::class.from(item))
+            } else {
+                mentions
+            }
+        }.toSet()
+
 }
 
 /**
@@ -195,6 +223,11 @@ private class GitHubSearchRequest(private val client: HttpClient, private val ur
     private var token: PersonalAccessToken? = null
 
     /**
+     * The page number of the results to fetch.
+     */
+    private var page: Int? = null
+
+    /**
      * Sets the type of the searched item.
      */
     fun by(itemType: ItemType): GitHubSearchRequest {
@@ -220,6 +253,14 @@ private class GitHubSearchRequest(private val client: HttpClient, private val ur
     }
 
     /**
+     * Sets the page number of the results to fetch.
+     */
+    fun onPage(page: Int): GitHubSearchRequest {
+        this.page = page
+        return this
+    }
+
+    /**
      * Creates and sends request with specified data.
      *
      * @throws IllegalArgumentException some request data is not specified.
@@ -233,15 +274,17 @@ private class GitHubSearchRequest(private val client: HttpClient, private val ur
         checkNotNull(token) {
             "The user authentication token on GitHub is not specified."
         }
+        checkNotNull(page) { "The page number of the results to fetch is not specified." }
 
         val query = "is:${itemType!!.value} involves:@me " +
                 "updated:>${Timestamps.toString(updatedAfter)}"
         return client.get(url) {
             url {
                 parameters.append("q", query)
-                parameters.append("per_page", "100")
+                parameters.append("per_page", perPage.toString())
+                parameters.append("page", page!!.toString())
                 parameters.append("sort", "updated")
-                parameters.append("order", "desc")
+                parameters.append("order", "asc")
             }
             configureHeaders(token!!)
         }
@@ -251,7 +294,7 @@ private class GitHubSearchRequest(private val client: HttpClient, private val ur
 /**
  * Creates a builder for request to obtain mentions on a specific issue or pull request.
  */
-private fun HttpClient.findMentionsOn(repo: Repo, number: Long, itemType: ItemType):
+private fun HttpClient.findMentionsOn(repo: Repo, number: Int, itemType: ItemType):
         MentionsInIssueOrPullRequests =
     MentionsInIssueOrPullRequests(this, repo, number, itemType)
 
@@ -270,7 +313,7 @@ private fun HttpClient.findMentionsOn(repo: Repo, number: Long, itemType: ItemTy
 private class MentionsInIssueOrPullRequests(
     private val client: HttpClient,
     private val repo: Repo,
-    private val number: Long,
+    private val number: Int,
     private val itemType: ItemType
 ) {
     /**

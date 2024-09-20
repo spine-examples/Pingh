@@ -85,7 +85,7 @@ message IssueOrPullRequestFragment {
     string html_url = 6 [(required) = true, json_name = "html_url"];
 
     // The number of this item in repository.
-    int64 number = 7 [(required) = true, (min).value = "1"];
+    int32 number = 7 [(required) = true, (min).value = "1"];
 }
 
 // The GitHub API response received when searching for mentions
@@ -97,11 +97,14 @@ message IssueOrPullRequestFragment {
 //
 message IssuesAndPullRequestsSearchResponse {
 
+    // The total number of issues and pull requests found.
+    int32 total_count = 1 [(required) = true, (min).value = "0", json_name = "total_count"];
+
     // GitHub items on which the mention occurred.
     //
     // No results may be found for a search request, in this case the list is empty.
     //
-    repeated IssueOrPullRequestFragment item = 1 [(validate) = true, json_name = "items"];
+    repeated IssueOrPullRequestFragment item = 2 [(validate) = true, json_name = "items"];
 }
 
 // Comment data received via GitHub API.
