@@ -128,7 +128,7 @@ internal class UserSessionProcess :
             return EitherOf2.withB(UserIsNotLoggedIntoGitHub::class.withSession(command.id))
         }
         ensureUsernameMatching(tokens.accessToken)
-        ensureThatOrgHaveAccess(tokens.accessToken)
+        ensureMembershipInPermittedOrgs(tokens.accessToken)
         with(builder()) {
             refreshToken = tokens.refreshToken
             whenAccessTokenExpires = tokens.whenExpires
@@ -160,7 +160,7 @@ internal class UserSessionProcess :
      * of any [permitted organizations][permittedOrganizations].
      */
     @Throws(NotMemberOfPermittedOrgs::class)
-    private fun ensureThatOrgHaveAccess(token: PersonalAccessToken) {
+    private fun ensureMembershipInPermittedOrgs(token: PersonalAccessToken) {
         val userOrganizations = users.memberships(token)
         if (!userOrganizations.any { permittedOrganizations.contains(it) }) {
             throw NotMemberOfPermittedOrgs::class.with(state().id)

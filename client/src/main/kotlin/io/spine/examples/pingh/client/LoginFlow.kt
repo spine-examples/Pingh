@@ -54,12 +54,12 @@ import kotlinx.coroutines.launch
  * There are several stages in this process:
  *
  * 1. [EnterUsername]: The user inputs their username to receive a user code.
- * 2. [VerifyLogin]: The user enters the user code on GitHub and confirms
+ * 2. [Verify]: The user enters the user code on GitHub and confirms
  * the login within the Pingh app.
- * 3. [LoginFailed]: The login process failed due to an error that occurred during authentication.
+ * 3. [Failed]: The login process failed due to an error that occurred during authentication.
  *
  * The flow is considered completed whenever the login is successfully
- * [confirmed][VerifyLogin.confirm] in the Pingh app.
+ * [confirmed][Verify.confirm] in the Pingh app.
  *
  * @property client Enables interaction with the Pingh server.
  * @property session The information about the current user session.
@@ -76,20 +76,20 @@ public class LoginFlow internal constructor(
      * Each stage [change][moveToNextStage] verifies if the transition is permissible.
      */
     private val possibleTransitions = mapOf(
-        EnterUsername::class to listOf(VerifyLogin::class),
-        VerifyLogin::class to listOf(LoginFailed::class),
-        LoginFailed::class to listOf(EnterUsername::class),
+        EnterUsername::class to listOf(Verify::class),
+        Verify::class to listOf(Failed::class),
+        Failed::class to listOf(EnterUsername::class),
     )
 
     /**
      * Current stage of the GitHub login process.
      */
-    private val stage: MutableStateFlow<LoginStage> = MutableStateFlow(EnterUsername())
+    private val stage: MutableStateFlow<Stage> = MutableStateFlow(EnterUsername())
 
     /**
      * Returns the immutable state of the current login stage.
      */
-    public fun currentStage(): StateFlow<LoginStage> = stage
+    public fun currentStage(): StateFlow<Stage> = stage
 
     /**
      * Switches the current stage to the passed one.
@@ -97,7 +97,7 @@ public class LoginFlow internal constructor(
      * @throws IllegalStateException if the transition of their current [stage]
      *   to the passed stage is not [allowed][possibleTransitions].
      */
-    private fun moveToNextStage(stage: LoginStage) {
+    private fun moveToNextStage(stage: Stage) {
         val current = this.stage.value::class
         val possibleNext = possibleTransitions.getOrDefault(current, emptyList())
         val next = stage::class
@@ -113,13 +113,13 @@ public class LoginFlow internal constructor(
     /**
      * Represents a stage in the GitHub login process.
      */
-    public interface LoginStage
+    public interface Stage
 
     /**
      * A stage of the login flow on which the user enters their GitHub username
      * and receives a user code in return.
      */
-    public inner class EnterUsername internal constructor() : LoginStage {
+    public inner class EnterUsername internal constructor() : Stage {
         /**
          * Starts the GitHub login process and requests `UserCode`.
          *
@@ -135,7 +135,7 @@ public class LoginFlow internal constructor(
             )
             client.observeEvent(command.id, UserCodeReceived::class) { event ->
                 session.value = UserSession(event.id)
-                moveToNextStage(VerifyLogin(event))
+                moveToNextStage(Verify(event))
                 onSuccess(event)
             }
             client.send(command)
@@ -149,7 +149,7 @@ public class LoginFlow internal constructor(
      * @param event The event received after the user enters their name.
      */
     @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
-    public inner class VerifyLogin internal constructor(event: UserCodeReceived) : LoginStage {
+    public inner class Verify internal constructor(event: UserCodeReceived) : Stage {
         /**
          * The code a user needs to enter on GitHub to confirm login to the app.
          */
@@ -215,7 +215,7 @@ public class LoginFlow internal constructor(
         /**
          * Checks whether the user has completed the login on GitHub and entered their user code.
          *
-         * Errors during verification cause the process to transition to the [LoginFailed] stage.
+         * Errors during verification cause the process to transition to the [Failed] stage.
          *
          * @param onSuccess Called when the login is successfully verified.
          * @param onFail Called when login verification fails.
@@ -236,11 +236,11 @@ public class LoginFlow internal constructor(
                 },
                 EventObserver(command.id, UsernameMismatch::class) { rejection ->
                     codeExpirationJob.cancel()
-                    moveToNextStage(LoginFailed(rejection.cause))
+                    moveToNextStage(Failed(rejection.cause))
                 },
                 EventObserver(command.id, NotMemberOfPermittedOrgs::class) { rejection ->
                     codeExpirationJob.cancel()
-                    moveToNextStage(LoginFailed(rejection.cause))
+                    moveToNextStage(Failed(rejection.cause))
                 }
             )
             client.send(command)
@@ -287,11 +287,11 @@ public class LoginFlow internal constructor(
      *
      * 1. The user is not a member of an authorized organization.
      * 2. The username obtained in [EnterUsername] step differs from the username
-     * of the account used to complete [VerifyLogin] step.
+     * of the account used to complete [Verify] step.
      *
      * @param cause The reason for the login failure.
      */
-    public inner class LoginFailed internal constructor(cause: String) : LoginStage {
+    public inner class Failed internal constructor(cause: String) : Stage {
 
         /**
          * The error message from the login process.
@@ -341,5 +341,6 @@ private val UsernameMismatch.cause: String
 /**
  * An error message explaining the cause of `NotMemberOfPermittedOrgs` rejection.
  */
+@Suppress("UnusedReceiverParameter" /* Associated with the rejection but doesn't use its data. */)
 private val NotMemberOfPermittedOrgs.cause: String
     get() = "You are not a member of an organization authorized to use the application."
