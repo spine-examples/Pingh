@@ -215,7 +215,7 @@ public class LoginFlow internal constructor(
         /**
          * Checks whether the user has completed the login on GitHub and entered their user code.
          *
-         * Errors during verification cause the process to transition to the [Failed] stage.
+         * Rejections during verification cause the process to transition to the [Failed] stage.
          *
          * @param onSuccess Called when the login is successfully verified.
          * @param onFail Called when login verification fails.
@@ -286,8 +286,8 @@ public class LoginFlow internal constructor(
      * Possible reasons for failure include:
      *
      * 1. The user is not a member of an authorized organization.
-     * 2. The username obtained in [EnterUsername] step differs from the username
-     * of the account used to complete [Verify] step.
+     * 2. The username obtained in [EnterUsername] stage differs from the username
+     * of the account used to complete [Verify] stage.
      *
      * @param cause The reason for the login failure.
      */
