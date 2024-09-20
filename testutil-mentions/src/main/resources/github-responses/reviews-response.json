@@ -1,0 +1,80 @@
+[
+  {
+    "id": 2055303949,
+    "node_id": "PRR_kwDOL2L5hc56gXMN",
+    "user": {
+      "login": "armiol",
+      "id": 82468,
+      "node_id": "MDQ6VXNlcjgyNDY4",
+      "avatar_url": "https://avatars.githubusercontent.com/u/82468?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/armiol",
+      "html_url": "https://github.com/armiol",
+      "followers_url": "https://api.github.com/users/armiol/followers",
+      "following_url": "https://api.github.com/users/armiol/following{/other_user}",
+      "gists_url": "https://api.github.com/users/armiol/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/armiol/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/armiol/subscriptions",
+      "organizations_url": "https://api.github.com/users/armiol/orgs",
+      "repos_url": "https://api.github.com/users/armiol/repos",
+      "events_url": "https://api.github.com/users/armiol/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/armiol/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "body": "@MykytaPimonovTD after our vocal discussion, I am now requesting changes to this PR.\r\nThis is needed so that you could re-request a review once you make the adjustments we discussed.",
+    "state": "CHANGES_REQUESTED",
+    "html_url": "https://github.com/spine-examples/Pingh/pull/3#pullrequestreview-2055303949",
+    "pull_request_url": "https://api.github.com/repos/spine-examples/Pingh/pulls/3",
+    "author_association": "CONTRIBUTOR",
+    "_links": {
+      "html": {
+        "href": "https://github.com/spine-examples/Pingh/pull/3#pullrequestreview-2055303949"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/spine-examples/Pingh/pulls/3"
+      }
+    },
+    "submitted_at": "2024-05-14T14:56:11Z",
+    "commit_id": "e12dc42cc9ac33931bb2f64deb278447a7560934"
+  },
+  {
+    "id": 2060331443,
+    "node_id": "PRR_kwDOL2L5hc56zimz",
+    "user": {
+      "login": "armiol",
+      "id": 82468,
+      "node_id": "MDQ6VXNlcjgyNDY4",
+      "avatar_url": "https://avatars.githubusercontent.com/u/82468?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/armiol",
+      "html_url": "https://github.com/armiol",
+      "followers_url": "https://api.github.com/users/armiol/followers",
+      "following_url": "https://api.github.com/users/armiol/following{/other_user}",
+      "gists_url": "https://api.github.com/users/armiol/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/armiol/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/armiol/subscriptions",
+      "organizations_url": "https://api.github.com/users/armiol/orgs",
+      "repos_url": "https://api.github.com/users/armiol/repos",
+      "events_url": "https://api.github.com/users/armiol/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/armiol/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "body": "@MykytaPimonovTD much better.\r\n\r\nPlease see my comments.",
+    "state": "CHANGES_REQUESTED",
+    "html_url": "https://github.com/spine-examples/Pingh/pull/3#pullrequestreview-2060331443",
+    "pull_request_url": "https://api.github.com/repos/spine-examples/Pingh/pulls/3",
+    "author_association": "CONTRIBUTOR",
+    "_links": {
+      "html": {
+        "href": "https://github.com/spine-examples/Pingh/pull/3#pullrequestreview-2060331443"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/spine-examples/Pingh/pulls/3"
+      }
+    },
+    "submitted_at": "2024-05-16T10:35:04Z",
+    "commit_id": "0ca99e4a53d72cd562508a60074e8900324f9c4d"
+  }
+]

@@ -164,6 +164,7 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
                 .findMentionsOn(item.repo(), item.number, itemType)
                 .of(user)
                 .with(token)
+                .setTitle(item.title)
                 .get()
             if (item.body.contains(user.tag())) {
                 mentions.plus(Mention::class.from(item))
@@ -327,6 +328,14 @@ private class MentionsInIssueOrPullRequests(
     private var token: PersonalAccessToken? = null
 
     /**
+     * The string to be used as the title for the found mentions.
+     *
+     * It is recommended to use the title of the GitHub item where
+     * the mentions are being searched.
+     */
+    private var title: String? = null
+
+    /**
      * Sets the name of the user whose mentions are to be found.
      */
     fun of(user: Username): MentionsInIssueOrPullRequests {
@@ -343,6 +352,14 @@ private class MentionsInIssueOrPullRequests(
     }
 
     /**
+     * Sets the string to be used as the title for the found mentions.
+     */
+    fun setTitle(title: String): MentionsInIssueOrPullRequests {
+        this.title = title
+        return this
+    }
+
+    /**
      * Returns the user mentions on pull request or issue.
      *
      * @throws IllegalArgumentException some request data is not specified.
@@ -351,9 +368,10 @@ private class MentionsInIssueOrPullRequests(
     @Throws(CannotObtainMentionsException::class)
     fun get(): Set<Mention> {
         checkNotNull(user) {
-            "The name of the user whose mentions are to be found must be specified."
+            "The name of the user whose mentions are to be found is not specified."
         }
-        checkNotNull(token) { "The the user authentication token on GitHub must be specified." }
+        checkNotNull(token) { "The the user authentication token on GitHub is not specified." }
+        checkNotNull(title) { "The title for the found mentions is not specified." }
         return comments(issueCommentsUrl) + when (itemType) {
             ItemType.ISSUE -> emptySet()
             ItemType.PULL_REQUEST -> comments(reviewCommentsUrl) + reviews()
@@ -369,7 +387,7 @@ private class MentionsInIssueOrPullRequests(
         obtainByUrl(url, CommentsResponse::class::parseJson)
             .itemList
             .filter { comment -> comment.body.contains(user!!.tag()) }
-            .map { comment -> Mention::class.from(comment, repo.name) }
+            .map { comment -> Mention::class.from(comment, title!!) }
             .toSet()
 
     /**
@@ -380,8 +398,8 @@ private class MentionsInIssueOrPullRequests(
     private fun reviews(): Set<Mention> =
         obtainByUrl(reviewsUrl, ReviewsResponse::class::parseJson)
             .itemList
-            .filter { comment -> comment.body.contains(user!!.tag()) }
-            .map { comment -> Mention::class.from(comment, repo.name) }
+            .filter { review -> review.body.contains(user!!.tag()) }
+            .map { review -> Mention::class.from(review, title!!) }
             .toSet()
 
     /**

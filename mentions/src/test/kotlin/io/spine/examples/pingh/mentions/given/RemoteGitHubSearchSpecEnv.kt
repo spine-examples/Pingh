@@ -61,7 +61,10 @@ internal fun mockEngineThatContainsMentions(token: PersonalAccessToken): HttpCli
             }
         }
 
-        if (request.url.pathSegments.size == 7 && request.url.pathSegments[6] == "comments") {
+        if (request.url.pathSegments.size == 7 &&
+            request.url.pathSegments[4] == "issues" &&
+            request.url.pathSegments[6] == "comments"
+        ) {
             if (request.url.pathSegments[5] == "3") {
                 val body = loadJson("comments-under-pr-response.json")
                 return@MockEngine respond(body)
@@ -72,6 +75,23 @@ internal fun mockEngineThatContainsMentions(token: PersonalAccessToken): HttpCli
             }
         }
 
+        if (request.url.pathSegments.size == 7 &&
+            request.url.pathSegments[4] == "pulls" &&
+            request.url.pathSegments[6] == "comments"
+        ) {
+            val body = loadJson("review-comments-response.json")
+            return@MockEngine respond(body)
+        }
+
+        if (request.url.pathSegments.size == 7 &&
+            request.url.pathSegments[4] == "pulls" &&
+            request.url.pathSegments[6] == "reviews"
+        ) {
+            val body = loadJson("reviews-response.json")
+            return@MockEngine respond(body)
+        }
+
+        println(request.url)
         fail("Unexpected request.")
     }
 
@@ -83,14 +103,14 @@ internal fun expectedMentions(): Set<Mention> =
         Mention.newBuilder()
             .setId("IC_kwDOL2L5hc5-0lTv")
             .setAuthor("armiol", "https://avatars.githubusercontent.com/u/82468?v=4")
-            .setTitle("Request updates for assigned issues without activity")
+            .setTitle("Comment on Request updates for assigned issues without activity")
             .setWhenMentioned("2024-05-23T17:38:40Z")
             .setUrl("https://github.com/spine-examples/Pingh/pull/8#issuecomment-2127713519")
             .vBuild(),
         Mention.newBuilder()
             .setId("IC_kwDOL2L5hc5-0lTv")
             .setAuthor("armiol", "https://avatars.githubusercontent.com/u/82468?v=4")
-            .setTitle("Implement user session flow")
+            .setTitle("Comment on Implement user session flow")
             .setWhenMentioned("2024-05-23T17:38:40Z")
             .setUrl("https://github.com/spine-examples/Pingh/pull/8#issuecomment-2127713519")
             .vBuild(),
@@ -100,6 +120,27 @@ internal fun expectedMentions(): Set<Mention> =
             .setTitle("Implement user session flow")
             .setWhenMentioned("2024-05-14T12:12:02Z")
             .setUrl("https://github.com/spine-examples/Pingh/pull/3")
+            .vBuild(),
+        Mention.newBuilder()
+            .setId("PRRC_kwDOL2L5hc5fXf9M")
+            .setAuthor("armiol", "https://avatars.githubusercontent.com/u/82468?v=4")
+            .setTitle("Comment on Implement user session flow")
+            .setWhenMentioned("2024-05-14T13:04:02Z")
+            .setUrl("https://github.com/spine-examples/Pingh/pull/3#discussion_r1599995724")
+            .vBuild(),
+        Mention.newBuilder()
+            .setId("PRR_kwDOL2L5hc56gXMN")
+            .setAuthor("armiol", "https://avatars.githubusercontent.com/u/82468?v=4")
+            .setTitle("Review of Implement user session flow")
+            .setWhenMentioned("2024-05-14T14:56:11Z")
+            .setUrl("https://github.com/spine-examples/Pingh/pull/3#pullrequestreview-2055303949")
+            .vBuild(),
+        Mention.newBuilder()
+            .setId("PRR_kwDOL2L5hc56zimz")
+            .setAuthor("armiol", "https://avatars.githubusercontent.com/u/82468?v=4")
+            .setTitle("Review of Implement user session flow")
+            .setWhenMentioned("2024-05-16T10:35:04Z")
+            .setUrl("https://github.com/spine-examples/Pingh/pull/3#pullrequestreview-2060331443")
             .vBuild(),
     )
 

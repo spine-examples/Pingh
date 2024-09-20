@@ -1,0 +1,274 @@
+[
+  {
+    "url": "https://api.github.com/repos/spine-examples/Pingh/pulls/comments/1599995724",
+    "pull_request_review_id": 2055303949,
+    "id": 1599995724,
+    "node_id": "PRRC_kwDOL2L5hc5fXf9M",
+    "diff_hunk": "@@ -0,0 +1,55 @@\n+/*\n+ * Copyright 2024, TeamDev. All rights reserved.\n+ *\n+ * Licensed under the Apache License, Version 2.0 (the \"License\");\n+ * you may not use this file except in compliance with the License.\n+ * You may obtain a copy of the License at\n+ *\n+ * http://www.apache.org/licenses/LICENSE-2.0\n+ *\n+ * Redistribution and use in source and/or binary forms, with or without\n+ * modification, must retain the above copyright notice and the following\n+ * disclaimer.\n+ *\n+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n+ * \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\n+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\n+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\n+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\n+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\n+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\n+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\n+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n+ */\n+\n+package io.spine.examples.pingh.sessions\n+\n+import io.spine.server.BoundedContext\n+import io.spine.server.BoundedContextBuilder\n+\n+/**\n+ * Configurator that customizes the session bounded context",
+    "path": "sessions/src/main/kotlin/io/spine/examples/pingh/sessions/SessionsContext.kt",
+    "commit_id": "289c072a3976a8fb505d75d38cbeef40173604e1",
+    "original_commit_id": "514e00aadad6df1063b8098fcec74a694034a12c",
+    "user": {
+      "login": "armiol",
+      "id": 82468,
+      "node_id": "MDQ6VXNlcjgyNDY4",
+      "avatar_url": "https://avatars.githubusercontent.com/u/82468?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/armiol",
+      "html_url": "https://github.com/armiol",
+      "followers_url": "https://api.github.com/users/armiol/followers",
+      "following_url": "https://api.github.com/users/armiol/following{/other_user}",
+      "gists_url": "https://api.github.com/users/armiol/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/armiol/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/armiol/subscriptions",
+      "organizations_url": "https://api.github.com/users/armiol/orgs",
+      "repos_url": "https://api.github.com/users/armiol/repos",
+      "events_url": "https://api.github.com/users/armiol/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/armiol/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "body": "@MykytaPimonovTD Please do study other examples in this organization.\r\n\r\nFor instance, a similar type is declared [here](https://github.com/spine-examples/kanban/blob/master/server/src/main/java/io/spine/examples/kanban/server/KanbanContext.java).",
+    "created_at": "2024-05-14T13:04:02Z",
+    "updated_at": "2024-05-14T14:56:11Z",
+    "html_url": "https://github.com/spine-examples/Pingh/pull/3#discussion_r1599995724",
+    "pull_request_url": "https://api.github.com/repos/spine-examples/Pingh/pulls/3",
+    "author_association": "CONTRIBUTOR",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/spine-examples/Pingh/pulls/comments/1599995724"
+      },
+      "html": {
+        "href": "https://github.com/spine-examples/Pingh/pull/3#discussion_r1599995724"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/spine-examples/Pingh/pulls/3"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/spine-examples/Pingh/pulls/comments/1599995724/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": 33,
+    "side": "RIGHT",
+    "original_position": 33,
+    "position": null,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/spine-examples/Pingh/pulls/comments/1603091135",
+    "pull_request_review_id": 2060331443,
+    "id": 1603091135,
+    "node_id": "PRRC_kwDOL2L5hc5fjTq_",
+    "diff_hunk": "@@ -0,0 +1,148 @@\n+/*\n+ * Copyright 2024, TeamDev. All rights reserved.\n+ *\n+ * Licensed under the Apache License, Version 2.0 (the \"License\");\n+ * you may not use this file except in compliance with the License.\n+ * You may obtain a copy of the License at\n+ *\n+ * http://www.apache.org/licenses/LICENSE-2.0\n+ *\n+ * Redistribution and use in source and/or binary forms, with or without\n+ * modification, must retain the above copyright notice and the following\n+ * disclaimer.\n+ *\n+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n+ * \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\n+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\n+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\n+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\n+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\n+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\n+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\n+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n+ */\n+\n+package io.spine.examples.pingh.sessions\n+\n+import io.kotest.matchers.shouldBe\n+import io.spine.base.EventMessage\n+import io.spine.examples.pingh.sessions.event.UserLoggedIn\n+import io.spine.examples.pingh.sessions.event.UserLoggedOut\n+import io.spine.examples.pingh.sessions.given.*\n+import io.spine.protobuf.AnyPacker\n+import io.spine.server.BoundedContextBuilder\n+import io.spine.testing.server.EventSubject\n+import io.spine.testing.server.blackbox.ContextAwareTest\n+import org.junit.jupiter.api.BeforeEach\n+import org.junit.jupiter.api.DisplayName\n+import org.junit.jupiter.api.Nested\n+import org.junit.jupiter.api.Test\n+\n+@DisplayName(\"Sessions Context should\")\n+class SessionsContextSpec : ContextAwareTest() {\n+\n+    override fun contextBuilder(): BoundedContextBuilder =\n+        newBuilder()\n+\n+    @Nested\n+    inner class `handle the 'LogUserIn' command` {",
+    "path": "sessions/src/test/kotlin/io/spine/examples/pingh/sessions/SessionsContextSpec.kt",
+    "commit_id": "289c072a3976a8fb505d75d38cbeef40173604e1",
+    "original_commit_id": "0ca99e4a53d72cd562508a60074e8900324f9c4d",
+    "user": {
+      "login": "armiol",
+      "id": 82468,
+      "node_id": "MDQ6VXNlcjgyNDY4",
+      "avatar_url": "https://avatars.githubusercontent.com/u/82468?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/armiol",
+      "html_url": "https://github.com/armiol",
+      "followers_url": "https://api.github.com/users/armiol/followers",
+      "following_url": "https://api.github.com/users/armiol/following{/other_user}",
+      "gists_url": "https://api.github.com/users/armiol/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/armiol/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/armiol/subscriptions",
+      "organizations_url": "https://api.github.com/users/armiol/orgs",
+      "repos_url": "https://api.github.com/users/armiol/repos",
+      "events_url": "https://api.github.com/users/armiol/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/armiol/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "body": "I think we can safely omit \"the\" here and in the following method names.",
+    "created_at": "2024-05-16T10:28:33Z",
+    "updated_at": "2024-05-16T10:35:05Z",
+    "html_url": "https://github.com/spine-examples/Pingh/pull/3#discussion_r1603091135",
+    "pull_request_url": "https://api.github.com/repos/spine-examples/Pingh/pulls/3",
+    "author_association": "CONTRIBUTOR",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/spine-examples/Pingh/pulls/comments/1603091135"
+      },
+      "html": {
+        "href": "https://github.com/spine-examples/Pingh/pull/3#discussion_r1603091135"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/spine-examples/Pingh/pulls/3"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/spine-examples/Pingh/pulls/comments/1603091135/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": 50,
+    "side": "RIGHT",
+    "original_position": 50,
+    "position": null,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/spine-examples/Pingh/pulls/comments/1603093658",
+    "pull_request_review_id": 2060331443,
+    "id": 1603093658,
+    "node_id": "PRRC_kwDOL2L5hc5fjUSa",
+    "diff_hunk": "@@ -0,0 +1,148 @@\n+/*\n+ * Copyright 2024, TeamDev. All rights reserved.\n+ *\n+ * Licensed under the Apache License, Version 2.0 (the \"License\");\n+ * you may not use this file except in compliance with the License.\n+ * You may obtain a copy of the License at\n+ *\n+ * http://www.apache.org/licenses/LICENSE-2.0\n+ *\n+ * Redistribution and use in source and/or binary forms, with or without\n+ * modification, must retain the above copyright notice and the following\n+ * disclaimer.\n+ *\n+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n+ * \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\n+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\n+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\n+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\n+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\n+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\n+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\n+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n+ */\n+\n+package io.spine.examples.pingh.sessions\n+\n+import io.kotest.matchers.shouldBe\n+import io.spine.base.EventMessage\n+import io.spine.examples.pingh.sessions.event.UserLoggedIn\n+import io.spine.examples.pingh.sessions.event.UserLoggedOut\n+import io.spine.examples.pingh.sessions.given.*\n+import io.spine.protobuf.AnyPacker\n+import io.spine.server.BoundedContextBuilder\n+import io.spine.testing.server.EventSubject\n+import io.spine.testing.server.blackbox.ContextAwareTest\n+import org.junit.jupiter.api.BeforeEach\n+import org.junit.jupiter.api.DisplayName\n+import org.junit.jupiter.api.Nested\n+import org.junit.jupiter.api.Test\n+\n+@DisplayName(\"Sessions Context should\")\n+class SessionsContextSpec : ContextAwareTest() {\n+\n+    override fun contextBuilder(): BoundedContextBuilder =\n+        newBuilder()\n+\n+    @Nested\n+    inner class `handle the 'LogUserIn' command` {\n+\n+        private lateinit var session: SessionId\n+\n+        @BeforeEach\n+        fun sendCommand() {\n+            session = createSession()\n+            val command = logUserIn(session)\n+            context().receivesCommand(command)\n+        }\n+\n+        @Test\n+        fun `emit 'UserLoggedIn' event`() {\n+            val expected = with(UserLoggedIn.newBuilder()) {\n+                id = session\n+                build()\n+            }\n+            val events = assertEvents(UserLoggedIn::class.java)\n+            events.hasSize(1)\n+            events.message(0)\n+                .comparingExpectedFieldsOnly()\n+                .isEqualTo(expected)\n+        }\n+\n+        @Test\n+        fun `update the 'UserSession' entity`() {\n+            val expected = userSession(session)\n+            context().assertState(session, expected)\n+        }\n+    }\n+\n+    @Nested\n+    inner class `handle the 'LogUserOut' command` {\n+\n+        private lateinit var session: SessionId\n+\n+        @BeforeEach\n+        fun sendCommand() {\n+            session = createSession()\n+            context().receivesCommand(logUserIn(session))\n+            context().receivesCommand(logUserOut(session))\n+        }\n+\n+        @Test\n+        fun `emit 'UserLoggedOut' event`() {\n+            val expected = with(UserLoggedOut.newBuilder()) {\n+                id = session\n+                vBuild()\n+            }\n+            val eventSubject = assertEvents(UserLoggedOut::class.java)\n+            eventSubject.hasSize(1)\n+            val event = eventSubject.actual()[0]\n+            val message = AnyPacker.unpack(event.message, UserLoggedOut::class.java)",
+    "path": "sessions/src/test/kotlin/io/spine/examples/pingh/sessions/SessionsContextSpec.kt",
+    "commit_id": "289c072a3976a8fb505d75d38cbeef40173604e1",
+    "original_commit_id": "0ca99e4a53d72cd562508a60074e8900324f9c4d",
+    "user": {
+      "login": "armiol",
+      "id": 82468,
+      "node_id": "MDQ6VXNlcjgyNDY4",
+      "avatar_url": "https://avatars.githubusercontent.com/u/82468?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/armiol",
+      "html_url": "https://github.com/armiol",
+      "followers_url": "https://api.github.com/users/armiol/followers",
+      "following_url": "https://api.github.com/users/armiol/following{/other_user}",
+      "gists_url": "https://api.github.com/users/armiol/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/armiol/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/armiol/subscriptions",
+      "organizations_url": "https://api.github.com/users/armiol/orgs",
+      "repos_url": "https://api.github.com/users/armiol/repos",
+      "events_url": "https://api.github.com/users/armiol/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/armiol/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "body": "I think this whole piece can be simplified. See [this API call](https://github.com/SpineEventEngine/core-java/blob/1.x-dev/testutil-server/src/main/java/io/spine/testing/server/blackbox/BlackBoxContext.java#L678).",
+    "created_at": "2024-05-16T10:30:38Z",
+    "updated_at": "2024-05-16T10:35:05Z",
+    "html_url": "https://github.com/spine-examples/Pingh/pull/3#discussion_r1603093658",
+    "pull_request_url": "https://api.github.com/repos/spine-examples/Pingh/pulls/3",
+    "author_association": "CONTRIBUTOR",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/spine-examples/Pingh/pulls/comments/1603093658"
+      },
+      "html": {
+        "href": "https://github.com/spine-examples/Pingh/pull/3#discussion_r1603093658"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/spine-examples/Pingh/pulls/3"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/spine-examples/Pingh/pulls/comments/1603093658/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": 102,
+    "side": "RIGHT",
+    "original_position": 102,
+    "position": null,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/spine-examples/Pingh/pulls/comments/1603094380",
+    "pull_request_review_id": 2060331443,
+    "id": 1603094380,
+    "node_id": "PRRC_kwDOL2L5hc5fjUds",
+    "diff_hunk": "@@ -0,0 +1,148 @@\n+/*\n+ * Copyright 2024, TeamDev. All rights reserved.\n+ *\n+ * Licensed under the Apache License, Version 2.0 (the \"License\");\n+ * you may not use this file except in compliance with the License.\n+ * You may obtain a copy of the License at\n+ *\n+ * http://www.apache.org/licenses/LICENSE-2.0\n+ *\n+ * Redistribution and use in source and/or binary forms, with or without\n+ * modification, must retain the above copyright notice and the following\n+ * disclaimer.\n+ *\n+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n+ * \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\n+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\n+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\n+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\n+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\n+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\n+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\n+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n+ */\n+\n+package io.spine.examples.pingh.sessions\n+\n+import io.kotest.matchers.shouldBe\n+import io.spine.base.EventMessage\n+import io.spine.examples.pingh.sessions.event.UserLoggedIn\n+import io.spine.examples.pingh.sessions.event.UserLoggedOut\n+import io.spine.examples.pingh.sessions.given.*\n+import io.spine.protobuf.AnyPacker\n+import io.spine.server.BoundedContextBuilder\n+import io.spine.testing.server.EventSubject\n+import io.spine.testing.server.blackbox.ContextAwareTest\n+import org.junit.jupiter.api.BeforeEach\n+import org.junit.jupiter.api.DisplayName\n+import org.junit.jupiter.api.Nested\n+import org.junit.jupiter.api.Test\n+\n+@DisplayName(\"Sessions Context should\")\n+class SessionsContextSpec : ContextAwareTest() {\n+\n+    override fun contextBuilder(): BoundedContextBuilder =\n+        newBuilder()\n+\n+    @Nested\n+    inner class `handle the 'LogUserIn' command` {\n+\n+        private lateinit var session: SessionId\n+\n+        @BeforeEach\n+        fun sendCommand() {\n+            session = createSession()\n+            val command = logUserIn(session)\n+            context().receivesCommand(command)\n+        }\n+\n+        @Test\n+        fun `emit 'UserLoggedIn' event`() {\n+            val expected = with(UserLoggedIn.newBuilder()) {\n+                id = session\n+                build()\n+            }\n+            val events = assertEvents(UserLoggedIn::class.java)\n+            events.hasSize(1)\n+            events.message(0)\n+                .comparingExpectedFieldsOnly()\n+                .isEqualTo(expected)\n+        }\n+\n+        @Test\n+        fun `update the 'UserSession' entity`() {\n+            val expected = userSession(session)\n+            context().assertState(session, expected)\n+        }\n+    }\n+\n+    @Nested\n+    inner class `handle the 'LogUserOut' command` {\n+\n+        private lateinit var session: SessionId\n+\n+        @BeforeEach\n+        fun sendCommand() {\n+            session = createSession()\n+            context().receivesCommand(logUserIn(session))\n+            context().receivesCommand(logUserOut(session))",
+    "path": "sessions/src/test/kotlin/io/spine/examples/pingh/sessions/SessionsContextSpec.kt",
+    "commit_id": "289c072a3976a8fb505d75d38cbeef40173604e1",
+    "original_commit_id": "0ca99e4a53d72cd562508a60074e8900324f9c4d",
+    "user": {
+      "login": "armiol",
+      "id": 82468,
+      "node_id": "MDQ6VXNlcjgyNDY4",
+      "avatar_url": "https://avatars.githubusercontent.com/u/82468?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/armiol",
+      "html_url": "https://github.com/armiol",
+      "followers_url": "https://api.github.com/users/armiol/followers",
+      "following_url": "https://api.github.com/users/armiol/following{/other_user}",
+      "gists_url": "https://api.github.com/users/armiol/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/armiol/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/armiol/subscriptions",
+      "organizations_url": "https://api.github.com/users/armiol/orgs",
+      "repos_url": "https://api.github.com/users/armiol/repos",
+      "events_url": "https://api.github.com/users/armiol/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/armiol/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "body": "Instead of calling `context()` twice, you can chain `.receivesCommand(..)` calls.\r\n\r\nSame below.",
+    "created_at": "2024-05-16T10:31:12Z",
+    "updated_at": "2024-05-16T10:35:05Z",
+    "html_url": "https://github.com/spine-examples/Pingh/pull/3#discussion_r1603094380",
+    "pull_request_url": "https://api.github.com/repos/spine-examples/Pingh/pulls/3",
+    "author_association": "CONTRIBUTOR",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/spine-examples/Pingh/pulls/comments/1603094380"
+      },
+      "html": {
+        "href": "https://github.com/spine-examples/Pingh/pull/3#discussion_r1603094380"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/spine-examples/Pingh/pulls/3"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/spine-examples/Pingh/pulls/comments/1603094380/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": 90,
+    "side": "RIGHT",
+    "original_position": 90,
+    "position": null,
+    "subject_type": "line"
+  }
+]
