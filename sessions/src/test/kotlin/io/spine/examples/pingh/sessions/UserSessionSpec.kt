@@ -47,7 +47,7 @@ import io.spine.examples.pingh.sessions.given.expectedUserSessionAfterTokenRefre
 import io.spine.examples.pingh.sessions.given.expectedUserSessionWithDeviceCode
 import io.spine.examples.pingh.sessions.given.expectedUserSessionWithRefreshToken
 import io.spine.examples.pingh.sessions.given.generate
-import io.spine.examples.pingh.sessions.rejection.Rejections.OrgAccessDenied
+import io.spine.examples.pingh.sessions.rejection.Rejections.NotMemberOfPermittedOrgs
 import io.spine.examples.pingh.sessions.rejection.Rejections.UsernameMismatch
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubUsersResponses
@@ -150,7 +150,7 @@ internal class UserSessionSpec : ContextAwareTest() {
             auth.enterUserCode()
             users.username = Username::class.of("illegal")
             sendVerificationCommand()
-            val expected = UsernameMismatch::class.with(id, users.username)
+            val expected = UsernameMismatch::class.with(id, id.username, users.username)
             context().assertEvent(expected)
         }
 
@@ -160,7 +160,7 @@ internal class UserSessionSpec : ContextAwareTest() {
             users.username = id.username
             users.isMemberOfPermittedOrganizations = false
             sendVerificationCommand()
-            val expected = OrgAccessDenied::class.with(id)
+            val expected = NotMemberOfPermittedOrgs::class.with(id)
             context().assertEvent(expected)
         }
 

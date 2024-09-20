@@ -28,34 +28,31 @@
 
 package io.spine.examples.pingh.sessions
 
-import io.spine.examples.pingh.github.Organization
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.sessions.rejection.OrgAccessDenied
+import io.spine.examples.pingh.sessions.rejection.NotMemberOfPermittedOrgs
 import io.spine.examples.pingh.sessions.rejection.UsernameMismatch
 import kotlin.reflect.KClass
 
 /**
- * Creates a new `UsernameMismatch` rejection with the passed ID of the session
- * and name of the user whose account was used for authentication.
+ * Creates a new `UsernameMismatch` rejection with the passed ID of the session,
+ * name entered at the start of the login process, and name of the user whose account
+ * was used for authentication.
  */
 internal fun KClass<UsernameMismatch>.with(
     id: SessionId,
+    expectedUser: Username,
     loggedInUser: Username
 ): UsernameMismatch =
     UsernameMismatch.newBuilder()
         .setId(id)
+        .setExpectedUser(expectedUser)
         .setLoggedInUser(loggedInUser)
         .build()
 
 /**
- * Creates a new `OrgAccessDenied` rejection
- * with the passed ID of the session and permitted organizations.
+ * Creates a new `NotMemberOfPermittedOrgs` rejection with the passed ID of the session.
  */
-internal fun KClass<OrgAccessDenied>.with(
-    id: SessionId,
-    permittedOrganizations: List<Organization>
-): OrgAccessDenied =
-    OrgAccessDenied.newBuilder()
+internal fun KClass<NotMemberOfPermittedOrgs>.with(id: SessionId): NotMemberOfPermittedOrgs =
+    NotMemberOfPermittedOrgs.newBuilder()
         .setId(id)
-        .addAllPermittedOrganization(permittedOrganizations)
         .build()

@@ -88,9 +88,7 @@ internal class DesktopClient(
             .getOrNull(0)
 
     /**
-     * Observes events until one is emitted.
-     *
-     * Once an event is emitted, all subscriptions are automatically canceled.
+     * Observes all provided events and cancels all subscriptions once any event is emitted.
      *
      * @param observers The information on the observation of events.
      */

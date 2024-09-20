@@ -45,8 +45,11 @@ message UsernameMismatch {
     // The ID of the session.
     SessionId id = 1 [(required) = true];
 
+    // The username entered at the start of the login process.
+    spine_examples.pingh.github.Username expected_user = 2 [(required) = true];
+
     // The name of the user whose account completed the authentication.
-    spine_examples.pingh.github.Username logged_in_user = 2 [(required) = true];
+    spine_examples.pingh.github.Username logged_in_user = 3 [(required) = true];
 }
 
 // The user is not a member of an organization authorized to use the Pingh application.
@@ -56,11 +59,8 @@ message UsernameMismatch {
 //
 // See: https://github.com/apps/pingh-tracker-of-github-mentions.
 //
-message OrgAccessDenied {
+message NotMemberOfPermittedOrgs {
 
     // The ID of the session.
     SessionId id = 1 [(required) = true];
-
-    // Organizations that are permitted to use the Pingh application.
-    repeated spine_examples.pingh.github.Organization permitted_organization = 2;
 }

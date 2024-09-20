@@ -30,7 +30,7 @@ import com.google.protobuf.Duration
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.spine.examples.pingh.client.LoginFlow.EnterUsername
-import io.spine.examples.pingh.client.LoginFlow.VerifyLogin
+import io.spine.examples.pingh.client.LoginFlow.Verify
 import io.spine.examples.pingh.client.MentionsFlow
 import io.spine.examples.pingh.client.e2e.given.expectedMentionsList
 import io.spine.examples.pingh.client.e2e.given.randomUnread
@@ -83,7 +83,7 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
         val loginFlow = app().startLoginFlow()
         (loginFlow.currentStage().value as EnterUsername).requestUserCode(username) {
             enterUserCode()
-            (loginFlow.currentStage().value as VerifyLogin).confirm(
+            (loginFlow.currentStage().value as Verify).confirm(
                 onSuccess = {
                     future.complete(null)
                 }
