@@ -147,8 +147,8 @@ public fun KClass<Mention>.from(fragment: CommentFragment, itemTitle: String): M
  *
  * Reviews do not have titles, which are required to create a `Mention`s.
  * Therefore, it is necessary to additionally specify which value is considered
- * a mention's title. It is recommended to use the GitHub title of the pull request
- * under which the review is submitted.
+ * a mention's title. It is recommended to use the title of the pull request for
+ * which the review is submitted.
  */
 public fun KClass<Mention>.from(fragment: ReviewFragment, prTitle: String): Mention =
     with(Mention.newBuilder()) {

@@ -176,8 +176,9 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
 }
 
 /**
- * GitHub item type. Contains the name by which they can be searching in the GitHub API
- * using the `is:` filter.
+ * GitHub item type.
+ *
+ * Contains the name by which they can be searching in the GitHub REST API using the `is:` filter.
  */
 private enum class ItemType(val value: String) {
     ISSUE("issue"),
@@ -187,8 +188,8 @@ private enum class ItemType(val value: String) {
 /**
  * Creates a search request builder.
  */
-private fun HttpClient.search(url: String): GitHubSearchRequest =
-    GitHubSearchRequest(this, url)
+private fun HttpClient.search(url: String): SearchRequestBuilder =
+    SearchRequestBuilder(this, url)
 
 /**
  * A builder for creating and sending requests to search for issues and pull requests
@@ -199,14 +200,14 @@ private fun HttpClient.search(url: String): GitHubSearchRequest =
  * Searching for mentions using [mentions:username](https://shorturl.at/zQzGL) is insufficient,
  * as it only captures mentions in issue comments, missing those in pull request reviews
  * and review comments. Instead, all issues and pull requests where the user was involved
- * are retrieved. Among them, mentions will then need to be manually selected.
+ * are retrieved. Among them, mentions will then need to be selected.
  *
  * @property client The HTTP client on behalf of which requests is made.
  * @property url The GitHub REST API search endpoint.
  * @see <a href="https://shorturl.at/6z3UB">
  *     Search by a user that's involved in an issue or pull request</a>
  */
-private class GitHubSearchRequest(private val client: HttpClient, private val url: String) {
+private class SearchRequestBuilder(private val client: HttpClient, private val url: String) {
     /**
      * The type of the searched item.
      */
@@ -231,7 +232,7 @@ private class GitHubSearchRequest(private val client: HttpClient, private val ur
     /**
      * Sets the type of the searched item.
      */
-    fun by(itemType: ItemType): GitHubSearchRequest {
+    fun by(itemType: ItemType): SearchRequestBuilder {
         this.itemType = itemType
         return this
     }
@@ -240,7 +241,7 @@ private class GitHubSearchRequest(private val client: HttpClient, private val ur
      * Sets the time after which GitHub items containing the searched mentions
      * should have been updated.
      */
-    fun by(updatedAfter: Timestamp): GitHubSearchRequest {
+    fun by(updatedAfter: Timestamp): SearchRequestBuilder {
         this.updatedAfter = updatedAfter
         return this
     }
@@ -248,7 +249,7 @@ private class GitHubSearchRequest(private val client: HttpClient, private val ur
     /**
      * Sets the user authentication token on GitHub
      */
-    fun with(token: PersonalAccessToken): GitHubSearchRequest {
+    fun with(token: PersonalAccessToken): SearchRequestBuilder {
         this.token = token
         return this
     }
@@ -256,7 +257,7 @@ private class GitHubSearchRequest(private val client: HttpClient, private val ur
     /**
      * Sets the page number of the results to fetch.
      */
-    fun onPage(page: Int): GitHubSearchRequest {
+    fun onPage(page: Int): SearchRequestBuilder {
         this.page = page
         return this
     }
@@ -296,8 +297,8 @@ private class GitHubSearchRequest(private val client: HttpClient, private val ur
  * Creates a builder for request to obtain mentions on a specific issue or pull request.
  */
 private fun HttpClient.findMentionsOn(repo: Repo, number: Int, itemType: ItemType):
-        MentionsInIssueOrPullRequests =
-    MentionsInIssueOrPullRequests(this, repo, number, itemType)
+        MentionsOnIssueOrPullRequestsBuilder =
+    MentionsOnIssueOrPullRequestsBuilder(this, repo, number, itemType)
 
 /**
  * A builder for creating and sending request to obtain mentions
@@ -311,7 +312,7 @@ private fun HttpClient.findMentionsOn(repo: Repo, number: Int, itemType: ItemTyp
  * @property number The number of this issue or pull request in the repository.
  * @property itemType The GitHub item type.
  */
-private class MentionsInIssueOrPullRequests(
+private class MentionsOnIssueOrPullRequestsBuilder(
     private val client: HttpClient,
     private val repo: Repo,
     private val number: Int,
@@ -338,7 +339,7 @@ private class MentionsInIssueOrPullRequests(
     /**
      * Sets the name of the user whose mentions are to be found.
      */
-    fun of(user: Username): MentionsInIssueOrPullRequests {
+    fun of(user: Username): MentionsOnIssueOrPullRequestsBuilder {
         this.user = user
         return this
     }
@@ -346,7 +347,7 @@ private class MentionsInIssueOrPullRequests(
     /**
      * Sets the user authentication token on GitHub.
      */
-    fun with(token: PersonalAccessToken): MentionsInIssueOrPullRequests {
+    fun with(token: PersonalAccessToken): MentionsOnIssueOrPullRequestsBuilder {
         this.token = token
         return this
     }
@@ -354,7 +355,7 @@ private class MentionsInIssueOrPullRequests(
     /**
      * Sets the string to be used as the title for the found mentions.
      */
-    fun setTitle(title: String): MentionsInIssueOrPullRequests {
+    fun setTitle(title: String): MentionsOnIssueOrPullRequestsBuilder {
         this.title = title
         return this
     }

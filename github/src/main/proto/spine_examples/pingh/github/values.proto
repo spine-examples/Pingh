@@ -141,6 +141,6 @@ message Repo {
     // The name of the GitHub repository.
     string name = 1 [(required) = true];
 
-    // The name of user or organization which is owner of this repo.
+    // The name of user or organization which is owner of this repository.
     string owner = 2 [(required) = true];
 }
