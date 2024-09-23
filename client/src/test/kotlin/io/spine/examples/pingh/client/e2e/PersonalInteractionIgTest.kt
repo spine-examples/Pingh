@@ -33,6 +33,7 @@ import io.spine.examples.pingh.client.LoginFlow.EnterUsername
 import io.spine.examples.pingh.client.LoginFlow.Verify
 import io.spine.examples.pingh.client.MentionsFlow
 import io.spine.examples.pingh.client.e2e.given.expectedMentionsList
+import io.spine.examples.pingh.client.e2e.given.observeUserMentions
 import io.spine.examples.pingh.client.e2e.given.randomUnread
 import io.spine.examples.pingh.client.e2e.given.updateStatusById
 import io.spine.examples.pingh.clock.emitTimePassedEvent
@@ -74,7 +75,9 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
     internal fun logInAndUpdateMentions() {
         logIn()
         expected = expectedMentionsList(username)
+        val observer = app().observeUserMentions(username, expected.size)
         val mentionsFlow = app().startMentionsFlow()
+        observer.waitUntilUpdate()
         mentionsFlow.actual shouldBe expected
     }
 
@@ -107,7 +110,9 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
         val mentionsFlow = app().startMentionsFlow()
         val snoozedMentionId = mentionsFlow.snoozeRandomMention()
         mentionsFlow.actual shouldBe expected
+        val observer = app().observeUserMentions(username)
         mentionsFlow.markAsRead(snoozedMentionId)
+        observer.waitUntilUpdate()
         expected = expected.updateStatusById(snoozedMentionId, MentionStatus.READ)
         mentionsFlow.actual shouldBe expected
     }
@@ -129,7 +134,9 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
         val snoozedMentionId = mentionsFlow.snoozeRandomMention(milliseconds(500))
         mentionsFlow.actual shouldBe expected
         sleep(1000)
+        val observer = app().observeUserMentions(username)
         emitTimePassedEvent()
+        observer.waitUntilUpdate()
         expected = expected.updateStatusById(snoozedMentionId, MentionStatus.UNREAD)
         mentionsFlow.actual shouldBe expected
     }
@@ -189,13 +196,17 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
         val mentionsFlow = app().startMentionsFlow()
         mentionsFlow.snoozeRandomMention(milliseconds(500))
         sleep(1000)
+        val observer = app().observeUserMentions(username)
         emitTimePassedEvent()
+        observer.waitUntilUpdate()
         notificationsCount() shouldBe (expected.size + 1)
     }
 
     private fun MentionsFlow.snoozeRandomMention(snoozeTime: Duration = hours(2)): MentionId {
         val mention = actual.randomUnread()
+        val observer = app().observeUserMentions(username)
         snooze(mention.id, snoozeTime)
+        observer.waitUntilUpdate()
         expected = expected.updateStatusById(mention.id, MentionStatus.SNOOZED)
         return mention.id
     }
