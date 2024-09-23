@@ -29,9 +29,9 @@ package io.spine.examples.pingh.client.e2e
 import com.google.protobuf.Duration
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import io.spine.examples.pingh.client.LoginFlow.EnterUsername
-import io.spine.examples.pingh.client.LoginFlow.Verify
+import io.spine.examples.pingh.client.EnterUsername
 import io.spine.examples.pingh.client.MentionsFlow
+import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.client.e2e.given.expectedMentionsList
 import io.spine.examples.pingh.client.e2e.given.randomUnread
 import io.spine.examples.pingh.client.e2e.given.updateStatusById
@@ -83,7 +83,7 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
         val loginFlow = app().startLoginFlow()
         (loginFlow.currentStage().value as EnterUsername).requestUserCode(username) {
             enterUserCode()
-            (loginFlow.currentStage().value as Verify).confirm(
+            (loginFlow.currentStage().value as VerifyLogin).confirm(
                 onSuccess = {
                     future.complete(null)
                 }

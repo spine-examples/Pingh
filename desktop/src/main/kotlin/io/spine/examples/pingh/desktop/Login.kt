@@ -79,9 +79,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.protobuf.Duration
 import io.spine.examples.pingh.client.LoginFlow
-import io.spine.examples.pingh.client.LoginFlow.EnterUsername
-import io.spine.examples.pingh.client.LoginFlow.Failed
-import io.spine.examples.pingh.client.LoginFlow.Verify
+import io.spine.examples.pingh.client.EnterUsername
+import io.spine.examples.pingh.client.LoginFailed
+import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
@@ -110,12 +110,12 @@ internal fun LoginPage(
             flow = screenStage
         )
 
-        is Verify -> VerificationPage(
+        is VerifyLogin -> VerificationPage(
             flow = screenStage,
             toMentionsPage = toMentionsPage
         )
 
-        is Failed -> FailedPage(
+        is LoginFailed -> FailedPage(
             flow = screenStage
         )
     }
@@ -402,7 +402,7 @@ private fun LoginButton(
  */
 @Composable
 private fun VerificationPage(
-    flow: Verify,
+    flow: VerifyLogin,
     toMentionsPage: () -> Unit
 ) {
     val userCode by flow.userCode.collectAsState()
@@ -520,7 +520,7 @@ private fun CopyToClipboardIcon(
  *   where the user must verify their login.
  */
 @Composable
-private fun CodeExpiredErrorMessage(flow: Verify) {
+private fun CodeExpiredErrorMessage(flow: VerifyLogin) {
     ClickableErrorMessage(
         text = "The code has expired, please start over.",
         clickablePartOfText = "start over",
@@ -599,7 +599,7 @@ private fun VerificationUrlButton(url: Url) {
  */
 @Composable
 private fun SubmitButton(
-    flow: Verify,
+    flow: VerifyLogin,
     toMentionsPage: () -> Unit
 ) {
     val enabled by flow.canAskForNewTokens.collectAsState()
@@ -645,7 +645,7 @@ private fun SubmitButton(
  *   where the user must verify their login.
  */
 @Composable
-private fun NoResponseErrorMessage(flow: Verify) {
+private fun NoResponseErrorMessage(flow: VerifyLogin) {
     val interval by flow.interval.collectAsState()
     ClickableErrorMessage(
         text = """
@@ -722,7 +722,7 @@ private fun ClickableErrorMessage(
  * @param flow The stage in the GitHub login process control flow where the login attempt fails.
  */
 @Composable
-private fun FailedPage(flow: Failed) {
+private fun FailedPage(flow: LoginFailed) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -747,7 +747,7 @@ private fun FailedPage(flow: Failed) {
  * @param flow The stage in the GitHub login process control flow where the login attempt fails.
  */
 @Composable
-private fun RestartButton(flow: Failed) {
+private fun RestartButton(flow: LoginFailed) {
     Button(
         onClick = flow::restartLogin,
         modifier = Modifier
