@@ -94,7 +94,7 @@ public class LoginFlow internal constructor(
         when (stage.value) {
             is EnterUsername -> {
                 checkNotNull(stage.value.result) {
-                    "The `UserCodeReceived` event was not specified as the result " +
+                    "The `UserCodeReceived` event is not specified as the result " +
                             "of the `EnterUsername` stage."
                 }
                 stage.value = VerifyLogin(
@@ -105,7 +105,7 @@ public class LoginFlow internal constructor(
 
             is VerifyLogin -> {
                 checkNotNull(stage.value.result) {
-                    "No error message was specified as the result of the `VerifyLogin` stage."
+                    "No error message is specified as the result of the `VerifyLogin` stage."
                 }
                 stage.value = LoginFailed(::moveToNextStage, stage.value.result as String)
             }

@@ -94,8 +94,7 @@ public class VerifyLogin internal constructor(
     /**
      * The duration after which the [userCode] expires.
      */
-    public val expiresIn: MutableStateFlow<Duration> =
-        MutableStateFlow(event.expiresIn)
+    public val expiresIn: MutableStateFlow<Duration> = MutableStateFlow(event.expiresIn)
 
     /**
      * Whether the user code is expired.
