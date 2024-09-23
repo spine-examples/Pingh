@@ -35,6 +35,7 @@ import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.CommentFragment
 import io.spine.examples.pingh.github.rest.IssueOrPullRequestFragment
 import io.spine.examples.pingh.github.rest.OrganizationFragment
+import io.spine.examples.pingh.github.rest.ReviewFragment
 import io.spine.examples.pingh.github.rest.UserFragment
 import io.spine.examples.pingh.github.rest.VerificationCodesFragment
 import io.spine.examples.pingh.github.rest.VerificationCodesResponse
@@ -92,9 +93,20 @@ public fun KClass<User>.of(username: String, avatarUrl: String): User =
     )
 
 /**
+ * Returns the `Repo` where this issue or pull request was created.
+ */
+public fun IssueOrPullRequestFragment.repo(): Repo {
+    val pathSegments = htmlUrl.substring("https://".length).split("/")
+    return Repo.newBuilder()
+        .setOwner(pathSegments[1])
+        .setName(pathSegments[2])
+        .vBuild()
+}
+
+/**
  * Creates a new `Mention` with the data specified in the `IssueOrPullRequestFragment`.
  */
-public fun KClass<Mention>.fromFragment(fragment: IssueOrPullRequestFragment): Mention =
+public fun KClass<Mention>.from(fragment: IssueOrPullRequestFragment): Mention =
     with(Mention.newBuilder()) {
         id = NodeId::class.of(fragment.nodeId)
         author = User::class.of(
@@ -116,18 +128,37 @@ public fun KClass<Mention>.fromFragment(fragment: IssueOrPullRequestFragment): M
  * a mention's title. It is recommended to use the GitHub title of the item
  * under which the comment is made.
  */
-public fun KClass<Mention>.fromFragment(
-    fragment: CommentFragment,
-    itemTitle: String
-): Mention =
+public fun KClass<Mention>.from(fragment: CommentFragment, itemTitle: String): Mention =
     with(Mention.newBuilder()) {
         id = NodeId::class.of(fragment.nodeId)
         author = User::class.of(
             fragment.whoCreated.username,
             fragment.whoCreated.avatarUrl
         )
-        title = itemTitle
+        title = "Comment on $itemTitle"
         whenMentioned = Timestamps.parse(fragment.whenCreated)
+        url = Url::class.of(fragment.htmlUrl)
+        vBuild()
+    }
+
+/**
+ * Creates a new `Mention` with the passed title value and
+ * the data specified in the `ReviewFragment`.
+ *
+ * Reviews do not have titles, which are required to create a `Mention`s.
+ * Therefore, it is necessary to additionally specify which value is considered
+ * a mention's title. It is recommended to use the title of the pull request for
+ * which the review is submitted.
+ */
+public fun KClass<Mention>.from(fragment: ReviewFragment, prTitle: String): Mention =
+    with(Mention.newBuilder()) {
+        id = NodeId::class.of(fragment.nodeId)
+        author = User::class.of(
+            fragment.whoCreated.username,
+            fragment.whoCreated.avatarUrl
+        )
+        title = "Review of $prTitle"
+        whenMentioned = Timestamps.parse(fragment.whenSubmitted)
         url = Url::class.of(fragment.htmlUrl)
         vBuild()
     }

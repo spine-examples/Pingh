@@ -27,9 +27,9 @@
 package io.spine.examples.pingh.testing.mentions.given
 
 import io.spine.examples.pingh.github.Mention
-import io.spine.examples.pingh.github.fromFragment
+import io.spine.examples.pingh.github.from
 import io.spine.examples.pingh.github.rest.CommentsResponse
-import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResult
+import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResponse
 import io.spine.examples.pingh.mentions.parseJson
 
 /**
@@ -50,9 +50,9 @@ private fun loadMentionsInPr(): Set<Mention> {
         .getResource("/github-responses/prs-search-response.json")
     checkNotNull(jsonFile)
     val json = jsonFile.readText(Charsets.UTF_8)
-    return IssuesAndPullRequestsSearchResult::class.parseJson(json)
+    return IssuesAndPullRequestsSearchResponse::class.parseJson(json)
         .itemList
-        .map { fragment -> Mention::class.fromFragment(fragment) }
+        .map { fragment -> Mention::class.from(fragment) }
         .toSet()
 }
 
@@ -72,6 +72,6 @@ private fun loadMentionsInCommentsUnderPr(): Set<Mention> {
     // is just the value of the `item` field.
     return CommentsResponse::class.parseJson("{ item: $json }")
         .itemList
-        .map { fragment -> Mention::class.fromFragment(fragment, "Comment") }
+        .map { fragment -> Mention::class.from(fragment, "Comment") }
         .toSet()
 }

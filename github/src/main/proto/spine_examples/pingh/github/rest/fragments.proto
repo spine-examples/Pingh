@@ -84,8 +84,8 @@ message IssueOrPullRequestFragment {
     //
     string html_url = 6 [(required) = true, json_name = "html_url"];
 
-    // The URL of all comments under this item.
-    string comments_url = 7 [(required) = true, json_name = "comments_url"];
+    // The number of this item in repository.
+    int32 number = 7 [(required) = true, (min).value = "1"];
 }
 
 // The GitHub API response received when searching for mentions
@@ -95,13 +95,16 @@ message IssueOrPullRequestFragment {
 // Request to the GitHub API to retrieve them is the same and returns a list containing
 // both issues and pull requests.
 //
-message IssuesAndPullRequestsSearchResult {
+message IssuesAndPullRequestsSearchResponse {
+
+    // The total number of issues and pull requests found.
+    int32 total_count = 1 [(required) = true, (min).value = "0", json_name = "total_count"];
 
     // GitHub items on which the mention occurred.
     //
     // No results may be found for a search request, in this case the list is empty.
     //
-    repeated IssueOrPullRequestFragment item = 1 [(validate) = true, json_name = "items"];
+    repeated IssueOrPullRequestFragment item = 2 [(validate) = true, json_name = "items"];
 }
 
 // Comment data received via GitHub API.
@@ -139,6 +142,43 @@ message CommentsResponse {
     // If a GitHub item has no comments, the list is empty.
     //
     repeated CommentFragment item = 1 [(validate) = true];
+}
+
+// Pull request review data received via GitHub REST API.
+message ReviewFragment {
+
+    // The review's ID in GitHub.
+    //
+    // To avoid conflicts with the `id` field in the JSON response received from GitHub,
+    // the name `node_id` is used.
+    //
+    string node_id = 1 [(required) = true, json_name = "node_id"];
+
+    // The reviewer.
+    UserFragment who_created = 2 [(required) = true, json_name = "user"];
+
+    // The time when this review was submitted.
+    string when_submitted = 3 [(required) = true, json_name = "submitted_at"];
+
+    // The text body of this review.
+    string body = 4 [(required) = true];
+
+    // The URL of this GitHub review.
+    //
+    // To avoid conflicts with the `url` field in the JSON response received from GitHub,
+    // the name `html_url` is used.
+    //
+    string html_url = 5 [(required) = true, json_name = "html_url"];
+}
+
+// The GitHub REST API response received when obtaining pull request reviews by the URL.
+message ReviewsResponse {
+
+    // GitHub pull request reviews.
+    //
+    // If a GitHub pull request has no reviews, the list is empty.
+    //
+    repeated ReviewFragment item = 1 [(validate) = true];
 }
 
 // The GitHub REST API response received when obtaining verification codes.
