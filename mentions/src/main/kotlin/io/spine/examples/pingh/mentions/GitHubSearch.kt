@@ -48,11 +48,14 @@ public interface GitHubSearch {
      * @param token The `PersonalAccessToken` to access user's private repositories.
      * @param updatedAfter The time after which GitHub items containing the searched mentions
      *   should have been updated.
+     * @param onlyOnFirstPage Indicates whether the search should only fetch results
+     *   from the first page.
      */
     @Throws(CannotObtainMentionsException::class)
     public fun searchMentions(
         username: Username,
         token: PersonalAccessToken,
-        updatedAfter: Timestamp = Timestamp.getDefaultInstance()
+        updatedAfter: Timestamp = Timestamp.getDefaultInstance(),
+        onlyOnFirstPage: Boolean = true
     ): Set<Mention>
 }

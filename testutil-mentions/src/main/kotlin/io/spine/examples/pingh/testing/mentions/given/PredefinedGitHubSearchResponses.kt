@@ -85,7 +85,8 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
     public override fun searchMentions(
         username: Username,
         token: PersonalAccessToken,
-        updatedAfter: Timestamp
+        updatedAfter: Timestamp,
+        onlyOnFirstPage: Boolean
     ): Set<Mention> {
         if (responseStatusCode != HttpStatusCode.OK) {
             throw CannotObtainMentionsException(responseStatusCode.value)
