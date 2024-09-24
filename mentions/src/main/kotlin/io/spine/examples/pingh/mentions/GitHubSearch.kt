@@ -48,7 +48,7 @@ public interface GitHubSearch {
      * @param token The `PersonalAccessToken` to access user's private repositories.
      * @param updatedAfter The time after which GitHub items containing the searched mentions
      *   should have been updated.
-     * @param onlyOnFirstPage Indicates whether the search should only fetch results
+     * @param onlyOnFirstPage Indicates whether the search retrieves results only
      *   from the first page.
      */
     @Throws(CannotObtainMentionsException::class)

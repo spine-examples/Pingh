@@ -202,12 +202,12 @@ internal class GitHubClientProcess :
  *
  * @see [identifyLastWorkday]
  */
-private fun Timestamp.thisOrLastWorkday(): Timestamp {
-    if (!this.isDefault()) {
-        return this
+private fun Timestamp.thisOrLastWorkday(): Timestamp =
+    if (isDefault()) {
+        Timestamp::class.identifyLastWorkday()
+    } else {
+        this
     }
-    return Timestamp::class.identifyLastWorkday()
-}
 
 /**
  * Returns the midnight of the last working day, if counted from the current point in time.

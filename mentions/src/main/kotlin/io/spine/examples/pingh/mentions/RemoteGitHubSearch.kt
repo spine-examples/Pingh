@@ -92,20 +92,24 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
         updatedAfter: Timestamp,
         onlyOnFirstPage: Boolean
     ): Set<Mention> =
-        findMentions(username, token, updatedAfter, ItemType.ISSUE, onlyOnFirstPage) +
-                findMentions(username, token, updatedAfter, ItemType.PULL_REQUEST, onlyOnFirstPage)
+        findMentions(username, token, updatedAfter, onlyOnFirstPage, ItemType.ISSUE) +
+                findMentions(username, token, updatedAfter, onlyOnFirstPage, ItemType.PULL_REQUEST)
 
     /**
      * Requests GitHub for mentions of a user in issues or pull requests,
      * then looks for where the user was specifically mentioned on that item.
+     *
+     * If `onlyOnFirstPage` is `false`, pagination is handled during the search.
+     * This means that if not all results are retrieved in the initial request,
+     * additional requests are made to fetch the remaining results.
      */
     @Throws(CannotObtainMentionsException::class)
     private fun findMentions(
         username: Username,
         token: PersonalAccessToken,
         updatedAfter: Timestamp,
-        itemType: ItemType,
-        onlyOnFirstPage: Boolean
+        onlyOnFirstPage: Boolean,
+        itemType: ItemType
     ): Set<Mention> {
         var page = 1
         val firstResult = searchIssuesOrPullRequests(token, updatedAfter, itemType, page)
