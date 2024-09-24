@@ -43,7 +43,6 @@ import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.from
 import io.spine.examples.pingh.github.repo
 import io.spine.examples.pingh.github.rest.CommentsResponse
-import io.spine.examples.pingh.github.rest.IssueOrPullRequestFragment
 import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResponse
 import io.spine.examples.pingh.github.rest.ReviewsResponse
 import io.spine.examples.pingh.github.tag
@@ -55,7 +54,7 @@ import kotlinx.coroutines.runBlocking
  *
  * @see <a href="https://shorturl.at/w35Ao">Changing the number of items per page</a>
  */
-private const val perPage = 100
+private const val perPage = 20
 
 /**
  * Using the GitHub API fetches mentions of a specific user.
@@ -105,17 +104,22 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
         token: PersonalAccessToken,
         updatedAfter: Timestamp,
         itemType: ItemType
-    ): Set<Mention> {
-        var page = 1
-        val firstResult = searchIssuesOrPullRequests(token, updatedAfter, itemType, page)
-        val totalCount = firstResult.totalCount
-        val items = firstResult.itemList.toMutableSet()
-        while (perPage * page < totalCount) {
-            page++
-            items += searchIssuesOrPullRequests(token, updatedAfter, itemType, page).itemList
-        }
-        return items.filterMentions(username, token, itemType)
-    }
+    ): Set<Mention> =
+        searchIssuesOrPullRequests(token, updatedAfter, itemType)
+            .itemList
+            .flatMap { item ->
+                val mentions = client
+                    .findMentionsOn(item.repo(), item.number, itemType)
+                    .of(username)
+                    .with(token)
+                    .setTitle(item.title)
+                    .get()
+                if (item.body.contains(username.tag())) {
+                    mentions.plus(Mention::class.from(item))
+                } else {
+                    mentions
+                }
+            }.toSet()
 
     /**
      * Sends a request to GitHub API for searching issues or pull requests that
@@ -132,8 +136,7 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
     private fun searchIssuesOrPullRequests(
         token: PersonalAccessToken,
         updatedAfter: Timestamp,
-        itemType: ItemType,
-        page: Int
+        itemType: ItemType
     ): IssuesAndPullRequestsSearchResponse =
         runBlocking {
             val response = client
@@ -141,7 +144,6 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
                 .by(itemType)
                 .by(updatedAfter)
                 .with(token)
-                .onPage(page)
                 .get()
 
             if (response.status != HttpStatusCode.OK) {
@@ -149,30 +151,6 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
             }
             IssuesAndPullRequestsSearchResponse::class.parseJson(response.body())
         }
-
-    /**
-     * Selects items where the user is mentioned and searches for mentions
-     * in comments and reviews, if available.
-     */
-    private fun Set<IssueOrPullRequestFragment>.filterMentions(
-        user: Username,
-        token: PersonalAccessToken,
-        itemType: ItemType
-    ): Set<Mention> =
-        this.flatMap { item ->
-            val mentions = client
-                .findMentionsOn(item.repo(), item.number, itemType)
-                .of(user)
-                .with(token)
-                .setTitle(item.title)
-                .get()
-            if (item.body.contains(user.tag())) {
-                mentions.plus(Mention::class.from(item))
-            } else {
-                mentions
-            }
-        }.toSet()
-
 }
 
 /**
@@ -225,11 +203,6 @@ private class SearchRequestBuilder(private val client: HttpClient, private val u
     private var token: PersonalAccessToken? = null
 
     /**
-     * The page number of the results to fetch.
-     */
-    private var page: Int? = null
-
-    /**
      * Sets the type of the searched item.
      */
     fun by(itemType: ItemType): SearchRequestBuilder {
@@ -255,14 +228,6 @@ private class SearchRequestBuilder(private val client: HttpClient, private val u
     }
 
     /**
-     * Sets the page number of the results to fetch.
-     */
-    fun onPage(page: Int): SearchRequestBuilder {
-        this.page = page
-        return this
-    }
-
-    /**
      * Creates and sends request with specified data.
      *
      * @throws IllegalArgumentException some request data is not specified.
@@ -276,7 +241,6 @@ private class SearchRequestBuilder(private val client: HttpClient, private val u
         checkNotNull(token) {
             "The user authentication token on GitHub is not specified."
         }
-        checkNotNull(page) { "The page number of the results to fetch is not specified." }
 
         val query = "is:${itemType!!.value} involves:@me " +
                 "updated:>${Timestamps.toString(updatedAfter)}"
@@ -284,9 +248,8 @@ private class SearchRequestBuilder(private val client: HttpClient, private val u
             url {
                 parameters.append("q", query)
                 parameters.append("per_page", perPage.toString())
-                parameters.append("page", page!!.toString())
                 parameters.append("sort", "updated")
-                parameters.append("order", "asc")
+                parameters.append("order", "desc")
             }
             configureHeaders(token!!)
         }
