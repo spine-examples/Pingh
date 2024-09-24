@@ -94,9 +94,6 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
     /**
      * Requests GitHub for mentions of a user in issues or pull requests,
      * then looks for where the user was specifically mentioned on that item.
-     *
-     * Accounts for pagination during the search. If not all results are retrieved in
-     * a single request, additional requests are made to ensure all results are fetched.
      */
     @Throws(CannotObtainMentionsException::class)
     private fun findMentions(
