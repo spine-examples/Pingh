@@ -86,7 +86,7 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
         username: Username,
         token: PersonalAccessToken,
         updatedAfter: Timestamp,
-        onlyOnFirstPage: Boolean
+        limit: Int?
     ): Set<Mention> {
         if (responseStatusCode != HttpStatusCode.OK) {
             throw CannotObtainMentionsException(responseStatusCode.value)

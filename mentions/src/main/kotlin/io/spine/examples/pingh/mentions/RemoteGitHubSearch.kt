@@ -55,7 +55,7 @@ import kotlinx.coroutines.runBlocking
  *
  * @see <a href="https://shorturl.at/w35Ao">Changing the number of items per page</a>
  */
-private const val perPage = 20
+private const val perPage = 100
 
 /**
  * Using the GitHub API fetches mentions of a specific user.
@@ -81,8 +81,9 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
      * @param token The `PersonalAccessToken` to access user's private repositories.
      * @param updatedAfter The time after which GitHub items containing the searched mentions
      *   should have been updated.
-     * @param onlyOnFirstPage If `true`, retrieves mentions only from the first page of results.
-     *   If `false`, fetches all mentions since [updatedAfter].
+     * @param limit The maximum number of recent mentions to return. If set, no more than `limit`
+     *   mentions will be retrieved. If not set, all mentions since
+     *   the [updatedAfter] will be returned.
      * @see [GitHubSearch.searchMentions]
      */
     @Throws(CannotObtainMentionsException::class)
@@ -90,32 +91,38 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
         username: Username,
         token: PersonalAccessToken,
         updatedAfter: Timestamp,
-        onlyOnFirstPage: Boolean
-    ): Set<Mention> =
-        findMentions(username, token, updatedAfter, onlyOnFirstPage, ItemType.ISSUE) +
-                findMentions(username, token, updatedAfter, onlyOnFirstPage, ItemType.PULL_REQUEST)
+        limit: Int?
+    ): Set<Mention> {
+        require(limit == null || limit > 0) {
+            "The maximum number of recent mentions must be `null` or positive."
+        }
+        return findMentions(username, token, updatedAfter, limit, ItemType.ISSUE) +
+                findMentions(username, token, updatedAfter, limit, ItemType.PULL_REQUEST)
+    }
 
     /**
      * Requests GitHub for mentions of a user in issues or pull requests,
      * then looks for where the user was specifically mentioned on that item.
      *
-     * If `onlyOnFirstPage` is `false`, pagination is handled during the search.
-     * This means that if not all results are retrieved in the initial request,
-     * additional requests are made to fetch the remaining results.
+     * The maximum number of fetched mentions can be restricted by the specified [limit];
+     * if no `limit` is set, all mentions since the [updatedAfter] are retrieved.
+     *
+     * Accounts for pagination during the search. If not all results within `limit` are retrieved
+     * in a single request, additional requests are made to ensure all results are fetched.
      */
     @Throws(CannotObtainMentionsException::class)
     private fun findMentions(
         username: Username,
         token: PersonalAccessToken,
         updatedAfter: Timestamp,
-        onlyOnFirstPage: Boolean,
+        limit: Int?,
         itemType: ItemType
     ): Set<Mention> {
         var page = 1
         val firstResult = searchIssuesOrPullRequests(token, updatedAfter, itemType, page)
         val totalCount = firstResult.totalCount
         val items = firstResult.itemList.toMutableSet()
-        while (!onlyOnFirstPage && perPage * page < totalCount) {
+        while ((limit == null || perPage * page < limit) && perPage * page < totalCount) {
             page++
             items += searchIssuesOrPullRequests(token, updatedAfter, itemType, page).itemList
         }

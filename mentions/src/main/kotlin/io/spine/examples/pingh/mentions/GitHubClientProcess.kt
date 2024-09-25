@@ -66,6 +66,11 @@ import kotlin.reflect.KClass
 internal val mentionsUpdateInterval: Duration = minutes(1)
 
 /**
+ * Limit the number of mentions loaded on the first launch.
+ */
+private const val limitOnFirstLaunch: Int = 20
+
+/**
  * A process of reading user's mentions from GitHub.
  */
 internal class GitHubClientProcess :
@@ -153,9 +158,12 @@ internal class GitHubClientProcess :
         val username = state().id.username
         val token = state().token
         val updatedAfter = state().whenLastSuccessfullyUpdated.thisOrLastWorkday()
-        val onlyOnFirstPage = state().whenLastSuccessfullyUpdated.isDefault()
         val mentions = try {
-            search.searchMentions(username, token, updatedAfter, onlyOnFirstPage)
+            if (state().whenLastSuccessfullyUpdated.isDefault()) {
+                search.searchMentions(username, token, updatedAfter, limitOnFirstLaunch)
+            } else {
+                search.searchMentions(username, token, updatedAfter)
+            }
         } catch (exception: CannotObtainMentionsException) {
             builder().clearWhenStarted()
             return listOf(
