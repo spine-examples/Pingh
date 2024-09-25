@@ -56,7 +56,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
-import java.util.*
+import java.util.Optional
 import kotlin.jvm.Throws
 import kotlin.reflect.KClass
 
@@ -64,6 +64,11 @@ import kotlin.reflect.KClass
  * The time interval between automatic requests to update mentions.
  */
 internal val mentionsUpdateInterval: Duration = minutes(1)
+
+/**
+ * The limit the number of mentions loaded on the first launch.
+ */
+private const val limitOnFirstLaunch: Int = 20
 
 /**
  * A process of reading user's mentions from GitHub.
@@ -139,6 +144,10 @@ internal class GitHubClientProcess :
     /**
      * Fetches user's mentions from GitHub and terminates the mention update process.
      *
+     * If mentions have never been loaded before, it retrieves no more 20 mentions made
+     * since the start of the previous workday. Otherwise, it fetches all mentions
+     * since the last update.
+     *
      * @return If the mentions fetching from GitHub is successful, list of events,
      * where the [UserMentioned] event for each mention comes first,
      * followed by a single [MentionsUpdateFromGitHubCompleted] event.
@@ -150,7 +159,11 @@ internal class GitHubClientProcess :
         val token = state().token
         val updatedAfter = state().whenLastSuccessfullyUpdated.thisOrLastWorkday()
         val mentions = try {
-            search.searchMentions(username, token, updatedAfter)
+            if (state().whenLastSuccessfullyUpdated.isDefault()) {
+                search.searchMentions(username, token, updatedAfter, limitOnFirstLaunch)
+            } else {
+                search.searchMentions(username, token, updatedAfter)
+            }
         } catch (exception: CannotObtainMentionsException) {
             builder().clearWhenStarted()
             return listOf(
@@ -195,14 +208,14 @@ internal class GitHubClientProcess :
  * Returns this `Timestamp` if its value is not default,
  * otherwise returns the midnight of the last workday.
  *
- * @see [thisOrLastWorkday]
+ * @see [identifyLastWorkday]
  */
-private fun Timestamp.thisOrLastWorkday(): Timestamp {
-    if (Timestamps.compare(this, this.defaultInstanceForType) != 0) {
-        return this
+private fun Timestamp.thisOrLastWorkday(): Timestamp =
+    if (isDefault()) {
+        Timestamp::class.identifyLastWorkday()
+    } else {
+        this
     }
-    return Timestamp::class.identifyLastWorkday()
-}
 
 /**
  * Returns the midnight of the last working day, if counted from the current point in time.
