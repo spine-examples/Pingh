@@ -66,7 +66,7 @@ import kotlin.reflect.KClass
 internal val mentionsUpdateInterval: Duration = minutes(1)
 
 /**
- * Limit the number of mentions loaded on the first launch.
+ * The limit the number of mentions loaded on the first launch.
  */
 private const val limitOnFirstLaunch: Int = 20
 

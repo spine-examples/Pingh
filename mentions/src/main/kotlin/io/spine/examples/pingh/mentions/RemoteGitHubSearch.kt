@@ -55,7 +55,7 @@ import kotlinx.coroutines.runBlocking
  *
  * @see <a href="https://shorturl.at/w35Ao">Changing the number of items per page</a>
  */
-private const val perPage = 100
+private const val perPage = 20
 
 /**
  * Using the GitHub API fetches mentions of a specific user.
@@ -94,7 +94,7 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
         limit: Int?
     ): Set<Mention> {
         require(limit == null || limit > 0) {
-            "The maximum number of recent mentions must be `null` or positive."
+            "The maximum number of recent mentions must be `null` or positive value."
         }
         return findMentions(username, token, updatedAfter, limit, ItemType.ISSUE) +
                 findMentions(username, token, updatedAfter, limit, ItemType.PULL_REQUEST)
