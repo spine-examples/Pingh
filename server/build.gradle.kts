@@ -24,6 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.Ktor
@@ -34,7 +35,7 @@ plugins {
     // Add the Gradle plugin for bootstrapping projects built with Spine.
     // See: https://github.com/SpineEventEngine/bootstrap
     id("io.spine.tools.gradle.bootstrap").version("1.9.0")
-
+    id("com.github.johnrengelman.shadow")
     application
 }
 
@@ -62,6 +63,22 @@ dependencies {
     implementation(Testcontainers.gcloud)
 }
 
+val appClassName = "io.spine.examples.pingh.server.PinghServerKt"
+
+tasks.withType<ShadowJar> {
+    mergeServiceFiles("desc.ref")
+    mergeServiceFiles("META-INF/services/io.spine.option.OptionsProvider")
+    manifest {
+        attributes["Main-Class"] = appClassName
+    }
+    exclude(
+        // Protobuf files.
+        "google/**",
+        "spine/**",
+        "spine_examples/**"
+    )
+}
+
 application {
-    mainClass.set("io.spine.examples.pingh.server.PinghServerKt")
+    mainClass.set(appClassName)
 }
