@@ -30,6 +30,7 @@ import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.Ktor
 import io.spine.internal.dependency.Spine
 import io.spine.internal.dependency.Testcontainers
+import io.spine.internal.gradle.publishing.gitHubPackages
 
 plugins {
     // Add the Gradle plugin for bootstrapping projects built with Spine.
@@ -37,6 +38,7 @@ plugins {
     id("io.spine.tools.gradle.bootstrap").version("1.9.0")
     id("com.github.johnrengelman.shadow")
     application
+    `maven-publish`
 }
 
 forceGrpcDependencies(configurations)
@@ -64,6 +66,7 @@ dependencies {
 }
 
 val appClassName = "io.spine.examples.pingh.server.PinghServerKt"
+project.setProperty("mainClassName", appClassName)
 
 tasks.withType<ShadowJar> {
     mergeServiceFiles("desc.ref")
@@ -81,4 +84,23 @@ tasks.withType<ShadowJar> {
 
 application {
     mainClass.set(appClassName)
+}
+
+publishing {
+    repositories {
+        gitHubPackages()
+    }
+
+    publications {
+        create("fatJar", MavenPublication::class) {
+            groupId = project.group.toString()
+            artifactId = "pingh-server"
+            version = project.version.toString()
+
+            artifact(tasks.shadowJar) {
+                // Avoid `-all` suffix in the published artifact.
+                classifier = ""
+            }
+        }
+    }
 }
