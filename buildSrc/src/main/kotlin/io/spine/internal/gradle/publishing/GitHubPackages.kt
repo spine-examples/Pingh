@@ -55,10 +55,7 @@ public fun RepositoryHandler.gitHubPackages() {
 private fun actor(): String = System.getenv("GITHUB_ACTOR") ?: "developers@spine.io"
 
 /**
- * Returns the GitHub token from the environment variables.
- *
- * @throws IllegalStateException if GitHub token doesn't exist.
+ * Returns the GitHub token from the environment variables if it exists;
+ * otherwise, returns empty string.
  */
-private fun token(): String = System.getenv("GITHUB_TOKEN") ?: throw IllegalStateException(
-    "GitHub token for publication is not found in env variables."
-)
+private fun token(): String = System.getenv("GITHUB_TOKEN") ?: ""
