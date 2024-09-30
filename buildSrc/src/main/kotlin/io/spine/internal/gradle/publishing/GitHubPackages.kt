@@ -24,10 +24,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.dependency
+package io.spine.internal.gradle.publishing
 
-// https://github.com/spine-examples/Pingh
-public object Pingh {
-    private const val version = "1.0.0-SNAPSHOT.1"
-    public const val client: String = "io.spine.examples.pingh:client:$version"
+import java.net.URI
+import org.gradle.api.artifacts.dsl.RepositoryHandler
+
+/**
+ * Adds maven repository of Pingh project hosted at GitHub Packages.
+ *
+ * Authentication is handled using the GitHub actor and GitHub token from
+ * the environment variables.
+ *
+ * @see <a href="https://shorturl.at/AuxHg">Publishing packages to GitHub Packages</a>
+ */
+public fun RepositoryHandler.gitHubPackages() {
+    maven {
+        name = "GitHubPackages"
+        url = URI("https://maven.pkg.github.com/spine-examples/Pingh")
+        credentials {
+            username = actor()
+            password = token()
+        }
+    }
 }
+
+/**
+ * Returns the GitHub actor from the environment variable if it exists;
+ * otherwise, returns the default actor.
+ */
+private fun actor(): String = System.getenv("GITHUB_ACTOR") ?: "developers@spine.io"
+
+/**
+ * Returns the GitHub token from the environment variables if it exists;
+ * otherwise, returns empty string.
+ */
+private fun token(): String = System.getenv("GITHUB_TOKEN") ?: ""

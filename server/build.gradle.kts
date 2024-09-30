@@ -24,18 +24,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.Ktor
 import io.spine.internal.dependency.Spine
 import io.spine.internal.dependency.Testcontainers
+import io.spine.internal.gradle.publishing.gitHubPackages
 
 plugins {
     // Add the Gradle plugin for bootstrapping projects built with Spine.
     // See: https://github.com/SpineEventEngine/bootstrap
     id("io.spine.tools.gradle.bootstrap").version("1.9.0")
-
+    id("com.github.johnrengelman.shadow")
     application
+    `maven-publish`
 }
 
 forceGrpcDependencies(configurations)
@@ -62,6 +65,42 @@ dependencies {
     implementation(Testcontainers.gcloud)
 }
 
+val appClassName = "io.spine.examples.pingh.server.PinghServerKt"
+project.setProperty("mainClassName", appClassName)
+
+tasks.withType<ShadowJar> {
+    mergeServiceFiles("desc.ref")
+    mergeServiceFiles("META-INF/services/io.spine.option.OptionsProvider")
+    manifest {
+        attributes["Main-Class"] = appClassName
+    }
+    exclude(
+        // Protobuf files.
+        "google/**",
+        "spine/**",
+        "spine_examples/**"
+    )
+}
+
 application {
-    mainClass.set("io.spine.examples.pingh.server.PinghServerKt")
+    mainClass.set(appClassName)
+}
+
+publishing {
+    repositories {
+        gitHubPackages()
+    }
+
+    publications {
+        create("fatJar", MavenPublication::class) {
+            groupId = project.group.toString()
+            artifactId = "pingh-server"
+            version = project.version.toString()
+
+            artifact(tasks.shadowJar) {
+                // Avoid `-all` suffix in the published artifact.
+                classifier = ""
+            }
+        }
+    }
 }
