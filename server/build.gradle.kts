@@ -95,7 +95,7 @@ publishing {
         create("fatJar", MavenPublication::class) {
             groupId = project.group.toString()
             artifactId = "pingh-server"
-            version = project.version.toString() + ".1"
+            version = project.version.toString()
 
             artifact(tasks.shadowJar) {
                 // Avoid `-all` suffix in the published artifact.
