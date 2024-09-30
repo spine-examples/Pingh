@@ -35,7 +35,7 @@ import org.gradle.api.artifacts.dsl.RepositoryHandler
  * Authentication is handled using the GitHub actor and GitHub token from
  * the environment variables.
  *
- * @see <a href="">Publishing packages to GitHub Packages</a>
+ * @see <a href="https://shorturl.at/AuxHg">Publishing packages to GitHub Packages</a>
  */
 public fun RepositoryHandler.gitHubPackages() {
     maven {
