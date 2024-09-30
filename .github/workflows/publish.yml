@@ -16,8 +16,7 @@ jobs:
           distribution: temurin
 
       - name: Publish package
-        # Since we're in the `master` branch already, this means that tests of a PR passed.
-        # So, no need to run the tests again when publishing.
-        run: ./gradlew publish -x test --stacktrace
+        run: ./gradlew publish --stacktrace
         env:
+          GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
