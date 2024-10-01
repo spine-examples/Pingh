@@ -35,12 +35,6 @@ import com.google.cloud.secretmanager.v1.SecretVersionName
  */
 internal object Secret {
     /**
-     * The Google Cloud Platform project ID.
-     */
-    private val projectId: String
-        get() = System.getProperty("GCP_PROJECT_ID")
-
-    /**
      * Retrieves the secret with the specified [name][secretId].
      *
      * The latest version of the secret available in the current [project][projectId] is retrieved.
@@ -50,10 +44,20 @@ internal object Secret {
      */
     internal fun named(secretId: String): String =
         SecretManagerServiceClient.create().use { client ->
-            val version = SecretVersionName.of(projectId, secretId, "latest")
+            val version = SecretVersionName.of(projectId(), secretId, "latest")
             client.accessSecretVersion(version)
                 .payload
                 .data
                 .toStringUtf8()
         }
+
+    /**
+     * Returns the Google Cloud Platform project ID from system properties.
+     *
+     * @throws IllegalStateException if `GCP_PROJECT_ID` property is empty.
+     */
+    private fun projectId(): String =
+        System.getProperty("GCP_PROJECT_ID") ?: throw IllegalStateException(
+            "The project ID is not specified as a system property using the `GCP_PROJECT_ID` key."
+        )
 }
