@@ -24,26 +24,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.dependency.Guava
-import io.spine.internal.dependency.Protobuf
-import org.gradle.api.artifacts.ConfigurationContainer
+package io.spine.internal.dependency
 
-/**
- * Forces dependencies for gRPC operation in the project.
- *
- * Also forces necessary transitive dependencies.
- */
-public fun forceGrpcDependencies(configurations: ConfigurationContainer) {
-    configurations.all {
-        resolutionStrategy {
-            force(
-                Guava.lib,
-                Grpc.netty,
-                Grpc.inprocess,
-                Protobuf.java,
-                Protobuf.javaUtil
-            )
-        }
-    }
+// https://github.com/protocolbuffers/protobuf
+public object Protobuf {
+    private const val group = "com.google.protobuf"
+    public const val version: String = "3.19.4"
+
+    public const val java: String = "$group:protobuf-java:${version}"
+    public const val javaUtil: String = "$group:protobuf-java-util:${version}"
 }
