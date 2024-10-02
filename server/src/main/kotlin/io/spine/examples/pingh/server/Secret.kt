@@ -31,7 +31,7 @@ import com.google.cloud.secretmanager.v1.SecretVersionName
 
 /**
  * Allows to access application secrets stored
- * in [Google Secret Manager](https://cloud.google.com/secret-manager).
+ * in [Google Cloud Secret Manager](https://cloud.google.com/secret-manager).
  */
 internal object Secret {
     /**

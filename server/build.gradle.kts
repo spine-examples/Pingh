@@ -99,6 +99,7 @@ publishing {
             groupId = project.group.toString()
             artifactId = "pingh-server"
             version = project.version.toString()
+            description = "Pingh app server."
 
             artifact(tasks.shadowJar) {
                 // Avoid `-all` suffix in the published artifact.
