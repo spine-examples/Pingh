@@ -62,6 +62,7 @@ dependencies {
     implementation(Grpc.netty)
     implementation(Grpc.inprocess)
     implementation(GCloud.SecretManager.lib)
+    implementation(GCloud.Datastore.lib)
     implementation(Protobuf.java)
     implementation(Protobuf.javaUtil)
     implementation(Spine.GCloud.datastore)
