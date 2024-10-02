@@ -26,8 +26,13 @@
 
 package io.spine.internal.dependency
 
-// https://github.com/spine-examples/Pingh
-public object Pingh {
-    private const val version = "1.0.0-SNAPSHOT.2"
-    public const val client: String = "io.spine.examples.pingh:client:$version"
+public object GCloud {
+    private const val group = "com.google.cloud"
+
+    // https://github.com/googleapis/google-cloud-java/tree/main/java-secretmanager
+    public object SecretManager {
+        // The selected version is compatible with Protobuf 3.13.0, which is used by Spine 1.9.0.
+        private const val version = "1.4.2"
+        public const val lib: String = "$group:google-cloud-secretmanager:$version"
+    }
 }

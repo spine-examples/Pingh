@@ -25,6 +25,7 @@
  */
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import io.spine.internal.dependency.GCloud
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.Ktor
@@ -59,6 +60,7 @@ dependencies {
     implementation(Guava.lib)
     implementation(Grpc.netty)
     implementation(Grpc.inprocess)
+    implementation(GCloud.SecretManager.lib)
     implementation(Spine.GCloud.datastore)
     implementation(Spine.GCloud.testutil)
     implementation(Testcontainers.lib)
@@ -69,6 +71,7 @@ val appClassName = "io.spine.examples.pingh.server.PinghServerKt"
 project.setProperty("mainClassName", appClassName)
 
 tasks.withType<ShadowJar> {
+    mergeServiceFiles()
     mergeServiceFiles("desc.ref")
     mergeServiceFiles("META-INF/services/io.spine.option.OptionsProvider")
     manifest {
@@ -96,6 +99,7 @@ publishing {
             groupId = project.group.toString()
             artifactId = "pingh-server"
             version = project.version.toString()
+            description = "Pingh app server."
 
             artifact(tasks.shadowJar) {
                 // Avoid `-all` suffix in the published artifact.

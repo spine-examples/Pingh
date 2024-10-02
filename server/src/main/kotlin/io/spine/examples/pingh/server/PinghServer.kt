@@ -46,16 +46,12 @@ import io.spine.examples.pingh.sessions.newSessionsContext
 /**
  * The client ID for the Pingh GitHub App.
  */
-// TODO:2024-07-29:mykyta.pimonov: Load a key from the Google Secret Manager
-//  after deployment to the Google Cloud.
-private val clientId = ClientId::class.of("client_id")
+private val clientId = ClientId::class.of(Secret.named("github_client_id"))
 
 /**
  * The client secret of the Pingh GitHub App.
  */
-// TODO:2024-08-28:mykyta.pimonov: Load a key from the Google Secret Manager
-//  after deployment to the Google Cloud.
-private val clientSecret = ClientSecret::class.of("client_id")
+private val clientSecret = ClientSecret::class.of(Secret.named("github_client_secret"))
 
 /**
  * The entry point of the server application.
