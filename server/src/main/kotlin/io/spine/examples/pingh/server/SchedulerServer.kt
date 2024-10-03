@@ -59,7 +59,7 @@ internal fun startSchedulerServer() {
  * Handles requests from Google Cloud Scheduler.
  *
  * Emits an event with the current time upon receiving an update check request
- * and returning an `200 OK` status in response.
+ * and returning a `200 OK` status in response.
  */
 private fun Application.module() {
     routing {
