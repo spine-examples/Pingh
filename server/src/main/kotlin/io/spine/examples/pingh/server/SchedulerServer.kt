@@ -42,7 +42,7 @@ import io.spine.examples.pingh.clock.emitTimePassedEvent
 private const val schedulerPort = 8080
 
 /**
- * Starts a server that handles for requests from Google Cloud Scheduler
+ * Starts a server that handles requests from Google Cloud Scheduler
  * and creates an event with the current time.
  *
  * The server runs in the background on port [schedulerPort].
@@ -56,9 +56,9 @@ internal fun startSchedulerServer() {
 }
 
 /**
- * Handles requests from the Google Cloud Scheduler.
+ * Handles requests from Google Cloud Scheduler.
  *
- * Emits an event with the current time upon receiving a data update request
+ * Emits an event with the current time upon receiving an update check request
  * and returning an `200 OK` status in response.
  */
 private fun Application.module() {
