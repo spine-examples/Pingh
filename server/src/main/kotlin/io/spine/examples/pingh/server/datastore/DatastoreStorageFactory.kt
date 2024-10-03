@@ -26,6 +26,9 @@
 
 package io.spine.examples.pingh.server.datastore
 
+import com.google.cloud.datastore.DatastoreOptions
+import io.spine.server.storage.datastore.DatastoreStorageFactory
+import io.spine.server.storage.datastore.DsColumnMapping
 import io.spine.server.storage.datastore.ProjectId
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory
 
@@ -54,4 +57,33 @@ public object DatastoreStorageFactory {
             .service
         return TestDatastoreStorageFactory.basedOn(datastore)
     }
+
+    /**
+     * Creates a factory for generating `Storage`s based on remote Google Cloud Datastore.
+     *
+     * Uses a Datastore named `(default)`.
+     *
+     * To connect to the Datastore, the [project ID][projectId] must be specified as
+     * a system parameter with the key `GCP_PROJECT_ID`.
+     */
+    public fun remote(): DatastoreStorageFactory {
+        val datastore = DatastoreOptions.newBuilder()
+            .setProjectId(projectId())
+            .build()
+            .service
+        return DatastoreStorageFactory.newBuilder()
+            .setDatastore(datastore)
+            .setColumnMapping(DsColumnMapping())
+            .build()
+    }
+
+    /**
+     * Returns the Google Cloud Platform project ID from system properties.
+     *
+     * @throws IllegalStateException if `GCP_PROJECT_ID` property is empty.
+     */
+    private fun projectId(): String =
+        System.getProperty("GCP_PROJECT_ID") ?: throw IllegalStateException(
+            "The project ID is not specified as a system property using the `GCP_PROJECT_ID` key."
+        )
 }

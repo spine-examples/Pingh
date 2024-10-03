@@ -32,13 +32,13 @@ import io.spine.examples.pingh.mentions.newMentionsContext
 import io.spine.server.Server
 import io.spine.server.ServerEnvironment
 import io.spine.server.delivery.Delivery
-import io.spine.server.storage.memory.InMemoryStorageFactory
 import io.spine.server.transport.memory.InMemoryTransportFactory
 import io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT
 import io.spine.examples.pingh.github.ClientId
 import io.spine.examples.pingh.github.ClientSecret
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.RemoteGitHubSearch
+import io.spine.examples.pingh.server.datastore.DatastoreStorageFactory
 import io.spine.examples.pingh.sessions.RemoteGitHubAuthentication
 import io.spine.examples.pingh.sessions.RemoteGitHubUsers
 import io.spine.examples.pingh.sessions.newSessionsContext
@@ -87,14 +87,13 @@ private fun createServer(): Server {
 /**
  * Configures the server environment.
  *
- * Server side of this application is currently running in in-memory storage mode.
- * Therefore, any changes made by users of this application will not be persisted
- * in-between the application launches.
+ * Application data is stored using Google Cloud Datastore. Therefore, any changes made
+ * by users of this application will be persisted in-between the application launches.
  */
 private fun configureEnvironment() {
     ServerEnvironment
         .`when`(DefaultMode::class.java)
-        .use(InMemoryStorageFactory.newInstance())
+        .use(DatastoreStorageFactory.remote())
         .use(Delivery.localAsync())
         .use(InMemoryTransportFactory.newInstance())
 }

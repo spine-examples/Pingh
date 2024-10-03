@@ -29,6 +29,7 @@ import io.spine.internal.dependency.GCloud
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.Ktor
+import io.spine.internal.dependency.Protobuf
 import io.spine.internal.dependency.Spine
 import io.spine.internal.dependency.Testcontainers
 import io.spine.internal.gradle.publishing.gitHubPackages
@@ -61,10 +62,26 @@ dependencies {
     implementation(Grpc.netty)
     implementation(Grpc.inprocess)
     implementation(GCloud.SecretManager.lib)
+    implementation(GCloud.Datastore.lib)
+    implementation(Protobuf.java)
+    implementation(Protobuf.javaUtil)
     implementation(Spine.GCloud.datastore)
     implementation(Spine.GCloud.testutil)
     implementation(Testcontainers.lib)
     implementation(Testcontainers.gcloud)
+}
+
+/**
+ * For Google Cloud Datastore to function correctly, Protobuf version 3.18 or higher is required.
+ * Since Protobuf is included as a transitive dependency in many Google and Spine libraries,
+ * it is necessary to explicitly specify the required version for the project.
+ */
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "com.google.protobuf" && requested.name == "protobuf-java") {
+            useVersion(Protobuf.version)
+        }
+    }
 }
 
 val appClassName = "io.spine.examples.pingh.server.PinghServerKt"

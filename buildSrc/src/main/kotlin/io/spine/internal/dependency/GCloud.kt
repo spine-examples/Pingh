@@ -35,4 +35,10 @@ public object GCloud {
         private const val version = "1.4.2"
         public const val lib: String = "$group:google-cloud-secretmanager:$version"
     }
+
+    // https://github.com/googleapis/java-datastore
+    public object Datastore {
+        private const val version = "2.14.2"
+        public const val lib: String = "$group:google-cloud-datastore:$version"
+    }
 }
