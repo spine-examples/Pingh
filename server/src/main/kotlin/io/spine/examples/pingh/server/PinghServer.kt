@@ -66,11 +66,15 @@ public fun main() {
  * Creates a new Spine `Server` instance at the
  * [DEFAULT_CLIENT_SERVICE_PORT].
  *
+ * Additionally, starts a server to handle requests from the Google Cloud Scheduler,
+ * emitting events with the current time.
+ *
  * The server includes bounded contexts of [Sessions][io.spine.examples.pingh.sessions]
  * and [Mentions][io.spine.examples.pingh.mentions].
  */
 private fun createServer(): Server {
     configureEnvironment()
+    startSchedulerServer()
     val clientEngine = CIO.create()
     return Server
         .atPort(DEFAULT_CLIENT_SERVICE_PORT)
