@@ -37,33 +37,35 @@ import io.ktor.server.routing.routing
 import io.spine.examples.pingh.clock.Clock
 
 /**
- * The port for listening to requests from the Google Cloud Scheduler.
+ * The port for listening to HTTP requests.
  */
-private const val schedulerPort = 8080
+private const val updateCheckPort = 8080
 
 /**
- * Starts a server that handles requests from Google Cloud Scheduler
- * and creates an event with the current time.
+ * Starts the server that handles requests to check for updates.
  *
- * The server runs in the background on port [schedulerPort].
+ * The server runs in the background on port [updateCheckPort].
+ *
+ * This server does not perform any updates itself; it simply processes the incoming
+ * HTTP requests and forwards a message to the [Pingh server][PinghApplication.server],
+ * which is responsible for executing the updates.
  */
-internal fun startSchedulerServer(clock: Clock) {
+internal fun startUpdateCheckServer(clock: Clock) {
     embeddedServer(
         Netty,
-        port = schedulerPort,
-        module = {
-            module(clock)
-        }
-    ).start(wait = false)
+        port = updateCheckPort
+    ) {
+        configure(clock)
+    }.start(wait = false)
 }
 
 /**
- * Handles requests from Google Cloud Scheduler.
+ * Handles HTTP requests.
  *
  * Emits an event with the current time upon receiving an update check request
  * and returning a `200 OK` status in response.
  */
-private fun Application.module(clock: Clock) {
+private fun Application.configure(clock: Clock) {
     routing {
         post("/check-for-updates") {
             clock.triggerTimePassed()
