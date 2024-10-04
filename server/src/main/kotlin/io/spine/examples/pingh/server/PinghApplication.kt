@@ -50,7 +50,7 @@ import io.spine.server.transport.memory.InMemoryTransportFactory
  * During the initialization, performs the actions as follows.
  *
  * 1. Configures the server environment for production use,
- * including the interaction with GitHub API, Google Datastore, etc.
+ * including the interaction with GitHub API and Google Datastore.
  *
  * 2. Starts an [HTTP endpoint][startHeartbeatServer] receiving the current time values
  * from an external clock or a system scheduler.

@@ -29,9 +29,9 @@ package io.spine.examples.pingh.server
 /**
  * The entry point of the server application.
  *
- * Starts a Pingh server that handles RPC requests. Additionally, it starts a server
- * to handle HTTP requests that receive the current time from
- * an external clock or system scheduler.
+ * Starts a Pingh server that handles RPC requests. Additionally, starts
+ * a [server][startHeartbeatServer] to handle HTTP requests that receive
+ * the current time from an external clock or system scheduler.
  */
 public fun main() {
     val app = PinghApplication()
