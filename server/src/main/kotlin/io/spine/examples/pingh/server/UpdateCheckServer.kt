@@ -60,7 +60,7 @@ internal fun startUpdateCheckServer(clock: Clock) {
 }
 
 /**
- * Handles HTTP requests.
+ * Configures HTTP request handlers.
  *
  * Emits an event with the current time upon receiving an update check request
  * and returning a `200 OK` status in response.

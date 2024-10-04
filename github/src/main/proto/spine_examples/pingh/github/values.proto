@@ -150,7 +150,7 @@ message Repo {
 //
 message GitHubApp {
 
-    // The client ID for a GitHub App.
+    // The client ID of a GitHub App.
     //
     // Used in the authentication flow to generate personal access tokens
     // on behalf of the GitHub App.

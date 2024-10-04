@@ -74,7 +74,7 @@ public class Clock {
         private var instance: Clock? = null
 
         /**
-         * Returns static instance of the `Clock`.
+         * Returns test instance of the `Clock`.
          */
         internal fun default(): Clock {
             if (instance == null) {

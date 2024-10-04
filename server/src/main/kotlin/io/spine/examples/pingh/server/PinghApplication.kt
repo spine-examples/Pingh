@@ -48,8 +48,8 @@ import io.spine.server.transport.memory.InMemoryTransportFactory
  * Manages the server-side of the Pingh application.
  *
  * Configures the server environment during initialization and creates the server
- * without starting it. Additionally, it provides functionality to create a client
- * for interacting with the server.
+ * without starting it. Additionally, provides a service that enables the emitting events
+ * with the current time to the Pingh server.
  */
 internal class PinghApplication {
     private companion object {

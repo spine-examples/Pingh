@@ -30,7 +30,7 @@ package io.spine.examples.pingh.server
  * The entry point of the server application.
  *
  * Starts a Pingh server that handles RPC requests. Additionally, it launches a server
- * to handle requests from Google Cloud Scheduler.
+ * to handle requests to check for updates.
  */
 public fun main() {
     val app = PinghApplication()
