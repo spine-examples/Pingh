@@ -45,11 +45,15 @@ import io.spine.server.delivery.Delivery
 import io.spine.server.transport.memory.InMemoryTransportFactory
 
 /**
- * Manages the server-side of the Pingh application.
+ * The server side of the Pingh application.
  *
- * Configures the server environment during initialization and creates the server
- * without starting it. Additionally, provides a service that enables the emitting events
- * with the current time to the Pingh server.
+ * During the initialization, performs the actions as follows.
+ *
+ * 1. Configures the server environment for production use,
+ * including the interaction with GitHub API, Google Datastore, etc.
+ *
+ * 2. Starts an [HTTP endpoint][startHeartbeatServer] receiving the current time values
+ * from an external clock or a system scheduler.
  */
 internal class PinghApplication {
     private companion object {
@@ -72,15 +76,10 @@ internal class PinghApplication {
      */
     internal val server: Server
 
-    /**
-     * Allows to emit events with current time.
-     */
-    internal val clock: Clock
-
     init {
         configureEnvironment()
         server = createServer()
-        clock = Clock()
+        startHeartbeatServer(Clock())
     }
 
     /**

@@ -39,21 +39,18 @@ import io.spine.examples.pingh.clock.Clock
 /**
  * The port for listening to HTTP requests.
  */
-private const val updateCheckPort = 8080
+private const val heartbeatPort = 8080
 
 /**
- * Starts the server that handles requests to check for updates.
+ * Starts the server that handles periodic requests from external clocks or schedulers
+ * to notify the Pingh server of the current time.
  *
- * The server runs in the background on port [updateCheckPort].
- *
- * This server does not perform any updates itself; it simply processes the incoming
- * HTTP requests and forwards a message to the [Pingh server][PinghApplication.server],
- * which is responsible for executing the updates.
+ * The server runs in the background on port [heartbeatPort].
  */
-internal fun startUpdateCheckServer(clock: Clock) {
+internal fun startHeartbeatServer(clock: Clock) {
     embeddedServer(
         Netty,
-        port = updateCheckPort
+        port = heartbeatPort
     ) {
         configure(clock)
     }.start(wait = false)
@@ -62,12 +59,12 @@ internal fun startUpdateCheckServer(clock: Clock) {
 /**
  * Configures HTTP request handlers.
  *
- * Emits an event with the current time upon receiving an update check request
+ * Emits an event with the current time upon receiving a request
  * and returning a `200 OK` status in response.
  */
 private fun Application.configure(clock: Clock) {
     routing {
-        post("/check-for-updates") {
+        post("/time") {
             clock.triggerTimePassed()
             call.respond(HttpStatusCode.OK)
         }

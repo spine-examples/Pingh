@@ -33,8 +33,6 @@ import io.ktor.client.request.post
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
-import io.spine.examples.pingh.github.ClientId
-import io.spine.examples.pingh.github.ClientSecret
 import io.spine.examples.pingh.github.DeviceCode
 import io.spine.examples.pingh.github.GitHubApp
 import io.spine.examples.pingh.github.RefreshToken
@@ -68,7 +66,7 @@ public class RemoteGitHubAuthentication(
         runBlocking {
             val response = client
                 .authenticationRequest("https://github.com/login/device/code")
-                .with(gitHubApp.id)
+                .with(gitHubApp)
                 .post()
             VerificationCodesResponse::class.parseJson(response.body())
         }
@@ -92,7 +90,7 @@ public class RemoteGitHubAuthentication(
         runBlocking {
             val response = client
                 .authenticationRequest("https://github.com/login/oauth/access_token")
-                .with(gitHubApp.id)
+                .with(gitHubApp)
                 .with(deviceCode)
                 .post()
             val body = response.body<String>()
@@ -122,8 +120,7 @@ public class RemoteGitHubAuthentication(
         runBlocking {
             val response = client
                 .authenticationRequest("https://github.com/login/oauth/access_token")
-                .with(gitHubApp.id)
-                .with(gitHubApp.secret)
+                .with(gitHubApp)
                 .with(refreshToken)
                 .post()
             AccessTokenResponse::class.parseJson(response.body())
@@ -145,14 +142,9 @@ private class AuthenticationRequestBuilder(
 ) {
 
     /**
-     * The client ID for the Pingh GitHub App.
+     * Secrets used to make requests on behalf of the GitHub App.
      */
-    private var clientId: ClientId? = null
-
-    /**
-     * The client secret of the Pingh GitHub App.
-     */
-    private var clientSecret: ClientSecret? = null
+    private var gitHubApp: GitHubApp? = null
 
     /**
      * The verification code that is used to verify the device.
@@ -170,18 +162,10 @@ private class AuthenticationRequestBuilder(
     private var refreshToken: RefreshToken? = null
 
     /**
-     * Sets the client ID for the Pingh GitHub App.
+     * Sets secrets used to make requests on behalf of the GitHub App.
      */
-    fun with(clientId: ClientId): AuthenticationRequestBuilder {
-        this.clientId = clientId
-        return this
-    }
-
-    /**
-     * Sets the client secret of the Pingh GitHub App.
-     */
-    fun with(clientSecret: ClientSecret): AuthenticationRequestBuilder {
-        this.clientSecret = clientSecret
+    fun with(gitHubApp: GitHubApp): AuthenticationRequestBuilder {
+        this.gitHubApp = gitHubApp
         return this
     }
 
@@ -206,10 +190,10 @@ private class AuthenticationRequestBuilder(
     /**
      * Creates and sends request with specified data.
      *
-     * @throws IllegalArgumentException if the client ID request data is not specified.
+     * @throws IllegalArgumentException if the GitHub App request data is not specified.
      */
     suspend fun post(): HttpResponse {
-        checkNotNull(clientId) { "Client ID must be set." }
+        checkNotNull(gitHubApp) { "GitHub App must be set." }
         return client.post(url) {
             url.configureParameters()
             headers.append("Accept", "application/vnd.github+json")
@@ -220,15 +204,15 @@ private class AuthenticationRequestBuilder(
      * Configures request parameters.
      */
     private fun URLBuilder.configureParameters() {
-        parameters.append("client_id", clientId!!.value)
-        if (clientSecret != null) {
-            parameters.append("client_secret", clientSecret!!.value)
+        parameters.append("client_id", gitHubApp!!.id.value)
+        if (grantType != null) {
+            parameters.append("grant_type", grantType!!.value)
+            if (grantType == GrantType.REFRESH_TOKEN) {
+                parameters.append("client_secret", gitHubApp!!.secret.value)
+            }
         }
         if (deviceCode != null) {
             parameters.append("device_code", deviceCode!!.value)
-        }
-        if (grantType != null) {
-            parameters.append("grant_type", grantType!!.value)
         }
         if (refreshToken != null) {
             parameters.append("refresh_token", refreshToken!!.value)
