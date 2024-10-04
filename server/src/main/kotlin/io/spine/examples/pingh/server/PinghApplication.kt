@@ -27,8 +27,8 @@
 package io.spine.examples.pingh.server
 
 import io.ktor.client.engine.cio.CIO
-import io.spine.client.Client
 import io.spine.environment.DefaultMode
+import io.spine.examples.pingh.clock.Clock
 import io.spine.examples.pingh.github.ClientId
 import io.spine.examples.pingh.github.ClientSecret
 import io.spine.examples.pingh.github.GitHubApp
@@ -72,9 +72,15 @@ internal class PinghApplication {
      */
     internal val server: Server
 
+    /**
+     * Allows to emit events with current time.
+     */
+    internal val clock: Clock
+
     init {
         configureEnvironment()
         server = createServer()
+        clock = Clock()
     }
 
     /**
@@ -110,13 +116,4 @@ internal class PinghApplication {
             .add(newMentionsContext(RemoteGitHubSearch(httpEngine)))
             .build()
     }
-
-    /**
-     * Creates a `Client` connected to the Pingh server running on the current machine.
-     *
-     * Use the method only if the [server] is [running][Server.start].
-     */
-    internal fun connectToServer(): Client =
-        Client.connectTo("localhost", pinghPort)
-            .build()
 }

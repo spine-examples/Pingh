@@ -32,6 +32,6 @@ package io.spine.examples.pingh.server
 public fun main() {
     val app = PinghApplication()
     app.server.start()
-    startSchedulerServer()
+    startSchedulerServer(app.clock)
     app.server.awaitTermination()
 }

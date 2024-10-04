@@ -34,7 +34,7 @@ import io.ktor.server.netty.Netty
 import io.ktor.server.response.respond
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
-import io.spine.examples.pingh.clock.emitTimePassedEvent
+import io.spine.examples.pingh.clock.Clock
 
 /**
  * The port for listening to requests from the Google Cloud Scheduler.
@@ -47,11 +47,13 @@ private const val schedulerPort = 8080
  *
  * The server runs in the background on port [schedulerPort].
  */
-internal fun startSchedulerServer() {
+internal fun startSchedulerServer(clock: Clock) {
     embeddedServer(
         Netty,
         port = schedulerPort,
-        module = Application::module
+        module = {
+            module(clock)
+        }
     ).start(wait = false)
 }
 
@@ -61,10 +63,10 @@ internal fun startSchedulerServer() {
  * Emits an event with the current time upon receiving an update check request
  * and returning a `200 OK` status in response.
  */
-private fun Application.module() {
+private fun Application.module(clock: Clock) {
     routing {
-        post("/check-updates") {
-            emitTimePassedEvent()
+        post("/check-for-updates") {
+            clock.triggerTimePassed()
             call.respond(HttpStatusCode.OK)
         }
     }
