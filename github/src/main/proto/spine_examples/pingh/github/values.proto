@@ -144,3 +144,22 @@ message Repo {
     // The name of user or organization which is owner of this repository.
     string owner = 2 [(required) = true];
 }
+
+// A GitHub app that contains a set of secrets required to make requests
+// on its behalf during the authentication flow.
+//
+message GitHubApp {
+
+    // The client ID for a GitHub App.
+    //
+    // Used in the authentication flow to generate personal access tokens
+    // on behalf of the GitHub App.
+    //
+    ClientId id = 1 [(required) = true];
+
+    // The client secret of a GitHub App.
+    //
+    // Used in the authentication flow to refresh access tokens.
+    //
+    ClientSecret secret = 2 [(required) = true];
+}

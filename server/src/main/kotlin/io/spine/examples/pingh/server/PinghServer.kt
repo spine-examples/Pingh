@@ -33,9 +33,9 @@ import io.spine.server.Server
 import io.spine.server.ServerEnvironment
 import io.spine.server.delivery.Delivery
 import io.spine.server.transport.memory.InMemoryTransportFactory
-import io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT
 import io.spine.examples.pingh.github.ClientId
 import io.spine.examples.pingh.github.ClientSecret
+import io.spine.examples.pingh.github.GitHubApp
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.RemoteGitHubSearch
 import io.spine.examples.pingh.server.datastore.DatastoreStorageFactory
@@ -44,14 +44,17 @@ import io.spine.examples.pingh.sessions.RemoteGitHubUsers
 import io.spine.examples.pingh.sessions.newSessionsContext
 
 /**
- * The client ID for the Pingh GitHub App.
+ * The port on which the Pingh server runs.
  */
-private val clientId = ClientId::class.of(Secret.named("github_client_id"))
+private const val pinghPort = 50051
 
 /**
- * The client secret of the Pingh GitHub App.
+ * Secrets of the Pingh GitHub App required for the authentication flow.
  */
-private val clientSecret = ClientSecret::class.of(Secret.named("github_client_secret"))
+private val gitHubApp = GitHubApp::class.of(
+    ClientId::class.of(Secret.named("github_client_id")),
+    ClientSecret::class.of(Secret.named("github_client_secret"))
+)
 
 /**
  * The entry point of the server application.
@@ -63,8 +66,7 @@ public fun main() {
 }
 
 /**
- * Creates a new Spine `Server` instance at the
- * [DEFAULT_CLIENT_SERVICE_PORT].
+ * Creates a new Spine `Server` instance at the [pinghPort].
  *
  * Additionally, starts a server to handle requests from the Google Cloud Scheduler,
  * emitting events with the current time.
@@ -75,16 +77,16 @@ public fun main() {
 private fun createServer(): Server {
     configureEnvironment()
     startSchedulerServer()
-    val clientEngine = CIO.create()
+    val engine = CIO.create()
     return Server
-        .atPort(DEFAULT_CLIENT_SERVICE_PORT)
+        .atPort(pinghPort)
         .add(
             newSessionsContext(
-                RemoteGitHubAuthentication(clientId, clientSecret, clientEngine),
-                RemoteGitHubUsers(clientEngine)
+                RemoteGitHubAuthentication(gitHubApp, engine),
+                RemoteGitHubUsers(engine)
             )
         )
-        .add(newMentionsContext(RemoteGitHubSearch(clientEngine)))
+        .add(newMentionsContext(RemoteGitHubSearch(engine)))
         .build()
 }
 

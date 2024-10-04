@@ -36,6 +36,7 @@ import io.ktor.http.URLBuilder
 import io.spine.examples.pingh.github.ClientId
 import io.spine.examples.pingh.github.ClientSecret
 import io.spine.examples.pingh.github.DeviceCode
+import io.spine.examples.pingh.github.GitHubApp
 import io.spine.examples.pingh.github.RefreshToken
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.ErrorResponse
@@ -47,13 +48,11 @@ import kotlinx.coroutines.runBlocking
 /**
  * Using the GitHub REST API generates access tokens for the user.
  *
- * @property clientId The client ID for the Pingh GitHub App.
- * @property clientSecret The client secret of the Pingh GitHub App.
+ * @property gitHubApp Secrets used to make requests on behalf of the GitHub App.
  * @param engine The engine used to create the HTTP client.
  */
 public class RemoteGitHubAuthentication(
-    private val clientId: ClientId,
-    private val clientSecret: ClientSecret,
+    private val gitHubApp: GitHubApp,
     engine: HttpClientEngine
 ): GitHubAuthentication {
 
@@ -69,7 +68,7 @@ public class RemoteGitHubAuthentication(
         runBlocking {
             val response = client
                 .authenticationRequest("https://github.com/login/device/code")
-                .with(clientId)
+                .with(gitHubApp.id)
                 .post()
             VerificationCodesResponse::class.parseJson(response.body())
         }
@@ -93,7 +92,7 @@ public class RemoteGitHubAuthentication(
         runBlocking {
             val response = client
                 .authenticationRequest("https://github.com/login/oauth/access_token")
-                .with(clientId)
+                .with(gitHubApp.id)
                 .with(deviceCode)
                 .post()
             val body = response.body<String>()
@@ -123,8 +122,8 @@ public class RemoteGitHubAuthentication(
         runBlocking {
             val response = client
                 .authenticationRequest("https://github.com/login/oauth/access_token")
-                .with(clientId)
-                .with(clientSecret)
+                .with(gitHubApp.id)
+                .with(gitHubApp.secret)
                 .with(refreshToken)
                 .post()
             AccessTokenResponse::class.parseJson(response.body())
