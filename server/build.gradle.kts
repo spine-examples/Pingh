@@ -56,8 +56,11 @@ dependencies {
     api(project(":github"))
     api(project(":sessions"))
     api(project(":mentions"))
+    implementation(project(":clock"))
 
     implementation(Ktor.Client.cio)
+    implementation(Ktor.Server.core)
+    implementation(Ktor.Server.netty)
     implementation(Guava.lib)
     implementation(Grpc.netty)
     implementation(Grpc.inprocess)

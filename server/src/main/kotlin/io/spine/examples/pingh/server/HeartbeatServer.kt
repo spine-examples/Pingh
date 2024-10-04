@@ -26,15 +26,47 @@
 
 package io.spine.examples.pingh.server
 
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
+import io.ktor.server.application.call
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import io.ktor.server.response.respond
+import io.ktor.server.routing.post
+import io.ktor.server.routing.routing
+import io.spine.examples.pingh.clock.Clock
+
 /**
- * The entry point of the server application.
- *
- * Starts a Pingh server that handles RPC requests. Additionally, starts
- * a [server][startHeartbeatServer] to handle HTTP requests that receive
- * the current time from an external clock or system scheduler.
+ * The port for listening to HTTP requests.
  */
-public fun main() {
-    val app = PinghApplication()
-    app.server.start()
-    app.server.awaitTermination()
+private const val heartbeatPort = 8080
+
+/**
+ * Starts the server that handles periodic requests from external clocks or schedulers
+ * to notify the Pingh server of the current time.
+ *
+ * The server runs in the background on port [heartbeatPort].
+ */
+internal fun startHeartbeatServer(clock: Clock) {
+    embeddedServer(
+        Netty,
+        port = heartbeatPort
+    ) {
+        configure(clock)
+    }.start(wait = false)
+}
+
+/**
+ * Configures HTTP request handlers.
+ *
+ * Emits an event with the current time upon receiving a request
+ * and returning a `200 OK` status in response.
+ */
+private fun Application.configure(clock: Clock) {
+    routing {
+        post("/time") {
+            clock.triggerTimePassed()
+            call.respond(HttpStatusCode.OK)
+        }
+    }
 }

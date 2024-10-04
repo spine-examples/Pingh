@@ -254,3 +254,12 @@ public fun KClass<Organization>.loggedAs(login: String): Organization =
     Organization.newBuilder()
         .setLogin(OrganizationLogin::class.of(login))
         .vBuild()
+
+/**
+ * Creates a new `GitHubApp` with the passed GitHub App client ID and secret.
+ */
+public fun KClass<GitHubApp>.of(id: ClientId, secret: ClientSecret): GitHubApp =
+    GitHubApp.newBuilder()
+        .setId(id)
+        .setSecret(secret)
+        .vBuild()
