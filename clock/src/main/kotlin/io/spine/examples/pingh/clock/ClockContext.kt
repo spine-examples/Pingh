@@ -49,7 +49,7 @@ private val actor = UserId.newBuilder()
 /**
  * Emits the `TimePassed` event that contains the current time.
  *
- * Use only for test.
+ * Use only for testing.
  */
 @VisibleForTesting
 public fun emitTimePassedEvent() {
