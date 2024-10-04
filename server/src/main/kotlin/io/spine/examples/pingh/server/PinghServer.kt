@@ -26,80 +26,12 @@
 
 package io.spine.examples.pingh.server
 
-import io.ktor.client.engine.cio.CIO
-import io.spine.environment.DefaultMode
-import io.spine.examples.pingh.mentions.newMentionsContext
-import io.spine.server.Server
-import io.spine.server.ServerEnvironment
-import io.spine.server.delivery.Delivery
-import io.spine.server.transport.memory.InMemoryTransportFactory
-import io.spine.examples.pingh.github.ClientId
-import io.spine.examples.pingh.github.ClientSecret
-import io.spine.examples.pingh.github.GitHubApp
-import io.spine.examples.pingh.github.of
-import io.spine.examples.pingh.mentions.RemoteGitHubSearch
-import io.spine.examples.pingh.server.datastore.DatastoreStorageFactory
-import io.spine.examples.pingh.sessions.RemoteGitHubAuthentication
-import io.spine.examples.pingh.sessions.RemoteGitHubUsers
-import io.spine.examples.pingh.sessions.newSessionsContext
-
-/**
- * The port on which the Pingh server runs.
- */
-private const val pinghPort = 50051
-
-/**
- * Secrets of the Pingh GitHub App required for the authentication flow.
- */
-private val gitHubApp = GitHubApp::class.of(
-    ClientId::class.of(Secret.named("github_client_id")),
-    ClientSecret::class.of(Secret.named("github_client_secret"))
-)
-
 /**
  * The entry point of the server application.
  */
 public fun main() {
-    val server = createServer()
-    server.start()
-    server.awaitTermination()
-}
-
-/**
- * Creates a new Spine `Server` instance at the [pinghPort].
- *
- * Additionally, starts a server to handle requests from the Google Cloud Scheduler,
- * emitting events with the current time.
- *
- * The server includes bounded contexts of [Sessions][io.spine.examples.pingh.sessions]
- * and [Mentions][io.spine.examples.pingh.mentions].
- */
-private fun createServer(): Server {
-    configureEnvironment()
+    val app = PinghApplication()
+    app.server.start()
     startSchedulerServer()
-    val engine = CIO.create()
-    return Server
-        .atPort(pinghPort)
-        .add(
-            newSessionsContext(
-                RemoteGitHubAuthentication(gitHubApp, engine),
-                RemoteGitHubUsers(engine)
-            )
-        )
-        .add(newMentionsContext(RemoteGitHubSearch(engine)))
-        .build()
-}
-
-/**
- * Configures the server environment.
- *
- * Application data is stored using Google Cloud Datastore. Therefore, any changes made
- * by users of this application will be persisted in-between the application launches.
- */
-private fun configureEnvironment() {
-    ServerEnvironment
-        .`when`(DefaultMode::class.java)
-        .use(DatastoreStorageFactory.remote())
-        .use(Delivery.localAsync())
-        .use(InMemoryTransportFactory.newInstance())
+    app.server.awaitTermination()
 }
