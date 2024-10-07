@@ -63,8 +63,8 @@ internal fun startHeartbeatServer(clock: Clock) {
  * If the "Authorization" header is missing or does not match the Compute Engine
  * authentication token stored in Secret Manager, the request will be rejected
  * with a `401 Unauthorized` status code. Otherwise, upon receiving a request with valid
- * authorization token, the server will emit an event with the current time and
- * return a `200 OK` status in response.
+ * authentication token, the server will emit an event with the current time and
+ * return a `200 OK` status code in response.
  */
 private fun Application.configure(clock: Clock) {
     val token = Secret.named("auth_token")
