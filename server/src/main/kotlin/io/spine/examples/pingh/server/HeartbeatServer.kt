@@ -31,6 +31,7 @@ import io.ktor.server.application.Application
 import io.ktor.server.application.call
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.server.request.authorization
 import io.ktor.server.response.respond
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
@@ -59,14 +60,23 @@ internal fun startHeartbeatServer(clock: Clock) {
 /**
  * Configures HTTP request handlers.
  *
- * Emits an event with the current time upon receiving a request
- * and returning a `200 OK` status in response.
+ * If the "Authorization" header is missing or does not match the Compute Engine
+ * authentication token stored in Secret Manager, the request will be rejected
+ * with a `401 Unauthorized` status code. Otherwise, upon receiving a request with valid
+ * authorization token, the server will emit an event with the current time and
+ * return a `200 OK` status in response.
  */
 private fun Application.configure(clock: Clock) {
+    val token = Secret.named("auth_token")
     routing {
         post("/time") {
-            clock.triggerTimePassed()
-            call.respond(HttpStatusCode.OK)
+            val currentToken = call.request.authorization()
+            if (currentToken == null || currentToken != token) {
+                call.respond(HttpStatusCode.Unauthorized)
+            } else {
+                clock.triggerTimePassed()
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }
 }
