@@ -30,7 +30,7 @@ import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Timestamps
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
 /**
@@ -64,15 +64,22 @@ internal fun Timestamp.add(duration: com.google.protobuf.Duration): Timestamp =
  * - If the difference is exactly one day, returns the string `"yesterday"`;
  * - In all other cases, returns the day and month.
  *
+ * Note that this timestamp must be in UTC. A default time zone offset
+ * is applied to the UTC time.
+ *
+ * @receiver The timestamp represents a time in the past in UTC.
  * @throws IllegalArgumentException if the `Timestamp` is not from the past.
  */
 public fun Timestamp.howMuchTimeHasPassed(): String {
-    val thisDatetime = LocalDateTime.ofEpochSecond(this.seconds, this.nanos, ZoneOffset.UTC)
+    val offset = OffsetDateTime.now().offset
+    val thisDatetime = LocalDateTime.ofEpochSecond(this.seconds, this.nanos, offset)
     val difference = Duration.between(
         thisDatetime,
-        LocalDateTime.now(ZoneOffset.UTC)
+        LocalDateTime.now(offset)
     )
-    require(difference > Duration.ZERO) { "" }
+    require(difference > Duration.ZERO) {
+        "This `Timestamp` must indicate a time in the past."
+    }
     return when {
         difference.toMinutes() < 1L -> "just now"
         difference.toMinutes() == 1L -> "a minute ago"

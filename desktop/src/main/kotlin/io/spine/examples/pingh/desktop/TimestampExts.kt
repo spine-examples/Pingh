@@ -28,7 +28,7 @@ package io.spine.examples.pingh.desktop
 
 import com.google.protobuf.Timestamp
 import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
 /**
@@ -40,9 +40,14 @@ private val datetimeFormat = DateTimeFormatter.ofPattern("dd MMM HH:mm")
 /**
  * Converts `Timestamp` to the `dd MMM HH:mm` string.
  *
+ * Note that this timestamp must be in UTC. A default time zone offset
+ * is applied to the UTC time.
+ *
  * Examples:
  * - `10 May 14:37`
  * - `05 Sep 04:00`
+ *
+ * @receiver The timestamp in UTC.
  */
 internal fun Timestamp.toDatetime(): String =
     datetimeFormat.format(toLocalDateTime())
@@ -51,4 +56,4 @@ internal fun Timestamp.toDatetime(): String =
  * Converts this `Timestamp` to `LocalDateTime`.
  */
 private fun Timestamp.toLocalDateTime(): LocalDateTime =
-    LocalDateTime.ofEpochSecond(this.seconds, this.nanos, ZoneOffset.UTC)
+    LocalDateTime.ofEpochSecond(this.seconds, this.nanos, OffsetDateTime.now().offset)
