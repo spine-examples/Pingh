@@ -24,15 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "Pingh"
-include(
-    "time",
-    "clock",
-    "github",
-    "sessions",
-    "mentions",
-    "testutil-mentions",
-    "testutil-sessions",
-    "server",
-    "client"
-)
+import io.spine.internal.dependency.Spine
+
+dependencies {
+    implementation(Spine.base)
+}
