@@ -33,16 +33,14 @@ public object Spine {
      * in `build.gradle.kts` in each module.
      */
     private const val version = "1.9.0"
+    private const val group = "io.spine"
 
-    // https://github.com/SpineEventEngine/core-java
-    public object Server {
-        private const val group = "io.spine"
-        public const val lib: String = "$group:spine-server:$version"
-    }
+    public const val base: String = "$group:spine-base:$version"
+    public const val server: String = "$group:spine-server:$version"
 
     // https://github.com/SpineEventEngine/gcloud-java
     public object GCloud {
-        private const val group = "io.spine.gcloud"
+        private const val group = "${Spine.group}.gcloud"
         public const val datastore: String = "$group:spine-datastore:$version"
         public const val testutil: String = "$group:spine-testutil-gcloud:$version"
     }

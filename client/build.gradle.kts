@@ -56,7 +56,7 @@ dependencies {
     testImplementation(project(":testutil-mentions"))
     testImplementation(project(":testutil-sessions"))
     testImplementation(project(":clock"))
-    testImplementation(Spine.Server.lib)
+    testImplementation(Spine.server)
     testImplementation(Spine.GCloud.datastore)
     testImplementation(Spine.GCloud.testutil)
 }
