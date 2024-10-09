@@ -30,6 +30,7 @@ import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Timestamps
 import io.spine.time.InstantConverter
 import java.time.Instant
+import java.time.format.DateTimeParseException
 import kotlin.reflect.KClass
 
 /**
@@ -40,6 +41,8 @@ import kotlin.reflect.KClass
  * [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt) format. To resolve this mismatch,
  * the input string is first parsed into an [Instant], since it matches the `ISO 8601` format.
  * The resulting `Instant` is then converted into a `Timestamp`.
+ *
+ * @throws DateTimeParseException if the provided string is not in `ISO 8601` format.
  */
 @Suppress("UnusedReceiverParameter" /* Class extensions don't use class as a parameter. */)
 internal fun KClass<Timestamp>.parse(value: String): Timestamp {
