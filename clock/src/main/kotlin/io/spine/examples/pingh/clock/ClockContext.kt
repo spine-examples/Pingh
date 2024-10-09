@@ -27,9 +27,9 @@
 package io.spine.examples.pingh.clock
 
 import com.google.common.annotations.VisibleForTesting
-import io.spine.base.Time.currentTime
 import io.spine.core.UserId
 import io.spine.examples.pingh.clock.event.TimePassed
+import io.spine.examples.pingh.time.UtcTime.currentUtcTime
 import io.spine.server.ServerEnvironment
 import io.spine.server.integration.ThirdPartyContext
 import io.spine.server.transport.TransportFactory
@@ -96,7 +96,7 @@ public class Clock {
         if (context == null) {
             context = ThirdPartyContext.singleTenant(contextName)
         }
-        val event = TimePassed::class.buildBy(currentTime())
+        val event = TimePassed::class.buildBy(currentUtcTime())
         context!!.emittedEvent(event, actor)
     }
 }

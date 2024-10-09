@@ -28,7 +28,6 @@ package io.spine.examples.pingh.mentions
 
 import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Timestamps
-import io.spine.base.Time.currentTime
 import io.spine.core.UserId
 import io.spine.examples.pingh.clock.buildBy
 import io.spine.examples.pingh.clock.event.TimePassed
@@ -43,6 +42,7 @@ import io.spine.examples.pingh.mentions.given.generate
 import io.spine.examples.pingh.mentions.given.onlyWithId
 import io.spine.examples.pingh.mentions.rejection.Rejections.MentionIsAlreadyRead
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
+import io.spine.examples.pingh.time.UtcTime.currentUtcTime
 import io.spine.server.BoundedContextBuilder
 import io.spine.server.integration.ThirdPartyContext
 import io.spine.testing.server.blackbox.ContextAwareTest
@@ -84,7 +84,7 @@ internal class MentionSpec : ContextAwareTest() {
 
         @BeforeEach
         internal fun sendSnoozeMentionCommand() {
-            untilWhen = currentTime()
+            untilWhen = currentUtcTime()
             val command = SnoozeMention::class.buildBy(id, untilWhen)
             context().receivesCommand(command)
         }
@@ -134,7 +134,7 @@ internal class MentionSpec : ContextAwareTest() {
 
             @BeforeEach
             internal fun setSnoozedStatus() {
-                val command = SnoozeMention::class.buildBy(id, currentTime())
+                val command = SnoozeMention::class.buildBy(id, currentUtcTime())
                 context().receivesCommand(command)
                 emitTimePassedEvent()
             }
@@ -168,13 +168,13 @@ internal class MentionSpec : ContextAwareTest() {
 
         @Test
         internal fun `do nothing if snooze time hasn't already passed`() {
-            val command = SnoozeMention::class.buildBy(id, currentTime())
+            val command = SnoozeMention::class.buildBy(id, currentUtcTime())
             context().receivesCommand(command)
             emitTimePassedEvent(Timestamps.MIN_VALUE)
             assertThatNothingHappened(MentionStatus.SNOOZED)
         }
 
-        private fun emitTimePassedEvent(time: Timestamp = currentTime()) {
+        private fun emitTimePassedEvent(time: Timestamp = currentUtcTime()) {
             val clockContext = ThirdPartyContext.singleTenant("Clock")
             val event = TimePassed::class.buildBy(time)
             val actor = UserId::class.generate()
@@ -193,7 +193,7 @@ internal class MentionSpec : ContextAwareTest() {
     @Test
     internal fun `reject 'SnoozeMention' command, if mention is already read`() {
         val readCommand = MarkMentionAsRead::class.buildBy(id)
-        val snoozeCommand = SnoozeMention::class.buildBy(id, currentTime())
+        val snoozeCommand = SnoozeMention::class.buildBy(id, currentUtcTime())
         context()
             .receivesCommand(readCommand)
             .receivesCommand(snoozeCommand)

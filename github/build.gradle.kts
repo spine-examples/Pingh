@@ -36,3 +36,7 @@ spine {
     assembleModel()
     enableJava()
 }
+
+dependencies {
+    implementation(project(":time"))
+}

@@ -29,10 +29,10 @@
 package io.spine.examples.pingh.mentions
 
 import com.google.protobuf.Timestamp
-import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
 import io.spine.examples.pingh.mentions.command.SnoozeMention
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
+import io.spine.examples.pingh.time.UtcTime.currentUtcTime
 import kotlin.reflect.KClass
 
 /**
@@ -59,7 +59,7 @@ public fun KClass<SnoozeMention>.buildBy(id: MentionId, untilWhen: Timestamp): S
  */
 public fun KClass<UpdateMentionsFromGitHub>.buildBy(
     id: GitHubClientId,
-    whenRequested: Timestamp = currentTime()
+    whenRequested: Timestamp = currentUtcTime()
 ):
         UpdateMentionsFromGitHub =
     UpdateMentionsFromGitHub.newBuilder()

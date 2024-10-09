@@ -28,7 +28,6 @@
 
 package io.spine.examples.pingh.mentions.given
 
-import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.github.NodeId
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
@@ -40,6 +39,7 @@ import io.spine.examples.pingh.mentions.UserMentionsId
 import io.spine.examples.pingh.mentions.of
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
+import io.spine.examples.pingh.time.UtcTime.currentUtcTime
 import io.spine.net.Url
 import io.spine.testing.TestValues.randomString
 import kotlin.reflect.KClass
@@ -56,7 +56,7 @@ internal fun KClass<UserMentioned>.generateWith(whoWasMentioned: Username): User
         )
         whoMentioned = User::class.of(randomString(), randomString())
         title = randomString()
-        whenMentioned = currentTime()
+        whenMentioned = currentUtcTime()
         url = Url::class.of(randomString())
         vBuild()
     }

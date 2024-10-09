@@ -27,7 +27,6 @@
 package io.spine.examples.pingh.sessions
 
 import com.google.protobuf.Timestamp
-import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.clock.buildBy
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.github.Username
@@ -51,6 +50,7 @@ import io.spine.examples.pingh.sessions.rejection.Rejections.NotMemberOfPermitte
 import io.spine.examples.pingh.sessions.rejection.Rejections.UsernameMismatch
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubUsersResponses
+import io.spine.examples.pingh.time.UtcTime.currentUtcTime
 import io.spine.protobuf.Durations2.minutes
 import io.spine.server.BoundedContextBuilder
 import io.spine.server.integration.ThirdPartyContext
@@ -213,7 +213,7 @@ internal class UserSessionSpec : ContextAwareTest() {
                 .isEqualTo(expected)
         }
 
-        private fun emitTimePassedEvent(time: Timestamp = currentTime()) {
+        private fun emitTimePassedEvent(time: Timestamp = currentUtcTime()) {
             val clockContext = ThirdPartyContext.singleTenant("Clock")
             val event = TimePassed::class.buildBy(time)
             val actor = GivenUserId.generated()
@@ -231,7 +231,7 @@ internal class UserSessionSpec : ContextAwareTest() {
         internal fun sendRefreshTokenCommand() {
             id = SessionId::class.generate()
             logIn(id)
-            whenRequested = currentTime()
+            whenRequested = currentUtcTime()
             val command = RefreshToken::class.with(id, whenRequested)
             context().receivesCommand(command)
         }

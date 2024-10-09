@@ -29,7 +29,6 @@ package io.spine.examples.pingh.mentions
 import com.google.protobuf.Timestamp
 import io.kotest.matchers.shouldBe
 import io.ktor.http.HttpStatusCode
-import io.spine.base.Time.currentTime
 import io.spine.core.UserId
 import io.spine.examples.pingh.clock.buildBy
 import io.spine.examples.pingh.clock.event.TimePassed
@@ -57,6 +56,7 @@ import io.spine.examples.pingh.sessions.with
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubUsersResponses
+import io.spine.examples.pingh.time.UtcTime.currentUtcTime
 import io.spine.protobuf.Durations2.seconds
 import io.spine.server.BoundedContextBuilder
 import io.spine.server.integration.ThirdPartyContext
@@ -139,7 +139,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
         @BeforeEach
         internal fun emitTokenRefreshedEvent() {
             newToken = PersonalAccessToken::class.of(randomString())
-            val event = TokenRefreshed::class.with(sessionId, newToken, currentTime())
+            val event = TokenRefreshed::class.with(sessionId, newToken, currentUtcTime())
             sessionContext.receivesEvent(event)
         }
 
@@ -165,7 +165,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
 
         @Test
         internal fun `send update command if no updates have been made yet`() {
-            val time = currentTime()
+            val time = currentUtcTime()
             emitTimePassedEvent(time)
             val expected = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId, time)
             val commandSubject = context().assertCommands()
@@ -177,7 +177,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
 
         @Test
         internal fun `send update command if required time since the last update has passed`() {
-            val firstRequestTime = currentTime()
+            val firstRequestTime = currentUtcTime()
             val lastRequestTime = firstRequestTime.add(mentionsUpdateInterval)
             emitTimePassedEvent(firstRequestTime)
             emitTimePassedEvent(lastRequestTime)
@@ -191,7 +191,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
 
         @Test
         internal fun `do nothing if the required time between updates has not passed`() {
-            val time = currentTime()
+            val time = currentUtcTime()
             emitTimePassedEvent(time)
             emitTimePassedEvent(time.add(seconds(1)))
             context().assertCommands()
@@ -320,7 +320,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
 
     @Test
     internal fun `remember the time of last successful update`() {
-        val whenRequested = currentTime()
+        val whenRequested = currentUtcTime()
         val command = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId, whenRequested)
         context().receivesCommand(command)
         val expected = GitHubClient::class.buildBy(gitHubClientId, token, whenRequested)
