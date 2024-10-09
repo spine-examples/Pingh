@@ -27,19 +27,18 @@
 package io.spine.examples.pingh.time
 
 import com.google.protobuf.Timestamp
-import io.spine.base.Time
 import io.spine.time.InstantConverter
 import java.time.LocalDateTime
+import java.time.ZoneId
 
 /**
  * Converts the current UTC time in this `Timestamp` to local time,
  * based on the system's time zone.
  *
- * The current time zone is retrieved from the [provider][Time.Provider]
- * that supplies the current time.
+ * The current time zone is set to the [ZoneId.systemDefault()][ZoneId.systemDefault] zone.
  */
 public fun Timestamp.asLocalDateTime(): LocalDateTime {
-    val timeZone = Time.currentTimeZone()
+    val timeZone = ZoneId.systemDefault()
     val instant = InstantConverter.reversed()
         .convert(this)
     return LocalDateTime.ofInstant(instant, timeZone)

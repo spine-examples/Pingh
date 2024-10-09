@@ -41,7 +41,13 @@ public object UtcTime {
      * is used to obtain the time, which returns the number of milliseconds elapsed since midnight,
      * January 1, 1970 (UTC). This value is then converted to a `Timestamp`.
      *
+     * It is recommended to use this method instead of [Time.currentTime()][Time.currentTime],
+     * as changes to the time [provider][Time.setProvider] may cause `Time.currentTime()`
+     * to return different values. This method, however, consistently returns
+     * the system time in UTC.
+     *
+     * @see [Time.systemTime]
      * @see [Time.SystemTimeProvider.currentTime]
      */
-    public fun currentUtcTime(): Timestamp = Time.currentTime()
+    public fun currentUtcTime(): Timestamp = Time.systemTime()
 }
