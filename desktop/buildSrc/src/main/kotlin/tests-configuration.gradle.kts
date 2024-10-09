@@ -36,9 +36,7 @@ plugins {
  */
 dependencies {
     testImplementation(JUnit.api)
-    testImplementation(JUnit.params)
     testRuntimeOnly(JUnit.runner)
-
     testImplementation(Kotest.assertions)
 }
 
