@@ -24,21 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.time
+package io.spine.internal.dependency
 
-import com.google.protobuf.Timestamp
-import io.spine.time.InstantConverter
-import java.time.LocalDateTime
-import java.time.ZoneId
-
-/**
- * Converts the current UTC time in this `Timestamp` to local time,
- * based on the system's time zone.
- *
- * The default time zone is set to the [ZoneId.systemDefault()][ZoneId.systemDefault] zone.
- */
-public fun Timestamp.asLocalDateTime(timeZone: ZoneId = ZoneId.systemDefault()): LocalDateTime {
-    val instant = InstantConverter.reversed()
-        .convert(this)
-    return LocalDateTime.ofInstant(instant, timeZone)
+// https://github.com/kotest/kotest
+public object Kotest {
+    private const val version = "5.9.1"
+    private const val group = "io.kotest"
+    public const val assertions: String = "$group:kotest-assertions-core:$version"
 }

@@ -24,21 +24,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.time
+import io.spine.internal.dependency.JUnit
+import io.spine.internal.dependency.Kotest
 
-import com.google.protobuf.Timestamp
-import io.spine.time.InstantConverter
-import java.time.LocalDateTime
-import java.time.ZoneId
+plugins {
+    java
+}
 
 /**
- * Converts the current UTC time in this `Timestamp` to local time,
- * based on the system's time zone.
- *
- * The default time zone is set to the [ZoneId.systemDefault()][ZoneId.systemDefault] zone.
+ * Add dependencies for testing.
  */
-public fun Timestamp.asLocalDateTime(timeZone: ZoneId = ZoneId.systemDefault()): LocalDateTime {
-    val instant = InstantConverter.reversed()
-        .convert(this)
-    return LocalDateTime.ofInstant(instant, timeZone)
+dependencies {
+    testImplementation(JUnit.api)
+    testImplementation(JUnit.params)
+    testRuntimeOnly(JUnit.runner)
+
+    testImplementation(Kotest.assertions)
+}
+
+/**
+ * Explicitly instructs to discover and execute JUnit tests.
+ */
+tasks.withType<Test> {
+    useJUnitPlatform {
+        includeEngines("junit-jupiter")
+    }
 }

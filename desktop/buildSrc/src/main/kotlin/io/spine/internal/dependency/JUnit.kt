@@ -24,21 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.time
+package io.spine.internal.dependency
 
-import com.google.protobuf.Timestamp
-import io.spine.time.InstantConverter
-import java.time.LocalDateTime
-import java.time.ZoneId
+// https://github.com/junit-team/junit5/
+public object JUnit {
+    private const val version = "5.11.2"
+    private const val group = "org.junit.jupiter"
 
-/**
- * Converts the current UTC time in this `Timestamp` to local time,
- * based on the system's time zone.
- *
- * The default time zone is set to the [ZoneId.systemDefault()][ZoneId.systemDefault] zone.
- */
-public fun Timestamp.asLocalDateTime(timeZone: ZoneId = ZoneId.systemDefault()): LocalDateTime {
-    val instant = InstantConverter.reversed()
-        .convert(this)
-    return LocalDateTime.ofInstant(instant, timeZone)
+    public const val api: String = "$group:junit-jupiter-engine:${version}"
+    public const val runner: String = "$group:junit-jupiter-engine:${version}"
+    public const val params: String = "$group:junit-jupiter-params:${version}"
 }
