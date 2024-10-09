@@ -48,8 +48,6 @@ dependencies {
     // in different bounded contexts. All necessary classes are collected in the `server` module.
     api(project(":server"))
 
-    implementation(project(":time"))
-
     implementation(Guava.lib)
     implementation(Grpc.netty)
     implementation(Grpc.inprocess)

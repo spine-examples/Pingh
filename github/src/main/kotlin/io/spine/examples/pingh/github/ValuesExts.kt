@@ -28,6 +28,7 @@
 
 package io.spine.examples.pingh.github
 
+import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Timestamps
 import io.spine.examples.pingh.github.rest.AccessTokenFragment
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
@@ -114,7 +115,7 @@ public fun KClass<Mention>.from(fragment: IssueOrPullRequestFragment): Mention =
             fragment.whoCreated.avatarUrl
         )
         title = fragment.title
-        whenMentioned = Timestamps.parse(fragment.whenCreated)
+        whenMentioned = Timestamp::class.parse(fragment.whenCreated)
         url = Url::class.of(fragment.htmlUrl)
         vBuild()
     }
@@ -136,7 +137,7 @@ public fun KClass<Mention>.from(fragment: CommentFragment, itemTitle: String): M
             fragment.whoCreated.avatarUrl
         )
         title = "Comment on $itemTitle"
-        whenMentioned = Timestamps.parse(fragment.whenCreated)
+        whenMentioned = Timestamp::class.parse(fragment.whenCreated)
         url = Url::class.of(fragment.htmlUrl)
         vBuild()
     }
@@ -158,7 +159,7 @@ public fun KClass<Mention>.from(fragment: ReviewFragment, prTitle: String): Ment
             fragment.whoCreated.avatarUrl
         )
         title = "Review of $prTitle"
-        whenMentioned = Timestamps.parse(fragment.whenSubmitted)
+        whenMentioned = Timestamp::class.parse(fragment.whenSubmitted)
         url = Url::class.of(fragment.htmlUrl)
         vBuild()
     }
