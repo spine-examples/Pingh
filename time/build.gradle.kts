@@ -28,4 +28,5 @@ import io.spine.internal.dependency.Spine
 
 dependencies {
     implementation(Spine.base)
+    implementation(Spine.time)
 }

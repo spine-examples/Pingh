@@ -24,25 +24,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.dependency
+package io.spine.examples.pingh.time
 
-// https://github.com/SpineEventEngine
-public object Spine {
+import com.google.protobuf.Timestamp
+import io.spine.base.Time
+
+/**
+ * Allows retrieval of the current time in UTC.
+ */
+public object UtcTime {
+
     /**
-     * Keep in sync with in sync with Spine Bootstraps plugin
-     * in `build.gradle.kts` in each module.
+     * Retrieves the current time in UTC.
+     *
+     * Implementation details: The [System.currentTimeMillis()][System.currentTimeMillis] method
+     * is used to obtain the time, which returns the number of milliseconds elapsed since midnight,
+     * January 1, 1970 (UTC). This value is then converted to a `Timestamp`.
+     *
+     * @see [Time.SystemTimeProvider.currentTime]
      */
-    private const val version = "1.9.0"
-    private const val group = "io.spine"
-
-    public const val base: String = "$group:spine-base:$version"
-    public const val time: String = "$group:spine-time:$version"
-    public const val server: String = "$group:spine-server:$version"
-
-    // https://github.com/SpineEventEngine/gcloud-java
-    public object GCloud {
-        private const val group = "${Spine.group}.gcloud"
-        public const val datastore: String = "$group:spine-datastore:$version"
-        public const val testutil: String = "$group:spine-testutil-gcloud:$version"
-    }
+    public fun currentUtcTime(): Timestamp = Time.currentTime()
 }
