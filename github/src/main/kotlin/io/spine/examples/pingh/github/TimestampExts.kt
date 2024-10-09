@@ -24,22 +24,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.Spine
+package io.spine.examples.pingh.github
 
-plugins {
-    // Add the Gradle plugin for bootstrapping projects built with Spine.
-    // See: https://github.com/SpineEventEngine/bootstrap
-    id("io.spine.tools.gradle.bootstrap").version("1.9.0")
-}
+import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Timestamps
+import io.spine.time.InstantConverter
+import java.time.Instant
+import kotlin.reflect.KClass
 
-spine {
-    // Enable the code generation for the elements of the ubiquitous language,
-    // declared in Proto files.
-    assembleModel()
-    enableJava()
-}
-
-dependencies {
-    implementation(project(":time"))
-    implementation(Spine.time)
+/**
+ * Parses the time from a string in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+ *
+ * Implementation details: The GitHub API provides time data in `ISO 8601` format,
+ * while [Timestamps.parse()][Timestamps.parse] expects time data in
+ * [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt) format. To resolve this mismatch,
+ * the input string is first parsed into an [Instant], since it matches the `ISO 8601` format.
+ * The resulting `Instant` is then converted into a `Timestamp`.
+ */
+@Suppress("UnusedReceiverParameter" /* Class extensions don't use class as a parameter. */)
+internal fun KClass<Timestamp>.parse(value: String): Timestamp {
+    val instant = Instant.parse(value)
+    return InstantConverter.instance()
+        .convert(instant)!!
 }
