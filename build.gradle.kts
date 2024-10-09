@@ -72,6 +72,7 @@ subprojects {
  */
 val modulesRequiredForDesktop = setOf(
     "time",
+    "clock",
     "github",
     "sessions",
     "mentions",
