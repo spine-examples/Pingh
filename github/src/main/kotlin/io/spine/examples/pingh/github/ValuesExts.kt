@@ -30,6 +30,7 @@ package io.spine.examples.pingh.github
 
 import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Timestamps
+import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.github.rest.AccessTokenFragment
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.CommentFragment
@@ -39,7 +40,6 @@ import io.spine.examples.pingh.github.rest.ReviewFragment
 import io.spine.examples.pingh.github.rest.UserFragment
 import io.spine.examples.pingh.github.rest.VerificationCodesFragment
 import io.spine.examples.pingh.github.rest.VerificationCodesResponse
-import io.spine.examples.pingh.time.UtcTime.currentUtcTime
 import io.spine.net.Url
 import io.spine.protobuf.Durations2.seconds
 import kotlin.reflect.KClass
@@ -213,7 +213,7 @@ public fun KClass<AccessTokenResponse>.fromFragment(
 ): AccessTokenResponse =
     with(AccessTokenResponse.newBuilder()) {
         accessToken = PersonalAccessToken::class.of(fragment.accessToken)
-        whenExpires = Timestamps.add(currentUtcTime(), seconds(fragment.expiresIn))
+        whenExpires = Timestamps.add(currentTime(), seconds(fragment.expiresIn))
         refreshToken = RefreshToken::class.of(fragment.refreshToken)
         vBuild()
     }

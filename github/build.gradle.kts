@@ -40,6 +40,5 @@ spine {
 }
 
 dependencies {
-    implementation(project(":time"))
     implementation(Spine.time)
 }

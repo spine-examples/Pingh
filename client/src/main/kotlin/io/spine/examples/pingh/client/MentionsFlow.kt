@@ -28,6 +28,7 @@ package io.spine.examples.pingh.client
 
 import com.google.protobuf.Duration
 import com.google.protobuf.util.Timestamps
+import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.mentions.GitHubClientId
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionView
@@ -38,7 +39,6 @@ import io.spine.examples.pingh.mentions.of
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
 import io.spine.examples.pingh.mentions.command.SnoozeMention
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
-import io.spine.examples.pingh.time.UtcTime.currentUtcTime
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
@@ -134,7 +134,7 @@ public class MentionsFlow internal constructor(
      */
     internal fun snooze(id: MentionId, snoozeTime: Duration) {
         ensureLoggedIn()
-        val command = SnoozeMention::class.buildBy(id, currentUtcTime().add(snoozeTime))
+        val command = SnoozeMention::class.buildBy(id, currentTime().add(snoozeTime))
         client.send(command)
     }
 

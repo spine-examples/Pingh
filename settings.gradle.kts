@@ -26,7 +26,6 @@
 
 rootProject.name = "Pingh"
 include(
-    "time",
     "clock",
     "github",
     "sessions",

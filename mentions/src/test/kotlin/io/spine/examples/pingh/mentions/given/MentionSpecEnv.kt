@@ -29,6 +29,7 @@
 package io.spine.examples.pingh.mentions.given
 
 import com.google.protobuf.Timestamp
+import io.spine.base.Time.currentTime
 import io.spine.core.UserId
 import io.spine.examples.pingh.github.NodeId
 import io.spine.examples.pingh.github.User
@@ -43,7 +44,6 @@ import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.Rejections.MentionIsAlreadyRead
-import io.spine.examples.pingh.time.UtcTime.currentUtcTime
 import io.spine.net.Url
 import io.spine.testing.TestValues.randomString
 import java.util.Objects
@@ -69,7 +69,7 @@ internal fun KClass<UserMentioned>.buildBy(id: MentionId): UserMentioned =
         .setTitle(randomString())
         .setUrl(Url::class.of(randomString()))
         .setWhoMentioned(User::class.of(randomString(), randomString()))
-        .setWhenMentioned(currentUtcTime())
+        .setWhenMentioned(currentTime())
         .vBuild()
 
 /**
@@ -98,7 +98,7 @@ internal fun KClass<Mention>.buildBy(
  * Creates a new `MentionSnoozed` event with the specified ID of the mention.
  */
 internal fun KClass<MentionSnoozed>.buildBy(id: MentionId): MentionSnoozed =
-    this.buildBy(id, currentUtcTime())
+    this.buildBy(id, currentTime())
 
 /**
  * Creates a new `MentionIsAlreadyRead` rejection with the specified ID of the mention.

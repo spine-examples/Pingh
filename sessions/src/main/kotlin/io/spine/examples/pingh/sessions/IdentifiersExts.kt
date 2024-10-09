@@ -29,8 +29,8 @@
 package io.spine.examples.pingh.sessions
 
 import com.google.protobuf.Timestamp
+import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.time.UtcTime.currentUtcTime
 import kotlin.reflect.KClass
 
 /**
@@ -39,7 +39,7 @@ import kotlin.reflect.KClass
  */
 public fun KClass<SessionId>.of(
     username: Username,
-    whenCreated: Timestamp = currentUtcTime()
+    whenCreated: Timestamp = currentTime()
 ): SessionId =
     SessionId.newBuilder()
         .setUsername(username)

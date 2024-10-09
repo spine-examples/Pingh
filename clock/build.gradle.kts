@@ -45,6 +45,5 @@ spine {
 }
 
 dependencies {
-    implementation(project(":time"))
     implementation(JavaX.annotations)
 }

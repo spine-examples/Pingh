@@ -28,9 +28,10 @@ package io.spine.examples.pingh.client
 
 import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Timestamps
-import io.spine.examples.pingh.time.asLocalDateTime
+import io.spine.time.InstantConverter
 import java.time.Duration
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 /**
@@ -85,4 +86,16 @@ public fun Timestamp.howMuchTimeHasPassed(): String {
         difference.toDays() == 1L -> "yesterday"
         else -> dateFormat.format(thisDatetime)
     }
+}
+
+/**
+ * Converts the current UTC time in this `Timestamp` to local time,
+ * based on the system's time zone.
+ *
+ * The default time zone is set to the [ZoneId.systemDefault()][ZoneId.systemDefault] zone.
+ */
+public fun Timestamp.asLocalDateTime(timeZone: ZoneId = ZoneId.systemDefault()): LocalDateTime {
+    val instant = InstantConverter.reversed()
+        .convert(this)
+    return LocalDateTime.ofInstant(instant, timeZone)
 }

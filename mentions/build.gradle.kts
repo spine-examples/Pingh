@@ -59,7 +59,6 @@ tasks.named("compileKotlin") {
 dependencies {
     implementation(project(":github"))
     implementation(project(":sessions"))
-    implementation(project(":time"))
     implementation(project(":clock"))
     implementation(JavaX.annotations)
     implementation(Ktor.Client.core)

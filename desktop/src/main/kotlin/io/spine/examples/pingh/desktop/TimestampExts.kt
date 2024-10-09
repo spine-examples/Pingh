@@ -27,7 +27,7 @@
 package io.spine.examples.pingh.desktop
 
 import com.google.protobuf.Timestamp
-import io.spine.examples.pingh.time.asLocalDateTime
+import io.spine.examples.pingh.client.asLocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 

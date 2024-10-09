@@ -30,5 +30,6 @@ package io.spine.internal.dependency
 public object Kotest {
     private const val version = "5.9.1"
     private const val group = "io.kotest"
+
     public const val assertions: String = "$group:kotest-assertions-core:$version"
 }

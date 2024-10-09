@@ -56,7 +56,6 @@ dependencies {
     api(project(":github"))
     api(project(":sessions"))
     api(project(":mentions"))
-    api(project(":time"))
     implementation(project(":clock"))
 
     implementation(Ktor.Client.cio)
