@@ -56,7 +56,7 @@ private const val pinghPort = 50051
  *
  * Server setup and startup process:
  *
- * 1. Configures the environment for local use, including loading GitHub App secrets
+ * 1. Configures the environment for local use, which includes loading GitHub App secrets
  * from the configuration file.
  *
  * 2. Initializes an [IntervalClock] to emit an event with the current time to the server
@@ -66,7 +66,7 @@ private const val pinghPort = 50051
  */
 public fun main() {
     configureEnvironment()
-    val gitHubApp = gitHubApp()
+    val gitHubApp = loadGitHubApp()
     val server = createServer(gitHubApp)
     IntervalClock(1.seconds).start()
     server.start()
@@ -91,7 +91,7 @@ private fun configureEnvironment() {
 /**
  * Loads GitHub application properties from resource folder.
  */
-private fun gitHubApp(): GitHubApp {
+private fun loadGitHubApp(): GitHubApp {
     val properties = Properties()
     val path = "/local/config/server.properties"
     PinghApplication::class.java.getResourceAsStream(path).use {
