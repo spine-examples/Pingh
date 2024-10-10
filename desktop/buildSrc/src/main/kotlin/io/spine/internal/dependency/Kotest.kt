@@ -26,23 +26,10 @@
 
 package io.spine.internal.dependency
 
-// https://github.com/SpineEventEngine
-public object Spine {
-    /**
-     * Keep in sync with in sync with Spine Bootstraps plugin
-     * in `build.gradle.kts` in each module.
-     */
-    private const val version = "1.9.0"
-    private const val group = "io.spine"
+// https://github.com/kotest/kotest
+public object Kotest {
+    private const val version = "5.9.1"
+    private const val group = "io.kotest"
 
-    public const val base: String = "$group:spine-base:$version"
-    public const val time: String = "$group:spine-time:$version"
-    public const val server: String = "$group:spine-server:$version"
-
-    // https://github.com/SpineEventEngine/gcloud-java
-    public object GCloud {
-        private const val group = "${Spine.group}.gcloud"
-        public const val datastore: String = "$group:spine-datastore:$version"
-        public const val testutil: String = "$group:spine-testutil-gcloud:$version"
-    }
+    public const val assertions: String = "$group:kotest-assertions-core:$version"
 }

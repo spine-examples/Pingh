@@ -24,25 +24,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.dependency
+package io.spine.examples.pingh.github
 
-// https://github.com/SpineEventEngine
-public object Spine {
-    /**
-     * Keep in sync with in sync with Spine Bootstraps plugin
-     * in `build.gradle.kts` in each module.
-     */
-    private const val version = "1.9.0"
-    private const val group = "io.spine"
+import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Timestamps
+import io.spine.time.InstantConverter
+import java.time.Instant
+import java.time.format.DateTimeParseException
+import kotlin.reflect.KClass
 
-    public const val base: String = "$group:spine-base:$version"
-    public const val time: String = "$group:spine-time:$version"
-    public const val server: String = "$group:spine-server:$version"
-
-    // https://github.com/SpineEventEngine/gcloud-java
-    public object GCloud {
-        private const val group = "${Spine.group}.gcloud"
-        public const val datastore: String = "$group:spine-datastore:$version"
-        public const val testutil: String = "$group:spine-testutil-gcloud:$version"
-    }
+/**
+ * Parses the time from a string in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+ *
+ * Implementation details: The GitHub API provides time data in `ISO 8601` format,
+ * while [Timestamps.parse()][Timestamps.parse] expects time data in
+ * [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt) format. To resolve this mismatch,
+ * the input string is first parsed into an [Instant], since it matches the `ISO 8601` format.
+ * The resulting `Instant` is then converted into a `Timestamp`.
+ *
+ * @throws DateTimeParseException if the provided string is not in `ISO 8601` format.
+ */
+@Suppress("UnusedReceiverParameter" /* Class extensions don't use class as a parameter. */)
+internal fun KClass<Timestamp>.parse(value: String): Timestamp {
+    val instant = Instant.parse(value)
+    return InstantConverter.instance()
+        .convert(instant)!!
 }

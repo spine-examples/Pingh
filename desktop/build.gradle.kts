@@ -45,6 +45,9 @@ plugins {
 
     // Adds and configures the Detekt for analysis code.
     id("detekt-code-analysis")
+
+    // Adds dependencies for testing and configure test-running tasks.
+    id("tests-configuration")
 }
 
 /**

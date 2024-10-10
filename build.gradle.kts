@@ -71,6 +71,7 @@ subprojects {
  * The set of names of modules that required for building the `desktop` standalone project.
  */
 val modulesRequiredForDesktop = setOf(
+    "clock",
     "github",
     "sessions",
     "mentions",

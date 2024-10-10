@@ -28,9 +28,10 @@ package io.spine.examples.pingh.client
 
 import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Timestamps
+import io.spine.time.InstantConverter
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 /**
@@ -64,15 +65,17 @@ internal fun Timestamp.add(duration: com.google.protobuf.Duration): Timestamp =
  * - If the difference is exactly one day, returns the string `"yesterday"`;
  * - In all other cases, returns the day and month.
  *
+ * @receiver The timestamp represents a time in the past.
  * @throws IllegalArgumentException if the `Timestamp` is not from the past.
  */
 public fun Timestamp.howMuchTimeHasPassed(): String {
-    val thisDatetime = LocalDateTime.ofEpochSecond(this.seconds, this.nanos, ZoneOffset.UTC)
-    val difference = Duration.between(
-        thisDatetime,
-        LocalDateTime.now(ZoneOffset.UTC)
-    )
-    require(difference > Duration.ZERO) { "" }
+    val thisDatetime = this.asLocalDateTime()
+    val now = LocalDateTime.now()
+    val difference = Duration.between(thisDatetime, now)
+    require(difference > Duration.ZERO) {
+        "The provided `Timestamp`, $thisDatetime, must represent a time in the past, " +
+                "but it does not. The current time is $now."
+    }
     return when {
         difference.toMinutes() < 1L -> "just now"
         difference.toMinutes() == 1L -> "a minute ago"
@@ -82,4 +85,16 @@ public fun Timestamp.howMuchTimeHasPassed(): String {
         difference.toDays() == 1L -> "yesterday"
         else -> dateFormat.format(thisDatetime)
     }
+}
+
+/**
+ * Converts the current UTC time in this `Timestamp` to local time,
+ * based on the system's time zone.
+ *
+ * The default time zone is set to the [ZoneId.systemDefault()][ZoneId.systemDefault] zone.
+ */
+public fun Timestamp.asLocalDateTime(timeZone: ZoneId = ZoneId.systemDefault()): LocalDateTime {
+    val instant = InstantConverter.reversed()
+        .convert(this)
+    return LocalDateTime.ofInstant(instant, timeZone)
 }
