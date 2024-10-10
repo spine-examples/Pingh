@@ -128,3 +128,11 @@ publishing {
         }
     }
 }
+
+/**
+ * Starts the Pingh server for local use.
+ */
+tasks.register<JavaExec>("runLocally") {
+    main = "io.spine.examples.pingh.server.LocalPinghServerKt"
+    classpath = sourceSets.main.get().runtimeClasspath
+}
