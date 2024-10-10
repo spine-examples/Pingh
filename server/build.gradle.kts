@@ -130,8 +130,8 @@ publishing {
 }
 
 /**
- * Publishes the necessary artifacts to Maven Local for building the desktop project,
- * and then starts the Pingh server for local use.
+ * Publishes the artifacts required for building the `desktop` standalone project
+ * to Maven Local repository, and then starts the Pingh server for local use.
  */
 tasks.register<JavaExec>("runLocally") {
     dependsOn(":publishRequiredForDesktopToMavenLocal")

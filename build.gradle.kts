@@ -103,7 +103,7 @@ val buildDesktopClient = tasks.register<RunGradleBuild>("buildDesktopClient") {
 
 /**
  * Publishes of all modules required for the `desktop` project
- * to the Local Maven repository.
+ * to the Maven Local repository.
  */
 tasks.register("publishRequiredForDesktopToMavenLocal") {
     val task = this
@@ -114,7 +114,7 @@ tasks.register("publishRequiredForDesktopToMavenLocal") {
 
 /**
  * Adds the publishing of modules required for the `desktop` project
- * to the Local Maven repository as part of the build process.
+ * to the Maven Local repository as part of the build process.
  */
 tasks.build {
     dependsOn(":publishRequiredForDesktopToMavenLocal")
