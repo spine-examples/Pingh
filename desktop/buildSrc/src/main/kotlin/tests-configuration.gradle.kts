@@ -35,8 +35,7 @@ plugins {
  * Add dependencies for testing.
  */
 dependencies {
-    testImplementation(JUnit.api)
-    testRuntimeOnly(JUnit.runner)
+    testImplementation(JUnit.engine)
     testImplementation(Kotest.assertions)
 }
 

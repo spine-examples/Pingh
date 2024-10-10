@@ -31,6 +31,5 @@ public object JUnit {
     private const val version = "5.11.2"
     private const val group = "org.junit.jupiter"
 
-    public const val api: String = "$group:junit-jupiter-engine:${version}"
-    public const val runner: String = "$group:junit-jupiter-engine:${version}"
+    public const val engine: String = "$group:junit-jupiter-engine:${version}"
 }
