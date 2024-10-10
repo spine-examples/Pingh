@@ -24,7 +24,48 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.examples.pingh.clock
+
+import java.lang.Thread.sleep
+import kotlin.time.Duration
+
 /**
- * The version of the `Pingh` to publish.
+ * A clock that continuously emits `TimePassed` events at the specified interval.
+ *
+ * @property pauseTime The time interval between emitting `TimePassed` events.
  */
-val pinghVersion: String by extra("1.0.0-SNAPSHOT.7")
+public class IntervalClock(private val pauseTime: Duration) {
+    /**
+     * Whether the clock is currently running.
+     *
+     * Used to control the [clockThread].
+     */
+    private var isRunning = false
+
+    /**
+     * The clock thread emits a `TimePassed` event after passing each time interval.
+     */
+    private lateinit var clockThread: Thread
+
+    /**
+     * Starts the clock.
+     */
+    public fun start() {
+        isRunning = true
+        clockThread = Thread {
+            while (isRunning) {
+                sleep(pauseTime.inWholeMilliseconds)
+                emitTimePassedEvent()
+            }
+        }
+        clockThread.start()
+    }
+
+    /**
+     * Stops the clock and waits until [clock thread][clockThread] is shut down.
+     */
+    public fun stop() {
+        isRunning = false
+        clockThread.join()
+    }
+}
