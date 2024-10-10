@@ -70,12 +70,11 @@ internal fun Timestamp.add(duration: com.google.protobuf.Duration): Timestamp =
  */
 public fun Timestamp.howMuchTimeHasPassed(): String {
     val thisDatetime = this.asLocalDateTime()
-    val difference = Duration.between(
-        thisDatetime,
-        LocalDateTime.now()
-    )
+    val now = LocalDateTime.now()
+    val difference = Duration.between(thisDatetime, now)
     require(difference > Duration.ZERO) {
-        "This `Timestamp` must indicate a time in the past."
+        "The provided `Timestamp`, $thisDatetime, must represent a time in the past, " +
+                "but it does not. The current time is $now."
     }
     return when {
         difference.toMinutes() < 1L -> "just now"
