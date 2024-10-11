@@ -34,7 +34,7 @@ package io.spine.examples.pingh.server
  * the current time from an external clock or system scheduler.
  */
 public fun main() {
-    val app = PinghApplication()
+    val app = Application()
     app.server.start()
     app.server.awaitTermination()
 }

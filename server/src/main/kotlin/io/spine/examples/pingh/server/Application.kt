@@ -55,7 +55,7 @@ import io.spine.server.transport.memory.InMemoryTransportFactory
  * 2. Starts an [HTTP endpoint][startHeartbeatServer] receiving the current time values
  * from an external clock or a system scheduler.
  */
-internal class PinghApplication {
+internal class Application {
     private companion object {
         /**
          * The port on which the Pingh server runs.

@@ -66,7 +66,7 @@ private const val pinghPort = 50051
  */
 public fun main() {
     configureEnvironment()
-    val gitHubApp = loadGitHubApp()
+    val gitHubApp = loadGitHubAppSecrets()
     val server = createServer(gitHubApp)
     IntervalClock(1.seconds).start()
     server.start()
@@ -89,12 +89,12 @@ private fun configureEnvironment() {
 }
 
 /**
- * Loads GitHub application properties from resource folder.
+ * Loads GitHub application secrets from resource folder.
  */
-private fun loadGitHubApp(): GitHubApp {
+private fun loadGitHubAppSecrets(): GitHubApp {
     val properties = Properties()
     val path = "/local/config/server.properties"
-    PinghApplication::class.java.getResourceAsStream(path).use {
+    Application::class.java.getResourceAsStream(path).use {
         properties.load(it)
     }
     check(properties.containsKey("github-app.client.id")) {

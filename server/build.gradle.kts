@@ -87,7 +87,7 @@ configurations.all {
     }
 }
 
-val appClassName = "io.spine.examples.pingh.server.PinghServerKt"
+val appClassName = "io.spine.examples.pingh.server.ServerKt"
 project.setProperty("mainClassName", appClassName)
 
 tasks.withType<ShadowJar> {
@@ -135,6 +135,6 @@ publishing {
  */
 tasks.register<JavaExec>("runLocally") {
     dependsOn(":publishRequiredForDesktopToMavenLocal")
-    main = "io.spine.examples.pingh.server.LocalPinghServerKt"
+    main = "io.spine.examples.pingh.server.LocalServerKt"
     classpath = sourceSets.main.get().runtimeClasspath
 }
