@@ -128,13 +128,3 @@ publishing {
         }
     }
 }
-
-/**
- * Publishes the artifacts required for building the `desktop` standalone project
- * to Maven Local repository, and then starts the Pingh server for local use.
- */
-tasks.register<JavaExec>("runLocally") {
-    dependsOn(":publishRequiredForDesktopToMavenLocal")
-    main = "io.spine.examples.pingh.server.LocalServerKt"
-    classpath = sourceSets.main.get().runtimeClasspath
-}
