@@ -111,7 +111,7 @@ internal class Application {
      *
      * In [Production] mode, starts a [server][startHeartbeatServer]
      * to handle HTTP requests from an external clock or system scheduler.
-     * In non-`Production` mode, starts a [clock][IntervalClock]
+     * In non-production mode, starts a [clock][IntervalClock]
      * to emit an event to the server every second.
      */
     private fun startClock() {

@@ -29,8 +29,10 @@ package io.spine.examples.pingh.server
 import io.spine.environment.CustomEnvironmentType
 
 /**
- * Production environment type that operates on Google Cloud
- * and has access to Google Cloud services.
+ * Production Environment Type
+ *
+ * Applications running in this environment operate on Google Cloud
+ * and have access to Google Cloud services.
  */
 internal class Production : CustomEnvironmentType<Production>() {
     /**
