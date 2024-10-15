@@ -27,14 +27,27 @@
 package io.spine.examples.pingh.server
 
 import io.ktor.client.engine.cio.CIO
+import io.spine.environment.DefaultMode
 import io.spine.environment.Environment
+import io.spine.examples.pingh.clock.Clock
+import io.spine.examples.pingh.clock.IntervalClock
+import io.spine.examples.pingh.github.ClientId
+import io.spine.examples.pingh.github.ClientSecret
 import io.spine.examples.pingh.github.GitHubApp
+import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.RemoteGitHubSearch
 import io.spine.examples.pingh.mentions.newMentionsContext
+import io.spine.examples.pingh.server.datastore.DatastoreStorageFactory
 import io.spine.examples.pingh.sessions.RemoteGitHubAuthentication
 import io.spine.examples.pingh.sessions.RemoteGitHubUsers
 import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.server.Server
+import io.spine.server.ServerEnvironment
+import io.spine.server.delivery.Delivery
+import io.spine.server.storage.memory.InMemoryStorageFactory
+import io.spine.server.transport.memory.InMemoryTransportFactory
+import java.util.Properties
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * The server side of the Pingh application.
@@ -49,12 +62,12 @@ internal abstract class Application {
         private const val pinghPort = 50051
 
         /**
-         * Returns a [CloudApplication] if the app is running on Google Cloud Platform;
+         * Returns a [Production] if the app is using for production;
          * otherwise, returns [LocalApplication].
          */
         internal fun newInstance(): Application =
-            if (Environment.instance().`is`(CloudMode::class.java)) {
-                CloudApplication()
+            if (Environment.instance().`is`(Production::class.java)) {
+                ProductionApplication()
             } else {
                 LocalApplication()
             }
@@ -105,5 +118,117 @@ internal abstract class Application {
             )
             .add(newMentionsContext(RemoteGitHubSearch(httpEngine)))
             .build()
+    }
+}
+
+/**
+ * The server side of the Pingh application for production use.
+ *
+ * During the initialization, performs the actions as follows:
+ *
+ * 1. Configures the server environment for production use,
+ * including the interaction with GitHub API and Google Datastore.
+ *
+ * 2. Starts an [HTTP endpoint][startHeartbeatServer] receiving the current time values
+ * from an external clock or a system scheduler.
+ */
+internal class ProductionApplication : Application() {
+    /**
+     * Obtains secrets of the Pingh GitHub App required for the authentication flow
+     * from the Secret Manager.
+     */
+    override fun gitHubApp() = GitHubApp::class.of(
+        ClientId::class.of(Secret.named("github_client_id")),
+        ClientSecret::class.of(Secret.named("github_client_secret"))
+    )
+
+    /**
+     * Configures the server environment.
+     *
+     * Application data is stored using Google Cloud Datastore. Therefore, any changes made
+     * by users of this application will be persisted in-between the application launches.
+     */
+    override fun configureEnvironment() {
+        ServerEnvironment
+            .`when`(Production::class.java)
+            .use(DatastoreStorageFactory.remote())
+            .use(Delivery.localAsync())
+            .use(InMemoryTransportFactory.newInstance())
+    }
+
+    /**
+     * Starts a [server][startHeartbeatServer] to handle HTTP requests that receive
+     * the current time from an external clock or system scheduler.
+     */
+    override fun startClock() {
+        startHeartbeatServer(Clock())
+    }
+}
+
+/**
+ * The server side of the Pingh application for local use.
+ *
+ * During the initialization, performs the actions as follows:
+ *
+ * 1. Configures the environment for local use, which includes loading GitHub App secrets
+ * from the configuration file.
+ *
+ * 2. Initializes an [IntervalClock] to emit an event with the current time to the server
+ * every second.
+ */
+internal class LocalApplication : Application() {
+    internal companion object {
+        /**
+         * Path to the configuration file containing the GitHub App secrets.
+         */
+        private const val gitHubAppSecretPath = "/local/config/server.properties"
+    }
+
+    /**
+     * Loads GitHub application secrets from resource folder.
+     */
+    override fun gitHubApp(): GitHubApp {
+        val properties = Properties()
+        LocalApplication::class.java.getResourceAsStream(gitHubAppSecretPath).use {
+            properties.load(it)
+        }
+        return GitHubApp::class.of(
+            ClientId::class.of(properties.getOrThrow("github-app.client.id")),
+            ClientSecret::class.of(properties.getOrThrow("github-app.client.secret"))
+        )
+    }
+
+    /**
+     * Returns the value of an environment variable by its `key` if it exists;
+     * otherwise, an [IllegalStateException] is thrown.
+     */
+    private fun Properties.getOrThrow(key: String): String =
+        getProperty(key) ?: throw IllegalStateException(
+            "For running Pingh server locally the \"$key\" must be provided " +
+                    "in the configuration file located at \"resource$gitHubAppSecretPath\"."
+        )
+
+    /**
+     * Configures the server environment.
+     *
+     * Server side of this application is currently running in in-memory storage mode.
+     * Therefore, any changes made by users of this application will not be persisted
+     * in-between the application launches.
+     */
+    override fun configureEnvironment() {
+        ServerEnvironment
+            .`when`(DefaultMode::class.java)
+            .use(InMemoryStorageFactory.newInstance())
+            .use(Delivery.localAsync())
+            .use(InMemoryTransportFactory.newInstance())
+    }
+
+    /**
+     * Starts a [clock][IntervalClock] to emit an event with the current time
+     * to the server every second.
+     */
+    override fun startClock() {
+        IntervalClock(1.seconds)
+            .start()
     }
 }

@@ -26,14 +26,20 @@
 
 package io.spine.examples.pingh.server
 
-import io.spine.environment.Environment
+import io.spine.environment.CustomEnvironmentType
 
 /**
- * The entry point of the server application.
+ * Production environment type that operates on Google Cloud
+ * and has access to Google Cloud services.
  */
-public fun main() {
-    Environment.instance().register(Production::class.java)
-    val app = Application.newInstance()
-    app.server.start()
-    app.server.awaitTermination()
+internal class Production : CustomEnvironmentType<Production>() {
+    /**
+     * Returns `true` if the Google Cloud project ID is present in the environment variables.
+     */
+    override fun enabled(): Boolean = System.getProperty("GCP_PROJECT_ID") != null
+
+    /**
+     * Returns production type instance.
+     */
+    override fun self(): Production = this
 }
