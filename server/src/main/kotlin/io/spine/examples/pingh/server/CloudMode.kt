@@ -38,7 +38,7 @@ import io.spine.server.delivery.Delivery
 import io.spine.server.transport.memory.InMemoryTransportFactory
 
 /**
- * Google Cloud Platform environment.
+ * Google Cloud Platform environment type.
  *
  * If the application is running in this mode,
  * it indicates that it has access to Google Cloud services.
