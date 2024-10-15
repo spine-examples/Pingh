@@ -27,48 +27,37 @@
 package io.spine.examples.pingh.server
 
 import io.ktor.client.engine.cio.CIO
-import io.spine.environment.DefaultMode
-import io.spine.examples.pingh.clock.Clock
-import io.spine.examples.pingh.github.ClientId
-import io.spine.examples.pingh.github.ClientSecret
+import io.spine.environment.Environment
 import io.spine.examples.pingh.github.GitHubApp
-import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.RemoteGitHubSearch
 import io.spine.examples.pingh.mentions.newMentionsContext
-import io.spine.examples.pingh.server.datastore.DatastoreStorageFactory
 import io.spine.examples.pingh.sessions.RemoteGitHubAuthentication
 import io.spine.examples.pingh.sessions.RemoteGitHubUsers
 import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.server.Server
-import io.spine.server.ServerEnvironment
-import io.spine.server.delivery.Delivery
-import io.spine.server.transport.memory.InMemoryTransportFactory
 
 /**
  * The server side of the Pingh application.
- *
- * During the initialization, performs the actions as follows.
- *
- * 1. Configures the server environment for production use,
- * including the interaction with GitHub API and Google Datastore.
- *
- * 2. Starts an [HTTP endpoint][startHeartbeatServer] receiving the current time values
- * from an external clock or a system scheduler.
  */
-internal class Application {
-    private companion object {
+@Suppress("LeakingThis" /* Abstract method implementations are required to create server */)
+internal abstract class Application {
+
+    internal companion object {
         /**
          * The port on which the Pingh server runs.
          */
         private const val pinghPort = 50051
 
         /**
-         * Secrets of the Pingh GitHub App required for the authentication flow.
+         * Returns a [CloudApplication] if the app is running on Google Cloud Platform;
+         * otherwise, returns [LocalApplication].
          */
-        private val gitHubApp = GitHubApp::class.of(
-            ClientId::class.of(Secret.named("github_client_id")),
-            ClientSecret::class.of(Secret.named("github_client_secret"))
-        )
+        internal fun newInstance(): Application =
+            if (Environment.instance().`is`(CloudMode::class.java)) {
+                CloudApplication()
+            } else {
+                LocalApplication()
+            }
     }
 
     /**
@@ -78,23 +67,25 @@ internal class Application {
 
     init {
         configureEnvironment()
+        startClock()
         server = createServer()
-        startHeartbeatServer(Clock())
     }
 
     /**
-     * Configures the server environment.
-     *
-     * Application data is stored using Google Cloud Datastore. Therefore, any changes made
-     * by users of this application will be persisted in-between the application launches.
+     * Returns the GitHub App secrets required to make authentication requests
+     * on behalf of the App.
      */
-    private fun configureEnvironment() {
-        ServerEnvironment
-            .`when`(DefaultMode::class.java)
-            .use(DatastoreStorageFactory.remote())
-            .use(Delivery.localAsync())
-            .use(InMemoryTransportFactory.newInstance())
-    }
+    protected abstract fun gitHubApp(): GitHubApp
+
+    /**
+     * Configures the server environment.
+     */
+    protected abstract fun configureEnvironment()
+
+    /**
+     * Starts emitting periodic events with the current time to the server.
+     */
+    protected abstract fun startClock()
 
     /**
      * Creates a new Spine `Server` instance at the [pinghPort].
@@ -108,7 +99,7 @@ internal class Application {
             .atPort(pinghPort)
             .add(
                 newSessionsContext(
-                    RemoteGitHubAuthentication(gitHubApp, httpEngine),
+                    RemoteGitHubAuthentication(gitHubApp(), httpEngine),
                     RemoteGitHubUsers(httpEngine)
                 )
             )

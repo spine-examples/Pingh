@@ -26,15 +26,16 @@
 
 package io.spine.examples.pingh.server
 
+import io.spine.environment.Environment
+
 /**
  * The entry point of the server application.
- *
- * Starts a Pingh server that handles RPC requests. Additionally, starts
- * a [server][startHeartbeatServer] to handle HTTP requests that receive
- * the current time from an external clock or system scheduler.
  */
 public fun main() {
-    val app = Application()
+    Environment.instance()
+        .register(LocalMode::class.java)
+        .register(CloudMode::class.java)
+    val app = Application.newInstance()
     app.server.start()
     app.server.awaitTermination()
 }
