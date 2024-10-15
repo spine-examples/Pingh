@@ -33,7 +33,7 @@ import io.spine.environment.Environment
  */
 public fun main() {
     Environment.instance().register(Production::class.java)
-    val app = Application.newInstance()
+    val app = Application()
     app.server.start()
     app.server.awaitTermination()
 }
