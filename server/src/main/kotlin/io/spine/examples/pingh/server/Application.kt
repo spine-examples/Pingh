@@ -174,16 +174,16 @@ private fun loadGitHubAppSecrets(): GitHubApp {
     Application::class.java.getResourceAsStream(path).use {
         properties.load(it)
     }
-    val errorFormat = "For running Pingh server locally the \"%s\" must be provided " +
+    val messageFormat = "For running Pingh server locally the \"%s\" must be provided " +
             "in the configuration file located at \"resource$path\"."
     return GitHubApp::class.of(
-        ClientId::class.of(properties.getOrThrow("github-app.client.id", errorFormat)),
-        ClientSecret::class.of(properties.getOrThrow("github-app.client.secret", errorFormat))
+        ClientId::class.of(properties.getOrThrow("github-app.client.id", messageFormat)),
+        ClientSecret::class.of(properties.getOrThrow("github-app.client.secret", messageFormat))
     )
 }
 
 /**
- * Returns the value of an environment variable by its `key` if it exists;
+ * Returns the value of property by its `key` if it exists;
  * otherwise, an [IllegalStateException] is thrown.
  */
 private fun Properties.getOrThrow(key: String, messageFormat: String): String =
