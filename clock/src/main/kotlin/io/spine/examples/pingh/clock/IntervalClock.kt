@@ -24,17 +24,48 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.server
+package io.spine.examples.pingh.clock
+
+import java.lang.Thread.sleep
+import kotlin.time.Duration
 
 /**
- * The entry point of the server application.
+ * A clock that continuously emits `TimePassed` events at the specified interval.
  *
- * Starts a Pingh server that handles RPC requests. Additionally, starts
- * a [server][startHeartbeatServer] to handle HTTP requests that receive
- * the current time from an external clock or system scheduler.
+ * @property pauseTime The time interval between emitting `TimePassed` events.
  */
-public fun main() {
-    val app = PinghApplication()
-    app.server.start()
-    app.server.awaitTermination()
+public class IntervalClock(private val pauseTime: Duration) {
+    /**
+     * Whether the clock is currently running.
+     *
+     * Used to control the [clockThread].
+     */
+    private var isRunning = false
+
+    /**
+     * The clock thread emits a `TimePassed` event after passing each time interval.
+     */
+    private lateinit var clockThread: Thread
+
+    /**
+     * Starts the clock.
+     */
+    public fun start() {
+        isRunning = true
+        clockThread = Thread {
+            while (isRunning) {
+                sleep(pauseTime.inWholeMilliseconds)
+                emitTimePassedEvent()
+            }
+        }
+        clockThread.start()
+    }
+
+    /**
+     * Stops the clock and waits until [clock thread][clockThread] is shut down.
+     */
+    public fun stop() {
+        isRunning = false
+        clockThread.join()
+    }
 }

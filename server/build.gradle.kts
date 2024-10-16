@@ -87,7 +87,7 @@ configurations.all {
     }
 }
 
-val appClassName = "io.spine.examples.pingh.server.PinghServerKt"
+val appClassName = "io.spine.examples.pingh.server.ServerKt"
 project.setProperty("mainClassName", appClassName)
 
 tasks.withType<ShadowJar> {
