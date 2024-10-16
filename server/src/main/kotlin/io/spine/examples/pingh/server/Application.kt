@@ -174,7 +174,7 @@ private fun loadGitHubAppSecrets(): GitHubApp {
     Application::class.java.getResourceAsStream(path).use {
         properties.load(it)
     }
-    val messageFormat = "For running Pingh server locally the \"%s\" must be provided " +
+    val messageFormat = "For running Pingh server locally the \"%s\" property must be provided " +
             "in the configuration file located at \"resource$path\"."
     return GitHubApp::class.of(
         ClientId::class.of(properties.getOrThrow("github-app.client.id", messageFormat)),
