@@ -1,6 +1,6 @@
 # Pingh
 
-A [GitHub app](https://github.com/apps/pingh-tracker-of-github-mentions) that notifies users 
+A [GitHub App](https://github.com/apps/pingh-tracker-of-github-mentions) that notifies users 
 of new GitHub `@mention`s. It also runs as a system tray application on macOS.
 
 Below is the list of implemented features of the application.
@@ -21,7 +21,7 @@ The following describes how these services interact:
 - The Server uses Datastore for data storage.
 - Secret Manager provides the Server with secure access to sensitive data, 
 such as GitHub App secrets and authentication tokens.
-- Scheduler sends an HTTP request to the Server every minute, informing it of the current time.
+- Scheduler sends HTTP requests to the Server every minute to inform it of the current time.
 - The Server uses the GitHub REST API for authentication and retrieving the latest mentions 
 of the logged-in user from GitHub.
 - The Client and Server communicate via RPC.
@@ -32,12 +32,12 @@ of the logged-in user from GitHub.
 
 The results of the Event storming session are present below.
 
-The stickies color on the board represents the following:
+The color of the sticks on the board represents the following:
 
 - orange — an event;
 - blue — a system command;
 - warm red — a rejection;
-- purple — a process;
+- purple — a process manager;
 - green — a projection;
 - pink — an external system.
 
@@ -79,7 +79,7 @@ To launch it, run the following command in the root project directory:
 ```
 
 This will start the server on `localhost:50051` and publish the required JAR files 
-for the client application modules to the Maven Local repository.
+for the client application to the Maven Local repository.
 
 3. Configure the client's connection to the server. To do this, 
 open the `config/server.properties` file in the client project resources directory 
@@ -117,9 +117,9 @@ This argument must specify the Google Cloud project ID.
 ### Compute Engine
 
 The [Compute Engine](https://cloud.google.com/products/compute) offers the capability to create 
-virtual machines. The Pingh server is deployed and running on one of the Compute Engine instances.
+virtual machines. The Pingh server is deployed and running on the Compute Engine instance.
 
-Hosting the application in Compute Engine also enables seamless access 
+Hosting the application in Compute Engine also enables access 
 to other Google Cloud services.
 
 To allow external requests, 
@@ -139,7 +139,7 @@ and the `datastore` OAuth scope must be enabled.
 Datastore requires initial configuration, including setting up indexes 
 for Spine's internal record types. The configuration file can be found 
 in the server's resources directory at `datastore/config/index.yaml`.
-For more information, consult the Google Cloud Platform 
+For more information, see the Google Cloud Platform 
 [documentation](https://cloud.google.com/datastore/docs/tools/indexconfig).
 
 ### Scheduler
