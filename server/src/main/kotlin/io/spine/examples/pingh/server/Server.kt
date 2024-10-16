@@ -24,7 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.examples.pingh.server
+
+import io.spine.environment.Environment
+
 /**
- * The version of the `Pingh` to publish.
+ * The entry point of the server application.
  */
-val pinghVersion: String by extra("1.0.0-SNAPSHOT.7")
+public fun main() {
+    Environment.instance().register(Production::class.java)
+    val app = Application()
+    app.server.start()
+    app.server.awaitTermination()
+}

@@ -24,7 +24,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.examples.pingh.server
+
+import io.spine.environment.CustomEnvironmentType
+
 /**
- * The version of the `Pingh` to publish.
+ * Production environment type.
+ *
+ * Applications running in this environment operate on Google Cloud
+ * and have access to Google Cloud services.
  */
-val pinghVersion: String by extra("1.0.0-SNAPSHOT.7")
+internal object Production : CustomEnvironmentType<Production>() {
+    /**
+     * Returns `true` if the Google Cloud project ID was provided
+     * as a JVM argument during server startup.
+     */
+    override fun enabled(): Boolean = System.getProperty("GCP_PROJECT_ID") != null
+
+    /**
+     * Returns production type instance.
+     */
+    override fun self(): Production = this
+}
