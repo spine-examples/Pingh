@@ -29,14 +29,15 @@ package io.spine.examples.pingh.server
 import io.spine.environment.CustomEnvironmentType
 
 /**
- * Production Environment Type
+ * Production environment type.
  *
  * Applications running in this environment operate on Google Cloud
  * and have access to Google Cloud services.
  */
-internal class Production : CustomEnvironmentType<Production>() {
+internal object Production : CustomEnvironmentType<Production>() {
     /**
-     * Returns `true` if the Google Cloud project ID is present in the environment variables.
+     * Returns `true` if the Google Cloud project ID was provided
+     * as a JVM argument during server startup.
      */
     override fun enabled(): Boolean = System.getProperty("GCP_PROJECT_ID") != null
 

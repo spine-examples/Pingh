@@ -123,6 +123,11 @@ internal class Application {
     }
 
     /**
+     * Return `true` if the application is running in [Production] mode.
+     */
+    private fun isProduction(): Boolean = Environment.instance().`is`(Production::class.java)
+
+    /**
      * Creates a new Spine `Server` instance at the [pinghPort].
      *
      * The server includes bounded contexts of [Sessions][io.spine.examples.pingh.sessions]
@@ -141,45 +146,40 @@ internal class Application {
             .add(newMentionsContext(RemoteGitHubSearch(httpEngine)))
             .build()
     }
+}
 
-    /**
-     * Returns the GitHub App secrets required to make authentication requests
-     * on behalf of the App.
-     *
-     * In [Production] mode, obtains secrets from the Secret Manager.
-     * In non-production mode, loads secrets from resource folder.
-     */
-    private fun gitHubApp(): GitHubApp =
-        if (isProduction()) {
-            GitHubApp::class.of(
-                ClientId::class.of(Secret.named("github_client_id")),
-                ClientSecret::class.of(Secret.named("github_client_secret"))
-            )
-        } else {
-            loadGitHubAppSecrets()
-        }
-
-    /**
-     * Loads GitHub application secrets from resource folder.
-     */
-    private fun loadGitHubAppSecrets(): GitHubApp {
-        val properties = Properties()
-        val path = "/local/config/server.properties"
-        Application::class.java.getResourceAsStream(path).use {
-            properties.load(it)
-        }
-        val errorFormat = "For running Pingh server locally the \"%s\" must be provided " +
-                "in the configuration file located at \"resource$path\"."
-        return GitHubApp::class.of(
-            ClientId::class.of(properties.getOrThrow("github-app.client.id", errorFormat)),
-            ClientSecret::class.of(properties.getOrThrow("github-app.client.secret", errorFormat))
+/**
+ * Returns the GitHub App secrets required to make authentication requests
+ * on behalf of the App.
+ *
+ * In [Production] mode, obtains secrets from the Secret Manager.
+ * In non-production mode, loads secrets from resource folder.
+ */
+private fun gitHubApp(): GitHubApp =
+    if (Environment.instance().`is`(Production::class.java)) {
+        GitHubApp::class.of(
+            ClientId::class.of(Secret.named("github_client_id")),
+            ClientSecret::class.of(Secret.named("github_client_secret"))
         )
+    } else {
+        loadGitHubAppSecrets()
     }
 
-    /**
-     * Return `true` if the application is running in [Production] mode.
-     */
-    private fun isProduction(): Boolean = Environment.instance().`is`(Production::class.java)
+/**
+ * Loads GitHub application secrets from resource folder.
+ */
+private fun loadGitHubAppSecrets(): GitHubApp {
+    val properties = Properties()
+    val path = "/local/config/server.properties"
+    Application::class.java.getResourceAsStream(path).use {
+        properties.load(it)
+    }
+    val errorFormat = "For running Pingh server locally the \"%s\" must be provided " +
+            "in the configuration file located at \"resource$path\"."
+    return GitHubApp::class.of(
+        ClientId::class.of(properties.getOrThrow("github-app.client.id", errorFormat)),
+        ClientSecret::class.of(properties.getOrThrow("github-app.client.secret", errorFormat))
+    )
 }
 
 /**
