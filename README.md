@@ -22,7 +22,7 @@ The following describes how these services interact:
 - Secret Manager provides the Server with secure access to sensitive data, 
 such as GitHub App secrets and authentication tokens.
 - Scheduler sends an HTTP request to the Server every minute, informing it of the current time.
-- The Server uses the GitHub REST API for authentication and retrieves the latest mentions 
+- The Server uses the GitHub REST API for authentication and retrieving the latest mentions 
 of the logged-in user from GitHub.
 - The Client and Server communicate via RPC.
 
@@ -75,7 +75,7 @@ Replace `client_id` and `client_secret` with the values obtained from GitHub.
 To launch it, run the following command in the root project directory:
 
 ```shell
-./gradlew runLocally
+./gradlew publishToMavenLocal run
 ```
 
 This will start the server on `localhost:50051` and publish the required JAR files 
@@ -110,10 +110,13 @@ use the following command:
 
 The Pingh application is working in the cloud environment on the Google Cloud Platform.
 
+To start the server in production mode on the cloud, 
+the JVM argument named `GCP_PROJECT_ID` must be passed at server startup. 
+This argument must specify the Google Cloud project ID.
+
 ### Compute Engine
 
-The [Compute Engine](https://cloud.google.com/products/compute) serves as the primary computational
-platform for the Pingh application. Compute Engine offers the capability to create 
+The [Compute Engine](https://cloud.google.com/products/compute) offers the capability to create 
 virtual machines. The Pingh server is deployed and running on one of the Compute Engine instances.
 
 Hosting the application in Compute Engine also enables seamless access 
@@ -141,15 +144,12 @@ For more information, consult the Google Cloud Platform
 
 ### Scheduler
 
-The Google Cloud [Scheduler](https://cloud.google.com/scheduler/docs/overview) service allows 
-configuring multiple scheduled tasks that deliver messages to specific targets.
+The Google Cloud [Scheduler](https://cloud.google.com/scheduler/docs/overview) allows 
+to configure multiple scheduled tasks that deliver messages to specific targets.
 
 For the Pingh application, a CRON task is set up to send a POST request with an empty body 
 to the Pingh server every minute. This request includes an authentication token to ensure 
 it will be accepted by the Pingh server.
-
-Each accepted request from the scheduler triggers the server to notify all bounded contexts 
-of the current time, enabling the execution of scheduled tasks.
 
 ### Secret Manager
 
