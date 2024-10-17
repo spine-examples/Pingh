@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.client.e2e.given
+package io.spine.examples.pingh.testing.client
 
 import io.spine.examples.pingh.client.NotificationSender
 

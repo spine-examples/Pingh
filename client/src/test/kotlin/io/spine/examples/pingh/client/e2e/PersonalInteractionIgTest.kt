@@ -41,6 +41,7 @@ import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
+import io.spine.examples.pingh.testing.client.IntegrationTest
 import io.spine.protobuf.Durations2.hours
 import io.spine.protobuf.Durations2.milliseconds
 import java.lang.Thread.sleep

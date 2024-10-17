@@ -24,40 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.dependency.Guava
-import io.spine.internal.dependency.KotlinX
+import io.spine.internal.dependency.JUnit
 import io.spine.internal.dependency.Spine
 
-plugins {
-    // Add the Gradle plugin for bootstrapping projects built with Spine.
-    // See: https://github.com/SpineEventEngine/bootstrap
-    id("io.spine.tools.gradle.bootstrap").version("1.9.0")
-}
-
-spine {
-    // Add and configure required dependencies for developing a Spine-based Java client.
-    // See: https://github.com/SpineEventEngine/bootstrap#java-projects
-    enableJava().client()
-}
-
-forceGrpcDependencies(configurations)
-
 dependencies {
-    // To work with `PinghApplication`, it is necessary to use value objects and IDs declared
-    // in different bounded contexts. All necessary classes are collected in the `server` module.
-    api(project(":server"))
-
-    implementation(Guava.lib)
-    implementation(Grpc.netty)
-    implementation(Grpc.inprocess)
-    implementation(KotlinX.Coroutines.core)
-
-    testImplementation(project(":testutil-client"))
-    testImplementation(project(":testutil-mentions"))
-    testImplementation(project(":testutil-sessions"))
-    testImplementation(project(":clock"))
-    testImplementation(Spine.server)
-    testImplementation(Spine.GCloud.datastore)
-    testImplementation(Spine.GCloud.testutil)
+    implementation(project(":client"))
+    implementation(project(":testutil-mentions"))
+    implementation(project(":testutil-sessions"))
+    implementation(Spine.server)
+    implementation(JUnit.api)
+    implementation(Spine.GCloud.datastore)
+    implementation(Spine.GCloud.testutil)
 }

@@ -24,12 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.client.e2e
+package io.spine.examples.pingh.testing.client
 
 import io.spine.environment.Tests
 import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.client.PinghApplication
-import io.spine.examples.pingh.client.e2e.given.MemoizingNotificationSender
 import io.spine.examples.pingh.mentions.newMentionsContext
 import io.spine.examples.pingh.server.datastore.DatastoreStorageFactory
 import io.spine.examples.pingh.sessions.newSessionsContext
@@ -48,7 +47,7 @@ import org.junit.jupiter.api.BeforeEach
  *
  * Also provides a [PinghApplication] for interacting with the `Server`.
  */
-internal abstract class IntegrationTest {
+public abstract class IntegrationTest {
 
     internal companion object {
 
