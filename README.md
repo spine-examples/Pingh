@@ -3,66 +3,76 @@
 A [GitHub App](https://github.com/apps/pingh-tracker-of-github-mentions) that notifies users 
 of new GitHub `@mention`s. It also runs as a system tray application on macOS.
 
-Below is the list of implemented features of the application.
-
 - Displays a list of recent `@mention`s for a logged-in GitHub user.
 - Marks mentions as “read” or snooze them for later.
 - Sends notifications for new mentions and for mentions whose snooze time has expired.
 - Enters DND mode to turn off notifications.
 
-## Service interaction scheme
+## Tech
 
-This system comprises six services: Client, Server, GitHub REST API, 
-and three Google Cloud Platform services — Scheduler, Datastore, and Secret Manager.
-The Server is hosted on Google Cloud.
+The application consists of two parts: the server and the client, 
+each utilizing different technologies.
 
-The following describes how these services interact:
+The server uses:
 
-- The Server uses Datastore for data storage.
-- Secret Manager provides the Server with secure access to sensitive data, 
-such as GitHub App secrets and authentication tokens.
-- Scheduler sends HTTP requests to the Server every minute to inform it of the current time.
-- The Server uses the GitHub REST API for authentication and retrieving the latest mentions 
-of the logged-in user from GitHub.
-- The Client and Server communicate via RPC.
+- Spine Event Engine 1.9.0.
+- Ktor 2.3.11. 
+- Kotlin 1.9.20.
+- JDK 11.
+- Gradle 6.9.4.
+- Google Cloud.
+- Docker.
 
-![Service interaction scheme](./img/service-interaction/scheme.jpg)
+The client uses:
 
-## Event storming
+- Compose Multiplatform 1.6.11.
+- Kotlin 1.9.20.
+- JDK 17.
+- Gradle 8.8.
 
-The results of the Event storming session are present below.
+## Project structure
 
-The color of the sticks on the board represents the following:
+The project consists of the following modules:
 
-- orange — an event;
-- blue — a system command;
-- warm red — a rejection;
-- purple — a process manager;
-- green — a projection;
-- pink — an external system.
+- `github`: The module that provides value objects to represent the GitHub context, 
+  along with descriptions of the JSON responses returned by the GitHub REST API.
+- `sessions`: The module that provides server-side code of the Sessions bounded context.
+  This context includes user session management and the authentication process via GitHub.
+- `mentions`: The module that provides server-side code of the Mentions bounded context.
+  This context includes managing the status of mentions and 
+  the process of retrieving new user mentions from GitHub.
+- `clock`: The module that emulates an external system by sending the current time to the server.
+- `server`: The module that configures the server environment, sets up the server, and starts it.
+  This module also enables interaction with [Google Cloud](#google-cloud-deployment).
+- `testutil-sessions`: The module that allows authentication to the app without using 
+  the GitHub REST API, which is necessary for testing.
+- `testutil-mentions`: The module that allows to retrieve new user mentions without using
+  the GitHub REST API, which is necessary for testing.
+- `client`: The module that provides process states and flows for the client application.
+- `desktop`: The module that provides the user interface created with Compose Multiplatform.
 
-![EventStorming legend](./img/event-storming/legend.jpg)
+For a detailed analysis of the processes within domain contexts, 
+see the [#EventStorming documentation](./EVENT_STORMING.md).
 
-### Sessions bounded context
-
-![Session bounded context](./img/event-storming/sessions-bc.jpg)
-
-### Mentions bounded context
-
-![Session bounded context part 1](./img/event-storming/mentions-bc-1.jpg)
-
-![Session bounded context part 2](./img/event-storming/mentions-bc-2.jpg)
-
-## Run locally
+## Local run
 
 The application server can be run locally, and the client application distribution 
-can also be built locally. The server requires JDK 11, while building the client requires JDK 17.
+can also be built locally.
 
-After downloading the project from GitHub, follow these steps:
+The following should be considered when running the application locally:
+
+- In-memory storage is used, so data will be lost between server restarts.
+- The GitHub App ID and secret must be manually specified, meaning secrets are stored directly 
+  in the project.
+- A clock runs in a separate thread on the server to update the system with the current time.
+
+![Local interaction diagram](./img/interaction-diagrams/local.png)
+
+To run the application locally, download the project from GitHub and follow these steps:
 
 1. Specify the GitHub App ID and secret in the configuration file. To do this, 
-open the `local/config/server.properties` file in the `server` resources directory
-and enter the GitHub App ID and secret as follows:
+  open the `local/config/server.properties` file in the `server` resources directory
+  and enter the GitHub App ID and secret as follows:
 
 ```properties
 github-app.client.id=client_id
@@ -72,7 +82,7 @@ github-app.client.secret=client_secret
 Replace `client_id` and `client_secret` with the values obtained from GitHub.
 
 2. Start the Pingh server locally. The server always runs on port `50051`. 
-To launch it, run the following command in the root project directory:
+  To launch it, run the following command in the root project directory:
 
 ```shell
 ./gradlew publishToMavenLocal run
@@ -82,8 +92,8 @@ This will start the server on `localhost:50051` and publish the required JAR fil
 for the client application to the Maven Local repository.
 
 3. Configure the client's connection to the server. To do this, 
-open the `config/server.properties` file in the client project resources directory 
-and enter the server's address and port as follows:
+  open the `config/server.properties` file in the client project resources directory 
+  and enter the server's address and port as follows:
 
 ```properties
 server.address=localhost
@@ -91,7 +101,7 @@ server.port=50051
 ```
 
 4. Build and run the client application. Navigate to the client project directory 
-and execute the following command:
+  and execute the following command:
 
 ```shell
 ./gradlew runDistributable
@@ -109,6 +119,8 @@ use the following command:
 ## Google Cloud deployment
 
 The Pingh application is working in the cloud environment on the Google Cloud Platform.
+
+![Google Cloud interaction diagram](./img/interaction-diagrams/google-cloud.png)
 
 To start the server in production mode on the cloud, 
 the JVM argument named `GCP_PROJECT_ID` must be passed at server startup. 
@@ -169,4 +181,4 @@ The following secrets are configured for the Pingh app:
 ## Feedback
 
 If you encounter any bugs or have suggestions for improving the application, 
-please [contact us](https://github.com/spine-examples/Pingh/issues/new).
+please [contact us](https://github.com/orgs/SpineEventEngine/discussions).
