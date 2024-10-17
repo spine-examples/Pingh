@@ -34,25 +34,26 @@ The client uses:
 
 The project consists of the following modules:
 
-- `github`: The module that provides value objects to represent the GitHub context, 
+- `github` provides value objects to represent the GitHub context, 
   along with descriptions of the JSON responses returned by the GitHub REST API.
-- `sessions`: The module that provides server-side code of the Sessions bounded context.
+- `sessions` provides server-side code of the Sessions bounded context.
   This context includes user session management and the authentication process via GitHub.
-- `mentions`: The module that provides server-side code of the Mentions bounded context.
+- `mentions` provides server-side code of the Mentions bounded context.
   This context includes managing the status of mentions and 
   the process of retrieving new user mentions from GitHub.
-- `clock`: The module that emulates an external system by sending the current time to the server.
-- `server`: The module that configures the server environment, sets up the server, and starts it.
+- `clock` emulates an external system by sending the current time to the server.
+- `server` configures the server environment, sets up the server, and starts it.
   This module also enables interaction with [Google Cloud](#google-cloud-deployment).
-- `testutil-sessions`: The module that allows authentication to the app without using 
-  the GitHub REST API, which is necessary for testing.
-- `testutil-mentions`: The module that allows to retrieve new user mentions without using
-  the GitHub REST API, which is necessary for testing.
-- `client`: The module that provides process states and flows for the client application.
-- `desktop`: The module that provides the user interface created with Compose Multiplatform.
+- `client` provides process states and flows for the client application.
+- `desktop` provides the user interface created with Compose Multiplatform.
+
+There are several auxiliary modules available for testing:
+
+- `testutil-sessions` allows authentication to the app without using the GitHub REST API.
+- `testutil-mentions` allows to retrieve new user mentions without using the GitHub REST API.
 
 For a detailed analysis of the processes within domain contexts, 
-see the [#EventStorming documentation](./EVENT_STORMING.md).
+see the [#EventStorming documentation](./EventStorming.md).
 
 ## Local run
 
@@ -66,7 +67,7 @@ The following should be considered when running the application locally:
   in the project.
 - A clock runs in a separate thread on the server to update the system with the current time.
 
-![Local interaction diagram](./img/interaction-diagrams/local.png)
+![Local interaction diagram](./img/interaction-diagrams/local.jpg)
 
 To run the application locally, download the project from GitHub and follow these steps:
 
@@ -120,7 +121,7 @@ use the following command:
 
 The Pingh application is working in the cloud environment on the Google Cloud Platform.
 
-![Google Cloud interaction diagram](./img/interaction-diagrams/google-cloud.png)
+![Google Cloud interaction diagram](./img/interaction-diagrams/google-cloud.jpg)
 
 To start the server in production mode on the cloud, 
 the JVM argument named `GCP_PROJECT_ID` must be passed at server startup. 
