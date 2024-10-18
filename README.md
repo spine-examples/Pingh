@@ -10,10 +10,7 @@ of new GitHub `@mention`s. It also runs as a system tray application on macOS.
 
 ## Tech
 
-The application consists of two parts: the server and the client, 
-each using different technologies.
-
-The server uses:
+Server stack:
 
 - Spine Event Engine 1.9.0.
 - Ktor 2.3.11. 
@@ -23,7 +20,7 @@ The server uses:
 - Google Cloud.
 - Docker.
 
-The client uses:
+Client stack:
 
 - Compose Multiplatform 1.6.11.
 - Kotlin 1.9.20.
@@ -68,6 +65,15 @@ When running the application locally, consider the following:
 - A clock runs in a separate thread on the server to send the current time to the system.
 
 <img src="./img/interaction-diagrams/local.jpg" width="600px" alt="Local interaction diagram">
+
+### Prerequisites
+
+- [JDK 11](https://www.oracle.com/java/technologies/javase/jdk11-archive-downloads.html)
+  and [JDK 17](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html).
+- [Gradle](https://gradle.org/releases/) 6.9 and 8.8.
+- [Docker Desktop](https://docs.docker.com/get-started/get-docker/).
+
+### Build
 
 To run the application locally, download the project from GitHub and follow these steps:
 
