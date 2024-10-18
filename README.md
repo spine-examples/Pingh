@@ -5,8 +5,8 @@ of new GitHub `@mention`s. It also runs as a system tray application on macOS.
 
 - Displays a list of recent `@mention`s for a logged-in GitHub user.
 - Marks mentions as “read” or snooze them for later.
-- Sends notifications for new mentions and for mentions whose snooze time has expired.
-- Enters DND mode to turn off notifications.
+- Notifies upon receiving new mentions or when the snooze time for a mention has expired.
+- Supports Do Not Disturb mode.
 
 ## Tech
 
@@ -29,19 +29,17 @@ Client stack:
 
 ## Project structure
 
-The project consists of the following modules:
-
-- `github` provides value objects to represent the GitHub context, 
+- `github` defines value objects to represent the GitHub context, 
   along with descriptions of the JSON responses returned by the GitHub REST API.
-- `sessions` provides an implementation of the Sessions bounded context, 
+- `sessions` implements the Sessions bounded context, 
   which includes user session management and authentication via GitHub.
-- `mentions` provides an implementation of the Mentions bounded context,
+- `mentions` implements the Mentions bounded context,
   which includes managing mention statuses and 
   the process of retrieving new user mentions from GitHub.
 - `clock` emulates an external system by sending the current time to the server.
 - `server` configures the server environment, sets up the server, and starts it.
   This module also enables interaction with [Google Cloud](#google-cloud-deployment).
-- `client` provides process states and flows for the client application.
+- `client` manages process states and flows for the client application.
 - `desktop` provides the user interface created with Compose Multiplatform.
 
 There are several auxiliary modules available for testing:
@@ -54,15 +52,13 @@ refer to the [#EventStorming documentation](./EventStorming.md).
 
 ## Local run
 
-The application server can be run locally, and the client application distribution 
-can also be built locally.
+Both client and server can be built and launched locally.
 
 When running the application locally, consider the following:
 
 - In-memory storage is used, so data will be lost between server restarts.
-- The GitHub App ID and secret must be manually specified, meaning secrets are stored directly 
-  in the project.
-- A clock runs in a separate thread on the server to send the current time to the system.
+- Both GitHub App ID and GitHub App secret must be specified explicitly 
+  by editing [server.properties](./server/src/main/resources/local/config/server.properties) file.
 
 <img src="./img/interaction-diagrams/local.jpg" width="600px" alt="Local interaction diagram">
 
@@ -166,7 +162,7 @@ For more information, see the Google Cloud Platform
 The Google Cloud [Scheduler](https://cloud.google.com/scheduler/docs/overview) allows for
 configuring multiple scheduled tasks that deliver messages to specific targets.
 
-For the Pingh application, a CRON task is set up to send a POST request with an empty body 
+For the Pingh application, a `cron` task is set up to send a POST request with an empty body 
 to the Pingh server every minute. This request includes an authentication token to ensure 
 it will be accepted by the Pingh server.
 
@@ -187,5 +183,5 @@ The following secrets are configured for the Pingh app:
 
 ## Feedback
 
-If you encounter any bugs or have suggestions for improving the application, 
-please [contact us](https://github.com/orgs/SpineEventEngine/discussions).
+We accept the questions and suggestions via the corresponding 
+[GitHub Discussions section](https://github.com/orgs/SpineEventEngine/discussions).
