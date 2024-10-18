@@ -30,11 +30,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly
+import io.spine.examples.pingh.client.TestClient
 import io.spine.examples.pingh.desktop.AppState
 import io.spine.examples.pingh.desktop.Theme
 import io.spine.examples.pingh.desktop.Window
+import io.spine.examples.pingh.desktop.loadServerProperties
 import io.spine.examples.pingh.desktop.retrieveSystemSettings
-import java.lang.Thread.sleep
 import java.util.concurrent.TimeUnit
 
 /**
@@ -60,4 +61,15 @@ internal fun ComposeUiTest.runApp() {
  */
 internal fun delay(millis: Long = 100) {
     sleepUninterruptibly(millis, TimeUnit.MILLISECONDS)
+}
+
+/**
+ * Loads connection data for the server and creates a test client to interact with it.
+ */
+internal fun createTestClient(): TestClient {
+    val properties = loadServerProperties()
+    return TestClient(
+        properties.getProperty("server.address"),
+        properties.getProperty("server.port").toInt()
+    )
 }

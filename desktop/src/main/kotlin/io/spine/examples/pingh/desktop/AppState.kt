@@ -63,32 +63,12 @@ internal class AppState(settings: SystemSettings) {
 
     init {
         val notificationSender = TrayNotificationSender(composeTray) { !window.isShown }
-        val properties = loadProperties()
+        val properties = loadServerProperties()
         app = PinghApplication.builder()
             .withAddress(properties.getProperty("server.address"))
             .withPort(properties.getProperty("server.port").toInt())
             .with(notificationSender)
             .build()
-    }
-
-    /**
-     * Loads server properties from resource folder.
-     */
-    private fun loadProperties(): Properties {
-        val properties = Properties()
-        val path = "/config/server.properties"
-        javaClass.getResourceAsStream(path).use {
-            properties.load(it)
-        }
-        check(properties.containsKey("server.address")) {
-            "The Pingh server address must be provided in the configuration file " +
-                    "located at \"resource$path\"."
-        }
-        check(properties.containsKey("server.port")) {
-            "The Pingh server port must be provided in the configuration file " +
-                    "located at \"resource$path\"."
-        }
-        return properties
     }
 }
 
@@ -118,4 +98,24 @@ private class TrayNotificationSender(
             composeTray.sendNotification(notification)
         }
     }
+}
+
+/**
+ * Loads server properties from resource folder.
+ */
+internal fun loadServerProperties(): Properties {
+    val properties = Properties()
+    val path = "/config/server.properties"
+    AppState::class.java.getResourceAsStream(path).use {
+        properties.load(it)
+    }
+    check(properties.containsKey("server.address")) {
+        "The Pingh server address must be provided in the configuration file " +
+                "located at \"resource$path\"."
+    }
+    check(properties.containsKey("server.port")) {
+        "The Pingh server port must be provided in the configuration file " +
+                "located at \"resource$path\"."
+    }
+    return properties
 }

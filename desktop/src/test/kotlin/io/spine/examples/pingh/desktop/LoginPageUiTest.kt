@@ -26,22 +26,39 @@
 
 package io.spine.examples.pingh.desktop
 
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.runComposeUiTest
+import io.spine.examples.pingh.desktop.given.createTestClient
 import io.spine.examples.pingh.desktop.given.delay
 import io.spine.examples.pingh.desktop.given.runApp
+import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.testing.client.IntegrationTest
 import kotlin.test.Test
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.DisplayName
 
 @DisplayName("Login page should")
-internal class LoginPageUITest : IntegrationTest() {
+@OptIn(ExperimentalTestApi::class)
+internal class LoginPageUiTest : IntegrationTest() {
+    internal companion object {
+        private val client = createTestClient()
+
+        @AfterAll
+        @JvmStatic
+        internal fun closeClient() {
+            client.close()
+        }
+    }
+
+    private val username = "MykytaPimonovTD"
 
     private val SemanticsNodeInteractionsProvider.loginButton
         get() = onNodeWithTag("login-button")
@@ -49,8 +66,13 @@ internal class LoginPageUITest : IntegrationTest() {
     private val SemanticsNodeInteractionsProvider.usernameInput
         get() = onNodeWithTag("username-input")
 
+    private val SemanticsNodeInteractionsProvider.submitButton
+        get() = onNodeWithTag("submit-button")
+
+    private val SemanticsNodeInteractionsProvider.noResponseMessage
+        get() = onNodeWithTag("no-response-message")
+
     @Test
-    @OptIn(ExperimentalTestApi::class)
     internal fun `have login button enabled only when a valid username is entered`() =
         runComposeUiTest {
             runApp()
@@ -58,8 +80,43 @@ internal class LoginPageUITest : IntegrationTest() {
             usernameInput.performTextInput("()+$")
             loginButton.assertIsNotEnabled()
             usernameInput.performTextClearance()
-            usernameInput.performTextInput("MykytaPimonovTD")
+            usernameInput.performTextInput(username)
             delay()
             loginButton.assertIsEnabled()
         }
+
+    @Test
+    internal fun `have submit button disabled after it is clicked, if no code has been entered`() =
+        runComposeUiTest {
+            runApp()
+            toVerificationPage()
+            submitButton.assertIsEnabled()
+            noResponseMessage.assertDoesNotExist()
+            submitButton.performClick()
+            delay()
+            submitButton.assertIsNotEnabled()
+            noResponseMessage.assertExists()
+        }
+
+    @Test
+    internal fun `have submit button become available again 5 seconds after unsuccessful click`() =
+        runComposeUiTest {
+            runApp()
+            toVerificationPage()
+            submitButton.performClick()
+            delay(5100)
+            submitButton.assertIsEnabled()
+            noResponseMessage.assertDoesNotExist()
+        }
+
+    private fun ComposeUiTest.toVerificationPage() {
+        usernameInput.performTextInput(username)
+        delay()
+        val observer = client.observeEvent(UserCodeReceived::class)
+        loginButton.performClick()
+        observer.waitUntilDone()
+        delay()
+        loginButton.assertDoesNotExist()
+        submitButton.assertExists()
+    }
 }

@@ -621,7 +621,8 @@ private fun SubmitButton(
     ) {
         Button(
             onClick = onClick,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize()
+                .testTag("submit-button"),
             enabled = enabled,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -660,6 +661,7 @@ private fun NoResponseErrorMessage(flow: VerifyLogin) {
         modifier = Modifier
             .width(180.dp)
             .offset(y = 40.dp)
+            .testTag("no-response-message")
     )
 }
 
