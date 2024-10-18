@@ -70,6 +70,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -236,7 +237,8 @@ private fun UsernameInput(
         },
         modifier = Modifier
             .width(180.dp)
-            .height(52.dp),
+            .height(52.dp)
+            .testTag("username-input"),
         textStyle = MaterialTheme.typography.bodyLarge.copy(
             color = MaterialTheme.colorScheme.onSecondary
         ),
@@ -371,7 +373,8 @@ private fun LoginButton(
         onClick = onClick,
         modifier = Modifier
             .width(180.dp)
-            .height(40.dp),
+            .height(40.dp)
+            .testTag("login-button"),
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,

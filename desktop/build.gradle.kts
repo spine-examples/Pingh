@@ -91,6 +91,7 @@ dependencies {
     implementation(Compose.Runtime.lib)
     implementation(compose.desktop.currentOs)
     implementation(Material3.Desktop.lib)
+    implementation(Guava.lib)
     implementation(Coil.lib)
     implementation(Coil.networkKtor)
     implementation(Coil.compose)
