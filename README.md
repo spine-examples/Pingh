@@ -11,7 +11,7 @@ of new GitHub `@mention`s. It also runs as a system tray application on macOS.
 ## Tech
 
 The application consists of two parts: the server and the client, 
-each utilizing different technologies.
+each using different technologies.
 
 The server uses:
 
@@ -36,10 +36,10 @@ The project consists of the following modules:
 
 - `github` provides value objects to represent the GitHub context, 
   along with descriptions of the JSON responses returned by the GitHub REST API.
-- `sessions` provides server-side code of the Sessions bounded context.
-  This context includes user session management and the authentication process via GitHub.
-- `mentions` provides server-side code of the Mentions bounded context.
-  This context includes managing the status of mentions and 
+- `sessions` provides an implementation of the Sessions bounded context, 
+  which includes user session management and authentication via GitHub.
+- `mentions` provides an implementation of the Mentions bounded context,
+  which includes managing mention statuses and 
   the process of retrieving new user mentions from GitHub.
 - `clock` emulates an external system by sending the current time to the server.
 - `server` configures the server environment, sets up the server, and starts it.
@@ -50,24 +50,24 @@ The project consists of the following modules:
 There are several auxiliary modules available for testing:
 
 - `testutil-sessions` allows authentication to the app without using the GitHub REST API.
-- `testutil-mentions` allows to retrieve new user mentions without using the GitHub REST API.
+- `testutil-mentions` allows retrieving new user mentions without using the GitHub REST API.
 
 For a detailed analysis of the processes within domain contexts, 
-see the [#EventStorming documentation](./EventStorming.md).
+refer to the [#EventStorming documentation](./EventStorming.md).
 
 ## Local run
 
 The application server can be run locally, and the client application distribution 
 can also be built locally.
 
-The following should be considered when running the application locally:
+When running the application locally, consider the following:
 
 - In-memory storage is used, so data will be lost between server restarts.
 - The GitHub App ID and secret must be manually specified, meaning secrets are stored directly 
   in the project.
-- A clock runs in a separate thread on the server to update the system with the current time.
+- A clock runs in a separate thread on the server to send the current time to the system.
 
-<img src="./img/interaction-diagrams/local.jpg" width="500px" alt="Local interaction diagram">
+<img src="./img/interaction-diagrams/local.jpg" width="600px" alt="Local interaction diagram">
 
 To run the application locally, download the project from GitHub and follow these steps:
 
@@ -119,9 +119,9 @@ use the following command:
 
 ## Google Cloud deployment
 
-The Pingh application is working in the cloud environment on the Google Cloud Platform.
+The Pingh application runs in the cloud environment on the Google Cloud Platform.
 
-<img src="./img/interaction-diagrams/google-cloud.jpg" width="550px" alt="Google Cloud interaction diagram">
+<img src="./img/interaction-diagrams/google-cloud.jpg" width="650px" alt="Google Cloud interaction diagram">
 
 To start the server in production mode on the cloud, 
 the JVM argument named `GCP_PROJECT_ID` must be passed at server startup. 
@@ -130,7 +130,7 @@ This argument must specify the Google Cloud project ID.
 ### Compute Engine
 
 The [Compute Engine](https://cloud.google.com/products/compute) offers the capability to create 
-virtual machines. The Pingh server is deployed and running on the Compute Engine instance.
+virtual machines. The Pingh server is deployed and running on a Compute Engine instance.
 
 Hosting the application in Compute Engine also enables access 
 to other Google Cloud services.
@@ -138,7 +138,7 @@ to other Google Cloud services.
 To allow external requests, 
 a [firewall rule](https://cloud.google.com/firewall/docs/firewalls) must be configured, 
 and ports `50051` (for the Pingh RPC server) and `8080` (for the HTTP server handling requests 
-from the Google Cloud [Scheduler](#scheduler)) must be opened.
+from the Google Cloud [Scheduler](#scheduler)) must be open.
 
 ### Datastore
 
@@ -157,8 +157,8 @@ For more information, see the Google Cloud Platform
 
 ### Scheduler
 
-The Google Cloud [Scheduler](https://cloud.google.com/scheduler/docs/overview) allows 
-to configure multiple scheduled tasks that deliver messages to specific targets.
+The Google Cloud [Scheduler](https://cloud.google.com/scheduler/docs/overview) allows for
+configuring multiple scheduled tasks that deliver messages to specific targets.
 
 For the Pingh application, a CRON task is set up to send a POST request with an empty body 
 to the Pingh server every minute. This request includes an authentication token to ensure 
