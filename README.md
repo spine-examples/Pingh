@@ -67,7 +67,7 @@ The following should be considered when running the application locally:
   in the project.
 - A clock runs in a separate thread on the server to update the system with the current time.
 
-![Local interaction diagram](./img/interaction-diagrams/local.jpg)
+<img src="./img/interaction-diagrams/local.jpg" width="500px" alt="Local interaction diagram">
 
 To run the application locally, download the project from GitHub and follow these steps:
 
@@ -121,7 +121,7 @@ use the following command:
 
 The Pingh application is working in the cloud environment on the Google Cloud Platform.
 
-![Google Cloud interaction diagram](./img/interaction-diagrams/google-cloud.jpg)
+<img src="./img/interaction-diagrams/google-cloud.jpg" width="550px" alt="Google Cloud interaction diagram">
 
 To start the server in production mode on the cloud, 
 the JVM argument named `GCP_PROJECT_ID` must be passed at server startup. 
