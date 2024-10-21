@@ -26,13 +26,8 @@ jobs:
         env:
           JAVA_HOME: ${{ env.JAVA_HOME_11_X64 }}
 
-      - name: Install Xvfb
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb
-
       - name: Start Xvfb
-        run: Xvfb :99 -ac &
+        run: Xvfb :99 &
 
       - name: Build client with JDK 17
         run: |
