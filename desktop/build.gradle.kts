@@ -34,6 +34,7 @@ import io.spine.internal.dependency.Pingh
 import io.spine.internal.gradle.AppVersion
 import io.spine.internal.gradle.allowBackgroundExecution
 import io.spine.internal.gradle.extractSemanticVersion
+import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -90,11 +91,17 @@ dependencies {
     implementation(Compose.Runtime.lib)
     implementation(compose.desktop.currentOs)
     implementation(Material3.Desktop.lib)
+    implementation(Guava.lib)
     implementation(Coil.lib)
     implementation(Coil.networkKtor)
     implementation(Coil.compose)
     implementation(Ktor.Client.android)
     implementation(Pingh.client)
+
+    testImplementation(Pingh.testutilClient)
+    testImplementation(kotlin("test"))
+    @OptIn(ExperimentalComposeLibrary::class)
+    testImplementation(compose.uiTest)
 }
 
 compose.desktop {

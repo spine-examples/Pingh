@@ -70,14 +70,7 @@ subprojects {
 /**
  * The set of names of modules that required for building the `desktop` standalone project.
  */
-val modulesRequiredForDesktop = setOf(
-    "clock",
-    "github",
-    "sessions",
-    "mentions",
-    "server",
-    "client"
-)
+val modulesRequiredForDesktop = project.subprojects.map { it.name }.toSet()
 
 /**
  * Publishes modules required for building the `desktop` standalone project

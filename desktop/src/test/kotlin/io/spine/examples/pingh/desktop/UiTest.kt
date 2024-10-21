@@ -24,31 +24,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.client.e2e.given
+package io.spine.examples.pingh.desktop
 
-import io.spine.examples.pingh.client.NotificationSender
+import androidx.compose.runtime.remember
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.ExperimentalTestApi
+import io.spine.examples.pingh.testing.client.IntegrationTest
+import org.junit.jupiter.api.AfterEach
 
 /**
- * Memorizes the number of notifications that should be sent.
- *
- * Does not send any notifications. Use only for tests.
+ * Abstract base for UI tests that require a server to run and
+ * a client application connected to it.
  */
-internal class MemoizingNotificationSender : NotificationSender {
+internal abstract class UiTest : IntegrationTest() {
 
-    /**
-     * The number of notifications that should be sent.
-     */
-    private var notificationsCount = 0
+    private var state: AppState? = null
 
-    /**
-     * Adds a notification to [total number][notificationsCount] that should be sent.
-     */
-    override fun send(title: String, content: String) {
-        notificationsCount++
+    @AfterEach
+    internal fun shutdownChannel() {
+        state?.app?.close()
     }
 
     /**
-     * Obtains the count of notifications that should be sent.
+     * Launches the Pingh application for testing and sets application state for this test case.
      */
-    internal fun notificationsCount(): Int = notificationsCount
+    @OptIn(ExperimentalTestApi::class)
+    protected fun ComposeUiTest.runApp() {
+        setContent {
+            Theme {
+                val settings = retrieveSystemSettings()
+                state = remember { AppState(settings) }
+                Window(state!!.window, state!!.app)
+            }
+        }
+    }
 }

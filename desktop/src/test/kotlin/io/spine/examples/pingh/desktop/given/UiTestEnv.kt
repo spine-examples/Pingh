@@ -24,7 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.examples.pingh.desktop.given
+
+import com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly
+import java.util.concurrent.TimeUnit
+import kotlin.time.Duration
+
 /**
- * The version of the `Pingh` to publish.
+ * Causes the currently executing thread to sleep for the specified duration.
  */
-val pinghVersion: String by extra("1.0.0-SNAPSHOT.9")
+internal fun delay(duration: Duration) {
+    sleepUninterruptibly(duration.inWholeMilliseconds, TimeUnit.MILLISECONDS)
+}
