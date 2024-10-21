@@ -47,6 +47,7 @@ import org.junit.jupiter.api.BeforeEach
  *
  * Also provides a [PinghApplication] for interacting with the `Server`.
  */
+@Suppress("UnnecessaryAbstractClass" /* Avoids creating instances; only for inheritance. */)
 public abstract class IntegrationTest {
 
     internal companion object {
