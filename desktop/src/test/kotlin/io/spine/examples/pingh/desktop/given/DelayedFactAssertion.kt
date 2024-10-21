@@ -84,6 +84,6 @@ internal class DelayedFactAssertion private constructor(private val assertion: (
                 delay(intervalBetweenChecks)
             }
         }
-        throw error ?: IllegalStateException("No checks have been made.")
+        throw error ?: AssertionError("No checks have been made.")
     }
 }
