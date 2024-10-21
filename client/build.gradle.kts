@@ -53,6 +53,7 @@ dependencies {
     implementation(Grpc.inprocess)
     implementation(KotlinX.Coroutines.core)
 
+    testImplementation(project(":testutil-client"))
     testImplementation(project(":testutil-mentions"))
     testImplementation(project(":testutil-sessions"))
     testImplementation(project(":clock"))

@@ -24,7 +24,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.examples.pingh.testing.client
+
+import io.spine.examples.pingh.client.NotificationSender
+
 /**
- * The version of the `Pingh` to publish.
+ * Memorizes the number of notifications that should be sent.
+ *
+ * Does not send any notifications. Use only for tests.
  */
-val pinghVersion: String by extra("1.0.0-SNAPSHOT.9")
+internal class MemoizingNotificationSender : NotificationSender {
+
+    /**
+     * The number of notifications that should be sent.
+     */
+    private var notificationsCount = 0
+
+    /**
+     * Adds a notification to [total number][notificationsCount] that should be sent.
+     */
+    override fun send(title: String, content: String) {
+        notificationsCount++
+    }
+
+    /**
+     * Obtains the count of notifications that should be sent.
+     */
+    internal fun notificationsCount(): Int = notificationsCount
+}

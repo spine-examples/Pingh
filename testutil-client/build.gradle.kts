@@ -24,7 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The version of the `Pingh` to publish.
- */
-val pinghVersion: String by extra("1.0.0-SNAPSHOT.9")
+import io.spine.internal.dependency.JUnit
+import io.spine.internal.dependency.Spine
+
+dependencies {
+    implementation(project(":client"))
+    implementation(project(":testutil-mentions"))
+    implementation(project(":testutil-sessions"))
+    implementation(Spine.server)
+    implementation(JUnit.api)
+    implementation(Spine.GCloud.datastore)
+    implementation(Spine.GCloud.testutil)
+}

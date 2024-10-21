@@ -48,6 +48,7 @@ There are several auxiliary modules available for testing:
 
 - `testutil-sessions` allows authentication to the app without using the GitHub REST API.
 - `testutil-mentions` allows retrieving new user mentions without using the GitHub REST API.
+- `testutil-client` is a utility code for client-side testing.
 
 For a detailed analysis of the processes within domain contexts, 
 refer to the [#EventStorming documentation](./EventStorming.md).
