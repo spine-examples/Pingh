@@ -24,15 +24,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop.given
+package io.spine.examples.pingh.desktop
 
-import com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly
-import java.util.concurrent.TimeUnit
-import kotlin.time.Duration
+import androidx.compose.runtime.remember
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.ExperimentalTestApi
+import io.spine.examples.pingh.testing.client.IntegrationTest
+import org.junit.jupiter.api.AfterEach
 
 /**
- * Causes the currently executing thread to sleep for the specified duration.
+ * Abstract base for UI tests that require a server to run and
+ * a client application connected to it.
  */
-internal fun delay(duration: Duration) {
-    sleepUninterruptibly(duration.inWholeMilliseconds, TimeUnit.MILLISECONDS)
+internal abstract class UiTest : IntegrationTest() {
+
+    private var state: AppState? = null
+
+    @AfterEach
+    internal fun shutdownChannel() {
+        state?.app?.close()
+    }
+
+    /**
+     * Launches the Pingh application for testing and sets application state for this test case.
+     */
+    @OptIn(ExperimentalTestApi::class)
+    protected fun ComposeUiTest.runApp() {
+        setContent {
+            Theme {
+                val settings = retrieveSystemSettings()
+                state = remember { AppState(settings) }
+                Window(state!!.window, state!!.app)
+            }
+        }
+    }
 }

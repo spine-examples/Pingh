@@ -136,16 +136,14 @@ internal class DesktopClient(
      */
     internal fun <E : EventMessage> observeEvent(
         type: KClass<E>,
-        filter: EventFilter? = null,
+        filter: EventFilter,
         onEmit: (event: E) -> Unit
     ): Subscription =
-        with(clientRequest().subscribeToEvent(type.java)) {
-            if (filter != null) {
-                where(filter)
-            }
-            observe(onEmit)
-            post()
-        }
+        clientRequest()
+            .subscribeToEvent(type.java)
+            .where(filter)
+            .observe(onEmit)
+            .post()
 
     /**
      * Subscribes to the event of the provided type and cancels itself after
@@ -195,7 +193,7 @@ internal class DesktopClient(
      *
      * @param subscription The subscription to be canceled.
      */
-    internal fun cancel(subscription: Subscription) {
+    private fun cancel(subscription: Subscription) {
         client.subscriptions()
             .cancel(subscription)
     }

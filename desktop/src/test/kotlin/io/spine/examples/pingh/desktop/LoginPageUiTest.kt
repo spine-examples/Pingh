@@ -36,27 +36,15 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.runComposeUiTest
-import io.spine.examples.pingh.desktop.given.createTestClient
+import io.spine.examples.pingh.desktop.given.DelayedFactAssertion.Companion.awaitFact
 import io.spine.examples.pingh.desktop.given.delay
-import io.spine.examples.pingh.desktop.given.runApp
-import io.spine.examples.pingh.sessions.event.UserCodeReceived
-import io.spine.examples.pingh.testing.client.IntegrationTest
 import kotlin.test.Test
-import org.junit.jupiter.api.AfterAll
+import kotlin.time.Duration.Companion.seconds
 import org.junit.jupiter.api.DisplayName
 
 @DisplayName("Login page should")
 @OptIn(ExperimentalTestApi::class)
-internal class LoginPageUiTest : IntegrationTest() {
-    internal companion object {
-        private val client = createTestClient()
-
-        @AfterAll
-        @JvmStatic
-        internal fun closeClient() {
-            client.close()
-        }
-    }
+internal class LoginPageUiTest : UiTest() {
 
     private val username = "MykytaPimonovTD"
 
@@ -78,11 +66,10 @@ internal class LoginPageUiTest : IntegrationTest() {
             runApp()
             loginButton.assertIsNotEnabled()
             usernameInput.performTextInput("()+$")
-            loginButton.assertIsNotEnabled()
+            awaitFact { loginButton.assertIsNotEnabled() }
             usernameInput.performTextClearance()
             usernameInput.performTextInput(username)
-            delay()
-            loginButton.assertIsEnabled()
+            awaitFact { loginButton.assertIsEnabled() }
         }
 
     @Test
@@ -93,9 +80,10 @@ internal class LoginPageUiTest : IntegrationTest() {
             submitButton.assertIsEnabled()
             noResponseMessage.assertDoesNotExist()
             submitButton.performClick()
-            delay()
-            submitButton.assertIsNotEnabled()
-            noResponseMessage.assertExists()
+            awaitFact {
+                submitButton.assertIsNotEnabled()
+                noResponseMessage.assertExists()
+            }
         }
 
     @Test
@@ -104,19 +92,20 @@ internal class LoginPageUiTest : IntegrationTest() {
             runApp()
             toVerificationPage()
             submitButton.performClick()
-            delay(5100)
-            submitButton.assertIsEnabled()
-            noResponseMessage.assertDoesNotExist()
+            delay(5.seconds)
+            awaitFact {
+                submitButton.assertIsEnabled()
+                noResponseMessage.assertDoesNotExist()
+            }
         }
 
     private fun ComposeUiTest.toVerificationPage() {
         usernameInput.performTextInput(username)
-        delay()
-        val observer = client.observeEvent(UserCodeReceived::class)
+        awaitFact { loginButton.assertIsEnabled() }
         loginButton.performClick()
-        observer.waitUntilDone()
-        delay()
-        loginButton.assertDoesNotExist()
-        submitButton.assertExists()
+        awaitFact {
+            loginButton.assertDoesNotExist()
+            submitButton.assertExists()
+        }
     }
 }
