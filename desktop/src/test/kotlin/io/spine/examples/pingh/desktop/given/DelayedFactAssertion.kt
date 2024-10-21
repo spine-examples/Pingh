@@ -33,11 +33,11 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 /**
- * Checks whether the specified event has occurred within a given time period.
+ * Checks whether the specified assertion has been successful within the given time period.
  *
  * Compose uses coroutines to update UI elements, which means that updates
- * may not occur immediately after a state change. Therefore, it is advisable to introduce
- * a brief delay before checking for state updates.
+ * may not occur immediately after a state change. Therefore, periodic checking over
+ * a specified duration is essential.
  *
  * @param assertion The assertion that must be checked.
  */
@@ -67,9 +67,9 @@ internal class DelayedFactAssertion private constructor(private val assertion: (
     private var error: AssertionError? = null
 
     /**
-     * Performs periodic assertion checks.
+     * Performs periodic `assertion` checks.
      *
-     * Terminates if a check succeeds. However, if no successful check occurs before
+     * Terminates if a check succeeds. If no successful check occurs before
      * the check `duration` ends, throws an exception.
      */
     private fun awaitFact(duration: Duration) {

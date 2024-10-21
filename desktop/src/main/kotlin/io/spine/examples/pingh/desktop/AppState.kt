@@ -77,7 +77,7 @@ internal class AppState(settings: SystemSettings) {
     private fun loadProperties(): Properties {
         val properties = Properties()
         val path = "/config/server.properties"
-        AppState::class.java.getResourceAsStream(path).use {
+        javaClass.getResourceAsStream(path).use {
             properties.load(it)
         }
         check(properties.containsKey("server.address")) {
