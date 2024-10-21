@@ -27,7 +27,7 @@ Client stack:
 - Compose Multiplatform 1.6.11.
 - JDK 17.
 
-Builds with Gradle 8.8. Runs locally.
+Builds with Gradle 8.10.2. Runs locally.
 
 ## Project structure
 
