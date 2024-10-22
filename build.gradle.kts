@@ -24,7 +24,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.gradle.RunGradleBuild
 import io.spine.internal.gradle.publishing.publishToMavenLocal
 
 plugins {
@@ -78,20 +77,6 @@ val modulesRequiredForDesktop = project.subprojects.map { it.name }.toSet()
  */
 publishToMavenLocal {
     modules = modulesRequiredForDesktop
-}
-
-/**
- * The task that builds the standalone Gradle project in the `desktop` directory.
- *
- * This task depends on publishing to the Local Maven repository the modules
- * required for the `desktop` project.
- */
-val buildDesktopClient = tasks.register<RunGradleBuild>("buildDesktopClient") {
-    val task = this
-    directoryPath = "$rootDir/desktop"
-    modulesRequiredForDesktop.forEach { name ->
-        task.dependsOn(":$name:publishToMavenLocal")
-    }
 }
 
 /**

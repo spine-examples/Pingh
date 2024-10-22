@@ -109,6 +109,11 @@ application {
     mainClass.set(appClassName)
 }
 
+/**
+ * The name of the fat server artifact to be published to GitHub Packages.
+ */
+val fatArtifact = "pingh-server"
+
 publishing {
     repositories {
         gitHubPackages()
@@ -117,7 +122,7 @@ publishing {
     publications {
         create("fatJar", MavenPublication::class) {
             groupId = project.group.toString()
-            artifactId = "pingh-server"
+            artifactId = fatArtifact
             version = project.version.toString()
             description = "Pingh app server."
 
@@ -125,6 +130,34 @@ publishing {
                 // Avoid `-all` suffix in the published artifact.
                 classifier = ""
             }
+        }
+    }
+}
+
+/**
+ * Disables unnecessary publishing tasks:
+ *
+ * 1. In GitHub Packages, only fat JAR server artifacts should be published,
+ * while all other publishing tasks should be disabled.
+ *
+ * 2. The fat JAR server artifacts do not need to be published to the Maven Local repository,
+ * so that task should be disabled as well.
+ *
+ * The `afterEvaluate` block is used because
+ * the [PublishToMavenLocal][io.spine.internal.gradle.publishing.PublishToMavenLocal] plugin
+ * configures its tasks after the module compilation. Additional configuration
+ * for the server module's publishing tasks occurs after all project's publishing tasks
+ * have been fully set up.
+ */
+afterEvaluate {
+    tasks.withType<PublishToMavenRepository> {
+        if (publication.artifactId != fatArtifact) {
+            enabled = false
+        }
+    }
+    tasks.withType<PublishToMavenLocal> {
+        if (publication.artifactId == fatArtifact) {
+            enabled = false
         }
     }
 }
