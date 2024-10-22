@@ -46,8 +46,8 @@ Builds with Gradle 8.10.x. Runs locally.
 
 There are several auxiliary modules available for testing:
 
-- `testutil-sessions` for testing the `sessions` bounded context.
-- `testutil-mentions` for testing the `mentions` bounded context.
+- `testutil-sessions` for testing the Sessions bounded context.
+- `testutil-mentions` for testing the Mentions bounded context.
 - `testutil-client` for client-side testing.
 
 For a detailed analysis of the processes within domain contexts, 

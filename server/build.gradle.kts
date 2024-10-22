@@ -143,9 +143,9 @@ publishing {
  * 2. The fat JAR server artifacts do not need to be published to the Maven Local repository,
  * so that task should be disabled as well.
  *
- * The `afterEvaluate` block is used because
+ * The `afterEvaluate` is used because
  * the [PublishToMavenLocal][io.spine.internal.gradle.publishing.PublishToMavenLocal] plugin
- * configures its tasks after the module compilation. Additional configuration
+ * configures publishing tasks after the project has been evaluated. Additional configuration
  * for the server module's publishing tasks occurs after all project's publishing tasks
  * have been fully set up.
  */
