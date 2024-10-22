@@ -27,7 +27,7 @@ Client stack:
 - Compose Multiplatform 1.6.11.
 - JDK 17.
 
-Builds with Gradle 8.10.2. Runs locally.
+Builds with Gradle 8.10.x. Runs locally.
 
 ## Project structure
 
@@ -46,9 +46,9 @@ Builds with Gradle 8.10.2. Runs locally.
 
 There are several auxiliary modules available for testing:
 
-- `testutil-sessions` allows authentication to the app without using the GitHub REST API.
-- `testutil-mentions` allows retrieving new user mentions without using the GitHub REST API.
-- `testutil-client` is a utility code for client-side testing.
+- `testutil-sessions` for testing the `sessions` bounded context.
+- `testutil-mentions` for testing the `mentions` bounded context.
+- `testutil-client` for client-side testing.
 
 For a detailed analysis of the processes within domain contexts, 
 refer to the [#EventStorming documentation](./EventStorming.md).
