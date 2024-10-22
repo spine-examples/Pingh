@@ -44,11 +44,8 @@ Builds with Gradle 8.10.x. Runs locally.
 - `client` manages process states and flows for the client application.
 - `desktop` provides the user interface created with Compose Multiplatform.
 
-There are several auxiliary modules available for testing:
-
-- `testutil-sessions` for testing the Sessions bounded context.
-- `testutil-mentions` for testing the Mentions bounded context.
-- `testutil-client` for client-side testing.
+There are several auxiliary modules designed for testing of the corresponding Gradle subprojects: 
+`testutil-sessions`, `testutil-mentions`, and `testutil-client`.
 
 For a detailed analysis of the processes within domain contexts, 
 refer to the [#EventStorming documentation](./EventStorming.md).

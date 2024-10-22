@@ -135,19 +135,16 @@ publishing {
 }
 
 /**
- * Disables unnecessary publishing tasks:
+ * Configures the publishing, so that:
  *
- * 1. In GitHub Packages, only fat JAR server artifacts should be published,
- * while all other publishing tasks should be disabled.
+ * 1. The fat JAR artifact appears only in the remote Maven repository,
+ * which is GitHub Packages in this case.
  *
- * 2. The fat JAR server artifacts do not need to be published to the Maven Local repository,
- * so that task should be disabled as well.
+ * 2. The `server` module is only published locally,
+ * since it is needed for the project assembly.
  *
- * The `afterEvaluate` is used because
- * the [PublishToMavenLocal][io.spine.internal.gradle.publishing.PublishToMavenLocal] plugin
- * configures publishing tasks after the project has been evaluated. Additional configuration
- * for the server module's publishing tasks occurs after all project's publishing tasks
- * have been fully set up.
+ * We use `afterEvaluate` because
+ * the publishing tasks to modify are only available at this phase.
  */
 afterEvaluate {
     tasks.withType<PublishToMavenRepository> {
