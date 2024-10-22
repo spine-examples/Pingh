@@ -13,19 +13,21 @@ of new GitHub `@mention`s. It also runs as a system tray application on macOS.
 Server stack:
 
 - Spine Event Engine 1.9.0.
-- Ktor 2.3.11. 
 - Kotlin 1.9.20.
 - JDK 11.
-- Gradle 6.9.4.
-- Google Cloud.
+- Ktor 2.3.11.
+- Google Datastore.
 - Docker.
+
+Builds with Gradle 6.9.x. Deploys onto Google Cloud.
 
 Client stack:
 
-- Compose Multiplatform 1.6.11.
 - Kotlin 1.9.20.
+- Compose Multiplatform 1.6.11.
 - JDK 17.
-- Gradle 8.8.
+
+Builds with Gradle 8.10.x. Runs locally.
 
 ## Project structure
 
@@ -42,11 +44,8 @@ Client stack:
 - `client` manages process states and flows for the client application.
 - `desktop` provides the user interface created with Compose Multiplatform.
 
-There are several auxiliary modules available for testing:
-
-- `testutil-sessions` allows authentication to the app without using the GitHub REST API.
-- `testutil-mentions` allows retrieving new user mentions without using the GitHub REST API.
-- `testutil-client` is a utility code for client-side testing.
+There are several auxiliary modules designed for testing of the corresponding Gradle subprojects: 
+`testutil-sessions`, `testutil-mentions`, and `testutil-client`.
 
 For a detailed analysis of the processes within domain contexts, 
 refer to the [#EventStorming documentation](./EventStorming.md).
@@ -65,10 +64,8 @@ When running the application locally, consider the following:
 
 ### Prerequisites
 
-- [JDK 11](https://www.oracle.com/java/technologies/javase/jdk11-archive-downloads.html)
-  and [JDK 17](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html).
-- [Gradle](https://gradle.org/releases/) 6.9 and 8.8.
-- [Docker Desktop](https://docs.docker.com/get-started/get-docker/).
+- JDK 11 and 17.
+- Docker Desktop.
 
 ### Build
 

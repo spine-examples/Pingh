@@ -109,6 +109,11 @@ application {
     mainClass.set(appClassName)
 }
 
+/**
+ * The name of the fat server artifact to be published to GitHub Packages.
+ */
+val fatArtifact = "pingh-server"
+
 publishing {
     repositories {
         gitHubPackages()
@@ -117,7 +122,7 @@ publishing {
     publications {
         create("fatJar", MavenPublication::class) {
             groupId = project.group.toString()
-            artifactId = "pingh-server"
+            artifactId = fatArtifact
             version = project.version.toString()
             description = "Pingh app server."
 
@@ -125,6 +130,31 @@ publishing {
                 // Avoid `-all` suffix in the published artifact.
                 classifier = ""
             }
+        }
+    }
+}
+
+/**
+ * Configures the publishing, so that:
+ *
+ * 1. The fat JAR artifact appears only in the remote Maven repository,
+ * which is GitHub Packages in this case.
+ *
+ * 2. The `server` module is only published locally,
+ * since it is needed for the project assembly.
+ *
+ * We use `afterEvaluate` because
+ * the publishing tasks to modify are only available at this phase.
+ */
+afterEvaluate {
+    tasks.withType<PublishToMavenRepository> {
+        if (publication.artifactId != fatArtifact) {
+            enabled = false
+        }
+    }
+    tasks.withType<PublishToMavenLocal> {
+        if (publication.artifactId == fatArtifact) {
+            enabled = false
         }
     }
 }
