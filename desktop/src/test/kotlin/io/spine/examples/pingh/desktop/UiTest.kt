@@ -71,14 +71,14 @@ internal abstract class UiTest : IntegrationTest() {
     /**
      * Returns the number of opened URLs.
      *
-     * To correctly count opened links, the test application
-     * must be executed using [runApp()][ComposeUiTest.runApp] method.
+     * To correctly count opened URLs, the test application
+     * must be run using [runApp()][ComposeUiTest.runApp] method.
      */
     protected fun openedUrlCount(): Int = uriHandler.urlCount
 
     /**
-     * Logs in the user with the specified username and
-     * navigates to the home page with mentions.
+     * Logs the user in the application with the specified username and
+     * navigates to the Mentions page.
      */
     @OptIn(ExperimentalTestApi::class)
     protected fun ComposeUiTest.logIn() {

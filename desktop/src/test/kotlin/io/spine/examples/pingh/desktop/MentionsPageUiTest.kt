@@ -57,10 +57,10 @@ internal class MentionsPageUiTest : UiTest() {
             runApp()
             logIn()
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
-            val testTag = mentionCards().random().testTag
-            onNodeWithTag(testTag).performClick()
+            val tag = mentionCards().random().testTag
+            onNodeWithTag(tag).performClick()
             awaitFact { openedUrlCount() shouldBe 1 }
-            onNodeWithTag(testTag).performClick()
+            onNodeWithTag(tag).performClick()
             awaitFact { openedUrlCount() shouldBe 2 }
         }
 
@@ -70,8 +70,8 @@ internal class MentionsPageUiTest : UiTest() {
             runApp()
             logIn()
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
-            val testTag = mentionCards().random().testTag
-            val snoozeButton = onNodeWithTag(testTag)
+            val tag = mentionCards().random().testTag
+            val snoozeButton = onNodeWithTag(tag)
                 .onChildren()
                 .filterToOne(isSnoozeButton)
             snoozeButton.performClick()
@@ -84,11 +84,11 @@ internal class MentionsPageUiTest : UiTest() {
             runApp()
             logIn()
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
-            val testTag = mentionCards().random().testTag
-            val snoozeButton = onNodeWithTag(testTag)
+            val tag = mentionCards().random().testTag
+            val snoozeButton = onNodeWithTag(tag)
                 .onChildren()
                 .filterToOne(isSnoozeButton)
-            onNodeWithTag(testTag).performClick()
+            onNodeWithTag(tag).performClick()
             awaitFact { snoozeButton.assertDoesNotExist() }
         }
 
@@ -99,17 +99,17 @@ internal class MentionsPageUiTest : UiTest() {
             logIn()
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 2 }
             val mentionsCards = mentionCards().sortedBy { it.positionInRoot.y }
-            val readMentionsTag = mentionsCards[0].testTag
-            val snoozedMentionsTag = mentionsCards[1].testTag
-            onNodeWithTag(readMentionsTag).performClick()
-            onNodeWithTag(snoozedMentionsTag)
+            val readMentionTag = mentionsCards[0].testTag
+            val snoozedMentionTag = mentionsCards[1].testTag
+            onNodeWithTag(readMentionTag).performClick()
+            onNodeWithTag(snoozedMentionTag)
                 .onChildren()
                 .filterToOne(isSnoozeButton)
                 .performClick()
             awaitFact {
                 val mentions = mentionCards()
-                val readMention = mentions.first { it.testTag == readMentionsTag }
-                val snoozedMention = mentions.first { it.testTag == snoozedMentionsTag }
+                val readMention = mentions.first { it.testTag == readMentionTag }
+                val snoozedMention = mentions.first { it.testTag == snoozedMentionTag }
                 snoozedMention.positionInRoot.y shouldBeLessThan readMention.positionInRoot.y
                 mentions.forEach { mention ->
                     if (mention != readMention && mention != snoozedMention) {
