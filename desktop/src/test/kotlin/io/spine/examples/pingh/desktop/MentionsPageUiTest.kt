@@ -28,6 +28,7 @@ package io.spine.examples.pingh.desktop
 
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
 import androidx.compose.ui.test.filter
 import androidx.compose.ui.test.filterToOne
@@ -49,8 +50,6 @@ import org.junit.jupiter.api.DisplayName
 @OptIn(ExperimentalTestApi::class)
 internal class MentionsPageUiTest : UiTest() {
 
-    private val isSnoozeButton = hasTestTag("snooze-button")
-
     @Test
     internal fun `allow users to open a mentions URL even after it has been read`() =
         runComposeUiTest {
@@ -71,11 +70,8 @@ internal class MentionsPageUiTest : UiTest() {
             logIn()
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
             val tag = mentionCards().random().testTag
-            val snoozeButton = onNodeWithTag(tag)
-                .onChildren()
-                .filterToOne(isSnoozeButton)
-            snoozeButton.performClick()
-            awaitFact { snoozeButton.assertDoesNotExist() }
+            onSnoozeButtonWithParentTag(tag).performClick()
+            awaitFact { onSnoozeButtonWithParentTag(tag).assertDoesNotExist() }
         }
 
     @Test
@@ -85,11 +81,8 @@ internal class MentionsPageUiTest : UiTest() {
             logIn()
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
             val tag = mentionCards().random().testTag
-            val snoozeButton = onNodeWithTag(tag)
-                .onChildren()
-                .filterToOne(isSnoozeButton)
             onNodeWithTag(tag).performClick()
-            awaitFact { snoozeButton.assertDoesNotExist() }
+            awaitFact { onSnoozeButtonWithParentTag(tag).assertDoesNotExist() }
         }
 
     @Test
@@ -102,10 +95,7 @@ internal class MentionsPageUiTest : UiTest() {
             val readMentionTag = mentionsCards[0].testTag
             val snoozedMentionTag = mentionsCards[1].testTag
             onNodeWithTag(readMentionTag).performClick()
-            onNodeWithTag(snoozedMentionTag)
-                .onChildren()
-                .filterToOne(isSnoozeButton)
-                .performClick()
+            onSnoozeButtonWithParentTag(snoozedMentionTag).performClick()
             awaitFact {
                 val mentions = mentionCards()
                 val readMention = mentions.first { it.testTag == readMentionTag }
@@ -125,4 +115,10 @@ internal class MentionsPageUiTest : UiTest() {
             .onChildren()
             .filter(hasClickAction())
             .fetchSemanticsNodes()
+
+    private fun SemanticsNodeInteractionsProvider.onSnoozeButtonWithParentTag(tag: String):
+            SemanticsNodeInteraction =
+        onNodeWithTag(tag)
+            .onChildren()
+            .filterToOne(hasTestTag("snooze-button"))
 }
