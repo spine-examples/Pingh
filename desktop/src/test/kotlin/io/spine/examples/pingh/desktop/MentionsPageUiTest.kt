@@ -38,6 +38,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import io.kotest.matchers.floats.shouldBeLessThan
+import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import io.spine.examples.pingh.desktop.given.DelayedFactAssertion.Companion.awaitFact
 import io.spine.examples.pingh.desktop.given.testTag
@@ -55,6 +56,7 @@ internal class MentionsPageUiTest : UiTest() {
         runComposeUiTest {
             runApp()
             logIn()
+            awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
             val testTag = mentionCards().random().testTag
             onNodeWithTag(testTag).performClick()
             awaitFact { openedUrlCount() shouldBe 1 }
@@ -67,6 +69,7 @@ internal class MentionsPageUiTest : UiTest() {
         runComposeUiTest {
             runApp()
             logIn()
+            awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
             val testTag = mentionCards().random().testTag
             val snoozeButton = onNodeWithTag(testTag)
                 .onChildren()
@@ -80,6 +83,7 @@ internal class MentionsPageUiTest : UiTest() {
         runComposeUiTest {
             runApp()
             logIn()
+            awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
             val testTag = mentionCards().random().testTag
             val snoozeButton = onNodeWithTag(testTag)
                 .onChildren()
@@ -93,6 +97,7 @@ internal class MentionsPageUiTest : UiTest() {
         runComposeUiTest {
             runApp()
             logIn()
+            awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 2 }
             val mentionsCards = mentionCards().sortedBy { it.positionInRoot.y }
             val readMentionsTag = mentionsCards[0].testTag
             val snoozedMentionsTag = mentionsCards[1].testTag

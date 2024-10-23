@@ -124,7 +124,7 @@ private fun ToolBar(
         IconButton(
             icon = Icons.pingh,
             onClick = toSettingsPage,
-            modifier = Modifier.size(40.dp),
+            modifier = Modifier.size(40.dp).testTag("settings-button"),
             colors = IconButtonDefaults.iconButtonColors(
                 contentColor = contentColor
             )
