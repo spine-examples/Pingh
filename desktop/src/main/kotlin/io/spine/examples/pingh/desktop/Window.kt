@@ -30,11 +30,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.Window as ComposeWindow
@@ -47,21 +50,29 @@ import io.spine.examples.pingh.client.PinghApplication
  *
  * @param state The state of the application window.
  * @param app Manages the logic for the Pingh app.
+ * @param uriHandler The `CompositionLocal` that provides functionality for handling URL,
+ *   such as opening a URI.
  * @see [PlatformWindow]
  */
 @Composable
-internal fun Window(state: WindowState, app: PinghApplication) {
+internal fun Window(
+    state: WindowState,
+    app: PinghApplication,
+    uriHandler: UriHandler = LocalUriHandler.current
+) {
     PlatformWindow(
         title = state.title,
         isShown = state.isShown,
         onClose = state::hide
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(MaterialTheme.shapes.small)
-        ) {
-            CurrentPage(app)
+        CompositionLocalProvider(LocalUriHandler provides uriHandler) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(MaterialTheme.shapes.small)
+            ) {
+                CurrentPage(app)
+            }
         }
     }
 }

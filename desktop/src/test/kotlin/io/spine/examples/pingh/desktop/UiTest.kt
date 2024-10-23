@@ -29,6 +29,7 @@ package io.spine.examples.pingh.desktop
 import androidx.compose.runtime.remember
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import io.spine.examples.pingh.desktop.given.MemoizingUriHandler
 import io.spine.examples.pingh.testing.client.IntegrationTest
 import org.junit.jupiter.api.AfterEach
 
@@ -39,10 +40,12 @@ import org.junit.jupiter.api.AfterEach
 internal abstract class UiTest : IntegrationTest() {
 
     private var state: AppState? = null
+    private val uriHandler = MemoizingUriHandler()
 
     @AfterEach
     internal fun shutdownChannel() {
         state?.app?.close()
+        uriHandler.reset()
     }
 
     /**
@@ -54,8 +57,16 @@ internal abstract class UiTest : IntegrationTest() {
             Theme {
                 val settings = retrieveSystemSettings()
                 state = remember { AppState(settings) }
-                Window(state!!.window, state!!.app)
+                Window(state!!.window, state!!.app, uriHandler)
             }
         }
     }
+
+    /**
+     * Returns the number of opened URLs.
+     *
+     * To correctly count opened links, the test application
+     * must be executed using [runApp()][ComposeUiTest.runApp] method.
+     */
+    protected fun openedUrlCount(): Int = uriHandler.urlCount
 }
