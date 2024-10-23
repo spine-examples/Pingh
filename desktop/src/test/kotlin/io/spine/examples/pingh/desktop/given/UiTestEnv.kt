@@ -26,6 +26,8 @@
 
 package io.spine.examples.pingh.desktop.given
 
+import androidx.compose.ui.semantics.SemanticsNode
+import androidx.compose.ui.semantics.SemanticsProperties
 import com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
@@ -36,3 +38,11 @@ import kotlin.time.Duration
 internal fun delay(duration: Duration) {
     sleepUninterruptibly(duration.inWholeMilliseconds, TimeUnit.MILLISECONDS)
 }
+
+/**
+ * Returns test tag attached to this semantics node.
+ */
+internal val SemanticsNode.testTag: String
+    get() = config.getOrElse(SemanticsProperties.TestTag) {
+        throw IllegalStateException("This node does not have a `TestTag` specified.")
+    }
