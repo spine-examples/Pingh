@@ -26,23 +26,31 @@
 
 package io.spine.examples.pingh.desktop.given
 
-import androidx.compose.ui.semantics.SemanticsNode
-import androidx.compose.ui.semantics.SemanticsProperties
-import com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly
-import java.util.concurrent.TimeUnit
-import kotlin.time.Duration
+import androidx.compose.ui.platform.UriHandler
 
 /**
- * Causes the currently executing thread to sleep for the specified duration.
+ * Stores the count of URLs that should be opened.
+ *
+ * Does not actually open any URLs. Intended for testing purposes only.
  */
-internal fun delay(duration: Duration) {
-    sleepUninterruptibly(duration.inWholeMilliseconds, TimeUnit.MILLISECONDS)
-}
+internal class MemoizingUriHandler : UriHandler {
+    /**
+     * The number of URL that should be opened.
+     */
+    internal var urlCount = 0
+        private set
 
-/**
- * Returns test tag attached to this semantics node.
- */
-internal val SemanticsNode.testTag: String
-    get() = config.getOrElse(SemanticsProperties.TestTag) {
-        throw IllegalStateException("This node does not have a `TestTag` specified.")
+    /**
+     * Adds a URL to the [total count][urlCount] of URLs to be opened.
+     */
+    override fun openUri(uri: String) {
+        urlCount++
     }
+
+    /**
+     * Resets the count of opened URLs to zero.
+     */
+    internal fun reset() {
+        urlCount = 0
+    }
+}

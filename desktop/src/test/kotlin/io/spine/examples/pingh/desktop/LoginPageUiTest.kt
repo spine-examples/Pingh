@@ -46,8 +46,6 @@ import org.junit.jupiter.api.DisplayName
 @OptIn(ExperimentalTestApi::class)
 internal class LoginPageUiTest : UiTest() {
 
-    private val username = "MykytaPimonovTD"
-
     private val SemanticsNodeInteractionsProvider.loginButton
         get() = onNodeWithTag("login-button")
 

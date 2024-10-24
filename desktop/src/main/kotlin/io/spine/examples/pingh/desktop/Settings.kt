@@ -63,6 +63,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -245,7 +246,7 @@ private fun LogOutButton(
 ) {
     OutlinedButton(
         onClick = onClick,
-        modifier = Modifier.height(20.dp),
+        modifier = Modifier.height(20.dp).testTag("logout-button"),
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = MaterialTheme.colorScheme.secondary,
             contentColor = MaterialTheme.colorScheme.onSecondary
@@ -302,7 +303,8 @@ private fun DndOption(
             modifier = Modifier
                 .scale(switchScale)
                 .width(36.dp)
-                .height(20.dp),
+                .height(20.dp)
+                .testTag("dnd-option"),
             colors = SwitchDefaults.colors(
                 checkedThumbColor = MaterialTheme.colorScheme.secondary,
                 checkedTrackColor = MaterialTheme.colorScheme.primary,

@@ -58,6 +58,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.spine.examples.pingh.client.MentionsFlow
@@ -123,7 +124,7 @@ private fun ToolBar(
         IconButton(
             icon = Icons.pingh,
             onClick = toSettingsPage,
-            modifier = Modifier.size(40.dp),
+            modifier = Modifier.size(40.dp).testTag("settings-button"),
             colors = IconButtonDefaults.iconButtonColors(
                 contentColor = contentColor
             )
@@ -166,7 +167,8 @@ private fun MentionCards(
             .fillMaxSize()
             .padding(horizontal = 5.dp)
             .verticalScroll(scrollState)
-            .background(MaterialTheme.colorScheme.background),
+            .background(MaterialTheme.colorScheme.background)
+            .testTag("mention-cards"),
     ) {
         mentions.sorted()
             .forEach { mention ->
@@ -213,6 +215,7 @@ private fun MentionCard(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
+            .testTag("mention-card-${mention.id}")
             .height(50.dp),
         interactionSource = interactionSource,
         colors = CardDefaults.elevatedCardColors(
@@ -295,7 +298,7 @@ private fun SnoozeButton(
                 onClick = {
                     flow.snooze(mention.id)
                 },
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier.size(40.dp).testTag("snooze-button"),
                 colors = IconButtonDefaults.iconButtonColors(
                     contentColor = MaterialTheme.colorScheme.onSecondary
                 )

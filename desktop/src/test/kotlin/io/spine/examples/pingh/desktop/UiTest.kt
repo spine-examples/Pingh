@@ -29,6 +29,12 @@ package io.spine.examples.pingh.desktop
 import androidx.compose.runtime.remember
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
+import io.spine.examples.pingh.desktop.given.DelayedFactAssertion.Companion.awaitFact
+import io.spine.examples.pingh.desktop.given.MemoizingUriHandler
 import io.spine.examples.pingh.testing.client.IntegrationTest
 import org.junit.jupiter.api.AfterEach
 
@@ -38,11 +44,14 @@ import org.junit.jupiter.api.AfterEach
  */
 internal abstract class UiTest : IntegrationTest() {
 
+    protected val username = "MykytaPimonovTD"
     private var state: AppState? = null
+    private val uriHandler = MemoizingUriHandler()
 
     @AfterEach
     internal fun shutdownChannel() {
         state?.app?.close()
+        uriHandler.reset()
     }
 
     /**
@@ -54,8 +63,31 @@ internal abstract class UiTest : IntegrationTest() {
             Theme {
                 val settings = retrieveSystemSettings()
                 state = remember { AppState(settings) }
-                Window(state!!.window, state!!.app)
+                Window(state!!.window, state!!.app, uriHandler)
             }
         }
+    }
+
+    /**
+     * Returns the number of opened URLs.
+     *
+     * To correctly count opened URLs, the test application
+     * must be run using [runApp()][ComposeUiTest.runApp] method.
+     */
+    protected fun openedUrlCount(): Int = uriHandler.urlCount
+
+    /**
+     * Logs the user in the application with the specified username and
+     * navigates to the Mentions page.
+     */
+    @OptIn(ExperimentalTestApi::class)
+    protected fun ComposeUiTest.logIn() {
+        onNodeWithTag("username-input").performTextInput(username)
+        awaitFact { onNodeWithTag("login-button").assertIsEnabled() }
+        onNodeWithTag("login-button").performClick()
+        awaitFact { onNodeWithTag("submit-button").assertExists() }
+        enterUserCode()
+        onNodeWithTag("submit-button").performClick()
+        awaitFact { onNodeWithTag("submit-button").assertDoesNotExist() }
     }
 }
