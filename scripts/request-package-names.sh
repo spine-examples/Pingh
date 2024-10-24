@@ -57,7 +57,7 @@ function requestPackages() {
     countOnThisPage=$(echo "$response" | jq -c length)
     packagesOnThisPage=$(echo "$response" | \
         jq -c --arg repo "$repoName" '.[] | select(.repository.name == $repo) | .name')
-    if [ -z "$packagesOnThisPage" ]; then
+    if [ -z "$response" ]; then
         echo "An unexpected response was received and could not be parsed." \
              "Ensure that parameters contains the correct data."
         exit 1
