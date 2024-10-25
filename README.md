@@ -25,7 +25,7 @@ Client stack:
 
 - Kotlin 1.9.20.
 - Compose Multiplatform 1.6.11.
-- JDK 17 or higher.
+- JDK 17.
 
 Builds with Gradle 8.10.x. Runs locally.
 
@@ -64,7 +64,7 @@ When running the application locally, consider the following:
 
 ### Prerequisites
 
-- JDK 11 and JDK 17 or higher.
+- JDK 11 and JDK 17.
 - Docker Desktop.
 
 ### Build
@@ -82,7 +82,20 @@ github-app.client.secret=client_secret
 
 Replace `client_id` and `client_secret` with the values obtained from GitHub.
 
-2. Start the Pingh server locally. The server always runs on port `50051`. 
+2. Specify the names of organizations permitted to use the application. To do this, 
+  open `config/authentication.properties` file in the `sessions` resources directory 
+  and enter the organization names as a comma-separated string without spaces. 
+  For instance, for organizations `spine-examples` and `SpineEventEngine`, enter:
+
+```properties
+permitted-organizations=spine-examples,SpineEventEngine
+```
+
+Additionally, ensure that each specified organization has 
+the [GitHub App](https://github.com/apps/pingh-tracker-of-github-mentions) installed; 
+otherwise, authentication will fail.
+ 
+3. Start the Pingh server locally. The server always runs on port `50051`. 
   To launch it, run the following command in the root project directory:
 
 ```shell
@@ -92,8 +105,8 @@ Replace `client_id` and `client_secret` with the values obtained from GitHub.
 This will start the server on `localhost:50051` and publish the required JAR files 
 for the client application to the Maven Local repository.
 
-3. Configure the client's connection to the server. To do this, 
-  open the `config/server.properties` file in the client project resources directory 
+4. Configure the client's connection to the server. To do this, 
+  open the `config/server.properties` file in the resources directory of the `desktop` module
   and enter the server's address and port as follows:
 
 ```properties
@@ -101,7 +114,7 @@ server.address=localhost
 server.port=50051
 ```
 
-4. Build and run the client application. Navigate to the client project directory 
+5. Build and run the client application. Navigate to the `desktop` module directory 
   and execute the following command:
 
 ```shell

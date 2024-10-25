@@ -28,9 +28,7 @@ package io.spine.examples.pingh.sessions
 
 import io.spine.core.External
 import io.spine.examples.pingh.clock.event.TimePassed
-import io.spine.examples.pingh.github.Organization
 import io.spine.examples.pingh.github.PersonalAccessToken
-import io.spine.examples.pingh.github.loggedAs
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.command.RefreshToken
@@ -48,19 +46,6 @@ import io.spine.server.procman.ProcessManager
 import io.spine.server.tuple.EitherOf2
 import java.util.Optional
 import kotlin.jvm.Throws
-
-/**
- * Organizations whose members are allowed to authorize with the Pingh app.
- *
- * For this to work correctly, the organization must have
- * the [Pingh application](https://github.com/apps/pingh-tracker-of-github-mentions)
- * installed on GitHub.
- */
-private val permittedOrganizations: Set<Organization> = setOf(
-    Organization::class.loggedAs("SpineEventEngine"),
-    Organization::class.loggedAs("TeamDev-Ltd"),
-    Organization::class.loggedAs("TeamDev-IP")
-)
 
 /**
  * Coordinates session management, that is, user login and logout.
@@ -157,12 +142,12 @@ internal class UserSessionProcess :
 
     /**
      * Throws an `NotMemberOfPermittedOrgs` rejection if the user is not a member
-     * of any [permitted organizations][permittedOrganizations].
+     * of any [permitted organizations][PermittedOrganizations].
      */
     @Throws(NotMemberOfPermittedOrgs::class)
     private fun ensureMembershipInPermittedOrgs(token: PersonalAccessToken) {
         val userOrganizations = users.memberships(token)
-        if (!userOrganizations.any { permittedOrganizations.contains(it) }) {
+        if (!userOrganizations.any { PermittedOrganizations.contains(it) }) {
             throw NotMemberOfPermittedOrgs::class.with(state().id)
         }
     }
