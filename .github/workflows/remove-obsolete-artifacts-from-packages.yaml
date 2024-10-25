@@ -1,8 +1,9 @@
 #
 # Periodically removes obsolete artifacts from GitHub Packages.
 #
-# Only non-release artifacts—those containing the word "SNAPSHOT"
-# in their name—are eligible for removal, with the 5 newest non-release artifacts retained.
+# Only non-release artifacts—those containing "SNAPSHOT" in their version name—are eligible
+# for removal. The latest non-release artifacts will be retained, with the exact number determined
+# by the `VERSION_COUNT_TO_KEEP` environment variable.
 #
 # Please note the following details:
 #
@@ -27,6 +28,9 @@ name: Remove obsolete Maven artifacts from GitHub Packages
 on:
   schedule:
     - cron: '0 0 * * *'  # Run every day at midnight.
+
+env:
+  VERSION_COUNT_TO_KEEP: 5  # Number of most recent SNAPSHOT versions to retain.
 
 jobs:
   retrieve-package-names:
@@ -63,7 +67,6 @@ jobs:
           package-name: ${{ matrix.package-name }}
           package-type: 'maven'
           token: ${{ github.token }}
-          # Number of most recent SNAPSHOT versions to retain.
-          min-versions-to-keep: 5
-          # Ignores artifacts that do not contain the word 'SNAPSHOT'.
+          min-versions-to-keep: ${{ env.VERSION_COUNT_TO_KEEP }}
+          # Ignores artifacts that do not contain the word "SNAPSHOT".
           ignore-versions: '^(?!.+SNAPSHOT).*$'
