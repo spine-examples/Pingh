@@ -25,7 +25,7 @@ Client stack:
 
 - Kotlin 1.9.20.
 - Compose Multiplatform 1.6.11.
-- JDK 17.
+- JDK 17 or higher.
 
 Builds with Gradle 8.10.x. Runs locally.
 
@@ -64,7 +64,7 @@ When running the application locally, consider the following:
 
 ### Prerequisites
 
-- JDK 11 and 17.
+- JDK 11 and JDK 17 or higher.
 - Docker Desktop.
 
 ### Build
