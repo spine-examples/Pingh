@@ -50,29 +50,23 @@ import io.spine.examples.pingh.client.PinghApplication
  *
  * @param state The state of the application window.
  * @param app Manages the logic for the Pingh app.
- * @param uriHandler The `CompositionLocal` that provides functionality for handling URL,
- *   such as opening a URI.
+ * @param uriHandler Provides functionality for handling URL, such as opening a URI.
  * @see [PlatformWindow]
  */
 @Composable
 internal fun Window(
     state: WindowState,
     app: PinghApplication,
-    uriHandler: UriHandler = LocalUriHandler.current
+    uriHandler: UriHandler? = null
 ) {
     PlatformWindow(
         title = state.title,
         isShown = state.isShown,
         onClose = state::hide
     ) {
-        CompositionLocalProvider(LocalUriHandler provides uriHandler) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(MaterialTheme.shapes.small)
-            ) {
-                CurrentPage(app)
-            }
+        val localUriHandler = uriHandler ?: LocalUriHandler.current
+        CompositionLocalProvider(LocalUriHandler provides localUriHandler) {
+            WindowContent(app)
         }
     }
 }
@@ -109,6 +103,20 @@ private fun PlatformWindow(
         alwaysOnTop = true,
         content = content
     )
+}
+
+/**
+ * Displays a content in the Pingh window.
+ */
+@Composable
+private fun WindowContent(app: PinghApplication) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .clip(MaterialTheme.shapes.small)
+    ) {
+        CurrentPage(app)
+    }
 }
 
 /**
