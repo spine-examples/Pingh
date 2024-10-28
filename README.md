@@ -64,7 +64,7 @@ When running the application locally, consider the following:
 
 ### Prerequisites
 
-- JDK 11 and JDK 17.
+- JDK 11 and 17.
 - Docker Desktop.
 
 ### Build
@@ -191,6 +191,23 @@ The following secrets are configured for the Pingh app:
 - `github_client_id`: The client ID of a GitHub App.
 - `github_client_secret`: The client secret of a GitHub App.
 - `auth_token`: The authentication token required for accessing the HTTP server running on the VM.
+
+## Testing
+
+This project includes several types of testing.
+
+1. Unit tests focus on the behavior of entities within bounded contexts, using the Black Box 
+  provided by the Spine server testing API.
+
+2. End-to-end tests validate client-server interactions by starting the server and
+  running various user scenarios, with a Datastore emulator used for data storage.
+
+3. UI tests are created with the Testing Compose Multiplatform UI API 
+  to verify the functionality of the client application, 
+  with a test server also launched for these tests.
+
+A Docker environment is required for end-to-end and UI testing, 
+as the Datastore emulator is automatically started in a Docker container.
 
 ## Feedback
 
