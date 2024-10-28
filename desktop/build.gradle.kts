@@ -77,7 +77,6 @@ repositories {
 }
 
 kotlin {
-    jvmToolchain(BuildSettings.javaVersion.asInt())
     explicitApi()
 }
 

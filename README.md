@@ -72,8 +72,8 @@ When running the application locally, consider the following:
 To run the application locally, download the project from GitHub and follow these steps:
 
 1. Specify the GitHub App ID and secret in the configuration file. To do this, 
-  open the `local/config/server.properties` file in the `server` resources directory
-  and enter the GitHub App ID and secret as follows:
+  enter the GitHub App ID and secret 
+  in the `server/src/main/resources/local/config/server.properties` as follows:
 
 ```properties
 github-app.client.id=client_id
@@ -82,7 +82,20 @@ github-app.client.secret=client_secret
 
 Replace `client_id` and `client_secret` with the values obtained from GitHub.
 
-2. Start the Pingh server locally. The server always runs on port `50051`. 
+2. The application can be used only by members of certain organizations. 
+  Specify the names of these organizations separated by commas 
+  in the `sessions/src/main/resources/config/auth.properties` file.
+  For instance, for organizations `spine-examples` and `SpineEventEngine`, enter:
+
+```properties
+permitted-organizations=spine-examples, SpineEventEngine
+```
+
+Additionally, ensure that each specified organization has 
+the [GitHub App](https://github.com/apps/pingh-tracker-of-github-mentions) installed; 
+otherwise, authentication will fail.
+ 
+3. Start the Pingh server locally. The server always runs on port `50051`. 
   To launch it, run the following command in the root project directory:
 
 ```shell
@@ -92,16 +105,16 @@ Replace `client_id` and `client_secret` with the values obtained from GitHub.
 This will start the server on `localhost:50051` and publish the required JAR files 
 for the client application to the Maven Local repository.
 
-3. Configure the client's connection to the server. To do this, 
-  open the `config/server.properties` file in the client project resources directory 
-  and enter the server's address and port as follows:
+4. Configure the client's connection to the server. To do this, 
+  enter the server's address and port 
+  in the `desktop/src/main/resources/config/server.properties` file as follows:
 
 ```properties
 server.address=localhost
 server.port=50051
 ```
 
-4. Build and run the client application. Navigate to the client project directory 
+5. Build and run the client application. Navigate to the `desktop` module directory 
   and execute the following command:
 
 ```shell
@@ -178,6 +191,23 @@ The following secrets are configured for the Pingh app:
 - `github_client_id`: The client ID of a GitHub App.
 - `github_client_secret`: The client secret of a GitHub App.
 - `auth_token`: The authentication token required for accessing the HTTP server running on the VM.
+
+## Testing
+
+This project includes several types of testing.
+
+1. Unit tests focus on the behavior of entities within bounded contexts, using the Black Box 
+  provided by the Spine server testing API.
+
+2. End-to-end tests validate client-server interactions by starting the server and
+  running various user scenarios, with a Datastore emulator used for data storage.
+
+3. UI tests are created with the Testing Compose Multiplatform UI API 
+  to verify the functionality of the client application, 
+  with a test server also launched for these tests.
+
+A Docker environment is required for end-to-end and UI testing, 
+as the Datastore emulator is automatically started in a Docker container.
 
 ## Feedback
 
