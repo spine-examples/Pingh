@@ -72,8 +72,8 @@ When running the application locally, consider the following:
 To run the application locally, download the project from GitHub and follow these steps:
 
 1. Specify the GitHub App ID and secret in the configuration file. To do this, 
-  open the `local/config/server.properties` file in the `server` resources directory
-  and enter the GitHub App ID and secret as follows:
+  enter the GitHub App ID and secret 
+  in the `server/src/main/resources/local/config/server.properties` as follows:
 
 ```properties
 github-app.client.id=client_id
@@ -82,13 +82,13 @@ github-app.client.secret=client_secret
 
 Replace `client_id` and `client_secret` with the values obtained from GitHub.
 
-2. Specify the names of organizations permitted to use the application. To do this, 
-  open `config/authentication.properties` file in the `sessions` resources directory 
-  and enter the organization names as a comma-separated string without spaces. 
+2. The application can be used only by members of certain organizations. 
+  Specify the names of these organizations separated by commas 
+  in the `sessions/src/main/resources/config/auth.properties` file.
   For instance, for organizations `spine-examples` and `SpineEventEngine`, enter:
 
 ```properties
-permitted-organizations=spine-examples,SpineEventEngine
+permitted-organizations=spine-examples, SpineEventEngine
 ```
 
 Additionally, ensure that each specified organization has 
@@ -106,8 +106,8 @@ This will start the server on `localhost:50051` and publish the required JAR fil
 for the client application to the Maven Local repository.
 
 4. Configure the client's connection to the server. To do this, 
-  open the `config/server.properties` file in the resources directory of the `desktop` module
-  and enter the server's address and port as follows:
+  enter the server's address and port 
+  in the `desktop/src/main/resources/config/server.properties` file as follows:
 
 ```properties
 server.address=localhost

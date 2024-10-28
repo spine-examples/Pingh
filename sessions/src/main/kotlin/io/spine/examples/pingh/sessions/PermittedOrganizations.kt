@@ -47,7 +47,7 @@ internal object PermittedOrganizations {
      * Loads the list of permitted organizations from resource folder.
      */
     private fun loadFromProperties(): Set<Organization> {
-        val path = "/config/authentication.properties"
+        val path = "/config/auth.properties"
         val properties = Properties()
         PermittedOrganizations::class.java.getResourceAsStream(path).use {
             properties.load(it)
@@ -57,8 +57,8 @@ internal object PermittedOrganizations {
                 "List of names of permitted organizations must be provided " +
                         "in the configuration file located at \"resource$path\"."
             )
-        return orgStr.split(",")
-            .map { Organization::class.loggedAs(it) }
+        return orgStr.split(""",\s*""".toRegex())
+            .map { Organization::class.loggedAs(it.trim()) }
             .toSet()
     }
 
