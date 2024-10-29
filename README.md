@@ -58,6 +58,30 @@ The mentions in the private repositories are tracked if the user has access to t
 the [GitHub app](https://github.com/apps/pingh-tracker-of-github-mentions) is installed 
 on the repository or the organization that owns it.
 
+## Authentication
+
+The application can be used only by members of certain organizations.
+
+Users who are members of any permitted organization can log in to the application; 
+otherwise, they will encounter an exception.
+
+To check a user’s membership within an organization, the app must be installed 
+in that organization.
+
+By installing the application in an organization on the permitted list, 
+access to its private repositories for mention searches is granted, 
+along with the ability to verify membership for authentication. In contrast, 
+installing the application in an organization not on the permitted list 
+permits only detecting mentions in private repositories without impacting authentication.
+
+Specify the names of permitted organizations separated by commas
+in the `sessions/src/main/resources/config/auth.properties` file.
+For instance, for organizations `spine-examples` and `SpineEventEngine`, enter:
+
+```properties
+permitted-organizations=spine-examples, SpineEventEngine
+```
+
 ## Local run
 
 Both client and server can be built and launched locally.
@@ -90,18 +114,7 @@ github-app.client.secret=client_secret
 
 Replace `client_id` and `client_secret` with the values obtained from GitHub.
 
-2. The application can be used only by members of certain organizations. 
-  Specify the names of these organizations separated by commas 
-  in the `sessions/src/main/resources/config/auth.properties` file.
-  For instance, for organizations `spine-examples` and `SpineEventEngine`, enter:
-
-```properties
-permitted-organizations=spine-examples, SpineEventEngine
-```
-
-Additionally, ensure that each specified organization has 
-the [GitHub App](https://github.com/apps/pingh-tracker-of-github-mentions) installed; 
-otherwise, authentication will fail.
+2. Specify the names of permitted organizations. See: [Authentication](#authentication).
  
 3. Start the Pingh server locally. The server always runs on port `50051`. 
   To launch it, run the following command in the root project directory:
