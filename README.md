@@ -50,12 +50,13 @@ There are several auxiliary modules designed for testing of the corresponding Gr
 For a detailed analysis of the processes within domain contexts, 
 refer to the [#EventStorming documentation](./EventStorming.md).
 
-## Limitation
+## GitHub data access
 
-The app detects mentions in all public repositories.
+The application tracks user's mentions in all public GitHub repositories.
 
-To view mentions in private repositories, the organization that owns them must install 
-this [GitHub App](https://github.com/apps/pingh-tracker-of-github-mentions).
+The mentions in the private repositories are tracked if the user has access to the repository and 
+the [GitHub app](https://github.com/apps/pingh-tracker-of-github-mentions) is installed 
+on the repository or the organization that owns it.
 
 ## Local run
 
@@ -89,8 +90,8 @@ github-app.client.secret=client_secret
 
 Replace `client_id` and `client_secret` with the values obtained from GitHub.
 
-2. The application can be used only by members of certain organizations.
-  Specify the names of these organizations separated by commas
+2. The application can be used only by members of certain organizations. 
+  Specify the names of these organizations separated by commas 
   in the `sessions/src/main/resources/config/auth.properties` file.
   For instance, for organizations `spine-examples` and `SpineEventEngine`, enter:
 
