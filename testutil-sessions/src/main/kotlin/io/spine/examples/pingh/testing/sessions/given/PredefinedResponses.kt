@@ -27,7 +27,6 @@
 package io.spine.examples.pingh.testing.sessions.given
 
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
-import io.spine.examples.pingh.github.rest.OrganizationsResponse
 import io.spine.examples.pingh.github.rest.VerificationCodesResponse
 import io.spine.examples.pingh.sessions.parseJson
 
@@ -65,16 +64,4 @@ public fun loadRefreshedAccessToken(): AccessTokenResponse {
     checkNotNull(jsonFile)
     val json = jsonFile.readText()
     return AccessTokenResponse::class.parseJson(json)
-}
-
-/**
- * Returns the response provided by [PredefinedGitHubUsersResponses]
- * upon successful execution of the request for organizations in which the user is a member.
- */
-public fun loadOrganizations(): OrganizationsResponse {
-    val jsonFile = PredefinedGitHubUsersResponses::class.java
-        .getResource("/github-responses/organizations-response.json")
-    checkNotNull(jsonFile)
-    val json = jsonFile.readText()
-    return OrganizationsResponse::class.parseJson(" { item: $json } ")
 }

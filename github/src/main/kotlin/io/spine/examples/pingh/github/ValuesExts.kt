@@ -35,7 +35,6 @@ import io.spine.examples.pingh.github.rest.AccessTokenFragment
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.CommentFragment
 import io.spine.examples.pingh.github.rest.IssueOrPullRequestFragment
-import io.spine.examples.pingh.github.rest.OrganizationFragment
 import io.spine.examples.pingh.github.rest.ReviewFragment
 import io.spine.examples.pingh.github.rest.UserFragment
 import io.spine.examples.pingh.github.rest.VerificationCodesFragment
@@ -231,30 +230,6 @@ public fun KClass<ClientSecret>.of(value: String): ClientSecret =
  */
 public fun KClass<User>.from(fragment: UserFragment): User =
     this.of(fragment.username, fragment.avatarUrl)
-
-/**
- * Creates a new `OrganizationLogin` with the passed string value.
- */
-public fun KClass<OrganizationLogin>.of(value: String): OrganizationLogin =
-    OrganizationLogin.newBuilder()
-        .setValue(value)
-        .vBuild()
-
-/**
- * Creates a new `Organization` with the data specified in the `OrganizationFragment`.
- */
-public fun KClass<Organization>.from(fragment: OrganizationFragment): Organization =
-    Organization.newBuilder()
-        .setLogin(OrganizationLogin::class.of(fragment.login))
-        .vBuild()
-
-/**
- * Creates a new `Organization` with the passed login value.
- */
-public fun KClass<Organization>.loggedAs(login: String): Organization =
-    Organization.newBuilder()
-        .setLogin(OrganizationLogin::class.of(login))
-        .vBuild()
 
 /**
  * Creates a new `GitHubApp` with the passed GitHub App client ID and secret.

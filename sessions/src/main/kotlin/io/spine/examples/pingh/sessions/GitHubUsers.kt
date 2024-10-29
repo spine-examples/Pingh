@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.sessions
 
-import io.spine.examples.pingh.github.Organization
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.User
 
@@ -40,12 +39,4 @@ public interface GitHubUsers {
      * @param token The token issued to the user whose information are being retrieved.
      */
     public fun ownerOf(token: PersonalAccessToken): User
-
-    /**
-     * Returns organizations the owner of the passed token belongs to.
-     *
-     * @param token The access token for retrieving organizations
-     *   where the user is a private member.
-     */
-    public fun memberships(token: PersonalAccessToken): Set<Organization>
 }

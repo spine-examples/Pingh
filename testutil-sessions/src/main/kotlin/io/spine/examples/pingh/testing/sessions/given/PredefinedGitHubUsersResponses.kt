@@ -26,11 +26,9 @@
 
 package io.spine.examples.pingh.testing.sessions.given
 
-import io.spine.examples.pingh.github.Organization
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.from
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.sessions.GitHubUsers
 
@@ -52,15 +50,6 @@ public class PredefinedGitHubUsersResponses : GitHubUsers {
      */
     override fun ownerOf(token: PersonalAccessToken): User =
         User::class.of(username.value, "https://avatars.githubusercontent.com/u/160486193")
-
-    /**
-     * Returns the set of `Organization`s retrieved from a JSON file in the resource folder.
-     */
-    override fun memberships(token: PersonalAccessToken): Set<Organization> =
-        loadOrganizations()
-            .itemList
-            .map { fragment -> Organization::class.from(fragment) }
-            .toSet()
 
     /**
      * Resets the instance to its initial state.
