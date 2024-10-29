@@ -26,16 +26,21 @@
 
 package io.spine.examples.pingh.desktop
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.dp
@@ -88,8 +93,8 @@ private fun PlatformWindow(
     content: @Composable FrameWindowScope.() -> Unit
 ) {
     val windowState = rememberWindowState(
-        width = 240.dp,
-        height = 426.dp,
+        width = 460.dp,
+        height = 740.dp,
         position = WindowPosition(1200.dp, 30.dp)
     )
     ComposeWindow(
@@ -111,11 +116,26 @@ private fun PlatformWindow(
 @Composable
 private fun WindowContent(app: PinghApplication) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .clip(MaterialTheme.shapes.small)
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter
     ) {
-        CurrentPage(app)
+        Box(
+            modifier = Modifier
+                .width(420.dp)
+                .height(700.dp)
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    shape = MaterialTheme.shapes.small
+                )
+                .shadow(
+                    elevation = 10.dp,
+                    shape = MaterialTheme.shapes.small
+                )
+                .clip(MaterialTheme.shapes.small)
+        ) {
+            CurrentPage(app)
+        }
     }
 }
 
