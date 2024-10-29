@@ -42,7 +42,6 @@ import io.spine.examples.pingh.sessions.event.TokenRefreshed
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.rejection.Rejections.UsernameMismatch
-import io.spine.examples.pingh.sessions.rejection.Rejections.NotMemberOfPermittedOrgs
 import io.spine.examples.pingh.sessions.with
 import io.spine.examples.pingh.testing.sessions.given.loadAccessToken
 import io.spine.examples.pingh.testing.sessions.given.loadRefreshedAccessToken
@@ -145,12 +144,4 @@ internal fun KClass<UsernameMismatch>.with(
         .setId(id)
         .setExpectedUser(expectedUser)
         .setLoggedInUser(loggedInUser)
-        .vBuild()
-
-/**
- * Creates a new `NotMemberOfPermittedOrgs` rejection with the passed ID of the session.
- */
-internal fun KClass<NotMemberOfPermittedOrgs>.with(id: SessionId): NotMemberOfPermittedOrgs =
-    NotMemberOfPermittedOrgs.newBuilder()
-        .setId(id)
         .vBuild()

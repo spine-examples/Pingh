@@ -48,38 +48,26 @@ public class PredefinedGitHubUsersResponses : GitHubUsers {
     public var username: Username = Username::class.of("MykytaPimonovTD")
 
     /**
-     * Whether the user is a member of any permitted organizations.
-     */
-    public var isMemberOfPermittedOrganizations: Boolean = true
-
-    /**
      * Returns the `User` with the specified [username] and a default avatar URL.
      */
     override fun ownerOf(token: PersonalAccessToken): User =
         User::class.of(username.value, "https://avatars.githubusercontent.com/u/160486193")
 
     /**
-     * Returns the set of `Organization`s retrieved from a JSON file in the resource folder
-     * if the user is a member of any permitted organizations. Otherwise, returns empty set.
+     * Returns the set of `Organization`s retrieved from a JSON file in the resource folder.
      */
     override fun memberships(token: PersonalAccessToken): Set<Organization> =
-        if (isMemberOfPermittedOrganizations) {
-            loadOrganizations()
-                .itemList
-                .map { fragment -> Organization::class.from(fragment) }
-                .toSet()
-        } else {
-            setOf()
-        }
+        loadOrganizations()
+            .itemList
+            .map { fragment -> Organization::class.from(fragment) }
+            .toSet()
 
     /**
      * Resets the instance to its initial state.
      *
-     * Once the instance is reset, the user is considered a member of any permitted organizations,
-     * and the username is set to the default value.
+     * Once the instance is reset, the username is set to the default value.
      */
     public fun reset() {
-        isMemberOfPermittedOrganizations = true
         username = Username::class.of("MykytaPimonovTD")
     }
 }

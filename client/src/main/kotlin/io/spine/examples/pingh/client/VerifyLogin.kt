@@ -36,7 +36,6 @@ import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.of
-import io.spine.examples.pingh.sessions.rejection.Rejections.NotMemberOfPermittedOrgs
 import io.spine.examples.pingh.sessions.rejection.Rejections.UsernameMismatch
 import io.spine.examples.pingh.sessions.withSession
 import io.spine.net.Url
@@ -148,11 +147,6 @@ public class VerifyLogin internal constructor(
                 codeExpirationJob.cancel()
                 result = rejection.cause
                 moveToNextStage()
-            },
-            EventObserver(command.id, NotMemberOfPermittedOrgs::class) { rejection ->
-                codeExpirationJob.cancel()
-                result = rejection.cause
-                moveToNextStage()
             }
         )
         client.send(command)
@@ -222,10 +216,3 @@ private val UsernameMismatch.cause: String
     get() = "You entered \"${expectedUser.value}\" as the username but used the code " +
             "from \"${loggedInUser.value}\" account. You must authenticate with " +
             "the account matching the username you initially provided."
-
-/**
- * An error message explaining the cause of `NotMemberOfPermittedOrgs` rejection.
- */
-@Suppress("UnusedReceiverParameter" /* Associated with the rejection but doesn't use its data. */)
-private val NotMemberOfPermittedOrgs.cause: String
-    get() = "You are not a member of an organization authorized to use the application."

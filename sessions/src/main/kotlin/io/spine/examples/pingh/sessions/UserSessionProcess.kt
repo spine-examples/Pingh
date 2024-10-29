@@ -38,7 +38,6 @@ import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
-import io.spine.examples.pingh.sessions.rejection.NotMemberOfPermittedOrgs
 import io.spine.examples.pingh.sessions.rejection.UsernameMismatch
 import io.spine.server.command.Assign
 import io.spine.server.command.Command
@@ -100,10 +99,9 @@ internal class UserSessionProcess :
      *
      * @throws UsernameMismatch if the username of the logged-in account differs from
      *   the one provided at the start.
-     * @throws NotMemberOfPermittedOrgs if the user is not a member of any permitted organizations.
      */
     @Assign
-    @Throws(UsernameMismatch::class, NotMemberOfPermittedOrgs::class)
+    @Throws(UsernameMismatch::class)
     internal fun handle(
         command: VerifyUserLoginToGitHub
     ): EitherOf2<UserLoggedIn, UserIsNotLoggedIntoGitHub> {
@@ -113,7 +111,6 @@ internal class UserSessionProcess :
             return EitherOf2.withB(UserIsNotLoggedIntoGitHub::class.withSession(command.id))
         }
         ensureUsernameMatching(tokens.accessToken)
-        ensureMembershipInPermittedOrgs(tokens.accessToken)
         with(builder()) {
             refreshToken = tokens.refreshToken
             whenAccessTokenExpires = tokens.whenExpires
@@ -137,18 +134,6 @@ internal class UserSessionProcess :
         val loggedInUser = users.ownerOf(token)
         if (!expectedUsername.equals(loggedInUser.username)) {
             throw UsernameMismatch::class.with(state().id, expectedUsername, loggedInUser.username)
-        }
-    }
-
-    /**
-     * Throws an `NotMemberOfPermittedOrgs` rejection if the user is not a member
-     * of any [permitted organizations][PermittedOrganizations].
-     */
-    @Throws(NotMemberOfPermittedOrgs::class)
-    private fun ensureMembershipInPermittedOrgs(token: PersonalAccessToken) {
-        val userOrganizations = users.memberships(token)
-        if (!userOrganizations.any { PermittedOrganizations.contains(it) }) {
-            throw NotMemberOfPermittedOrgs::class.with(state().id)
         }
     }
 
