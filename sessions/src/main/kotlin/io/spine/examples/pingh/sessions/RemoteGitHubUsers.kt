@@ -31,8 +31,11 @@ import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
+import io.spine.examples.pingh.github.Organization
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.User
+import io.spine.examples.pingh.github.from
+import io.spine.examples.pingh.github.rest.OrganizationsResponse
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -58,6 +61,34 @@ public class RemoteGitHubUsers(engine: HttpClientEngine) : GitHubUsers {
                 configureHeaders(token)
             }
             User::class.parseJson(response.body())
+        }
+
+    /**
+     * Returns the organizations of which the user owning
+     * the provided access token is a member.
+     *
+     * Note that all organizations where the user is a public member are returned.
+     * Organizations where the user is a private member are only obtained
+     * if they have installed the
+     * [Pingh GitHub App](https://github.com/apps/pingh-tracker-of-github-mentions).
+     *
+     * @param token The access token used to access organizations where
+     *   the user is a private member.
+     * @see <a href="https://shorturl.at/ileD9">List organizations for the authenticated user</a>
+     */
+    override fun memberships(token: PersonalAccessToken): Set<Organization> =
+        runBlocking {
+            val response = client.get("https://api.github.com/user/orgs") {
+                configureHeaders(token)
+            }
+            val json = response.body<String>()
+            // The received JSON contains only an array, but Protobuf JSON Parser
+            // cannot process it. So the array is converted to JSON, where the result
+            // is just the value of the `item` field.
+            OrganizationsResponse::class.parseJson("{ item: $json }")
+                .itemList
+                .map {fragment -> Organization::class.from(fragment) }
+                .toSet()
         }
 }
 

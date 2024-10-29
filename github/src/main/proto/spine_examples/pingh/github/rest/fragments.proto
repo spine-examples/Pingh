@@ -231,3 +231,20 @@ message ErrorResponse {
     // The name of the error.
     string error = 1;
 }
+
+// Organization data retrieved from the GitHub REST API.
+message OrganizationFragment {
+
+    // A name of the organization.
+    string login = 1 [(required) = true];
+}
+
+// A response from the GitHub REST API to a request for the organizations the user belongs to.
+message OrganizationsResponse {
+
+    // GitHub organizations.
+    //
+    // If the user is not a member of an organization, the list is empty.
+    //
+    repeated OrganizationFragment item = 1 [(validate) = true];
+}

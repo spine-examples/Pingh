@@ -51,3 +51,16 @@ message UsernameMismatch {
     // The name of the user whose account completed the authentication.
     spine_examples.pingh.github.Username logged_in_user = 3 [(required) = true];
 }
+
+// The user is not a member of an organization authorized to use the Pingh application.
+//
+// To function properly and display members, the organization must have
+// the Pingh application installed on GitHub.
+//
+// See: https://github.com/apps/pingh-tracker-of-github-mentions.
+//
+message NotMemberOfPermittedOrgs {
+
+    // The ID of the session.
+    SessionId id = 1 [(required) = true];
+}

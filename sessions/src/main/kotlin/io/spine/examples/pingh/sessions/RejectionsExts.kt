@@ -29,6 +29,7 @@
 package io.spine.examples.pingh.sessions
 
 import io.spine.examples.pingh.github.Username
+import io.spine.examples.pingh.sessions.rejection.NotMemberOfPermittedOrgs
 import io.spine.examples.pingh.sessions.rejection.UsernameMismatch
 import kotlin.reflect.KClass
 
@@ -46,4 +47,12 @@ internal fun KClass<UsernameMismatch>.with(
         .setId(id)
         .setExpectedUser(expectedUser)
         .setLoggedInUser(loggedInUser)
+        .build()
+
+/**
+ * Creates a new `NotMemberOfPermittedOrgs` rejection with the passed ID of the session.
+ */
+internal fun KClass<NotMemberOfPermittedOrgs>.with(id: SessionId): NotMemberOfPermittedOrgs =
+    NotMemberOfPermittedOrgs.newBuilder()
+        .setId(id)
         .build()

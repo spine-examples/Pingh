@@ -88,8 +88,21 @@ github-app.client.secret=client_secret
 ```
 
 Replace `client_id` and `client_secret` with the values obtained from GitHub.
- 
-2. Start the Pingh server locally. The server always runs on port `50051`. 
+
+2. The application can be used only by members of certain organizations.
+   Specify the names of these organizations separated by commas
+   in the `sessions/src/main/resources/config/auth.properties` file.
+   For instance, for organizations `spine-examples` and `SpineEventEngine`, enter:
+
+```properties
+permitted-organizations=spine-examples, SpineEventEngine
+```
+
+Additionally, ensure that each specified organization has
+the [GitHub App](https://github.com/apps/pingh-tracker-of-github-mentions) installed;
+otherwise, authentication will fail.
+
+3. Start the Pingh server locally. The server always runs on port `50051`. 
   To launch it, run the following command in the root project directory:
 
 ```shell
@@ -99,7 +112,7 @@ Replace `client_id` and `client_secret` with the values obtained from GitHub.
 This will start the server on `localhost:50051` and publish the required JAR files 
 for the client application to the Maven Local repository.
 
-3. Configure the client's connection to the server. To do this, 
+4. Configure the client's connection to the server. To do this, 
   enter the server's address and port 
   in the `desktop/src/main/resources/config/server.properties` file as follows:
 
@@ -108,7 +121,7 @@ server.address=localhost
 server.port=50051
 ```
 
-4. Build and run the client application. Navigate to the `desktop` module directory 
+5. Build and run the client application. Navigate to the `desktop` module directory 
   and execute the following command:
 
 ```shell
