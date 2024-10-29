@@ -70,13 +70,14 @@ in that organization.
 
 By installing the application in an organization on the permitted list, 
 access to its private repositories for mention searches is granted, 
-along with the ability to verify membership for authentication. In contrast, 
-installing the application in an organization not on the permitted list 
-permits only detecting mentions in private repositories without impacting authentication.
+along with the ability to verify membership for authentication. Installing the application 
+in an organization not on the permitted list enables mention detection in private repositories 
+but does not affect authentication.
 
-Specify the names of permitted organizations separated by commas
-in the `sessions/src/main/resources/config/auth.properties` file.
-For instance, for organizations `spine-examples` and `SpineEventEngine`, enter:
+The names of permitted organizations are listed 
+in the `sessions/src/main/resources/config/auth.properties` file, separated by commas. 
+The names can be updated as needed. For instance, 
+for organizations `spine-examples` and `SpineEventEngine`, enter:
 
 ```properties
 permitted-organizations=spine-examples, SpineEventEngine
