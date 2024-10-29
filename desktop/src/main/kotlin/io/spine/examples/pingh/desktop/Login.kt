@@ -68,6 +68,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
@@ -139,6 +142,10 @@ private fun UsernameEnteringPage(
     var username by remember { mutableStateOf("") }
     var wasChanged by remember { mutableStateOf(false) }
     val isError = remember { mutableStateOf(false) }
+    val requestUserCode = {
+        val name = Username::class.of(username)
+        flow.requestUserCode(name)
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -154,15 +161,18 @@ private fun UsernameEnteringPage(
                 username = value
                 wasChanged = true
             },
+            onEnterPressed = {
+                if (wasChanged && !isError.value) {
+                    requestUserCode()
+                }
+            },
             isError = isError
         )
         Spacer(Modifier.height(10.dp))
         LoginButton(
-            enabled = wasChanged && !isError.value
-        ) {
-            val name = Username::class.of(username)
-            flow.requestUserCode(name)
-        }
+            enabled = wasChanged && !isError.value,
+            onClick = requestUserCode
+        )
     }
 }
 
@@ -213,12 +223,14 @@ private fun ApplicationInfo() {
  *
  * @param value The current value of the input field.
  * @param onChange Called when input value is changed.
+ * @param onEnterPressed Called when this input is focused and the "Enter" key is pressed.
  * @param isError Indicates if the input's current value is in error.
  */
 @Composable
 private fun UsernameInput(
     value: String,
     onChange: (String) -> Unit,
+    onEnterPressed: () -> Unit,
     isError: MutableState<Boolean>
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -238,6 +250,14 @@ private fun UsernameInput(
         modifier = Modifier
             .width(180.dp)
             .height(52.dp)
+            .onKeyEvent { event ->
+                if (event.key == Key.Enter) {
+                    onEnterPressed()
+                    true
+                } else {
+                    false
+                }
+            }
             .testTag("username-input"),
         textStyle = MaterialTheme.typography.bodyLarge.copy(
             color = MaterialTheme.colorScheme.onSecondary
