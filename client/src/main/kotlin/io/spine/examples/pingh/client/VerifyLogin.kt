@@ -220,7 +220,7 @@ private fun invoke(delay: Duration, action: () -> Unit): Job =
  */
 private val UsernameMismatch.cause: String
     get() = "You entered \"${expectedUser.value}\" as the username but used the code " +
-            "from \"${loggedInUser.value}\" account. You must authenticate with " +
+            "issued for \"${loggedInUser.value}\" account. You must authenticate with " +
             "the account matching the username you initially provided."
 
 /**
