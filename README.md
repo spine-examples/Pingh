@@ -50,6 +50,39 @@ There are several auxiliary modules designed for testing of the corresponding Gr
 For a detailed analysis of the processes within domain contexts, 
 refer to the [#EventStorming documentation](./EventStorming.md).
 
+## GitHub data access
+
+The application tracks user's mentions in all public GitHub repositories.
+
+The mentions in the private repositories are tracked if the user has access to the repository and 
+the [GitHub app](https://github.com/apps/pingh-tracker-of-github-mentions) is installed 
+on the repository or the organization that owns it.
+
+## Authentication
+
+The application can be used only by members of certain organizations.
+
+Users who are members of any permitted organization can log in to the application; 
+otherwise, they will encounter an exception.
+
+To check a user’s membership within an organization, the app must be installed 
+in that organization.
+
+By installing the application in an organization on the permitted list, 
+access to its private repositories for mention searches is granted, 
+along with the ability to verify membership for authentication. Installing the application 
+in an organization not on the permitted list enables mention detection in private repositories 
+but does not affect authentication.
+
+The names of permitted organizations are listed 
+in the `sessions/src/main/resources/config/auth.properties` file, separated by commas. 
+The names can be updated as needed. For instance, 
+for organizations `spine-examples` and `SpineEventEngine`, enter:
+
+```properties
+permitted-organizations=spine-examples, SpineEventEngine
+```
+
 ## Local run
 
 Both client and server can be built and launched locally.
@@ -82,18 +115,7 @@ github-app.client.secret=client_secret
 
 Replace `client_id` and `client_secret` with the values obtained from GitHub.
 
-2. The application can be used only by members of certain organizations. 
-  Specify the names of these organizations separated by commas 
-  in the `sessions/src/main/resources/config/auth.properties` file.
-  For instance, for organizations `spine-examples` and `SpineEventEngine`, enter:
-
-```properties
-permitted-organizations=spine-examples, SpineEventEngine
-```
-
-Additionally, ensure that each specified organization has 
-the [GitHub App](https://github.com/apps/pingh-tracker-of-github-mentions) installed; 
-otherwise, authentication will fail.
+2. Specify the names of permitted organizations. See: [Authentication](#authentication).
  
 3. Start the Pingh server locally. The server always runs on port `50051`. 
   To launch it, run the following command in the root project directory:
@@ -105,19 +127,18 @@ otherwise, authentication will fail.
 This will start the server on `localhost:50051` and publish the required JAR files 
 for the client application to the Maven Local repository.
 
-4. Configure the client's connection to the server. To do this, 
-  enter the server's address and port 
-  in the `desktop/src/main/resources/config/server.properties` file as follows:
+4. Configure the client's connection to the server by modifying
+  `desktop/src/main/resources/config/server.properties` as follows:
 
 ```properties
 server.address=localhost
 server.port=50051
 ```
 
-5. Build and run the client application. Navigate to the `desktop` module directory 
-  and execute the following command:
+5. Build and run the client application:
 
 ```shell
+cd ./desktop
 ./gradlew runDistributable
 ```
 
