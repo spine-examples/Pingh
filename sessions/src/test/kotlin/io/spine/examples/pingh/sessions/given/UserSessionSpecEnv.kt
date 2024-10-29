@@ -41,8 +41,8 @@ import io.spine.examples.pingh.sessions.buildWith
 import io.spine.examples.pingh.sessions.event.TokenRefreshed
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
-import io.spine.examples.pingh.sessions.rejection.Rejections.NotMemberOfPermittedOrgs
 import io.spine.examples.pingh.sessions.rejection.Rejections.UsernameMismatch
+import io.spine.examples.pingh.sessions.rejection.Rejections.NotMemberOfPermittedOrgs
 import io.spine.examples.pingh.sessions.with
 import io.spine.examples.pingh.testing.sessions.given.loadAccessToken
 import io.spine.examples.pingh.testing.sessions.given.loadRefreshedAccessToken
