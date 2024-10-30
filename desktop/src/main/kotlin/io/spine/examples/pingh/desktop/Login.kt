@@ -168,7 +168,7 @@ private fun UsernameEnteringPage(
             },
             isError = isError
         )
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(15.dp))
         LoginButton(
             enabled = wasChanged && !isError.value,
             onClick = requestUserCode
@@ -194,7 +194,7 @@ private fun ApplicationInfo() {
             Icon(
                 painter = Icons.pingh,
                 contentDescription = null,
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier.size(50.dp),
                 tint = MaterialTheme.colorScheme.onSecondary
             )
             Spacer(Modifier.width(10.dp))
@@ -206,11 +206,11 @@ private fun ApplicationInfo() {
                 style = MaterialTheme.typography.displayLarge
             )
         }
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(20.dp))
         Text(
             text = "Pingh is a GitHub app that looks up mentions on behalf of the user. " +
                     "It requires authentication via GitHub.",
-            modifier = Modifier.width(180.dp),
+            modifier = Modifier.width(240.dp),
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyMedium
@@ -248,8 +248,8 @@ private fun UsernameInput(
             isError.value = !isValidUsername(changedValue)
         },
         modifier = Modifier
-            .width(180.dp)
-            .height(52.dp)
+            .width(240.dp)
+            .height(57.dp)
             .onKeyEvent { event ->
                 if (event.key == Key.Enter) {
                     onEnterPressed()
@@ -294,8 +294,8 @@ private fun InputContainer(
 ) {
     Row(
         modifier = Modifier
-            .width(180.dp)
-            .height(40.dp)
+            .width(240.dp)
+            .height(45.dp)
             .border(border = border, shape = MaterialTheme.shapes.medium)
             .background(
                 color = MaterialTheme.colorScheme.secondary,
@@ -325,9 +325,9 @@ private fun InputContainer(
 private fun Label(color: Color) {
     Box(
         modifier = Modifier
-            .width(90.dp)
-            .height(10.dp)
-            .absoluteOffset(x = 10.dp, y = (-5).dp)
+            .width(110.dp)
+            .height(12.dp)
+            .absoluteOffset(x = 12.dp, y = (-6).dp)
     ) {
         Text(
             text = "GitHub username",
@@ -370,7 +370,7 @@ private fun ErrorMessage(isShown: Boolean) {
             modifier = Modifier
                 .width(155.dp)
                 .height(30.dp)
-                .absoluteOffset(x = 15.dp, y = 44.dp),
+                .absoluteOffset(x = 15.dp, y = 49.dp),
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.bodySmall
         )
@@ -392,8 +392,8 @@ private fun LoginButton(
     Button(
         onClick = onClick,
         modifier = Modifier
-            .width(180.dp)
-            .height(40.dp)
+            .width(240.dp)
+            .height(45.dp)
             .testTag("login-button"),
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(
@@ -445,7 +445,7 @@ private fun VerificationPage(
             userCode = userCode,
             isExpired = isUserCodeExpired
         )
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(15.dp))
         if (isUserCodeExpired) {
             Spacer(Modifier.height(5.dp))
             CodeExpiredErrorMessage(flow)
@@ -499,7 +499,7 @@ private fun UserCodeField(
             Text(
                 text = userCode.value,
                 color = color,
-                fontSize = 28.sp,
+                fontSize = 34.sp,
                 letterSpacing = 3.sp,
                 style = MaterialTheme.typography.displayLarge
             )
@@ -521,14 +521,14 @@ private fun CopyToClipboardIcon(
 ) {
     val clipboardManager = LocalClipboardManager.current
     Box(
-        modifier = Modifier.offset(x = 103.dp)
+        modifier = Modifier.offset(x = 130.dp)
     ) {
         IconButton(
             icon = Icons.copy,
             onClick = {
                 clipboardManager.setText(AnnotatedString(userCode.value))
             },
-            modifier = Modifier.size(30.dp),
+            modifier = Modifier.size(40.dp),
             colors = IconButtonDefaults.iconButtonColors(
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer
             )
@@ -635,8 +635,8 @@ private fun SubmitButton(
     }
     Box(
         modifier = Modifier
-            .width(210.dp)
-            .height(32.dp),
+            .width(240.dp)
+            .height(40.dp),
         contentAlignment = Alignment.TopCenter
     ) {
         Button(
@@ -679,8 +679,8 @@ private fun NoResponseErrorMessage(flow: VerifyLogin) {
         clickablePartOfText = "start over",
         onClick = flow::requestNewUserCode,
         modifier = Modifier
-            .width(180.dp)
-            .offset(y = 40.dp)
+            .width(220.dp)
+            .offset(y = 45.dp)
             .testTag("no-response-message")
     )
 }
@@ -757,11 +757,11 @@ private fun FailedPage(flow: LoginFailed) {
     ) {
         Text(
             text = flow.errorMessage.value,
-            modifier = Modifier.width(210.dp),
+            modifier = Modifier.width(240.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyLarge
         )
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(25.dp))
         RestartButton(flow)
     }
 }
@@ -776,8 +776,8 @@ private fun RestartButton(flow: LoginFailed) {
     Button(
         onClick = flow::restartLogin,
         modifier = Modifier
-            .width(210.dp)
-            .height(32.dp),
+            .width(240.dp)
+            .height(40.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
