@@ -693,8 +693,8 @@ private fun NoResponseErrorMessage(flow: VerifyLogin) {
         clickablePartOfText = "start over",
         onClick = flow::requestNewUserCode,
         modifier = Modifier
-            .width(220.dp)
-            .offset(y = 45.dp)
+            .width(240.dp)
+            .offset(y = 50.dp)
             .testTag("no-response-message")
     )
 }
