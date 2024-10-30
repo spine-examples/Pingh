@@ -108,7 +108,7 @@ private fun ToolBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(48.dp)
+            .height(60.dp)
             .background(MaterialTheme.colorScheme.secondary)
             .drawBehind {
                 drawLine(
@@ -118,20 +118,21 @@ private fun ToolBar(
                     strokeWidth = 1.dp.toPx()
                 )
             }
-            .padding(horizontal = 5.dp, vertical = 4.dp),
+            .padding(horizontal = 30.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
             icon = Icons.pingh,
             onClick = toSettingsPage,
-            modifier = Modifier.size(40.dp).testTag("settings-button"),
+            modifier = Modifier.size(50.dp).testTag("settings-button"),
             colors = IconButtonDefaults.iconButtonColors(
                 contentColor = contentColor
             )
         )
+        Spacer(Modifier.width(10.dp))
         Text(
             text = "Recent mentions",
-            modifier = Modifier.width(140.dp),
+            modifier = Modifier.width(250.dp),
             color = contentColor,
             style = MaterialTheme.typography.displayLarge
         )
@@ -140,7 +141,7 @@ private fun ToolBar(
             onClick = {
                 flow.updateMentions()
             },
-            modifier = Modifier.size(40.dp),
+            modifier = Modifier.size(50.dp),
             colors = IconButtonDefaults.iconButtonColors(
                 contentColor = contentColor
             )
@@ -165,17 +166,17 @@ private fun MentionCards(
     Column(
         Modifier
             .fillMaxSize()
-            .padding(horizontal = 5.dp)
+            .padding(horizontal = 10.dp)
             .verticalScroll(scrollState)
             .background(MaterialTheme.colorScheme.background)
             .testTag("mention-cards"),
     ) {
         mentions.sorted()
             .forEach { mention ->
-                Spacer(Modifier.height(5.dp))
+                Spacer(Modifier.height(10.dp))
                 MentionCard(flow, mention)
             }
-        Spacer(Modifier.height(5.dp))
+        Spacer(Modifier.height(10.dp))
     }
 }
 
@@ -216,7 +217,7 @@ private fun MentionCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("mention-card-${mention.id}")
-            .height(50.dp),
+            .height(60.dp),
         interactionSource = interactionSource,
         colors = CardDefaults.elevatedCardColors(
             containerColor = containerColor,
@@ -225,16 +226,16 @@ private fun MentionCard(
     ) {
         Row(
             modifier = Modifier
-                .padding(vertical = 3.dp, horizontal = 10.dp),
+                .padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Avatar(
                 url = mention.whoMentioned.avatarUrl,
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(50.dp)
             )
-            Spacer(Modifier.width(5.dp))
+            Spacer(Modifier.width(10.dp))
             MentionCardText(mention, isHovered)
-            Spacer(Modifier.width(5.dp))
+            Spacer(Modifier.width(10.dp))
             SnoozeButton(flow, mention)
         }
     }
@@ -258,7 +259,7 @@ private fun MentionCardText(
     Column(
         modifier = Modifier
             .fillMaxHeight()
-            .width(120.dp),
+            .width(240.dp),
         verticalArrangement = Arrangement.Center
     ) {
         Text(
@@ -267,7 +268,7 @@ private fun MentionCardText(
             maxLines = 1,
             style = MaterialTheme.typography.bodyLarge
         )
-        Spacer(Modifier.height(2.dp))
+        Spacer(Modifier.height(4.dp))
         Text(
             text = "$time, by ${mention.whoMentioned.username.value}",
             overflow = TextOverflow.Ellipsis,
@@ -298,7 +299,7 @@ private fun SnoozeButton(
                 onClick = {
                     flow.snooze(mention.id)
                 },
-                modifier = Modifier.size(40.dp).testTag("snooze-button"),
+                modifier = Modifier.size(50.dp).testTag("snooze-button"),
                 colors = IconButtonDefaults.iconButtonColors(
                     contentColor = MaterialTheme.colorScheme.onSecondary
                 )
@@ -307,7 +308,7 @@ private fun SnoozeButton(
         MentionStatus.SNOOZED ->
             Text(
                 text = "Snoozed",
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(50.dp)
                     .wrapContentSize(Alignment.Center),
                 style = MaterialTheme.typography.bodySmall
             )
