@@ -396,6 +396,7 @@ private fun LoginButton(
             .height(45.dp)
             .testTag("login-button"),
         enabled = enabled,
+        shape = MaterialTheme.shapes.medium,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
@@ -440,12 +441,12 @@ private fun VerificationPage(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         VerificationTitle()
-        Spacer(Modifier.height(15.dp))
+        Spacer(Modifier.height(25.dp))
         UserCodeField(
             userCode = userCode,
             isExpired = isUserCodeExpired
         )
-        Spacer(Modifier.height(15.dp))
+        Spacer(Modifier.height(25.dp))
         if (isUserCodeExpired) {
             Spacer(Modifier.height(5.dp))
             CodeExpiredErrorMessage(flow)
@@ -454,7 +455,7 @@ private fun VerificationPage(
                 verificationUrl = verificationUrl,
                 expiresIn = expiresIn
             )
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(25.dp))
             SubmitButton(
                 flow = flow,
                 toMentionsPage = toMentionsPage
@@ -470,7 +471,7 @@ private fun VerificationPage(
 private fun VerificationTitle() {
     Text(
         text = "Verify your login",
-        fontSize = 18.sp,
+        fontSize = 20.sp,
         style = MaterialTheme.typography.displayLarge
     )
 }
@@ -491,15 +492,32 @@ private fun UserCodeField(
     } else {
         MaterialTheme.colorScheme.onSecondary
     }
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
+    Row(
+        modifier = Modifier
+            .width(260.dp)
+            .height(46.dp)
+            .run {
+                if (isExpired) {
+                    this
+                } else {
+                    border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        shape = MaterialTheme.shapes.medium
+                    )
+                }
+            }
+            .padding(horizontal = 15.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         SelectionContainer {
             Text(
                 text = userCode.value,
+                modifier = Modifier.width(200.dp),
                 color = color,
-                fontSize = 34.sp,
+                fontSize = 30.sp,
+                textAlign = if (isExpired) TextAlign.Center else TextAlign.Start,
                 letterSpacing = 3.sp,
                 style = MaterialTheme.typography.displayLarge
             )
@@ -520,20 +538,16 @@ private fun CopyToClipboardIcon(
     userCode: UserCode
 ) {
     val clipboardManager = LocalClipboardManager.current
-    Box(
-        modifier = Modifier.offset(x = 130.dp)
-    ) {
-        IconButton(
-            icon = Icons.copy,
-            onClick = {
-                clipboardManager.setText(AnnotatedString(userCode.value))
-            },
-            modifier = Modifier.size(40.dp),
-            colors = IconButtonDefaults.iconButtonColors(
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-            )
+    IconButton(
+        icon = Icons.copy,
+        onClick = {
+            clipboardManager.setText(AnnotatedString(userCode.value))
+        },
+        modifier = Modifier.size(30.dp),
+        colors = IconButtonDefaults.iconButtonColors(
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
         )
-    }
+    )
 }
 
 /**
@@ -563,17 +577,16 @@ private fun VerificationText(
     expiresIn: Duration
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.width(260.dp)
     ) {
         Text(
             text = "Enter this code at",
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             style = MaterialTheme.typography.bodyLarge
         )
-        Spacer(Modifier.height(3.dp))
+        Spacer(Modifier.height(5.dp))
         VerificationUrlButton(verificationUrl)
-        Spacer(Modifier.height(3.dp))
+        Spacer(Modifier.height(12.dp))
         Text(
             text = "The code is valid for ${toMinutes(expiresIn)} minutes.",
             color = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -635,8 +648,8 @@ private fun SubmitButton(
     }
     Box(
         modifier = Modifier
-            .width(240.dp)
-            .height(40.dp),
+            .width(260.dp)
+            .height(46.dp),
         contentAlignment = Alignment.TopCenter
     ) {
         Button(
@@ -644,6 +657,7 @@ private fun SubmitButton(
             modifier = Modifier.fillMaxSize()
                 .testTag("submit-button"),
             enabled = enabled,
+            shape = MaterialTheme.shapes.medium,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
@@ -651,7 +665,7 @@ private fun SubmitButton(
         ) {
             Text(
                 text = "I have entered the code",
-                style = MaterialTheme.typography.displayMedium
+                style = MaterialTheme.typography.displaySmall
             )
         }
         if (!enabled) {

@@ -108,7 +108,7 @@ private fun ToolBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(60.dp)
+            .height(68.dp)
             .background(MaterialTheme.colorScheme.secondary)
             .drawBehind {
                 drawLine(
@@ -118,18 +118,18 @@ private fun ToolBar(
                     strokeWidth = 1.dp.toPx()
                 )
             }
-            .padding(horizontal = 30.dp),
+            .padding(start = 28.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
             icon = Icons.pingh,
             onClick = toSettingsPage,
-            modifier = Modifier.size(50.dp).testTag("settings-button"),
+            modifier = Modifier.size(54.dp).testTag("settings-button"),
             colors = IconButtonDefaults.iconButtonColors(
                 contentColor = contentColor
             )
         )
-        Spacer(Modifier.width(10.dp))
+        Spacer(Modifier.width(8.dp))
         Text(
             text = "Recent mentions",
             modifier = Modifier.width(250.dp),
