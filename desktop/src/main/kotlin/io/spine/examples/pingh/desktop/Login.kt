@@ -792,6 +792,7 @@ private fun RestartButton(flow: LoginFailed) {
         modifier = Modifier
             .width(240.dp)
             .height(40.dp),
+        shape = MaterialTheme.shapes.medium,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
