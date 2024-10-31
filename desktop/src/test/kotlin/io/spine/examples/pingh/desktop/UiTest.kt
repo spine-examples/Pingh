@@ -61,7 +61,7 @@ internal abstract class UiTest : IntegrationTest() {
     protected fun ComposeUiTest.runApp() {
         setContent {
             Theme {
-                state = remember { AppState() }
+                state = createAppState()
                 Window(state!!.window, state!!.app, uriHandler)
             }
         }

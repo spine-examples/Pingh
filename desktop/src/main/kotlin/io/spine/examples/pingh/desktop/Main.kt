@@ -35,7 +35,7 @@ import androidx.compose.ui.window.application
 public fun main() {
     application {
         Theme {
-            val state = remember { AppState() }
+            val state = createAppState()
             Window(state.window, state.app)
             Tray(state.tray, state.app)
         }

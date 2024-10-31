@@ -28,9 +28,12 @@ package io.spine.examples.pingh.desktop
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.ApplicationScope
-import androidx.compose.ui.window.TrayState as ComposeTrayState
-import androidx.compose.ui.window.Tray as ComposeTray
 import io.spine.examples.pingh.client.PinghApplication
+import java.awt.Image
+import java.awt.SystemTray
+import java.awt.TrayIcon
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
 
 /**
  * Adds the application icon to the platform taskbar.
@@ -42,47 +45,40 @@ import io.spine.examples.pingh.client.PinghApplication
  */
 @Composable
 internal fun ApplicationScope.Tray(state: TrayState, app: PinghApplication) {
-    ComposeTray(
-        icon = state.icon,
-        state = state.composeTray,
-        tooltip = state.title,
-        onAction = state::toggleWindowVisibility,
-        menu = {
-            Item(state.toggleName, onClick = state::toggleWindowVisibility)
-            Item("Quit", onClick = {
-                app.close()
-                exitApplication()
-            })
-        }
-    )
+    state.systemTray.apply {
+        isImageAutoSize = true
+        toolTip = state.title
+
+        addMouseListener(
+            object : MouseAdapter() {
+                override fun mouseClicked(e: MouseEvent) {
+                    if (e.button == 1) {
+                        state.toggleWindowVisibility()
+                    }
+                }
+            }
+        )
+    }
+    SystemTray.getSystemTray().add(state.systemTray)
 }
 
 /**
  * State of [Tray].
  *
  * @property window The state of the Pingh platform window.
- * @property composeTray The built-in state for Compose trays.
  */
 internal class TrayState(
-    private val window: WindowState,
-    internal val composeTray: ComposeTrayState,
+    icon: Image,
+    private val window: WindowState
 ) {
-    /**
-     * The tray icon.
-     */
-    internal val icon = Icons.tray
+    // TODO:2024-10-31:mykyta.pimonov: Rename.
+    internal val systemTray = TrayIcon(icon)
 
     /**
      * Application's title.
      */
     internal val title: String
         get() = window.title
-
-    /**
-     * Toggle name for the window visibility switcher.
-     */
-    internal val toggleName: String
-        get() = if (window.isShown) "Hide" else "Show"
 
     /**
      * Switches the window visibility.
