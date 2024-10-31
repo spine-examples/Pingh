@@ -72,8 +72,6 @@ internal class AppState(
             .with(notificationSender)
             .build()
     }
-
-
 }
 
 /**
