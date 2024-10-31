@@ -29,9 +29,13 @@ package io.spine.examples.pingh.desktop
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.ApplicationScope
 import io.spine.examples.pingh.client.PinghApplication
+import java.awt.Frame
 import java.awt.Image
+import java.awt.MenuItem
+import java.awt.PopupMenu
 import java.awt.SystemTray
 import java.awt.TrayIcon
+import java.awt.Window
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 
@@ -45,6 +49,10 @@ import java.awt.event.MouseEvent
  */
 @Composable
 internal fun ApplicationScope.Tray(state: TrayState, app: PinghApplication) {
+    val menu = Menu {
+        app.close()
+        exitApplication()
+    }
     state.systemTray.apply {
         isImageAutoSize = true
         toolTip = state.title
@@ -55,11 +63,50 @@ internal fun ApplicationScope.Tray(state: TrayState, app: PinghApplication) {
                     if (e.button == 1) {
                         state.toggleWindowVisibility()
                     }
+                    if (e.button == 3) {
+                        menu.show(e.xOnScreen, e.yOnScreen)
+                    }
                 }
             }
         )
     }
     SystemTray.getSystemTray().add(state.systemTray)
+}
+
+/**
+ *
+ */
+private class Menu(onExit: () -> Unit) {
+    /**
+     *
+     */
+    private val menuFrame = Frame()
+
+    /**
+     *
+     */
+    private val popupMenu = PopupMenu()
+
+    init {
+        val exitItem = MenuItem("Exit")
+        exitItem.addActionListener {
+            onExit()
+        }
+        popupMenu.add(exitItem)
+        menuFrame.apply {
+            isUndecorated = true
+            type = Window.Type.UTILITY
+            add(popupMenu)
+            isVisible = true
+        }
+    }
+
+    /**
+     *
+     */
+    fun show(x: Int, y: Int) {
+        popupMenu.show(menuFrame, x, y)
+    }
 }
 
 /**
