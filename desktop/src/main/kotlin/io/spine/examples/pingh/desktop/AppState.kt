@@ -34,10 +34,8 @@ import java.util.Properties
 
 /**
  * The top-level application state.
- *
- * @param settings The settings of the operating system on which the application is running.
  */
-internal class AppState(settings: SystemSettings) {
+internal class AppState {
 
     /**
      * A built-in state for Compose trays.
@@ -54,7 +52,7 @@ internal class AppState(settings: SystemSettings) {
     /**
      * State of the application icon, located in the platform taskbar.
      */
-    internal val tray = TrayState(window, composeTray, settings)
+    internal val tray = TrayState(window, composeTray)
 
     /**
      * Manages the logic for the Pingh app.
