@@ -30,14 +30,17 @@ import androidx.compose.ui.window.Notification
 import androidx.compose.ui.window.TrayState as ComposeTrayState
 import io.spine.examples.pingh.client.NotificationSender
 import io.spine.examples.pingh.client.PinghApplication
-import java.util.Properties
 
 /**
  * The top-level application state.
  *
+ * @param serverEndpoint The connection details for the Pingh server.
  * @param settings The settings of the operating system on which the application is running.
  */
-internal class AppState(settings: SystemSettings) {
+internal class AppState(
+    serverEndpoint: ServerEndpoint,
+    settings: SystemSettings
+) {
 
     /**
      * A built-in state for Compose trays.
@@ -63,33 +66,14 @@ internal class AppState(settings: SystemSettings) {
 
     init {
         val notificationSender = TrayNotificationSender(composeTray) { !window.isShown }
-        val properties = loadProperties()
         app = PinghApplication.builder()
-            .withAddress(properties.getProperty("server.address"))
-            .withPort(properties.getProperty("server.port").toInt())
+            .withAddress(serverEndpoint.address)
+            .withPort(serverEndpoint.port)
             .with(notificationSender)
             .build()
     }
 
-    /**
-     * Loads server properties from resource folder.
-     */
-    private fun loadProperties(): Properties {
-        val properties = Properties()
-        val path = "/config/server.properties"
-        javaClass.getResourceAsStream(path).use {
-            properties.load(it)
-        }
-        check(properties.containsKey("server.address")) {
-            "The Pingh server address must be provided in the configuration file " +
-                    "located at \"resource$path\"."
-        }
-        check(properties.containsKey("server.port")) {
-            "The Pingh server port must be provided in the configuration file " +
-                    "located at \"resource$path\"."
-        }
-        return properties
-    }
+
 }
 
 /**

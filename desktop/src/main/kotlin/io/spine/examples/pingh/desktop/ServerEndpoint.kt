@@ -26,20 +26,39 @@
 
 package io.spine.examples.pingh.desktop
 
-import androidx.compose.runtime.remember
-import androidx.compose.ui.window.application
+import java.util.Properties
 
 /**
- * Entry point of the desktop application.
+ * Pingh server endpoint with the necessary connection details.
+ *
+ * @property address The address of the Pingh server.
+ * @property port The port on which the Pingh server is running.
  */
-public fun main() {
-    val serverEndpoint = loadServerEndpointFromProperties()
-    application {
-        Theme {
-            val settings = retrieveSystemSettings()
-            val state = remember { AppState(serverEndpoint, settings) }
-            Window(state.window, state.app)
-            Tray(state.tray, state.app)
-        }
+internal data class ServerEndpoint(
+    val address: String,
+    val port: Int
+)
+
+/**
+ * Loads server endpoint properties from resource folder.
+ */
+internal fun loadServerEndpointFromProperties(): ServerEndpoint {
+    val properties = Properties()
+    val path = "/config/server.properties"
+    ServerEndpoint::class.java.getResourceAsStream(path).use {
+        properties.load(it)
     }
+    val errorMessageFormat = "To connect to the Pingh server, the \"%s\" property " +
+            "must be specified in the configuration file at \"resource$path\"."
+    return ServerEndpoint(
+        properties.getOrThrow("server.address", errorMessageFormat),
+        properties.getOrThrow("server.port", errorMessageFormat).toInt()
+    )
 }
+
+/**
+ * Returns the value of property by its `key` if it exists;
+ * otherwise, an [IllegalStateException] is thrown.
+ */
+private fun Properties.getOrThrow(key: String, errorMessageFormat: String): String =
+    getProperty(key) ?: throw IllegalStateException(errorMessageFormat.format(key))

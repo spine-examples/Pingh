@@ -59,10 +59,11 @@ internal abstract class UiTest : IntegrationTest() {
      */
     @OptIn(ExperimentalTestApi::class)
     protected fun ComposeUiTest.runApp() {
+        val serverEndpoint = ServerEndpoint(address, port)
         setContent {
             Theme {
                 val settings = retrieveSystemSettings()
-                state = remember { AppState(settings) }
+                state = remember { AppState(serverEndpoint, settings) }
                 Window(state!!.window, state!!.app, uriHandler)
             }
         }
