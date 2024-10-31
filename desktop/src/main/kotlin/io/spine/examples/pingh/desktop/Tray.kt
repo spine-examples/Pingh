@@ -70,7 +70,7 @@ internal class TrayState(
     /**
      * The tray icon.
      */
-    internal val icon = Icons.trayWhite
+    internal val icon = Icons.tray
 
     /**
      * Application's title.

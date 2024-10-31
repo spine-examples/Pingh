@@ -35,12 +35,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.res.loadImageBitmap
@@ -106,34 +101,6 @@ internal object Icons {
         BitmapPainter(useResource("icons/back.png", ::loadImageBitmap))
     internal val copy: BitmapPainter =
         BitmapPainter(useResource("icons/copy.png", ::loadImageBitmap))
-    internal val trayWhite: Painter =
-        ColorBitmapPainter("icons/tray.png", Color(232, 232, 232))
-    internal val trayBlack: Painter =
-        ColorBitmapPainter("icons/tray.png", Color(40, 40, 40))
-}
-
-/**
- * A `Painter` implementation used to draw an bitmap image with the passed `color`.
- *
- * @param resourcePath The path to the image resource.
- * @property color The color applied to the image.
- */
-internal class ColorBitmapPainter(
-    resourcePath: String,
-    private val color: Color
-) : Painter() {
-
-    /**
-     * Bitmap image loaded from resource.
-     */
-    private val img = BitmapPainter(useResource(resourcePath, ::loadImageBitmap))
-
-    override val intrinsicSize: Size
-        get() = img.intrinsicSize
-
-    override fun DrawScope.onDraw() {
-        with(img) {
-            draw(size, colorFilter = ColorFilter.tint(color))
-        }
-    }
+    internal val tray: BitmapPainter =
+        BitmapPainter(useResource("icons/tray.png", ::loadImageBitmap))
 }
