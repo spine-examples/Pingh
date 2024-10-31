@@ -42,6 +42,7 @@ import io.kotest.matchers.floats.shouldBeLessThan
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import io.spine.examples.pingh.desktop.given.DelayedFactAssertion.Companion.awaitFact
+import io.spine.examples.pingh.desktop.given.performHover
 import io.spine.examples.pingh.desktop.given.testTag
 import kotlin.test.Test
 import org.junit.jupiter.api.DisplayName
@@ -70,8 +71,13 @@ internal class MentionsPageUiTest : UiTest() {
             logIn()
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
             val tag = mentionCards().random().testTag
+            onNodeWithTag(tag).performHover()
+            awaitFact { onSnoozeButtonWithParentTag(tag).assertExists() }
             onSnoozeButtonWithParentTag(tag).performClick()
-            awaitFact { onSnoozeButtonWithParentTag(tag).assertDoesNotExist() }
+            awaitFact {
+                onNodeWithTag(tag).performHover()
+                onSnoozeButtonWithParentTag(tag).assertDoesNotExist()
+            }
         }
 
     @Test
@@ -82,7 +88,10 @@ internal class MentionsPageUiTest : UiTest() {
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
             val tag = mentionCards().random().testTag
             onNodeWithTag(tag).performClick()
-            awaitFact { onSnoozeButtonWithParentTag(tag).assertDoesNotExist() }
+            awaitFact {
+                onNodeWithTag(tag).performHover()
+                onSnoozeButtonWithParentTag(tag).assertDoesNotExist()
+            }
         }
 
     @Test
@@ -94,8 +103,10 @@ internal class MentionsPageUiTest : UiTest() {
             val mentionsCards = mentionCards().sortedBy { it.positionInRoot.y }
             val readMentionTag = mentionsCards[0].testTag
             val snoozedMentionTag = mentionsCards[1].testTag
-            onNodeWithTag(readMentionTag).performClick()
+            onNodeWithTag(snoozedMentionTag).performHover()
+            awaitFact { onSnoozeButtonWithParentTag(snoozedMentionTag).assertExists() }
             onSnoozeButtonWithParentTag(snoozedMentionTag).performClick()
+            onNodeWithTag(readMentionTag).performClick()
             awaitFact {
                 val mentions = mentionCards()
                 val readMention = mentions.first { it.testTag == readMentionTag }

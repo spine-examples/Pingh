@@ -26,8 +26,12 @@
 
 package io.spine.examples.pingh.desktop.given
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.performMouseInput
 import com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
@@ -46,3 +50,13 @@ internal val SemanticsNode.testTag: String
     get() = config.getOrElse(SemanticsProperties.TestTag) {
         throw IllegalStateException("This node does not have a `TestTag` specified.")
     }
+
+/**
+ * Hovers the mouse pointer over the center of the element to trigger a hover event.
+ */
+@OptIn(ExperimentalTestApi::class)
+internal fun SemanticsNodeInteraction.performHover() {
+    val size = this.fetchSemanticsNode().size
+    val middle = Offset(size.width / 2f, size.height / 2f)
+    this.performMouseInput { this.moveTo(middle) }
+}
