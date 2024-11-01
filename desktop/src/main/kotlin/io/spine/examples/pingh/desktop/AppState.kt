@@ -98,7 +98,7 @@ internal class AppState {
  *
  * Notifications will only be sent if the window is hidden but the application is run.
  *
- * @property tray A tray state that sends notifications.
+ * @property tray The tray state that sends notifications.
  * @property isWindowHidden Returns `true` if the [window][AppState.window] is hidden;
  *   returns `false` otherwise.
  */
@@ -108,7 +108,7 @@ private class TrayNotificationSender(
 ) : NotificationSender {
 
     /**
-     * Sends the information notification to the system tray.
+     * Sends the information [Notification] to the system tray.
      *
      * @param title The notification's title.
      * @param content The notification's content.
