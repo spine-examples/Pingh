@@ -28,13 +28,10 @@ package io.spine.examples.pingh.desktop
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.ApplicationScope
-import io.spine.examples.pingh.client.PinghApplication
 import java.awt.Frame
-import java.awt.Image
 import java.awt.MenuItem
 import java.awt.PopupMenu
 import java.awt.SystemTray
-import java.awt.TrayIcon
 import java.awt.Window
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
@@ -42,20 +39,31 @@ import java.awt.event.MouseEvent
 /**
  * Adds the application icon to the platform taskbar.
  *
- * This icon allows the user to show or hide the Pingh window and quit the application.
+ * Left-clicking the tray icon toggles the window’s visibility,
+ * hiding it if open and displaying it if hidden.
  *
- * @param state The state of the application icon, located in the platform taskbar.
- * @param app Manages the logic for the Pingh app.
+ * Right-clicking the tray icon opens the application's control menu.
+ *
+ * Because Java AWT lacks an API to obtain exact tray icon coordinates,
+ * the menu location is dynamically calculated based on the click position.
+ * As a result, the menu may appear in slightly different locations depending on where
+ * the tray icon is clicked.
+ *
+ * @param state The top-level application state.
+ * @throws IllegalStateException if the system tray is not supported on the current platform.
  */
 @Composable
-internal fun ApplicationScope.Tray(state: TrayState, app: PinghApplication) {
+internal fun ApplicationScope.Tray(state: AppState) {
+    if (!SystemTray.isSupported()) {
+        throw IllegalStateException("The platform does not support tray applications.")
+    }
     val menu = Menu {
-        app.close()
+        SystemTray.getSystemTray().remove(state.tray)
+        state.app.close()
         exitApplication()
     }
-    state.systemTray.apply {
+    state.tray.apply {
         isImageAutoSize = true
-        toolTip = state.title
 
         addMouseListener(
             object : MouseAdapter() {
@@ -70,67 +78,45 @@ internal fun ApplicationScope.Tray(state: TrayState, app: PinghApplication) {
             }
         )
     }
-    SystemTray.getSystemTray().add(state.systemTray)
+    SystemTray.getSystemTray().add(state.tray)
 }
 
 /**
+ * The tray application menu provides controls such as an exit option for the application.
  *
+ * When the menu is open, clicking anywhere outside of it will close the menu.
+ *
+ * @param onExit Called when the “Exit” button is pressed.
  */
 private class Menu(onExit: () -> Unit) {
     /**
-     *
+     * Utility window on which the application menu will be displayed.
      */
-    private val menuFrame = Frame()
+    private val frame = Frame()
 
     /**
-     *
+     * The application menu includes an "Exit" button to close the application.
      */
-    private val popupMenu = PopupMenu()
+    private val popup = PopupMenu()
 
     init {
         val exitItem = MenuItem("Exit")
         exitItem.addActionListener {
             onExit()
         }
-        popupMenu.add(exitItem)
-        menuFrame.apply {
+        popup.add(exitItem)
+        frame.apply {
             isUndecorated = true
             type = Window.Type.UTILITY
-            add(popupMenu)
+            add(popup)
             isVisible = true
         }
     }
 
     /**
-     *
+     * Displays the popup menu at the specified (`x`, `y`) position relative to the full screen.
      */
     fun show(x: Int, y: Int) {
-        popupMenu.show(menuFrame, x, y)
-    }
-}
-
-/**
- * State of [Tray].
- *
- * @property window The state of the Pingh platform window.
- */
-internal class TrayState(
-    icon: Image,
-    private val window: WindowState
-) {
-    // TODO:2024-10-31:mykyta.pimonov: Rename.
-    internal val systemTray = TrayIcon(icon)
-
-    /**
-     * Application's title.
-     */
-    internal val title: String
-        get() = window.title
-
-    /**
-     * Switches the window visibility.
-     */
-    internal fun toggleWindowVisibility() {
-        window.isShown = !window.isShown
+        popup.show(frame, x, y)
     }
 }

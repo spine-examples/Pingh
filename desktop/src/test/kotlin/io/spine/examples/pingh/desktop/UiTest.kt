@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.desktop
 
-import androidx.compose.runtime.remember
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsEnabled

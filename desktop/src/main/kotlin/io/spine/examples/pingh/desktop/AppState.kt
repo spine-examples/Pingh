@@ -37,7 +37,7 @@ import java.awt.TrayIcon
 import java.util.Properties
 
 /**
- *
+ * Creates the state of the application.
  */
 @Composable
 internal fun createAppState(): AppState {
@@ -47,6 +47,8 @@ internal fun createAppState(): AppState {
 
 /**
  * The top-level application state.
+ *
+ * @param trayIcon The image to be displayed in the tray.
  */
 internal class AppState(trayIcon: Image) {
     /**
@@ -55,9 +57,11 @@ internal class AppState(trayIcon: Image) {
     internal val window = WindowState()
 
     /**
-     * State of the application icon, located in the platform taskbar.
+     * The application icon, located in the platform taskbar.
+     *
+     * Also, provides access to send notifications.
      */
-    internal val tray = TrayState(trayIcon, window)
+    internal val tray = TrayIcon(trayIcon, window.title)
 
     /**
      * Manages the logic for the Pingh app.
@@ -93,6 +97,13 @@ internal class AppState(trayIcon: Image) {
         }
         return properties
     }
+
+    /**
+     * Switches the window visibility.
+     */
+    internal fun toggleWindowVisibility() {
+        window.isShown = !window.isShown
+    }
 }
 
 /**
@@ -100,12 +111,12 @@ internal class AppState(trayIcon: Image) {
  *
  * Notifications will only be sent if the window is hidden but the application is run.
  *
- * @property state
+ * @property tray The tray icon that enables sending notifications.
  * @property isWindowHidden Returns `true` if the [window][AppState.window] is hidden;
  *   returns `false` otherwise.
  */
 private class TrayNotificationSender(
-    private val state: TrayState,
+    private val tray: TrayIcon,
     private val isWindowHidden: () -> Boolean
 ) : NotificationSender {
 
@@ -117,7 +128,7 @@ private class TrayNotificationSender(
      */
     override fun send(title: String, content: String) {
         if (isWindowHidden()) {
-            state.systemTray.displayMessage(title, content, TrayIcon.MessageType.INFO)
+            tray.displayMessage(title, content, TrayIcon.MessageType.INFO)
         }
     }
 }
