@@ -38,7 +38,7 @@ public fun main() {
         Theme {
             val state = remember { AppState(serverEndpoint) }
             Window(state.window, state.app)
-            Tray(state.tray, state.app)
+            Tray(state)
         }
     }
 }
