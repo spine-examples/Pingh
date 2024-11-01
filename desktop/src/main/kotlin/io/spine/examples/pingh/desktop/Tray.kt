@@ -27,73 +27,147 @@
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.graphics.toAwtImage
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.window.ApplicationScope
-import androidx.compose.ui.window.TrayState as ComposeTrayState
-import androidx.compose.ui.window.Tray as ComposeTray
-import io.spine.examples.pingh.client.PinghApplication
+import androidx.compose.ui.window.Notification
+import java.awt.Frame
+import java.awt.MenuItem
+import java.awt.PopupMenu
+import java.awt.SystemTray
+import java.awt.TrayIcon
+import java.awt.TrayIcon.MessageType
+import java.awt.Window
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 /**
  * Adds the application icon to the platform taskbar.
  *
- * This icon allows the user to show or hide the Pingh window and quit the application.
+ * Left-clicking the tray icon toggles the window’s visibility,
+ * hiding it if open and displaying it if hidden.
  *
- * @param state The state of the application icon, located in the platform taskbar.
- * @param app Manages the logic for the Pingh app.
+ * Right-clicking the tray icon opens the application's control menu.
+ *
+ * Because Java AWT lacks an API to obtain exact tray icon coordinates,
+ * the menu location is dynamically calculated based on the click position.
+ * As a result, the menu may appear in slightly different locations depending on where
+ * the tray icon is clicked.
+ *
+ * @param state The top-level application state.
+ * @throws IllegalStateException if the system tray is not supported on the current platform.
  */
 @Composable
-internal fun ApplicationScope.Tray(state: TrayState, app: PinghApplication) {
-    ComposeTray(
-        icon = state.icon,
-        state = state.composeTray,
-        tooltip = state.title,
-        onAction = state::toggleWindowVisibility,
-        menu = {
-            Item(state.toggleName, onClick = state::toggleWindowVisibility)
-            Item("Quit", onClick = {
-                app.close()
-                exitApplication()
-            })
+internal fun ApplicationScope.Tray(state: AppState) {
+    check(SystemTray.isSupported()) { "The platform does not support tray applications." }
+
+    var tray: TrayIcon? = null
+
+    val destiny = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
+    val awtIcon = remember(Icons.tray) {
+        Icons.tray.toAwtImage(destiny, layoutDirection)
+    }
+
+    val menu = remember {
+        Menu {
+            state.app.close()
+            exitApplication()
+            SystemTray.getSystemTray().remove(tray)
         }
-    )
+    }
+
+    val onClick by rememberUpdatedState(mouseEventHandler(state, menu))
+
+    tray = remember {
+        TrayIcon(awtIcon, state.window.title).apply {
+            isImageAutoSize = true
+            addMouseListener(onClick)
+        }
+    }
+
+    SystemTray.getSystemTray().add(tray)
+
+    val coroutineScope = rememberCoroutineScope()
+    state.tray
+        .notificationFlow
+        .onEach { tray.displayMessage(it) }
+        .launchIn(coroutineScope)
 }
 
 /**
- * State of [Tray].
+ * The tray application menu provides controls such as an exit option for the application.
  *
- * @property window The state of the Pingh platform window.
- * @property composeTray The built-in state for Compose trays.
- * @param settings The settings of the operating system on which the application is running.
+ * When the menu is open, clicking anywhere outside of it will close the menu.
+ *
+ * @param onExit Called when the “Quit” button is pressed.
  */
-internal class TrayState(
-    private val window: WindowState,
-    internal val composeTray: ComposeTrayState,
-    settings: SystemSettings
-) {
+private class Menu(onExit: () -> Unit) {
     /**
-     * The tray icon.
+     * Utility window on which the application menu will be displayed.
      */
-    internal val icon = if (settings.theme == SystemTheme.DARK) {
-        Icons.trayWhite
-    } else {
-        Icons.trayBlack
+    private val frame = Frame()
+
+    /**
+     * The application menu includes a "Quit" button to close the application.
+     */
+    private val popup = PopupMenu()
+
+    init {
+        val exitItem = MenuItem("Quit Pingh app")
+        exitItem.addActionListener {
+            onExit()
+        }
+        popup.add(exitItem)
+        frame.apply {
+            isUndecorated = true
+            type = Window.Type.UTILITY
+            add(popup)
+            isVisible = true
+        }
     }
 
     /**
-     * Application's title.
+     * Displays the popup menu at the specified (`x`, `y`) position relative to the full screen.
      */
-    internal val title: String
-        get() = window.title
-
-    /**
-     * Toggle name for the window visibility switcher.
-     */
-    internal val toggleName: String
-        get() = if (window.isShown) "Hide" else "Show"
-
-    /**
-     * Switches the window visibility.
-     */
-    internal fun toggleWindowVisibility() {
-        window.isShown = !window.isShown
+    fun show(x: Int, y: Int) {
+        popup.show(frame, x, y)
     }
+}
+
+/**
+ * Handles click events on the system tray icon:
+ * a left-click toggles the window’s visibility,
+ * and a right-click opens the menu.
+ */
+private fun mouseEventHandler(state: AppState, menu: Menu) =
+    object : MouseAdapter() {
+        override fun mouseClicked(e: MouseEvent) {
+            if (e.button == 1) {
+                state.toggleWindowVisibility()
+            }
+            if (e.button == 3) {
+                menu.show(e.xOnScreen, e.yOnScreen)
+            }
+        }
+    }
+
+/**
+ * Displays a popup message near the tray icon.
+ */
+private fun TrayIcon.displayMessage(notification: Notification) {
+    val messageType = when (notification.type) {
+        Notification.Type.None -> MessageType.NONE
+        Notification.Type.Info -> MessageType.INFO
+        Notification.Type.Warning -> MessageType.WARNING
+        Notification.Type.Error -> MessageType.ERROR
+    }
+    displayMessage(notification.title, notification.message, messageType)
 }

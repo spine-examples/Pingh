@@ -27,34 +27,28 @@
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.ui.window.Notification
-import androidx.compose.ui.window.TrayState as ComposeTrayState
+import androidx.compose.ui.window.TrayState
 import io.spine.examples.pingh.client.NotificationSender
 import io.spine.examples.pingh.client.PinghApplication
 import java.util.Properties
 
 /**
  * The top-level application state.
- *
- * @param settings The settings of the operating system on which the application is running.
  */
-internal class AppState(settings: SystemSettings) {
-
-    /**
-     * A built-in state for Compose trays.
-     *
-     * Enables sending notifications.
-     */
-    private val composeTray = ComposeTrayState()
-
+internal class AppState {
     /**
      * State of the window.
      */
     internal val window = WindowState()
 
     /**
-     * State of the application icon, located in the platform taskbar.
+     * A tray state that sends notifications
+     * when configured within the [Tray] composable element.
+     *
+     * If the tray state is not configured when the notification is sent,
+     * the notification will be ignored.
      */
-    internal val tray = TrayState(window, composeTray, settings)
+    internal val tray = TrayState()
 
     /**
      * Manages the logic for the Pingh app.
@@ -62,7 +56,7 @@ internal class AppState(settings: SystemSettings) {
     internal val app: PinghApplication
 
     init {
-        val notificationSender = TrayNotificationSender(composeTray) { !window.isShown }
+        val notificationSender = TrayNotificationSender(tray) { !window.isShown }
         val properties = loadProperties()
         app = PinghApplication.builder()
             .withAddress(properties.getProperty("server.address"))
@@ -90,6 +84,13 @@ internal class AppState(settings: SystemSettings) {
         }
         return properties
     }
+
+    /**
+     * Switches the window visibility.
+     */
+    internal fun toggleWindowVisibility() {
+        window.isShown = !window.isShown
+    }
 }
 
 /**
@@ -97,12 +98,12 @@ internal class AppState(settings: SystemSettings) {
  *
  * Notifications will only be sent if the window is hidden but the application is run.
  *
- * @property composeTray The built-in state for Compose trays.
+ * @property tray The tray state that sends notifications.
  * @property isWindowHidden Returns `true` if the [window][AppState.window] is hidden;
  *   returns `false` otherwise.
  */
 private class TrayNotificationSender(
-    private val composeTray: ComposeTrayState,
+    private val tray: TrayState,
     private val isWindowHidden: () -> Boolean
 ) : NotificationSender {
 
@@ -115,7 +116,7 @@ private class TrayNotificationSender(
     override fun send(title: String, content: String) {
         if (isWindowHidden()) {
             val notification = Notification(title, content, Notification.Type.Info)
-            composeTray.sendNotification(notification)
+            tray.sendNotification(notification)
         }
     }
 }
