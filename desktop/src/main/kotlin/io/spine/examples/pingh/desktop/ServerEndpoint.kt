@@ -49,7 +49,7 @@ internal data class ServerEndpoint(
                 properties.load(it)
             }
             val errorMessageFormat = "To connect to the Pingh server, the \"%s\" property " +
-                    "must be specified in the configuration file at \"resource$path\"."
+                    "must be specified in the configuration file at \"resources$path\"."
             return ServerEndpoint(
                 properties.getOrThrow("server.address", errorMessageFormat),
                 properties.getOrThrow("server.port", errorMessageFormat).toInt()
