@@ -143,7 +143,6 @@ private fun WindowContent(app: PinghApplication) {
  * State of [Window].
  */
 internal class WindowState {
-
     /**
      * Window's title.
      */

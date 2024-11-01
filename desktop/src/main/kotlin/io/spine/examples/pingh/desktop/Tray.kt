@@ -86,7 +86,7 @@ internal fun ApplicationScope.Tray(state: AppState) {
  *
  * When the menu is open, clicking anywhere outside of it will close the menu.
  *
- * @param onExit Called when the “Exit” button is pressed.
+ * @param onExit Called when the “Quit” button is pressed.
  */
 private class Menu(onExit: () -> Unit) {
     /**
@@ -95,12 +95,12 @@ private class Menu(onExit: () -> Unit) {
     private val frame = Frame()
 
     /**
-     * The application menu includes an "Exit" button to close the application.
+     * The application menu includes a "Quit" button to close the application.
      */
     private val popup = PopupMenu()
 
     init {
-        val exitItem = MenuItem("Exit")
+        val exitItem = MenuItem("Quit Pingh app")
         exitItem.addActionListener {
             onExit()
         }
