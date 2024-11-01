@@ -31,6 +31,7 @@ import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Timestamps
 import com.google.protobuf.util.Timestamps.between
 import io.spine.base.EventMessage
+import io.spine.base.Time.currentTime
 import io.spine.core.External
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.github.Mention
@@ -106,6 +107,21 @@ internal class GitHubClientProcess :
             GitHubClientId::class.of(event.id.username),
             event.token
         )
+    }
+
+    /**
+     * Starts the process of fetching mentions from GitHub upon the first login.
+     *
+     * If no updates have been completed and none are currently in progress,
+     * then no updates have been made yet, and the `UpdateMentionsFromGitHub` command
+     * will be sent. Otherwise, an empty `Optional` will be returned.
+     */
+    @Command
+    internal fun on(event: GitHubTokenUpdated): Optional<UpdateMentionsFromGitHub> {
+        if (!state().hasWhenLastSuccessfullyUpdated() && !state().hasWhenStarted()) {
+            return Optional.of(UpdateMentionsFromGitHub::class.buildBy(event.id, currentTime()))
+        }
+        return Optional.empty()
     }
 
     /**
