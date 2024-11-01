@@ -24,7 +24,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.BuildSettings
 import io.spine.internal.dependency.Coil
 import io.spine.internal.dependency.Compose
 import io.spine.internal.dependency.Guava
@@ -111,6 +110,9 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageVersion = pinghVersion.extractSemanticVersion().value
             macOS {
+                // Changes the icon color depending on the screen theme.
+                // See: https://bugs.openjdk.org/browse/JDK-8255597.
+                jvmArgs += "-Dapple.awt.enableTemplateImages=true"
                 iconFile = iconForMacOs()
                 infoPlist {
                     allowBackgroundExecution()
