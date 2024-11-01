@@ -50,10 +50,10 @@ import org.junit.jupiter.api.BeforeEach
 @Suppress("UnnecessaryAbstractClass" /* Avoids creating instances; only for inheritance. */)
 public abstract class IntegrationTest {
 
-    internal companion object {
+    public companion object {
 
-        private const val port = 4242
-        private const val address = "localhost"
+        public const val port: Int = 4242
+        public const val address: String = "localhost"
 
         private val storageFactory = DatastoreStorageFactory.local()
         private val auth = PredefinedGitHubAuthenticationResponses()
