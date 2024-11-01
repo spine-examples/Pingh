@@ -54,9 +54,7 @@ import java.awt.event.MouseEvent
  */
 @Composable
 internal fun ApplicationScope.Tray(state: AppState) {
-    if (!SystemTray.isSupported()) {
-        throw IllegalStateException("The platform does not support tray applications.")
-    }
+    check(SystemTray.isSupported()) { "The platform does not support tray applications." }
     val menu = Menu {
         SystemTray.getSystemTray().remove(state.tray)
         state.app.close()
