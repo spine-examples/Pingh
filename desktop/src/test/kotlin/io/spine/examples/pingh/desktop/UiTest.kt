@@ -62,8 +62,7 @@ internal abstract class UiTest : IntegrationTest() {
         val serverEndpoint = ServerEndpoint(address, port)
         setContent {
             Theme {
-                val settings = retrieveSystemSettings()
-                state = remember { AppState(serverEndpoint, settings) }
+                state = remember { AppState(serverEndpoint) }
                 Window(state!!.window, state!!.app, uriHandler)
             }
         }
