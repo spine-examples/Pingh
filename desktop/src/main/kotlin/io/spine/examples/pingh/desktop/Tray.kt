@@ -27,14 +27,26 @@
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.graphics.toAwtImage
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.window.ApplicationScope
+import androidx.compose.ui.window.Notification
 import java.awt.Frame
 import java.awt.MenuItem
 import java.awt.PopupMenu
 import java.awt.SystemTray
+import java.awt.TrayIcon
+import java.awt.TrayIcon.MessageType
 import java.awt.Window
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 /**
  * Adds the application icon to the platform taskbar.
@@ -55,28 +67,39 @@ import java.awt.event.MouseEvent
 @Composable
 internal fun ApplicationScope.Tray(state: AppState) {
     check(SystemTray.isSupported()) { "The platform does not support tray applications." }
-    val menu = Menu {
-        SystemTray.getSystemTray().remove(state.tray)
-        state.app.close()
-        exitApplication()
-    }
-    state.tray.apply {
-        isImageAutoSize = true
 
-        addMouseListener(
-            object : MouseAdapter() {
-                override fun mouseClicked(e: MouseEvent) {
-                    if (e.button == 1) {
-                        state.toggleWindowVisibility()
-                    }
-                    if (e.button == 3) {
-                        menu.show(e.xOnScreen, e.yOnScreen)
-                    }
-                }
-            }
-        )
+    var tray: TrayIcon? = null
+
+    val destiny = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
+    val awtIcon = remember(Icons.tray) {
+        Icons.tray.toAwtImage(destiny, layoutDirection)
     }
-    SystemTray.getSystemTray().add(state.tray)
+
+    val menu = remember {
+        Menu {
+            state.app.close()
+            exitApplication()
+            SystemTray.getSystemTray().remove(tray)
+        }
+    }
+
+    val onClick by rememberUpdatedState(mouseEventHandler(state, menu))
+
+    tray = remember {
+        TrayIcon(awtIcon, state.window.title).apply {
+            isImageAutoSize = true
+            addMouseListener(onClick)
+        }
+    }
+
+    SystemTray.getSystemTray().add(tray)
+
+    val coroutineScope = rememberCoroutineScope()
+    state.tray
+        .notificationFlow
+        .onEach { tray.displayMessage(it) }
+        .launchIn(coroutineScope)
 }
 
 /**
@@ -117,4 +140,34 @@ private class Menu(onExit: () -> Unit) {
     fun show(x: Int, y: Int) {
         popup.show(frame, x, y)
     }
+}
+
+/**
+ * Handles click events on the system tray icon:
+ * a left-click toggles the window’s visibility,
+ * and a right-click opens the menu.
+ */
+private fun mouseEventHandler(state: AppState, menu: Menu) =
+    object : MouseAdapter() {
+        override fun mouseClicked(e: MouseEvent) {
+            if (e.button == 1) {
+                state.toggleWindowVisibility()
+            }
+            if (e.button == 3) {
+                menu.show(e.xOnScreen, e.yOnScreen)
+            }
+        }
+    }
+
+/**
+ * Displays a popup message near the tray icon.
+ */
+private fun TrayIcon.displayMessage(notification: Notification) {
+    val messageType = when (notification.type) {
+        Notification.Type.None -> MessageType.NONE
+        Notification.Type.Info -> MessageType.INFO
+        Notification.Type.Warning -> MessageType.WARNING
+        Notification.Type.Error -> MessageType.ERROR
+    }
+    displayMessage(notification.title, notification.message, messageType)
 }

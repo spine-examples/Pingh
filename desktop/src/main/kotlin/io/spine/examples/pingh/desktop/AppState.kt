@@ -26,42 +26,29 @@
 
 package io.spine.examples.pingh.desktop
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.toAwtImage
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.window.Notification
+import androidx.compose.ui.window.TrayState
 import io.spine.examples.pingh.client.NotificationSender
 import io.spine.examples.pingh.client.PinghApplication
-import java.awt.Image
-import java.awt.TrayIcon
 import java.util.Properties
 
 /**
- * Creates the state of the application.
- */
-@Composable
-internal fun createAppState(): AppState {
-    val trayIcon = Icons.tray.toAwtImage(LocalDensity.current, LocalLayoutDirection.current)
-    return AppState(trayIcon)
-}
-
-/**
  * The top-level application state.
- *
- * @param trayIcon The image to be displayed in the tray.
  */
-internal class AppState(trayIcon: Image) {
+internal class AppState {
     /**
      * State of the window.
      */
     internal val window = WindowState()
 
     /**
-     * The application icon, located in the platform taskbar.
+     * A tray state that sends notifications
+     * when configured within the [Tray] composable element.
      *
-     * Also, provides access to send notifications.
+     * If the tray state is not configured when the notification is sent,
+     * the notification will be ignored.
      */
-    internal val tray = TrayIcon(trayIcon, window.title)
+    internal val tray = TrayState()
 
     /**
      * Manages the logic for the Pingh app.
@@ -111,12 +98,12 @@ internal class AppState(trayIcon: Image) {
  *
  * Notifications will only be sent if the window is hidden but the application is run.
  *
- * @property tray The tray icon that enables sending notifications.
+ * @property tray A tray state that sends notifications.
  * @property isWindowHidden Returns `true` if the [window][AppState.window] is hidden;
  *   returns `false` otherwise.
  */
 private class TrayNotificationSender(
-    private val tray: TrayIcon,
+    private val tray: TrayState,
     private val isWindowHidden: () -> Boolean
 ) : NotificationSender {
 
@@ -128,7 +115,8 @@ private class TrayNotificationSender(
      */
     override fun send(title: String, content: String) {
         if (isWindowHidden()) {
-            tray.displayMessage(title, content, TrayIcon.MessageType.INFO)
+            val notification = Notification(title, content, Notification.Type.Info)
+            tray.sendNotification(notification)
         }
     }
 }

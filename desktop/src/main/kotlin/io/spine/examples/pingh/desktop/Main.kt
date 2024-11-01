@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.desktop
 
+import androidx.compose.runtime.remember
 import androidx.compose.ui.window.application
 
 /**
@@ -34,7 +35,7 @@ import androidx.compose.ui.window.application
 public fun main() {
     application {
         Theme {
-            val state = createAppState()
+            val state = remember { AppState() }
             Window(state.window, state.app)
             Tray(state)
         }

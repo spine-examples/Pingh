@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.desktop
 
+import androidx.compose.runtime.remember
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsEnabled
@@ -60,7 +61,7 @@ internal abstract class UiTest : IntegrationTest() {
     protected fun ComposeUiTest.runApp() {
         setContent {
             Theme {
-                state = createAppState()
+                state = remember { AppState() }
                 Window(state!!.window, state!!.app, uriHandler)
             }
         }
