@@ -37,23 +37,25 @@ import java.util.Properties
 internal data class ServerEndpoint(
     val address: String,
     val port: Int
-)
-
-/**
- * Loads server endpoint properties from resource folder.
- */
-internal fun loadServerEndpointFromProperties(): ServerEndpoint {
-    val properties = Properties()
-    val path = "/config/server.properties"
-    ServerEndpoint::class.java.getResourceAsStream(path).use {
-        properties.load(it)
+) {
+    internal companion object {
+        /**
+         * Loads server endpoint properties from resource folder.
+         */
+        internal fun load(): ServerEndpoint {
+            val properties = Properties()
+            val path = "/config/server.properties"
+            ServerEndpoint::class.java.getResourceAsStream(path).use {
+                properties.load(it)
+            }
+            val errorMessageFormat = "To connect to the Pingh server, the \"%s\" property " +
+                    "must be specified in the configuration file at \"resource$path\"."
+            return ServerEndpoint(
+                properties.getOrThrow("server.address", errorMessageFormat),
+                properties.getOrThrow("server.port", errorMessageFormat).toInt()
+            )
+        }
     }
-    val errorMessageFormat = "To connect to the Pingh server, the \"%s\" property " +
-            "must be specified in the configuration file at \"resource$path\"."
-    return ServerEndpoint(
-        properties.getOrThrow("server.address", errorMessageFormat),
-        properties.getOrThrow("server.port", errorMessageFormat).toInt()
-    )
 }
 
 /**
