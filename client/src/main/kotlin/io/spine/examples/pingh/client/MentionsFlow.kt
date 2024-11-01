@@ -67,7 +67,6 @@ public class MentionsFlow internal constructor(
 
     init {
         subscribeToMentionsUpdates()
-        updateMentions()
     }
 
     /**
