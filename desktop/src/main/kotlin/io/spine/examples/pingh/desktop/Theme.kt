@@ -73,7 +73,7 @@ private val colorScheme = lightColorScheme(
 )
 
 /**
- * Loaded from the resource San Francisco font family.
+ * Loads from the resource San Francisco font family.
  */
 @Composable
 private fun sanFrancisco(): FontFamily = FontFamily(
