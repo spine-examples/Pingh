@@ -82,6 +82,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.protobuf.Duration
+import io.spine.example.pingh.desktop.generated.resources.Res
+import io.spine.example.pingh.desktop.generated.resources.copy
+import io.spine.example.pingh.desktop.generated.resources.pingh
 import io.spine.examples.pingh.client.LoginFlow
 import io.spine.examples.pingh.client.EnterUsername
 import io.spine.examples.pingh.client.LoginFailed
@@ -92,6 +95,7 @@ import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.github.isValidUsername
 import io.spine.net.Url
 import io.spine.protobuf.Durations2.toMinutes
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * Displays the page with the current login stage.
@@ -192,7 +196,7 @@ private fun ApplicationInfo() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = Icons.pingh,
+                painter = painterResource(Res.drawable.pingh),
                 contentDescription = null,
                 modifier = Modifier.size(50.dp),
                 tint = MaterialTheme.colorScheme.onSecondary
@@ -539,7 +543,7 @@ private fun CopyToClipboardIcon(
 ) {
     val clipboardManager = LocalClipboardManager.current
     IconButton(
-        icon = Icons.copy,
+        icon = painterResource(Res.drawable.copy),
         onClick = {
             clipboardManager.setText(AnnotatedString(userCode.value))
         },

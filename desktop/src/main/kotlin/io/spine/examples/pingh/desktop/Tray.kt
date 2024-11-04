@@ -36,6 +36,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Notification
+import io.spine.example.pingh.desktop.generated.resources.Res
+import io.spine.example.pingh.desktop.generated.resources.tray
 import java.awt.Frame
 import java.awt.MenuItem
 import java.awt.PopupMenu
@@ -47,6 +49,7 @@ import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * Adds the application icon to the platform taskbar.
@@ -72,9 +75,7 @@ internal fun ApplicationScope.Tray(state: AppState) {
 
     val destiny = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
-    val awtIcon = remember(Icons.tray) {
-        Icons.tray.toAwtImage(destiny, layoutDirection)
-    }
+    val awtIcon = painterResource(Res.drawable.tray).toAwtImage(destiny, layoutDirection)
 
     val menu = remember {
         Menu {

@@ -62,7 +62,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
@@ -71,10 +70,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.spine.example.pingh.desktop.generated.resources.Res
+import io.spine.example.pingh.desktop.generated.resources.back
 import io.spine.examples.pingh.client.SettingsFlow
 import io.spine.examples.pingh.client.SettingsState
 import io.spine.examples.pingh.client.SnoozeTime
 import io.spine.examples.pingh.github.Username
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * Displays an application settings.
@@ -124,7 +126,7 @@ private fun SettingsHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
-            icon = Icons.back,
+            icon = painterResource(Res.drawable.back),
             onClick = toMentionsPage,
             modifier = Modifier.size(35.dp),
             colors = IconButtonDefaults.iconButtonColors(

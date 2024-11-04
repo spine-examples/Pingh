@@ -62,11 +62,16 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.spine.example.pingh.desktop.generated.resources.Res
+import io.spine.example.pingh.desktop.generated.resources.pingh
+import io.spine.example.pingh.desktop.generated.resources.refresh
+import io.spine.example.pingh.desktop.generated.resources.snooze
 import io.spine.examples.pingh.client.MentionsFlow
 import io.spine.examples.pingh.client.howMuchTimeHasPassed
 import io.spine.examples.pingh.client.sorted
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * Displays the `Mentions` page in the application.
@@ -124,7 +129,7 @@ private fun ToolBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
-            icon = Icons.pingh,
+            icon = painterResource(Res.drawable.pingh),
             onClick = toSettingsPage,
             modifier = Modifier.size(56.dp).testTag("settings-button"),
             colors = IconButtonDefaults.iconButtonColors(
@@ -140,7 +145,7 @@ private fun ToolBar(
             style = MaterialTheme.typography.displayLarge
         )
         IconButton(
-            icon = Icons.refresh,
+            icon = painterResource(Res.drawable.refresh),
             onClick = {
                 flow.updateMentions()
             },
@@ -305,7 +310,7 @@ private fun SnoozeButton(
     when {
         isParentHovered && mention.status == MentionStatus.UNREAD ->
             IconButton(
-                icon = Icons.snooze,
+                icon = painterResource(Res.drawable.snooze),
                 onClick = {
                     flow.snooze(mention.id)
                 },
