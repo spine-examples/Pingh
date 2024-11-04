@@ -50,7 +50,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -75,10 +74,13 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.protobuf.Duration
@@ -722,39 +724,36 @@ private fun ClickableErrorMessage(
     require(text.contains(clickablePartOfText)) {
         "The `clickablePartOfText` must be a substring of the `text`."
     }
-    val startPosition = text.indexOf(clickablePartOfText)
-    val endPosition = startPosition + clickablePartOfText.length
+    val index = text.indexOf(clickablePartOfText)
     val annotatedString = buildAnnotatedString {
-        append(text)
-        addStringAnnotation(
-            tag = "Action",
-            annotation = clickablePartOfText,
-            start = startPosition,
-            end = endPosition
-        )
-        addStyle(
-            style = SpanStyle(
-                color = MaterialTheme.colorScheme.primary,
-                textDecoration = TextDecoration.Underline
-            ),
-            start = startPosition,
-            end = endPosition
-        )
+        append(text.substring(0, index))
+        withLink(
+            LinkAnnotation.Clickable(
+                tag = "Action",
+                styles = TextLinkStyles(
+                    style = SpanStyle(
+                        color = MaterialTheme.colorScheme.primary,
+                        textDecoration = TextDecoration.None
+                    ),
+                    hoveredStyle = SpanStyle(
+                        textDecoration = TextDecoration.Underline
+                    )
+                ),
+                linkInteractionListener = { onClick() }
+            )
+        ) {
+            append(clickablePartOfText)
+        }
+        append(text.substring(index + clickablePartOfText.length, text.length))
     }
-    ClickableText(
+    Text(
         text = annotatedString,
         modifier = modifier,
         style = MaterialTheme.typography.bodyMedium.copy(
             color = MaterialTheme.colorScheme.error,
             textAlign = TextAlign.Center
         )
-    ) { offset ->
-        annotatedString
-            .getStringAnnotations(offset, offset)
-            .firstOrNull()?.let {
-                onClick()
-            }
-    }
+    )
 }
 
 /**
