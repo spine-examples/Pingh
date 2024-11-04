@@ -68,7 +68,7 @@ val dokkaVersion = "1.9.20"
  *
  * @see <a href="https://github.com/JetBrains/compose-multiplatform">Compose Multiplatform</a>
  */
-val composeVersion = "1.6.11"
+val composeVersion = "1.7.0"
 
 /**
  * Checks that the correct version of the JDK is being used.

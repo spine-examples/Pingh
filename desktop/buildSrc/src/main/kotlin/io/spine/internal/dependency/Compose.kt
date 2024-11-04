@@ -31,7 +31,7 @@ public object Compose {
     private const val group = "androidx.compose"
 
     public object Runtime {
-        private const val version = "1.6.0"
+        private const val version = "1.7.0"
         public const val lib: String = "$group.runtime:runtime:$version"
     }
 }
