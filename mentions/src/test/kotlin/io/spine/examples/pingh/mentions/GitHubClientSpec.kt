@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.mentions
 
 import com.google.protobuf.Timestamp
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import io.ktor.http.HttpStatusCode
 import io.spine.base.Time.currentTime
@@ -93,10 +94,14 @@ internal class GitHubClientSpec : ContextAwareTest() {
             )
         val username = Username::class.of(randomString())
         gitHubClientId = GitHubClientId::class.of(username)
-        emitUserLoggedInEventInSessionsContext()
+        emitUserLoggedInEvent()
     }
 
-    private fun emitUserLoggedInEventInSessionsContext() {
+    /**
+     * Note that after emitting `UserLoggedIn` event,
+     * the `UpdateMentionsFromGitHub` command is sent.
+     */
+    private fun emitUserLoggedInEvent() {
         token = PersonalAccessToken::class.of(randomString())
         sessionId = SessionId::class.of(gitHubClientId.username)
         val userLoggedIn = UserLoggedIn::class.buildBy(sessionId, token)
@@ -125,7 +130,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
 
         @Test
         internal fun `update token in existing 'GitHubClient' entity`() {
-            emitUserLoggedInEventInSessionsContext()
+            emitUserLoggedInEvent()
             val expected = GitHubClient::class.buildBy(gitHubClientId, token)
             context().assertState(gitHubClientId, expected)
         }
@@ -164,18 +169,6 @@ internal class GitHubClientSpec : ContextAwareTest() {
     `React on 'TimePassed' event, and` {
 
         @Test
-        internal fun `send update command if no updates have been made yet`() {
-            val time = currentTime()
-            emitTimePassedEvent(time)
-            val expected = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId, time)
-            val commandSubject = context().assertCommands()
-                .withType(UpdateMentionsFromGitHub::class.java)
-            commandSubject.hasSize(1)
-            commandSubject.message(0)
-                .isEqualTo(expected)
-        }
-
-        @Test
         internal fun `send update command if required time since the last update has passed`() {
             val firstRequestTime = currentTime()
             val lastRequestTime = firstRequestTime.add(mentionsUpdateInterval)
@@ -212,8 +205,6 @@ internal class GitHubClientSpec : ContextAwareTest() {
 
         @Test
         internal fun `emit 'MentionsUpdateFromGitHubRequested' event if update process started`() {
-            val command = UpdateMentionsFromGitHub::class.buildBy(gitHubClientId)
-            context().receivesCommand(command)
             val expected = MentionsUpdateFromGitHubRequested::class.buildBy(gitHubClientId)
             context().assertEvent(expected)
         }
@@ -266,7 +257,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
 
         @Test
         internal fun `emit 'UserMentioned' events for each mentions fetched from GitHub`() {
-            emitMentionsUpdateFromGitHubRequestedEvent()
+            emitUserLoggedInEvent()
             val expectedUserMentionedSet = expectedUserMentionedSet(gitHubClientId.username)
             val eventSubject = context().assertEvents()
                 .withType(UserMentioned::class.java)
@@ -280,7 +271,6 @@ internal class GitHubClientSpec : ContextAwareTest() {
 
         @Test
         internal fun `emit 'MentionsUpdateFromGitHubCompleted' event`() {
-            emitMentionsUpdateFromGitHubRequestedEvent()
             val expected = MentionsUpdateFromGitHubCompleted::class.buildBy(gitHubClientId)
             context().assertEvent(expected)
         }
@@ -289,24 +279,28 @@ internal class GitHubClientSpec : ContextAwareTest() {
         internal fun `emit 'RequestMentionsFromGitHubFailed' event if request to GitHub failed`() {
             val responseStatusCode = HttpStatusCode.ServiceUnavailable
             search.setResponseStatusCode(responseStatusCode)
-            emitMentionsUpdateFromGitHubRequestedEvent()
+            gitHubClientId = GitHubClientId::class.of(
+                Username::class.of(randomString())
+            )
+            emitUserLoggedInEvent()
             val expected = RequestMentionsFromGitHubFailed::class.buildBy(
                 gitHubClientId,
                 responseStatusCode.value
             )
             context().assertEvents()
                 .withType(UserMentioned::class.java)
-                .hasSize(0)
+                .actual()
+                .map { it.message.unpack<UserMentioned>() }
+                .filter { it.id.equals(gitHubClientId) }
+                .shouldBeEmpty()
             context().assertEvents()
                 .withType(MentionsUpdateFromGitHubCompleted::class.java)
-                .hasSize(0)
+                .actual()
+                .map { it.message.unpack<MentionsUpdateFromGitHubCompleted>() }
+                .filter { it.id.equals(gitHubClientId) }
+                .shouldBeEmpty()
             context().assertEvent(expected)
             search.setDefaultResponseStatusCode()
-        }
-
-        private fun emitMentionsUpdateFromGitHubRequestedEvent() {
-            val event = MentionsUpdateFromGitHubRequested::class.buildBy(gitHubClientId)
-            context().receivesEvent(event)
         }
     }
 
@@ -335,6 +329,6 @@ internal class GitHubClientSpec : ContextAwareTest() {
         context().receivesCommand(secondCommand)
         context().assertEvents()
             .withType(MentionsUpdateFromGitHubRequested::class.java)
-            .hasSize(2)
+            .hasSize(3)
     }
 }
