@@ -30,7 +30,7 @@ package io.spine.internal.dependency
 public object Material3 {
 
     public object Desktop {
-        private const val version = "1.6.2"
+        private const val version = "1.7.0"
         public const val lib: String =
             "org.jetbrains.compose.material3:material3-desktop:${version}"
     }
