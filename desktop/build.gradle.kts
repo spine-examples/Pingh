@@ -88,6 +88,7 @@ configurations.all {
 dependencies {
     implementation(Compose.Runtime.lib)
     implementation(compose.desktop.currentOs)
+    implementation(compose.components.resources)
     implementation(Material3.Desktop.lib)
     implementation(Guava.lib)
     implementation(Coil.lib)
@@ -100,6 +101,13 @@ dependencies {
     testImplementation(kotlin("test"))
     @OptIn(ExperimentalComposeLibrary::class)
     testImplementation(compose.uiTest)
+}
+
+compose.resources {
+    customDirectory(
+        sourceSetName = "main",
+        directoryProvider = provider { layout.projectDirectory.dir("src/main/composeResources") }
+    )
 }
 
 compose.desktop {
