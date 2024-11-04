@@ -112,9 +112,10 @@ internal class GitHubClientProcess :
     /**
      * Starts the process of fetching mentions from GitHub upon the first login.
      *
-     * If no updates have been completed and none are currently in progress,
-     * then no updates have been made yet, and the `UpdateMentionsFromGitHub` command
-     * will be sent. Otherwise, an empty `Optional` will be returned.
+     * If no updates have been completed and none are in progress,
+     * indicating that mentions have not yet been fetched,
+     * an `UpdateMentionsFromGitHub` command will be sent.
+     * Otherwise, an empty `Optional` will be returned.
      */
     @Command
     internal fun on(event: GitHubTokenUpdated): Optional<UpdateMentionsFromGitHub> {
