@@ -35,8 +35,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.unit.sp
+import io.spine.example.pingh.desktop.generated.resources.Res
+import io.spine.example.pingh.desktop.generated.resources.SFUIDisplay_Semibold
+import io.spine.example.pingh.desktop.generated.resources.SFUIText_Bold
+import io.spine.example.pingh.desktop.generated.resources.SFUIText_Italic
+import io.spine.example.pingh.desktop.generated.resources.SFUIText_Regular
+import org.jetbrains.compose.resources.Font
 
 /**
  * UI theme for the application.
@@ -46,7 +51,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 internal fun Theme(content: @Composable () -> Unit): Unit = MaterialTheme(
     colorScheme = colorScheme,
-    typography = typography,
+    typography = typography(sanFrancisco()),
     content = content
 )
 
@@ -70,29 +75,30 @@ private val colorScheme = lightColorScheme(
 /**
  * Loaded from the resource San Francisco font family.
  */
-private val sanFrancisco = FontFamily(
+@Composable
+private fun sanFrancisco(): FontFamily = FontFamily(
     Font(
-        "fonts/SFUIDisplay-Bold.ttf",
+        Res.font.SFUIText_Bold,
         FontWeight.Bold,
         FontStyle.Normal
     ),
     Font(
-        "fonts/SFUIDisplay-Semibold.ttf",
+        Res.font.SFUIDisplay_Semibold,
         FontWeight.SemiBold,
         FontStyle.Normal
     ),
     Font(
-        "fonts/SFUIText-Bold.ttf",
+        Res.font.SFUIText_Bold,
         FontWeight.Bold,
         FontStyle.Normal
     ),
     Font(
-        "fonts/SFUIText-Italic.ttf",
+        Res.font.SFUIText_Italic,
         FontWeight.Normal,
         FontStyle.Italic
     ),
     Font(
-        "fonts/SFUIText-Regular.ttf",
+        Res.font.SFUIText_Regular,
         FontWeight.Normal,
         FontStyle.Normal
     )
@@ -101,29 +107,29 @@ private val sanFrancisco = FontFamily(
 /**
  * Text styles of the application.
  */
-private val typography = Typography(
+private fun typography(family: FontFamily) = Typography(
     displayLarge = TextStyle(
-        fontFamily = sanFrancisco,
+        fontFamily = family,
         fontSize = 18.sp
     ),
     displayMedium = TextStyle(
-        fontFamily = sanFrancisco,
+        fontFamily = family,
         fontSize = 16.sp
     ),
     displaySmall = TextStyle(
-        fontFamily = sanFrancisco,
+        fontFamily = family,
         fontSize = 14.sp
     ),
     bodyLarge = TextStyle(
-        fontFamily = sanFrancisco,
+        fontFamily = family,
         fontSize = 14.sp
     ),
     bodyMedium = TextStyle(
-        fontFamily = sanFrancisco,
+        fontFamily = family,
         fontSize = 12.sp
     ),
     bodySmall = TextStyle(
-        fontFamily = sanFrancisco,
+        fontFamily = family,
         fontSize = 10.sp
     )
 )
