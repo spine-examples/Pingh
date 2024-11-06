@@ -70,19 +70,20 @@ internal class ExponentialBackoffStrategy private constructor(builder: Builder) 
     private var limit = builder.limit!!
 
     /**
-     * An action to execute upon the successful completion of a [repeatable task][retryAction].
+     * An action to execute upon the [successful completion][ActionOutcome.Success]
+     * of a [repeatable task][retryAction].
      */
     private var onSuccess = builder.onSuccess!!
 
     /**
      * A time counter that completes when the allotted time for the strategy expires.
      */
-    private lateinit var countdown: CompletableFuture<Unit>
+    private var countdown: CompletableFuture<Unit>? = null
 
     /**
      * A job that asynchronously performs an [action][retryAction] with a [delay][currentDelay].
      */
-    private lateinit var retryJob: Job
+    private var retryJob: Job? = null
 
     /**
      * A current delay time between attempts to execute the [action][retryAction].
@@ -91,6 +92,8 @@ internal class ExponentialBackoffStrategy private constructor(builder: Builder) 
 
     /**
      * Starts the execution of the exponential backoff strategy.
+     *
+     * @see [tryPerforming]
      */
     internal fun start() {
         currentDelay = minDelay
@@ -101,19 +104,27 @@ internal class ExponentialBackoffStrategy private constructor(builder: Builder) 
     /**
      * Attempts to perform the [action][retryAction].
      *
-     * If the `action` is completely successful, the strategy execution is completed.
-     * If the `action` fails and the allotted time for the strategy has not expired,
-     * the delay is increased and the action is retried.
+     * If the task completes successfully, execute the [onSuccess()][onSuccess] method
+     * and terminate the strategy.
+     *
+     * If the task completes with rejection, only end the strategy.
+     *
+     * If the task completes unsuccessfully and the execution time has not expired,
+     * the task will be scheduled for re-execution.
      */
     private fun tryPerforming() {
-        val res = retryAction()
-        if (res) {
-            onSuccess()
-        } else {
-            val delay = currentDelay!!
-            currentDelay = min(currentDelay!! * factor, maxDelay)
-            println(delay)
-            retryJob = invoke(delay, ::tryPerforming)
+        if (countdown!!.isDone) {
+            return
+        }
+        val status = retryAction()
+        when (status) {
+            ActionOutcome.Success -> onSuccess()
+            ActionOutcome.Rejection -> return
+            ActionOutcome.Failure -> {
+                val delay = currentDelay!!
+                currentDelay = min(currentDelay!! * factor, maxDelay)
+                retryJob = invoke(delay, ::tryPerforming)
+            }
         }
     }
 
@@ -121,10 +132,28 @@ internal class ExponentialBackoffStrategy private constructor(builder: Builder) 
      * Stops all scheduled actions.
      */
     internal fun stop() {
-        countdown.cancel(true)
-        if (retryJob.isActive) {
-            retryJob.cancel()
-        }
+        countdown?.cancel(true)
+        retryJob?.cancel()
+    }
+
+    /**
+     * Status of the completed task result.
+     */
+    internal enum class ActionOutcome {
+        /**
+         * The task was completed successfully.
+         */
+        Success,
+
+        /**
+         * The task was completed with rejection.
+         */
+        Rejection,
+
+        /**
+         * The task execution failed; should be restarted after a certain interval.
+         */
+        Failure
     }
 
     internal companion object {
@@ -141,7 +170,7 @@ internal class ExponentialBackoffStrategy private constructor(builder: Builder) 
         /**
          * An action that must be repeated until it succeeds.
          */
-        internal var retryAction: (() -> Boolean)? = null
+        internal var retryAction: (() -> ActionOutcome)? = null
             private set
 
         /**
@@ -169,7 +198,8 @@ internal class ExponentialBackoffStrategy private constructor(builder: Builder) 
             private set
 
         /**
-         * An action to execute upon the successful completion of a [repeatable task][retryAction].
+         * An action to execute upon the [successful completion][ActionOutcome.Success]
+         * of a [repeatable task][retryAction].
          */
         internal var onSuccess: (() -> Unit)? = null
             private set
@@ -177,9 +207,9 @@ internal class ExponentialBackoffStrategy private constructor(builder: Builder) 
         /**
          * Sets the action that must be repeated until it succeeds.
          *
-         * @param retryAction Returns `true` if successful.
+         * @see [ActionOutcome]
          */
-        internal fun perform(retryAction: () -> Boolean): Builder {
+        internal fun perform(retryAction: () -> ActionOutcome): Builder {
             this.retryAction = retryAction
             return this
         }
@@ -217,7 +247,7 @@ internal class ExponentialBackoffStrategy private constructor(builder: Builder) 
         }
 
         /**
-         * Sets the action to execute upon the successful completion
+         * Sets the action to execute upon the [successful completion][ActionOutcome.Success]
          * of a [repeatable task][retryAction].
          */
         internal fun doOnSuccess(action: () -> Unit): Builder {

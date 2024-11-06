@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.client
 
 import com.google.protobuf.Duration
+import io.spine.examples.pingh.client.ExponentialBackoffStrategy.ActionOutcome
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.SessionId
@@ -146,36 +147,36 @@ public class VerifyLogin internal constructor(
     }
 
     /**
-     * Checks whether the user has completed the login on GitHub and entered their user code.
+     * Checks if the user has completed the login process on GitHub and entered their user code.
      *
-     * Returns `true` if:
-     * - Authentication completed successfully.
-     * - Authentication completed with rejection,
-     *   which triggers a transition to the [LoginFailed] stage.
+     * Returns [Success status][ActionOutcome.Success] if authentication completes successfully.
      *
-     * Returns `false` if:
-     * - The user has not yet entered the code.
-     * - The server did not respond within the [allotted time][responseTimeout].
+     * Returns [Rejection status][ActionOutcome.Rejection] if authentication completes with a
+     * rejection, triggering a transition to the [LoginFailed] stage.
+     *
+     * Returns [Failure status][ActionOutcome.Failure] if:
+     * - The user has not entered the code.
+     * - The server did not respond within the [specified time][responseTimeout].
      */
-    private fun confirm(): Boolean {
-        val future = CompletableFuture<Boolean>()
+    private fun confirm(): ActionOutcome {
+        val future = CompletableFuture<ActionOutcome>()
         val command = VerifyUserLoginToGitHub::class.withSession(session.value!!.id)
         client.observeEither(
             EventObserver(command.id, UserLoggedIn::class) {
-                future.complete(true)
+                future.complete(ActionOutcome.Success)
             },
             EventObserver(command.id, UserIsNotLoggedIntoGitHub::class) {
-                future.complete(false)
+                future.complete(ActionOutcome.Failure)
             },
             EventObserver(command.id, UsernameMismatch::class) { rejection ->
                 codeExpirationJob.cancel()
-                future.complete(true)
+                future.complete(ActionOutcome.Rejection)
                 result = rejection.cause
                 moveToNextStage()
             },
             EventObserver(command.id, NotMemberOfPermittedOrgs::class) { rejection ->
                 codeExpirationJob.cancel()
-                future.complete(true)
+                future.complete(ActionOutcome.Rejection)
                 result = rejection.cause
                 moveToNextStage()
             }
@@ -184,7 +185,7 @@ public class VerifyLogin internal constructor(
         return try {
             future.get(responseTimeout.inWholeSeconds, TimeUnit.SECONDS)
         } catch (e: TimeoutException) {
-            false
+            ActionOutcome.Failure
         }
     }
 
@@ -221,7 +222,7 @@ public class VerifyLogin internal constructor(
         /**
          * The exponential delay increase coefficient.
          */
-        private const val exponentialBackoffFactor = 1.5
+        private const val exponentialBackoffFactor = 1.2
 
         /**
          * The maximum time to wait for a server response.
