@@ -29,16 +29,19 @@ package io.spine.examples.pingh.desktop
 import com.google.protobuf.Duration
 import com.google.protobuf.util.Durations
 
+private const val secPerMin = 60
+private const val minPerHour = 60
+
 /**
  * Returns the number of minutes in this duration.
  *
  * @return The number of minutes, from 0 to 59 inclusive.
  */
-internal fun Duration.minutes(): Int = (Durations.toMinutes(this) % 60).toInt()
+internal fun Duration.minutes(): Int = (Durations.toMinutes(this) % minPerHour).toInt()
 
 /**
  * Returns the number of seconds in this duration.
  *
  * @return The number of seconds, from 0 to 59 inclusive.
  */
-internal fun Duration.seconds(): Int = (Durations.toSeconds(this) % 60).toInt()
+internal fun Duration.seconds(): Int = (Durations.toSeconds(this) % secPerMin).toInt()
