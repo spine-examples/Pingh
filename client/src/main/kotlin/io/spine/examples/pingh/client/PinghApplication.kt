@@ -92,6 +92,11 @@ public class PinghApplication private constructor(
     private var mentionsFlow: MentionsFlow? = null
 
     /**
+     * Describes the login to GitHub via GitHub's device flow.
+     */
+    private var loginFlow: LoginFlow? = null
+
+    /**
      * Flow that manages the sending of notifications within the app.
      */
     private val notificationsFlow = NotificationsFlow(notificationSender, settings)
@@ -129,9 +134,13 @@ public class PinghApplication private constructor(
     public fun isLoggedIn(): Boolean = session.value != null
 
     /**
-     * Initiates the login flow.
+     * Initiates the login flow and terminates any previous flow, if it exists.
      */
-    public fun startLoginFlow(): LoginFlow = LoginFlow(client, session)
+    public fun startLoginFlow(): LoginFlow  {
+        loginFlow?.close()
+        loginFlow = LoginFlow(client, session)
+        return loginFlow!!
+    }
 
     /**
      * Returns mentions flow for current session.
@@ -154,6 +163,7 @@ public class PinghApplication private constructor(
      * Closes the client.
      */
     public fun close() {
+        loginFlow?.close()
         sessionObservation.cancel()
         client.close()
         channel.shutdown()
