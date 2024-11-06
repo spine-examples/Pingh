@@ -501,7 +501,8 @@ private fun UserCodeField(
                     )
                 }
             }
-            .padding(horizontal = 15.dp),
+            .padding(horizontal = 15.dp)
+            .testTag("user-code"),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
