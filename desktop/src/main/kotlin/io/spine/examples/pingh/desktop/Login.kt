@@ -45,7 +45,6 @@ import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -91,7 +90,6 @@ import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.github.isValidUsername
 import io.spine.net.Url
-import io.spine.protobuf.Durations2.toMinutes
 
 /**
  * Displays the page with the current login stage.
@@ -429,6 +427,7 @@ private fun VerificationPage(
     flow: VerifyLogin,
     toMentionsPage: () -> Unit
 ) {
+    flow.waitForAuthCompletion(onSuccess = toMentionsPage)
     val userCode by flow.userCode.collectAsState()
     val verificationUrl by flow.verificationUrl.collectAsState()
     val expiresIn by flow.expiresIn.collectAsState()
@@ -451,14 +450,9 @@ private fun VerificationPage(
             Spacer(Modifier.height(5.dp))
             CodeExpiredErrorMessage(flow)
         } else {
-            VerificationText(
+            VerificationInfo(
                 verificationUrl = verificationUrl,
                 expiresIn = expiresIn
-            )
-            Spacer(Modifier.height(25.dp))
-            SubmitButton(
-                flow = flow,
-                toMentionsPage = toMentionsPage
             )
         }
     }
@@ -494,7 +488,7 @@ private fun UserCodeField(
     }
     Row(
         modifier = Modifier
-            .width(260.dp)
+            .width(280.dp)
             .height(46.dp)
             .run {
                 if (isExpired) {
@@ -514,7 +508,7 @@ private fun UserCodeField(
         SelectionContainer {
             Text(
                 text = userCode.value,
-                modifier = Modifier.width(200.dp),
+                modifier = Modifier.width(220.dp),
                 color = color,
                 fontSize = 30.sp,
                 textAlign = if (isExpired) TextAlign.Center else TextAlign.Start,
@@ -566,42 +560,41 @@ private fun CodeExpiredErrorMessage(flow: VerifyLogin) {
 }
 
 /**
- * Displays instructions for login verification.
+ * Displays the remaining time for verification and instructions for confirming login.
  *
  * @param verificationUrl The URL of the GitHub verification page.
  * @param expiresIn The duration after which the `userCode` expires.
  */
 @Composable
-private fun VerificationText(
+private fun VerificationInfo(
     verificationUrl: Url,
     expiresIn: Duration
 ) {
-    Column(
-        modifier = Modifier.width(260.dp)
+    Row(
+        modifier = Modifier.width(280.dp).height(55.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(15.dp)
     ) {
-        Text(
-            text = "Enter this code at",
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
-            style = MaterialTheme.typography.bodyLarge
+        CountdownTimer(
+            minutes = expiresIn.minutes(),
+            seconds = expiresIn.seconds(),
+            size = 55.dp,
+            indicatorColor = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.background
         )
-        Spacer(Modifier.height(5.dp))
-        VerificationUrlButton(verificationUrl)
-        Spacer(Modifier.height(12.dp))
-        Text(
-            text = "The code is valid for ${toMinutes(expiresIn)} minutes.",
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
-            style = MaterialTheme.typography.bodyLarge
-        )
+        VerificationText(verificationUrl)
     }
 }
 
 /**
- * Displays a URL of the GitHub verification page.
+ * Displays instructions for login verification.
  *
  * @param url The URL of the GitHub verification page.
  */
+// TODO:2024-11-06:mykyta.pimonov: Rewrite using an `AnnotatedString` with a `LinkAnnotation`
+//  when upgrading to Compose Multiplatform 1.7.0.
 @Composable
-private fun VerificationUrlButton(url: Url) {
+private fun VerificationText(url: Url) {
     val uriHandler = LocalUriHandler.current
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -610,93 +603,34 @@ private fun VerificationUrlButton(url: Url) {
     } else {
         TextDecoration.None
     }
-    Text(
-        text = url.spec,
-        modifier = Modifier
-            .hoverable(interactionSource)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null
-            ) {
-                uriHandler.openUri(url.spec)
-            },
-        color = MaterialTheme.colorScheme.primary,
-        textDecoration = decoration,
-        style = MaterialTheme.typography.bodyLarge
-    )
-}
-
-/**
- * Displays a button to confirm verification.
- *
- * @param flow The control flow of the GitHub login process stage
- *   where the user must verify their login.
- * @param toMentionsPage The navigation to the 'Mentions' page.
- */
-@Composable
-private fun SubmitButton(
-    flow: VerifyLogin,
-    toMentionsPage: () -> Unit
-) {
-    val enabled by flow.canAskForNewTokens.collectAsState()
-    val onClick = {
-        flow.confirm(
-            onSuccess = {
-                toMentionsPage()
-            }
-        )
-    }
-    Box(
-        modifier = Modifier
-            .width(260.dp)
-            .height(46.dp),
-        contentAlignment = Alignment.TopCenter
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center
     ) {
-        Button(
-            onClick = onClick,
-            modifier = Modifier.fillMaxSize()
-                .testTag("submit-button"),
-            enabled = enabled,
-            shape = MaterialTheme.shapes.medium,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
-        ) {
+        Text(
+            text = "Enter this code at",
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Spacer(Modifier.height(5.dp))
+        Row {
             Text(
-                text = "I have entered the code",
-                style = MaterialTheme.typography.displaySmall
+                text = url.spec,
+                modifier = Modifier
+                    .hoverable(interactionSource)
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null
+                    ) {
+                        uriHandler.openUri(url.spec)
+                    },
+                color = MaterialTheme.colorScheme.primary,
+                textDecoration = decoration,
+                style = MaterialTheme.typography.bodyLarge
             )
-        }
-        if (!enabled) {
-            NoResponseErrorMessage(
-                flow = flow
-            )
+            Text(".")
         }
     }
-}
-
-/**
- * Displays an error message indicating that GitHub could not verify the login.
- *
- * @param flow The control flow of the GitHub login process stage
- *   where the user must verify their login.
- */
-@Composable
-private fun NoResponseErrorMessage(flow: VerifyLogin) {
-    val interval by flow.interval.collectAsState()
-    ClickableErrorMessage(
-        text = """
-                No response from GitHub yet.
-                Try again in ${interval.seconds} seconds, or start over.
-            """.trimIndent(),
-        clickablePartOfText = "start over",
-        onClick = flow::requestNewUserCode,
-        modifier = Modifier
-            .width(240.dp)
-            .offset(y = 50.dp)
-            .testTag("no-response-message")
-    )
 }
 
 /**

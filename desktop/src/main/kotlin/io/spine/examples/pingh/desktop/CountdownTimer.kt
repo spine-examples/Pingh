@@ -90,13 +90,11 @@ internal fun CountdownTimer(
             strokeCap = StrokeCap.Round
         )
         Text(
-            text = "$time",
+            text = time.toString(),
             style = MaterialTheme.typography.bodyLarge
         )
     }
 }
-
-
 
 /**
  * A time representation in minutes and seconds for use in countdown timers.
@@ -106,7 +104,7 @@ private data class TimeUnit(val min: Int, val sec: Int) {
     val inWholeSeconds: Int
         get() = min * secPerMin + sec
 
-    @Suppress("MagicNumber" /* Uses for ensure "mm:ss" time format. */)
+    @Suppress("MagicNumber" /* Uses for ensuring "mm:ss" time format. */)
     override fun toString(): String {
         val mins = if (min < 10) "0$min" else "$min"
         val secs = if (sec < 10) "0$sec" else "$sec"
