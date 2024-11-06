@@ -40,6 +40,11 @@ import io.spine.examples.pingh.sessions.rejection.Rejections.NotMemberOfPermitte
 import io.spine.examples.pingh.sessions.rejection.Rejections.UsernameMismatch
 import io.spine.examples.pingh.sessions.withSession
 import io.spine.net.Url
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -76,22 +81,6 @@ public class VerifyLogin internal constructor(
     public val verificationUrl: MutableStateFlow<Url> = MutableStateFlow(event.verificationUrl)
 
     /**
-     * The minimum duration that must pass before user can make a new access token request.
-     */
-    public val interval: MutableStateFlow<Duration> = MutableStateFlow(event.interval)
-
-    /**
-     * Whether a new token can be asked from the external API.
-     *
-     * The contract of the external API assumes some delay that must pass
-     * before a new token can be requested. Therefore, we should wait for this call
-     * to become available.
-     *
-     * @see [interval]
-     */
-    public val canAskForNewTokens: MutableStateFlow<Boolean> = MutableStateFlow(true)
-
-    /**
      * The duration after which the [userCode] expires.
      */
     public val expiresIn: MutableStateFlow<Duration> = MutableStateFlow(event.expiresIn)
@@ -104,9 +93,22 @@ public class VerifyLogin internal constructor(
     public val isUserCodeExpired: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     /**
+     * The minimum duration that must pass before user can make a new access token request.
+     */
+    private val interval = event.interval
+
+    /**
      * Job that marks a [userCode] as expired after the [time][expiresIn] has passed.
      */
     private lateinit var codeExpirationJob: Job
+
+    /**
+     * A strategy that monitors GitHub login completion.
+     *
+     * The intervals between unsuccessful attempts increase exponentially,
+     * and the step is considered successful upon a successful login.
+     */
+    private var retryStrategy: ExponentialBackoffStrategy? = null
 
     init {
         watchForCodeExpiration()
@@ -123,48 +125,66 @@ public class VerifyLogin internal constructor(
     }
 
     /**
+     * Sends requests to verify authentication completion.
+     *
+     * If authentication is not complete, the request is retried
+     * with exponentially increasing intervals.
+     * The process automatically ends when the code expires.
+     *
+     * @param onSuccess Called when login is verified.
+     */
+    public fun waitForAuthCompletion(onSuccess: () -> Unit) {
+        retryStrategy = ExponentialBackoffStrategy.builder()
+            .perform { confirm() }
+            .withMinDelay(interval.asKotlinDuration())
+            .withMaxDelay(1.minutes)
+            .withFactor(exponentialBackoffFactor)
+            .withTimeLimit(expiresIn.value.asKotlinDuration())
+            .doOnSuccess(onSuccess)
+            .build()
+        retryStrategy!!.start()
+    }
+
+    /**
      * Checks whether the user has completed the login on GitHub and entered their user code.
      *
-     * Rejections during verification cause the process to transition to the [LoginFailed] stage.
+     * Returns `true` if:
+     * - Authentication completed successfully.
+     * - Authentication completed with rejection,
+     *   which triggers a transition to the [LoginFailed] stage.
      *
-     * @param onSuccess Called when the login is successfully verified.
-     * @param onFail Called when login verification fails.
+     * Returns `false` if:
+     * - The user has not yet entered the code.
+     * - The server did not respond within the [allotted time][responseTimeout].
      */
-    public fun confirm(
-        onSuccess: (event: UserLoggedIn) -> Unit = {},
-        onFail: (event: UserIsNotLoggedIntoGitHub) -> Unit = {}
-    ) {
+    private fun confirm(): Boolean {
+        val future = CompletableFuture<Boolean>()
         val command = VerifyUserLoginToGitHub::class.withSession(session.value!!.id)
         client.observeEither(
-            EventObserver(command.id, UserLoggedIn::class) { event ->
-                codeExpirationJob.cancel()
-                onSuccess(event)
+            EventObserver(command.id, UserLoggedIn::class) {
+                future.complete(true)
             },
-            EventObserver(command.id, UserIsNotLoggedIntoGitHub::class) { event ->
-                preventAskingForNewTokens()
-                onFail(event)
+            EventObserver(command.id, UserIsNotLoggedIntoGitHub::class) {
+                future.complete(false)
             },
             EventObserver(command.id, UsernameMismatch::class) { rejection ->
                 codeExpirationJob.cancel()
+                future.complete(true)
                 result = rejection.cause
                 moveToNextStage()
             },
             EventObserver(command.id, NotMemberOfPermittedOrgs::class) { rejection ->
                 codeExpirationJob.cancel()
+                future.complete(true)
                 result = rejection.cause
                 moveToNextStage()
             }
         )
         client.send(command)
-    }
-
-    /**
-     * Prevents requests for new tokens during the [interval].
-     */
-    private fun preventAskingForNewTokens() {
-        canAskForNewTokens.value = false
-        invoke(interval.value) {
-            canAskForNewTokens.value = true
+        return try {
+            future.get(responseTimeout.inWholeSeconds, TimeUnit.SECONDS)
+        } catch (e: TimeoutException) {
+            false
         }
     }
 
@@ -183,12 +203,30 @@ public class VerifyLogin internal constructor(
             userCode.value = event.userCode
             verificationUrl.value = event.verificationUrl
             expiresIn.value = event.expiresIn
-            interval.value = event.interval
-            canAskForNewTokens.value = true
             codeExpirationJob.cancel()
             watchForCodeExpiration()
             onSuccess(event)
         }
+    }
+
+    /**
+     * Cancels all processes initiated by this flow.
+     */
+    internal fun close() {
+        codeExpirationJob.cancel()
+        retryStrategy?.stop()
+    }
+
+    private companion object {
+        /**
+         * The exponential delay increase coefficient.
+         */
+        private const val exponentialBackoffFactor = 1.5
+
+        /**
+         * The maximum time to wait for a server response.
+         */
+        private val responseTimeout = 5.seconds
     }
 }
 
