@@ -130,7 +130,7 @@ public class VerifyLogin internal constructor(
      *
      * If authentication is not complete, the request is retried
      * with exponentially increasing intervals.
-     * The process automatically ends when the code expires.
+     * The process automatically ends when the user code [expires][isUserCodeExpired].
      *
      * @param onSuccess Called when login is verified.
      */
@@ -163,9 +163,11 @@ public class VerifyLogin internal constructor(
         val command = VerifyUserLoginToGitHub::class.withSession(session.value!!.id)
         client.observeEither(
             EventObserver(command.id, UserLoggedIn::class) {
+                codeExpirationJob.cancel()
                 future.complete(ActionOutcome.Success)
             },
             EventObserver(command.id, UserIsNotLoggedIntoGitHub::class) {
+                codeExpirationJob.cancel()
                 future.complete(ActionOutcome.Failure)
             },
             EventObserver(command.id, UsernameMismatch::class) { rejection ->

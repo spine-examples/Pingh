@@ -104,13 +104,13 @@ internal class ExponentialBackoffStrategy private constructor(builder: Builder) 
     /**
      * Attempts to perform the [action][retryAction].
      *
-     * If the task completes successfully, execute the [onSuccess()][onSuccess] method
-     * and terminate the strategy.
+     * If the `action` completes successfully, the [onSuccess()][onSuccess] method is executed
+     * and the strategy is terminated.
      *
-     * If the task completes with rejection, only end the strategy.
+     * If the `action` completes with rejection, the strategy ends.
      *
-     * If the task completes unsuccessfully and the execution time has not expired,
-     * the task will be scheduled for re-execution.
+     * If the `action` completes unsuccessfully and the execution time has not expired,
+     * the `action` is scheduled for re-execution.
      */
     private fun tryPerforming() {
         if (countdown!!.isDone) {

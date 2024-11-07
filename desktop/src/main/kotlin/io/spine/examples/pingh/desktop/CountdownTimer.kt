@@ -35,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -71,7 +72,7 @@ internal fun CountdownTimer(
 ) {
     require(minutes >= 0) { "The number of minutes must be non-negative." }
     require(seconds >= 0) { "The number of seconds must be non-negative." }
-    val fullTime = TimeUnit(minutes, seconds)
+    val fullTime = remember { TimeUnit(minutes, seconds) }
     val time by produceState(initialValue = fullTime) {
         while (value.inWholeSeconds > 0) {
             delay(1.seconds)
