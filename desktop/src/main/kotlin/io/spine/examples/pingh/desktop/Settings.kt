@@ -49,6 +49,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -368,6 +369,7 @@ private fun Option(
  * @param state The state of the application settings.
  */
 @Composable
+@OptIn(ExperimentalMaterial3Api::class /* Required for `SegmentedButtonDefaults.itemShape()` */)
 private fun SnoozeTimeSegmentedButtonRow(state: SettingsState) {
     val snoozeTimeOptions = SnoozeTime.entries
     val currentSnoozeTime by state.snoozeTime.collectAsState()
