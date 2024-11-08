@@ -115,4 +115,13 @@ public class LoginFlow internal constructor(
             }
         }
     }
+
+    /**
+     * Cancels any processes initiated during this stage of flow.
+     */
+    internal fun close() {
+        when (val screenStage = stage.value) {
+            is VerifyLogin -> screenStage.close()
+        }
+    }
 }

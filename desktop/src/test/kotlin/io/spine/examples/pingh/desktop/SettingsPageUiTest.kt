@@ -54,6 +54,7 @@ internal class SettingsPageUiTest : UiTest() {
         runComposeUiTest {
             runApp()
             logIn()
+            awaitFact { settingsButton.assertExists() }
             settingsButton.performClick()
             awaitFact { dndOption.assertExists() }
             dndOption.performClick()
@@ -61,6 +62,7 @@ internal class SettingsPageUiTest : UiTest() {
             logoutButton.performClick()
             awaitFact { logoutButton.assertDoesNotExist() }
             logIn()
+            awaitFact { settingsButton.assertExists() }
             settingsButton.performClick()
             awaitFact { dndOption.assertIsOn() }
         }

@@ -24,7 +24,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.examples.pingh.desktop
+
+import com.google.protobuf.Duration
+import com.google.protobuf.util.Durations
+
+private const val secPerMin = 60
+private const val minPerHour = 60
+
 /**
- * The version of the `Pingh` to publish.
+ * Minutes of hour of the duration, ranging from 0 to 59.
  */
-val pinghVersion: String by extra("1.0.0-SNAPSHOT.20")
+internal val Duration.minutesOfHour: Int
+    get() = (Durations.toMinutes(this) % minPerHour).toInt()
+
+/**
+ * Seconds of minute of the duration, ranging from 0 to 59.
+ */
+internal val Duration.secondsOfMinute: Int
+    get() = (Durations.toSeconds(this) % secPerMin).toInt()

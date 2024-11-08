@@ -84,7 +84,7 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
         val loginFlow = app().startLoginFlow()
         (loginFlow.currentStage().value as EnterUsername).requestUserCode(username) {
             enterUserCode()
-            (loginFlow.currentStage().value as VerifyLogin).confirm(
+            (loginFlow.currentStage().value as VerifyLogin).waitForAuthCompletion(
                 onSuccess = {
                     future.complete(null)
                 }

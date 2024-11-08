@@ -37,7 +37,6 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.runComposeUiTest
 import io.spine.examples.pingh.desktop.given.DelayedFactAssertion.Companion.awaitFact
-import io.spine.examples.pingh.desktop.given.delay
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 import org.junit.jupiter.api.DisplayName
@@ -52,11 +51,8 @@ internal class LoginPageUiTest : UiTest() {
     private val SemanticsNodeInteractionsProvider.usernameInput
         get() = onNodeWithTag("username-input")
 
-    private val SemanticsNodeInteractionsProvider.submitButton
-        get() = onNodeWithTag("submit-button")
-
-    private val SemanticsNodeInteractionsProvider.noResponseMessage
-        get() = onNodeWithTag("no-response-message")
+    private val SemanticsNodeInteractionsProvider.userCode
+        get() = onNodeWithTag("user-code")
 
     @Test
     internal fun `have login button enabled only when a valid username is entered`() =
@@ -71,30 +67,13 @@ internal class LoginPageUiTest : UiTest() {
         }
 
     @Test
-    internal fun `have submit button disabled after it is clicked, if no code has been entered`() =
+    internal fun `be replaced with the Mentions page when the user code is entered`() =
         runComposeUiTest {
             runApp()
             toVerificationPage()
-            submitButton.assertIsEnabled()
-            noResponseMessage.assertDoesNotExist()
-            submitButton.performClick()
-            awaitFact {
-                submitButton.assertIsNotEnabled()
-                noResponseMessage.assertExists()
-            }
-        }
-
-    @Test
-    internal fun `have submit button become available again 5 seconds after unsuccessful click`() =
-        runComposeUiTest {
-            runApp()
-            toVerificationPage()
-            submitButton.performClick()
-            delay(5.seconds)
-            awaitFact {
-                submitButton.assertIsEnabled()
-                noResponseMessage.assertDoesNotExist()
-            }
+            awaitFact { userCode.assertExists() }
+            enterUserCode()
+            awaitFact(10.seconds) { userCode.assertDoesNotExist() }
         }
 
     private fun ComposeUiTest.toVerificationPage() {
@@ -103,7 +82,7 @@ internal class LoginPageUiTest : UiTest() {
         loginButton.performClick()
         awaitFact {
             loginButton.assertDoesNotExist()
-            submitButton.assertExists()
+            userCode.assertExists()
         }
     }
 }
