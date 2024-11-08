@@ -72,8 +72,12 @@ internal fun CountdownTimer(
     indicatorColor: Color,
     trackColor: Color
 ) {
-    require(minutes >= 0) { "The number of minutes must be non-negative." }
-    require(seconds >= 0) { "The number of seconds must be non-negative." }
+    require(minutes >= 0) {
+        "The number of minutes must be non-negative, but `$minutes` was provided."
+    }
+    require(seconds >= 0) {
+        "The number of seconds must be non-negative, but `$seconds` was provided."
+    }
     val total = remember { minutes * secPerMin + seconds }
     val left by produceState(initialValue = total) {
         while (value > 0) {
