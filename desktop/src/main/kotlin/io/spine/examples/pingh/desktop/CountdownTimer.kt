@@ -44,6 +44,8 @@ import androidx.compose.ui.unit.Dp
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 
+private const val secPerMin = 60
+
 /**
  * Displays a countdown timer that updates every second, starting from "`minutes`:`seconds`"
  * and ending at "00:00".
@@ -72,11 +74,11 @@ internal fun CountdownTimer(
 ) {
     require(minutes >= 0) { "The number of minutes must be non-negative." }
     require(seconds >= 0) { "The number of seconds must be non-negative." }
-    val fullTime = remember { TimeUnit(minutes, seconds) }
-    val time by produceState(initialValue = fullTime) {
-        while (value.inWholeSeconds > 0) {
+    val total = remember { minutes * secPerMin + seconds }
+    val left by produceState(initialValue = total) {
+        while (value > 0) {
             delay(1.seconds)
-            value = value.minusSecond()
+            value--
         }
     }
     Box(
@@ -84,45 +86,24 @@ internal fun CountdownTimer(
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator(
-            progress = { time.inWholeSeconds.toFloat() / fullTime.inWholeSeconds },
+            progress = { left.toFloat() / total },
             modifier = Modifier.fillMaxSize(),
             color = indicatorColor,
             trackColor = trackColor,
             strokeCap = StrokeCap.Round
         )
         Text(
-            text = time.toString(),
+            text = left.timeFormat(),
             style = MaterialTheme.typography.bodyLarge
         )
     }
 }
 
 /**
- * A time representation in minutes and seconds for use in countdown timers.
+ * Converts a number of seconds into a time string in `mm:ss` format.
  */
-private data class TimeUnit(val min: Int, val sec: Int) {
-
-    val inWholeSeconds: Int
-        get() = min * secPerMin + sec
-
-    @Suppress("MagicNumber" /* Uses for ensuring "mm:ss" time format. */)
-    override fun toString(): String {
-        val mins = if (min < 10) "0$min" else "$min"
-        val secs = if (sec < 10) "0$sec" else "$sec"
-        return "$mins:$secs"
-    }
-
-    fun minusSecond(): TimeUnit {
-        check(inWholeSeconds > 0) { "Time has already elapsed." }
-        val nextSec = sec - 1
-        return if (nextSec < 0) {
-             TimeUnit(min - 1, secPerMin - 1)
-        } else {
-            TimeUnit(min, nextSec)
-        }
-    }
-
-    private companion object {
-        private const val secPerMin = 60
-    }
+private fun Int.timeFormat(): String {
+    val min = this / secPerMin
+    val sec = this % secPerMin
+    return "%02d:%02d".format(min, sec)
 }
