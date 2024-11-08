@@ -41,11 +41,11 @@ import io.spine.examples.pingh.sessions.rejection.Rejections.NotMemberOfPermitte
 import io.spine.examples.pingh.sessions.rejection.Rejections.UsernameMismatch
 import io.spine.examples.pingh.sessions.withSession
 import io.spine.net.Url
+import io.spine.protobuf.Durations2.minutes
+import io.spine.protobuf.Durations2.seconds
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -137,10 +137,10 @@ public class VerifyLogin internal constructor(
     public fun waitForAuthCompletion(onSuccess: () -> Unit) {
         retryStrategy = ExponentialBackoffStrategy.builder()
             .perform { confirm() }
-            .withMinDelay(interval.asKotlinDuration())
-            .withMaxDelay(1.minutes)
+            .withMinDelay(interval)
+            .withMaxDelay(backoffMaxDelay)
             .withFactor(exponentialBackoffFactor)
-            .withTimeLimit(expiresIn.value.asKotlinDuration())
+            .withTimeLimit(expiresIn.value)
             .doOnSuccess(onSuccess)
             .build()
         retryStrategy!!.start()
@@ -185,7 +185,7 @@ public class VerifyLogin internal constructor(
         )
         client.send(command)
         return try {
-            future.get(responseTimeout.inWholeSeconds, TimeUnit.SECONDS)
+            future.get(responseTimeout.seconds, TimeUnit.SECONDS)
         } catch (e: TimeoutException) {
             ActionOutcome.Failure
         }
@@ -227,9 +227,14 @@ public class VerifyLogin internal constructor(
         private const val exponentialBackoffFactor = 1.2
 
         /**
+         * The maximum duration for the repeat interval in the exponential backoff strategy.
+         */
+        private val backoffMaxDelay = minutes(1)
+
+        /**
          * The maximum time to wait for a server response.
          */
-        private val responseTimeout = 5.seconds
+        private val responseTimeout = seconds(5)
     }
 }
 

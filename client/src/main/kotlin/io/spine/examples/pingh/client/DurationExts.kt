@@ -28,16 +28,9 @@ package io.spine.examples.pingh.client
 
 import com.google.protobuf.Duration
 import com.google.protobuf.util.Durations
-import kotlin.time.Duration.Companion.nanoseconds
 
 /**
  * The value of this `Duration` in milliseconds.
  */
 internal val Duration.inWholeMilliseconds: Long
     get() = Durations.toMillis(this)
-
-/**
- * Converts this duration to Kotlin duration.
- */
-internal fun Duration.asKotlinDuration(): kotlin.time.Duration =
-    Durations.toNanos(this).nanoseconds

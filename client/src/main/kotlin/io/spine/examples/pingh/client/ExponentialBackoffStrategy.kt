@@ -27,8 +27,10 @@
 package io.spine.examples.pingh.client
 
 import com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly
+import com.google.protobuf.util.Durations
 import java.util.concurrent.CompletableFuture
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.toJavaDuration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -217,16 +219,16 @@ internal class ExponentialBackoffStrategy private constructor(builder: Builder) 
         /**
          * Sets the minimum repetition interval.
          */
-        internal fun withMinDelay(minDelay: Duration): Builder {
-            this.minDelay = minDelay
+        internal fun withMinDelay(minDelay: com.google.protobuf.Duration): Builder {
+            this.minDelay = minDelay.toKotlin()
             return this
         }
 
         /**
          * Sets the maximum repetition interval.
          */
-        internal fun withMaxDelay(maxDelay: Duration): Builder {
-            this.maxDelay = maxDelay
+        internal fun withMaxDelay(maxDelay: com.google.protobuf.Duration): Builder {
+            this.maxDelay = maxDelay.toKotlin()
             return this
         }
 
@@ -241,8 +243,8 @@ internal class ExponentialBackoffStrategy private constructor(builder: Builder) 
         /**
          * Sets the timeframe in which [action][retryAction] attempts must be retried.
          */
-        internal fun withTimeLimit(limit: Duration): Builder {
-            this.limit = limit
+        internal fun withTimeLimit(limit: com.google.protobuf.Duration): Builder {
+            this.limit = limit.toKotlin()
             return this
         }
 
@@ -285,6 +287,12 @@ private fun invoke(delay: Duration, action: () -> Unit): Job =
         delay(delay)
         action()
     }
+
+/**
+ * Converts this duration to Kotlin duration.
+ */
+private fun com.google.protobuf.Duration.toKotlin(): Duration =
+    Durations.toNanos(this).nanoseconds
 
 /**
  * Returns the minimum duration.
