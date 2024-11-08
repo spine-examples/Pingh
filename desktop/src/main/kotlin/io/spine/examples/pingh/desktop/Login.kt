@@ -450,7 +450,7 @@ private fun VerificationPage(
             Spacer(Modifier.height(5.dp))
             CodeExpiredErrorMessage(flow)
         } else {
-            VerificationInfo(
+            VerifyLoginSection(
                 verificationUrl = verificationUrl,
                 expiresIn = expiresIn
             )
@@ -567,7 +567,7 @@ private fun CodeExpiredErrorMessage(flow: VerifyLogin) {
  * @param expiresIn The duration after which the `userCode` expires.
  */
 @Composable
-private fun VerificationInfo(
+private fun VerifyLoginSection(
     verificationUrl: Url,
     expiresIn: Duration
 ) {
@@ -577,8 +577,8 @@ private fun VerificationInfo(
         horizontalArrangement = Arrangement.spacedBy(15.dp)
     ) {
         CountdownTimer(
-            minutes = expiresIn.minutes(),
-            seconds = expiresIn.seconds(),
+            minutes = expiresIn.minutesOfHour,
+            seconds = expiresIn.secondsOfMinute,
             size = 55.dp,
             indicatorColor = MaterialTheme.colorScheme.primary,
             trackColor = MaterialTheme.colorScheme.background

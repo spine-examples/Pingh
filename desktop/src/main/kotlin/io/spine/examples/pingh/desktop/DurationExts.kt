@@ -33,15 +33,13 @@ private const val secPerMin = 60
 private const val minPerHour = 60
 
 /**
- * Returns the number of minutes in this duration.
- *
- * @return The number of minutes, from 0 to 59 inclusive.
+ * Minutes of hour of the duration, ranging from 0 to 59.
  */
-internal fun Duration.minutes(): Int = (Durations.toMinutes(this) % minPerHour).toInt()
+internal val Duration.minutesOfHour: Int
+    get() = (Durations.toMinutes(this) % minPerHour).toInt()
 
 /**
- * Returns the number of seconds in this duration.
- *
- * @return The number of seconds, from 0 to 59 inclusive.
+ * Seconds of minute of the duration, ranging from 0 to 59.
  */
-internal fun Duration.seconds(): Int = (Durations.toSeconds(this) % secPerMin).toInt()
+internal val Duration.secondsOfMinute: Int
+    get() = (Durations.toSeconds(this) % secPerMin).toInt()
