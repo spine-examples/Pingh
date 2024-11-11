@@ -31,11 +31,8 @@ package io.spine.examples.pingh.desktop
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -70,7 +67,6 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
@@ -580,7 +576,7 @@ private fun VerifyLoginSection(
     Row(
         modifier = Modifier.width(280.dp).height(55.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(15.dp)
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         CountdownTimer(
             minutes = expiresIn.minutesOfHour,
@@ -598,46 +594,36 @@ private fun VerifyLoginSection(
  *
  * @param url The URL of the GitHub verification page.
  */
-// TODO:2024-11-06:mykyta.pimonov: Rewrite using an `AnnotatedString` with a `LinkAnnotation`
-//  when upgrading to Compose Multiplatform 1.7.0.
 @Composable
 private fun VerificationText(url: Url) {
-    val uriHandler = LocalUriHandler.current
-    val interactionSource = remember { MutableInteractionSource() }
-    val isHovered by interactionSource.collectIsHoveredAsState()
-    val decoration = if (isHovered) {
-        TextDecoration.Underline
-    } else {
-        TextDecoration.None
-    }
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "Enter this code at",
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Spacer(Modifier.height(5.dp))
-        Row {
-            Text(
-                text = url.spec,
-                modifier = Modifier
-                    .hoverable(interactionSource)
-                    .clickable(
-                        interactionSource = interactionSource,
-                        indication = null
-                    ) {
-                        uriHandler.openUri(url.spec)
-                    },
-                color = MaterialTheme.colorScheme.primary,
-                textDecoration = decoration,
-                style = MaterialTheme.typography.bodyLarge
+    val annotatedString = buildAnnotatedString {
+        append("Enter this code at")
+        appendLine()
+        withLink(
+            LinkAnnotation.Url(
+                url = url.spec,
+                styles = TextLinkStyles(
+                    style = SpanStyle(
+                        color = MaterialTheme.colorScheme.primary,
+                        textDecoration = TextDecoration.None
+                    ),
+                    hoveredStyle = SpanStyle(
+                        textDecoration = TextDecoration.Underline
+                    )
+                )
             )
-            Text(".")
+        ) {
+            append(url.spec)
         }
+        append(".")
     }
+    Text(
+        text = annotatedString,
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.onSecondaryContainer,
+        lineHeight = 24.sp,
+        style = MaterialTheme.typography.bodyLarge
+    )
 }
 
 /**
