@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.desktop
 
-import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
 import androidx.compose.ui.test.assertIsEnabled
@@ -35,7 +34,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.runComposeUiTest
 import io.spine.examples.pingh.desktop.given.DelayedFactAssertion.Companion.awaitFact
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
@@ -56,8 +54,7 @@ internal class LoginPageUiTest : UiTest() {
 
     @Test
     internal fun `have login button enabled only when a valid username is entered`() =
-        runComposeUiTest {
-            runApp()
+        runPinghUiTest {
             loginButton.assertIsNotEnabled()
             usernameInput.performTextInput("()+$")
             awaitFact { loginButton.assertIsNotEnabled() }
@@ -68,17 +65,12 @@ internal class LoginPageUiTest : UiTest() {
 
     @Test
     internal fun `be replaced with the Mentions page when the user code is entered`() =
-        runComposeUiTest {
-            runApp()
-            toVerificationPage()
+        runPinghUiTest {
+            usernameInput.performTextInput(username)
+            awaitFact { loginButton.assertIsEnabled() }
+            loginButton.performClick()
             awaitFact { userCode.assertExists() }
             enterUserCode()
             awaitFact(10.seconds) { userCode.assertDoesNotExist() }
         }
-
-    private fun ComposeUiTest.toVerificationPage() {
-        usernameInput.performTextInput(username)
-        awaitFact { loginButton.assertIsEnabled() }
-        loginButton.performClick()
-    }
 }

@@ -35,6 +35,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.runDesktopComposeUiTest
 import io.spine.examples.pingh.desktop.given.DelayedFactAssertion.Companion.awaitFact
 import io.spine.examples.pingh.desktop.given.MemoizingUriHandler
 import io.spine.examples.pingh.testing.client.IntegrationTest
@@ -60,23 +61,28 @@ internal abstract class UiTest : IntegrationTest() {
      * Launches the Pingh application for testing and sets application state for this test case.
      */
     @OptIn(ExperimentalTestApi::class)
-    protected fun ComposeUiTest.runApp() {
-        val serverEndpoint = ServerEndpoint(address, port)
-        setContent {
-            Theme {
-                state = remember { AppState(serverEndpoint) }
-                CompositionLocalProvider(LocalUriHandler provides uriHandler) {
-                    CurrentPage(state!!.app)
+    protected fun runPinghUiTest(testBlock: ComposeUiTest.() -> Unit) =
+        runDesktopComposeUiTest(
+            width = 420,
+            height = 700
+        ) {
+            val serverEndpoint = ServerEndpoint(address, port)
+            setContent {
+                Theme {
+                    state = remember { AppState(serverEndpoint) }
+                    CompositionLocalProvider(LocalUriHandler provides uriHandler) {
+                        CurrentPage(state!!.app)
+                    }
                 }
             }
+            testBlock()
         }
-    }
 
     /**
      * Returns the number of opened URLs.
      *
      * To correctly count opened URLs, the test application
-     * must be run using [runApp()][ComposeUiTest.runApp] method.
+     * must be run using [runPinghUiTest()][runPinghUiTest] method.
      */
     protected fun openedUrlCount(): Int = uriHandler.urlCount
 
