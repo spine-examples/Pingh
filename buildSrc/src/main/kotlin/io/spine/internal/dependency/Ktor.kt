@@ -28,11 +28,17 @@ package io.spine.internal.dependency
 
 // https://github.com/ktorio/ktor
 public object Ktor {
+    private const val group = "io.ktor"
     private const val version = "2.3.11"
 
     public object Client {
-        public const val core: String = "io.ktor:ktor-client-core:$version"
-        public const val cio: String = "io.ktor:ktor-client-cio:$version"
-        public const val mock: String = "io.ktor:ktor-client-mock:$version"
+        public const val core: String = "$group:ktor-client-core:$version"
+        public const val cio: String = "$group:ktor-client-cio:$version"
+        public const val mock: String = "$group:ktor-client-mock:$version"
+    }
+
+    public object Server {
+        public const val core: String = "$group:ktor-server-core:$version"
+        public const val netty: String = "$group:ktor-server-netty:$version"
     }
 }

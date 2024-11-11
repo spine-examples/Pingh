@@ -58,8 +58,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.spine.examples.pingh.client.MentionsFlow
 import io.spine.examples.pingh.client.howMuchTimeHasPassed
 import io.spine.examples.pingh.client.sorted
@@ -104,33 +106,36 @@ private fun ToolBar(
     toSettingsPage: () -> Unit
 ) {
     val contentColor = MaterialTheme.colorScheme.onSecondary
+    val borderColor = MaterialTheme.colorScheme.onBackground
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(48.dp)
+            .height(72.dp)
             .background(MaterialTheme.colorScheme.secondary)
             .drawBehind {
                 drawLine(
-                    color = contentColor,
+                    color = borderColor,
                     start = Offset(0f, size.height),
                     end = Offset(size.width, size.height),
                     strokeWidth = 1.dp.toPx()
                 )
             }
-            .padding(horizontal = 5.dp, vertical = 4.dp),
+            .padding(start = 27.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
             icon = Icons.pingh,
             onClick = toSettingsPage,
-            modifier = Modifier.size(40.dp),
+            modifier = Modifier.size(56.dp).testTag("settings-button"),
             colors = IconButtonDefaults.iconButtonColors(
                 contentColor = contentColor
             )
         )
+        Spacer(Modifier.width(7.dp))
         Text(
             text = "Recent mentions",
-            modifier = Modifier.width(140.dp),
+            modifier = Modifier.width(250.dp),
+            fontSize = 20.sp,
             color = contentColor,
             style = MaterialTheme.typography.displayLarge
         )
@@ -139,7 +144,7 @@ private fun ToolBar(
             onClick = {
                 flow.updateMentions()
             },
-            modifier = Modifier.size(40.dp),
+            modifier = Modifier.size(50.dp),
             colors = IconButtonDefaults.iconButtonColors(
                 contentColor = contentColor
             )
@@ -164,16 +169,17 @@ private fun MentionCards(
     Column(
         Modifier
             .fillMaxSize()
-            .padding(horizontal = 5.dp)
+            .padding(horizontal = 10.dp)
             .verticalScroll(scrollState)
-            .background(MaterialTheme.colorScheme.background),
+            .background(MaterialTheme.colorScheme.background)
+            .testTag("mention-cards"),
     ) {
         mentions.sorted()
             .forEach { mention ->
-                Spacer(Modifier.height(5.dp))
+                Spacer(Modifier.height(10.dp))
                 MentionCard(flow, mention)
             }
-        Spacer(Modifier.height(5.dp))
+        Spacer(Modifier.height(10.dp))
     }
 }
 
@@ -213,7 +219,8 @@ private fun MentionCard(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp),
+            .testTag("mention-card-${mention.id}")
+            .height(60.dp),
         interactionSource = interactionSource,
         colors = CardDefaults.elevatedCardColors(
             containerColor = containerColor,
@@ -222,17 +229,17 @@ private fun MentionCard(
     ) {
         Row(
             modifier = Modifier
-                .padding(vertical = 3.dp, horizontal = 10.dp),
+                .padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Avatar(
                 url = mention.whoMentioned.avatarUrl,
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(50.dp)
             )
-            Spacer(Modifier.width(5.dp))
+            Spacer(Modifier.width(10.dp))
             MentionCardText(mention, isHovered)
-            Spacer(Modifier.width(5.dp))
-            SnoozeButton(flow, mention)
+            Spacer(Modifier.width(10.dp))
+            SnoozeButton(flow, mention, isHovered.value)
         }
     }
 }
@@ -252,10 +259,15 @@ private fun MentionCardText(
     val time = mention.whenMentioned.run {
         if (isHovered.value) toDatetime() else howMuchTimeHasPassed()
     }
+    val textWidth = if (isHovered.value || mention.status == MentionStatus.SNOOZED) {
+        240.dp
+    } else {
+        300.dp
+    }
     Column(
         modifier = Modifier
             .fillMaxHeight()
-            .width(120.dp),
+            .width(textWidth),
         verticalArrangement = Arrangement.Center
     ) {
         Text(
@@ -264,7 +276,7 @@ private fun MentionCardText(
             maxLines = 1,
             style = MaterialTheme.typography.bodyLarge
         )
-        Spacer(Modifier.height(2.dp))
+        Spacer(Modifier.height(4.dp))
         Text(
             text = "$time, by ${mention.whoMentioned.username.value}",
             overflow = TextOverflow.Ellipsis,
@@ -282,33 +294,33 @@ private fun MentionCardText(
  *
  * @param flow The flow for managing the lifecycle of mentions.
  * @param mention The mention whose information is displayed.
+ * @param isParentHovered Whether the parent mention card is being hovered.
  */
 @Composable
 private fun SnoozeButton(
     flow: MentionsFlow,
-    mention: MentionView
+    mention: MentionView,
+    isParentHovered: Boolean
 ) {
-    when (mention.status) {
-        MentionStatus.UNREAD ->
+    when {
+        isParentHovered && mention.status == MentionStatus.UNREAD ->
             IconButton(
                 icon = Icons.snooze,
                 onClick = {
                     flow.snooze(mention.id)
                 },
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier.size(50.dp).testTag("snooze-button"),
                 colors = IconButtonDefaults.iconButtonColors(
                     contentColor = MaterialTheme.colorScheme.onSecondary
                 )
             )
 
-        MentionStatus.SNOOZED ->
+        mention.status == MentionStatus.SNOOZED ->
             Text(
                 text = "Snoozed",
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(50.dp)
                     .wrapContentSize(Alignment.Center),
                 style = MaterialTheme.typography.bodySmall
             )
-
-        else -> {}
     }
 }

@@ -24,12 +24,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.examples.pingh.desktop.given
+
+import androidx.compose.ui.platform.UriHandler
+
 /**
- * Provides server-side code of the Sessions bounded context.
+ * Stores the count of URLs that should be opened.
+ *
+ * Does not actually open any URLs. Intended for testing purposes only.
  */
-@BoundedContext(NAME)
-package io.spine.exampless.pingh.sessions;
+internal class MemoizingUriHandler : UriHandler {
+    /**
+     * The number of URL that should be opened.
+     */
+    internal var urlCount = 0
+        private set
 
-import io.spine.core.BoundedContext;
+    /**
+     * Adds a URL to the [total count][urlCount] of URLs to be opened.
+     */
+    override fun openUri(uri: String) {
+        urlCount++
+    }
 
-import static io.spine.examples.pingh.sessions.SessionsContextKt.NAME;
+    /**
+     * Resets the count of opened URLs to zero.
+     */
+    internal fun reset() {
+        urlCount = 0
+    }
+}

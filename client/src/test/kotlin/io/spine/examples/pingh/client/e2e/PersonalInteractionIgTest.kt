@@ -42,6 +42,7 @@ import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
+import io.spine.examples.pingh.testing.client.IntegrationTest
 import io.spine.protobuf.Durations2.hours
 import io.spine.protobuf.Durations2.milliseconds
 import java.lang.Thread.sleep
@@ -86,7 +87,7 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
         val loginFlow = app().startLoginFlow()
         (loginFlow.currentStage().value as EnterUsername).requestUserCode(username) {
             enterUserCode()
-            (loginFlow.currentStage().value as VerifyLogin).confirm(
+            (loginFlow.currentStage().value as VerifyLogin).waitForAuthCompletion(
                 onSuccess = {
                     future.complete(null)
                 }

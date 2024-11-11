@@ -62,7 +62,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -117,14 +119,14 @@ private fun SettingsHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(48.dp)
-            .padding(horizontal = 5.dp, vertical = 4.dp),
+            .height(60.dp)
+            .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
             icon = Icons.back,
             onClick = toMentionsPage,
-            modifier = Modifier.size(30.dp),
+            modifier = Modifier.size(35.dp),
             colors = IconButtonDefaults.iconButtonColors(
                 contentColor = MaterialTheme.colorScheme.onSecondary
             )
@@ -152,7 +154,7 @@ private fun SettingsBox(
         Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(5.dp),
+            .padding(10.dp),
     ) {
         Card(
             modifier = Modifier.fillMaxSize(),
@@ -164,8 +166,8 @@ private fun SettingsBox(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(vertical = 5.dp),
-                verticalArrangement = Arrangement.spacedBy(15.dp),
+                    .padding(horizontal = 20.dp, vertical = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(25.dp),
                 content = content
             )
         }
@@ -188,7 +190,7 @@ private fun Profile(
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp)
-            .padding(horizontal = 10.dp, vertical = 4.dp),
+            .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Avatar(
@@ -245,7 +247,7 @@ private fun LogOutButton(
 ) {
     OutlinedButton(
         onClick = onClick,
-        modifier = Modifier.height(20.dp),
+        modifier = Modifier.height(22.dp).testTag("logout-button"),
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = MaterialTheme.colorScheme.secondary,
             contentColor = MaterialTheme.colorScheme.onSecondary
@@ -271,7 +273,7 @@ private fun SnoozeTimeOption(state: SettingsState) {
     Option(
         title = "Snooze time",
         description = "Time after which the notification is repeated.",
-        titleWight = 68.dp
+        titleWight = 150.dp
     ) {
         SnoozeTimeSegmentedButtonRow(state)
     }
@@ -292,7 +294,7 @@ private fun DndOption(
     Option(
         title = "Do not disturb",
         description = "Turn off notifications for new mentions or snooze expirations.",
-        titleWight = 174.dp
+        titleWight = 324.dp
     ) {
         Switch(
             checked = enabledDndMode,
@@ -302,7 +304,8 @@ private fun DndOption(
             modifier = Modifier
                 .scale(switchScale)
                 .width(36.dp)
-                .height(20.dp),
+                .height(20.dp)
+                .testTag("dnd-option"),
             colors = SwitchDefaults.colors(
                 checkedThumbColor = MaterialTheme.colorScheme.secondary,
                 checkedTrackColor = MaterialTheme.colorScheme.primary,
@@ -331,9 +334,7 @@ private fun Option(
     control: @Composable () -> Unit
 ) {
     Column(
-        Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 10.dp)
+        Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -342,14 +343,14 @@ private fun Option(
             Text(
                 text = title,
                 modifier = Modifier.width(titleWight),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyLarge
             )
             control()
         }
-        Spacer(Modifier.height(5.dp))
+        Spacer(Modifier.height(10.dp))
         Text(
             text = description,
-            modifier = Modifier.width(170.dp),
+            modifier = Modifier.width(360.dp),
             color = MaterialTheme.colorScheme.secondaryContainer,
             style = MaterialTheme.typography.bodySmall
         )
@@ -421,7 +422,7 @@ private fun SegmentedButton(
         selected = selected,
         onClick = onClick,
         modifier = Modifier
-            .width(48.dp)
+            .width(70.dp)
             .height(20.dp)
             .semantics { role = Role.RadioButton },
         shape = shape,

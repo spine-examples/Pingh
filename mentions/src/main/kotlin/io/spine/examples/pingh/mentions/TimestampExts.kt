@@ -40,3 +40,8 @@ internal fun Timestamp.isAfter(time: Timestamp): Boolean = compare(this, time) >
  * Adds the passed duration to this timestamp.
  */
 internal fun Timestamp.add(duration: Duration): Timestamp = Timestamps.add(this, duration)
+
+/**
+ * Returns `true` if this value is the default for `Timestamp`; otherwise, returns `false`.
+ */
+internal fun Timestamp.isDefault(): Boolean = compare(this, this.defaultInstanceForType) == 0

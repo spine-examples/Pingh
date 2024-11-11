@@ -28,6 +28,7 @@
 
 package io.spine.examples.pingh.github
 
+import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Timestamps
 import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.github.rest.AccessTokenFragment
@@ -114,7 +115,7 @@ public fun KClass<Mention>.from(fragment: IssueOrPullRequestFragment): Mention =
             fragment.whoCreated.avatarUrl
         )
         title = fragment.title
-        whenMentioned = Timestamps.parse(fragment.whenCreated)
+        whenMentioned = Timestamp::class.parse(fragment.whenCreated)
         url = Url::class.of(fragment.htmlUrl)
         vBuild()
     }
@@ -136,7 +137,7 @@ public fun KClass<Mention>.from(fragment: CommentFragment, itemTitle: String): M
             fragment.whoCreated.avatarUrl
         )
         title = "Comment on $itemTitle"
-        whenMentioned = Timestamps.parse(fragment.whenCreated)
+        whenMentioned = Timestamp::class.parse(fragment.whenCreated)
         url = Url::class.of(fragment.htmlUrl)
         vBuild()
     }
@@ -158,7 +159,7 @@ public fun KClass<Mention>.from(fragment: ReviewFragment, prTitle: String): Ment
             fragment.whoCreated.avatarUrl
         )
         title = "Review of $prTitle"
-        whenMentioned = Timestamps.parse(fragment.whenSubmitted)
+        whenMentioned = Timestamp::class.parse(fragment.whenSubmitted)
         url = Url::class.of(fragment.htmlUrl)
         vBuild()
     }
@@ -253,4 +254,13 @@ public fun KClass<Organization>.from(fragment: OrganizationFragment): Organizati
 public fun KClass<Organization>.loggedAs(login: String): Organization =
     Organization.newBuilder()
         .setLogin(OrganizationLogin::class.of(login))
+        .vBuild()
+
+/**
+ * Creates a new `GitHubApp` with the passed GitHub App client ID and secret.
+ */
+public fun KClass<GitHubApp>.of(id: ClientId, secret: ClientSecret): GitHubApp =
+    GitHubApp.newBuilder()
+        .setId(id)
+        .setSecret(secret)
         .vBuild()

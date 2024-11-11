@@ -24,31 +24,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.client.e2e.given
+import io.spine.internal.dependency.JUnit
+import io.spine.internal.dependency.Kotest
 
-import io.spine.examples.pingh.client.NotificationSender
+plugins {
+    java
+}
 
 /**
- * Memorizes the number of notifications that should be sent.
- *
- * Does not send any notifications. Use only for tests.
+ * Add dependencies for testing.
  */
-internal class MemoizingNotificationSender : NotificationSender {
+dependencies {
+    testImplementation(JUnit.engine)
+    testImplementation(Kotest.assertions)
+}
 
-    /**
-     * The number of notifications that should be sent.
-     */
-    private var notificationsCount = 0
-
-    /**
-     * Adds a notification to [total number][notificationsCount] that should be sent.
-     */
-    override fun send(title: String, content: String) {
-        notificationsCount++
+/**
+ * Explicitly instructs to discover and execute JUnit tests.
+ */
+tasks.withType<Test> {
+    useJUnitPlatform {
+        includeEngines("junit-jupiter")
     }
-
-    /**
-     * Obtains the count of notifications that should be sent.
-     */
-    internal fun notificationsCount(): Int = notificationsCount
 }

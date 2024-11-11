@@ -70,8 +70,17 @@ val dokkaVersion = "1.9.20"
  */
 val composeVersion = "1.6.11"
 
+/**
+ * Checks that the correct version of the JDK is being used.
+ */
+if (JavaVersion.current() < JavaVersion.toVersion(jvmVersion)) {
+    throw GradleException(
+        "JDK $jvmVersion or higher is required for building client application, " +
+                "but JDK ${JavaVersion.current()} is being used."
+    )
+}
+
 kotlin {
-    jvmToolchain(jvmVersion)
     explicitApiWarning()
 }
 

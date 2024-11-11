@@ -24,12 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.client.e2e
+package io.spine.examples.pingh.testing.client
 
 import io.spine.environment.Tests
 import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.client.PinghApplication
-import io.spine.examples.pingh.client.e2e.given.MemoizingNotificationSender
 import io.spine.examples.pingh.mentions.newMentionsContext
 import io.spine.examples.pingh.server.datastore.DatastoreStorageFactory
 import io.spine.examples.pingh.sessions.newSessionsContext
@@ -48,12 +47,13 @@ import org.junit.jupiter.api.BeforeEach
  *
  * Also provides a [PinghApplication] for interacting with the `Server`.
  */
-internal abstract class IntegrationTest {
+@Suppress("UnnecessaryAbstractClass" /* Avoids creating instances; only for inheritance. */)
+public abstract class IntegrationTest {
 
-    internal companion object {
+    public companion object {
 
-        private const val port = 4242
-        private const val address = "localhost"
+        public const val port: Int = 4242
+        public const val address: String = "localhost"
 
         private val storageFactory = DatastoreStorageFactory.local()
         private val auth = PredefinedGitHubAuthenticationResponses()

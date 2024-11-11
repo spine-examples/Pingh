@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.dependency.Spine
+
 plugins {
     // Add the Gradle plugin for bootstrapping projects built with Spine.
     // See: https://github.com/SpineEventEngine/bootstrap
@@ -35,4 +37,8 @@ spine {
     // declared in Proto files.
     assembleModel()
     enableJava()
+}
+
+dependencies {
+    implementation(Spine.time)
 }

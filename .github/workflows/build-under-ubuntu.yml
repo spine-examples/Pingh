@@ -26,9 +26,13 @@ jobs:
         env:
           JAVA_HOME: ${{ env.JAVA_HOME_11_X64 }}
 
+      - name: Start Xvfb
+        run: Xvfb :99 &
+
       - name: Build client with JDK 17
         run: |
           cd desktop
           ./gradlew build --stacktrace
         env:
           JAVA_HOME: ${{ env.JAVA_HOME_17_X64 }}
+          DISPLAY: ":99"

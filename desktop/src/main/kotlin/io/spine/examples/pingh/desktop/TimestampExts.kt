@@ -27,8 +27,8 @@
 package io.spine.examples.pingh.desktop
 
 import com.google.protobuf.Timestamp
-import java.time.LocalDateTime
-import java.time.ZoneOffset
+import io.spine.examples.pingh.client.asLocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 /**
@@ -44,11 +44,5 @@ private val datetimeFormat = DateTimeFormatter.ofPattern("dd MMM HH:mm")
  * - `10 May 14:37`
  * - `05 Sep 04:00`
  */
-internal fun Timestamp.toDatetime(): String =
-    datetimeFormat.format(toLocalDateTime())
-
-/**
- * Converts this `Timestamp` to `LocalDateTime`.
- */
-private fun Timestamp.toLocalDateTime(): LocalDateTime =
-    LocalDateTime.ofEpochSecond(this.seconds, this.nanos, ZoneOffset.UTC)
+internal fun Timestamp.toDatetime(timeZone: ZoneId = ZoneId.systemDefault()): String =
+    datetimeFormat.format(this.asLocalDateTime(timeZone))

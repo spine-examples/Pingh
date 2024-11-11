@@ -24,40 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop
+package io.spine.internal.dependency
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.runtime.Composable
+// https://github.com/kotest/kotest
+public object Kotest {
+    private const val version = "5.9.1"
+    private const val group = "io.kotest"
 
-/**
- * Obtains the settings of the operating system on which the application is running.
- */
-@Composable
-internal fun retrieveSystemSettings(): SystemSettings {
-    val theme = if (isSystemInDarkTheme()) SystemTheme.DARK else SystemTheme.LIGHT
-    return SystemSettings(theme)
-}
-
-/**
- * The settings of the operating system on which the application is running.
- *
- * @property theme The theme of the operating system.
- */
-internal data class SystemSettings(
-    val theme: SystemTheme
-)
-
-/**
- * Themes of operating system.
- */
-internal enum class SystemTheme {
-    /**
-     * The 'Light' theme.
-     */
-    LIGHT,
-
-    /**
-     * The 'Dark' theme.
-     */
-    DARK
+    public const val assertions: String = "$group:kotest-assertions-core:$version"
 }

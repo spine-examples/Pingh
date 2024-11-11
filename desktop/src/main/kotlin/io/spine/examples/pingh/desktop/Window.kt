@@ -26,15 +26,23 @@
 
 package io.spine.examples.pingh.desktop
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.Window as ComposeWindow
@@ -47,21 +55,23 @@ import io.spine.examples.pingh.client.PinghApplication
  *
  * @param state The state of the application window.
  * @param app Manages the logic for the Pingh app.
+ * @param uriHandler Provides functionality for handling URL, such as opening a URI.
  * @see [PlatformWindow]
  */
 @Composable
-internal fun Window(state: WindowState, app: PinghApplication) {
+internal fun Window(
+    state: WindowState,
+    app: PinghApplication,
+    uriHandler: UriHandler? = null
+) {
     PlatformWindow(
         title = state.title,
         isShown = state.isShown,
         onClose = state::hide
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(MaterialTheme.shapes.small)
-        ) {
-            CurrentPage(app)
+        val localUriHandler = uriHandler ?: LocalUriHandler.current
+        CompositionLocalProvider(LocalUriHandler provides localUriHandler) {
+            WindowContent(app)
         }
     }
 }
@@ -83,8 +93,8 @@ private fun PlatformWindow(
     content: @Composable FrameWindowScope.() -> Unit
 ) {
     val windowState = rememberWindowState(
-        width = 240.dp,
-        height = 426.dp,
+        width = 460.dp,
+        height = 740.dp,
         position = WindowPosition(1200.dp, 30.dp)
     )
     ComposeWindow(
@@ -101,10 +111,38 @@ private fun PlatformWindow(
 }
 
 /**
+ * Displays a content in the Pingh window.
+ */
+@Composable
+private fun WindowContent(app: PinghApplication) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        Box(
+            modifier = Modifier
+                .width(420.dp)
+                .height(700.dp)
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    shape = MaterialTheme.shapes.small
+                )
+                .shadow(
+                    elevation = 10.dp,
+                    shape = MaterialTheme.shapes.small
+                )
+                .clip(MaterialTheme.shapes.small)
+        ) {
+            CurrentPage(app)
+        }
+    }
+}
+
+/**
  * State of [Window].
  */
 internal class WindowState {
-
     /**
      * Window's title.
      */

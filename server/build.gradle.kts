@@ -24,18 +24,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import io.spine.internal.dependency.GCloud
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.Ktor
+import io.spine.internal.dependency.Protobuf
 import io.spine.internal.dependency.Spine
 import io.spine.internal.dependency.Testcontainers
+import io.spine.internal.gradle.publishing.gitHubPackages
 
 plugins {
     // Add the Gradle plugin for bootstrapping projects built with Spine.
     // See: https://github.com/SpineEventEngine/bootstrap
     id("io.spine.tools.gradle.bootstrap").version("1.9.0")
-
+    id("com.github.johnrengelman.shadow")
     application
+    `maven-publish`
 }
 
 forceGrpcDependencies(configurations)
@@ -51,17 +56,105 @@ dependencies {
     api(project(":github"))
     api(project(":sessions"))
     api(project(":mentions"))
+    implementation(project(":clock"))
 
     implementation(Ktor.Client.cio)
+    implementation(Ktor.Server.core)
+    implementation(Ktor.Server.netty)
     implementation(Guava.lib)
     implementation(Grpc.netty)
     implementation(Grpc.inprocess)
+    implementation(GCloud.SecretManager.lib)
+    implementation(GCloud.Datastore.lib)
+    implementation(Protobuf.java)
+    implementation(Protobuf.javaUtil)
     implementation(Spine.GCloud.datastore)
     implementation(Spine.GCloud.testutil)
     implementation(Testcontainers.lib)
     implementation(Testcontainers.gcloud)
 }
 
+/**
+ * For Google Cloud Datastore to function correctly, Protobuf version 3.18 or higher is required.
+ * Since Protobuf is included as a transitive dependency in many Google and Spine libraries,
+ * it is necessary to explicitly specify the required version for the project.
+ */
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "com.google.protobuf" && requested.name == "protobuf-java") {
+            useVersion(Protobuf.version)
+        }
+    }
+}
+
+val appClassName = "io.spine.examples.pingh.server.ServerKt"
+project.setProperty("mainClassName", appClassName)
+
+tasks.withType<ShadowJar> {
+    mergeServiceFiles()
+    mergeServiceFiles("desc.ref")
+    mergeServiceFiles("META-INF/services/io.spine.option.OptionsProvider")
+    manifest {
+        attributes["Main-Class"] = appClassName
+    }
+    exclude(
+        // Protobuf files.
+        "google/**",
+        "spine/**",
+        "spine_examples/**"
+    )
+}
+
 application {
-    mainClass.set("io.spine.examples.pingh.server.PinghServerKt")
+    mainClass.set(appClassName)
+}
+
+/**
+ * The name of the fat server artifact to be published to GitHub Packages.
+ */
+val fatArtifact = "pingh-server"
+
+publishing {
+    repositories {
+        gitHubPackages()
+    }
+
+    publications {
+        create("fatJar", MavenPublication::class) {
+            groupId = project.group.toString()
+            artifactId = fatArtifact
+            version = project.version.toString()
+            description = "Pingh app server."
+
+            artifact(tasks.shadowJar) {
+                // Avoid `-all` suffix in the published artifact.
+                classifier = ""
+            }
+        }
+    }
+}
+
+/**
+ * Configures the publishing, so that:
+ *
+ * 1. The fat JAR artifact appears only in the remote Maven repository,
+ * which is GitHub Packages in this case.
+ *
+ * 2. The `server` module is only published locally,
+ * since it is needed for the project assembly.
+ *
+ * We use `afterEvaluate` because
+ * the publishing tasks to modify are only available at this phase.
+ */
+afterEvaluate {
+    tasks.withType<PublishToMavenRepository> {
+        if (publication.artifactId != fatArtifact) {
+            enabled = false
+        }
+    }
+    tasks.withType<PublishToMavenLocal> {
+        if (publication.artifactId == fatArtifact) {
+            enabled = false
+        }
+    }
 }

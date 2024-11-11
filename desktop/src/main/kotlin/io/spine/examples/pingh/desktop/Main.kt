@@ -33,12 +33,12 @@ import androidx.compose.ui.window.application
  * Entry point of the desktop application.
  */
 public fun main() {
+    val serverEndpoint = ServerEndpoint.load()
     application {
         Theme {
-            val settings = retrieveSystemSettings()
-            val state = remember { AppState(settings) }
+            val state = remember { AppState(serverEndpoint) }
             Window(state.window, state.app)
-            Tray(state.tray, state.app)
+            Tray(state)
         }
     }
 }

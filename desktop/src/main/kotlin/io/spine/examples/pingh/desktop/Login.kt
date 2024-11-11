@@ -45,7 +45,6 @@ import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -68,8 +67,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -87,7 +90,6 @@ import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.github.isValidUsername
 import io.spine.net.Url
-import io.spine.protobuf.Durations2.toMinutes
 
 /**
  * Displays the page with the current login stage.
@@ -138,6 +140,10 @@ private fun UsernameEnteringPage(
     var username by remember { mutableStateOf("") }
     var wasChanged by remember { mutableStateOf(false) }
     val isError = remember { mutableStateOf(false) }
+    val requestUserCode = {
+        val name = Username::class.of(username)
+        flow.requestUserCode(name)
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -153,15 +159,18 @@ private fun UsernameEnteringPage(
                 username = value
                 wasChanged = true
             },
+            onEnterPressed = {
+                if (wasChanged && !isError.value) {
+                    requestUserCode()
+                }
+            },
             isError = isError
         )
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(15.dp))
         LoginButton(
-            enabled = wasChanged && !isError.value
-        ) {
-            val name = Username::class.of(username)
-            flow.requestUserCode(name)
-        }
+            enabled = wasChanged && !isError.value,
+            onClick = requestUserCode
+        )
     }
 }
 
@@ -183,7 +192,7 @@ private fun ApplicationInfo() {
             Icon(
                 painter = Icons.pingh,
                 contentDescription = null,
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier.size(50.dp),
                 tint = MaterialTheme.colorScheme.onSecondary
             )
             Spacer(Modifier.width(10.dp))
@@ -195,11 +204,11 @@ private fun ApplicationInfo() {
                 style = MaterialTheme.typography.displayLarge
             )
         }
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(20.dp))
         Text(
             text = "Pingh is a GitHub app that looks up mentions on behalf of the user. " +
                     "It requires authentication via GitHub.",
-            modifier = Modifier.width(180.dp),
+            modifier = Modifier.width(240.dp),
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyMedium
@@ -212,12 +221,14 @@ private fun ApplicationInfo() {
  *
  * @param value The current value of the input field.
  * @param onChange Called when input value is changed.
+ * @param onEnterPressed Called when this input is focused and the "Enter" key is pressed.
  * @param isError Indicates if the input's current value is in error.
  */
 @Composable
 private fun UsernameInput(
     value: String,
     onChange: (String) -> Unit,
+    onEnterPressed: () -> Unit,
     isError: MutableState<Boolean>
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -235,8 +246,17 @@ private fun UsernameInput(
             isError.value = !isValidUsername(changedValue)
         },
         modifier = Modifier
-            .width(180.dp)
-            .height(52.dp),
+            .width(240.dp)
+            .height(57.dp)
+            .onKeyEvent { event ->
+                if (event.key == Key.Enter) {
+                    onEnterPressed()
+                    true
+                } else {
+                    false
+                }
+            }
+            .testTag("username-input"),
         textStyle = MaterialTheme.typography.bodyLarge.copy(
             color = MaterialTheme.colorScheme.onSecondary
         ),
@@ -272,8 +292,8 @@ private fun InputContainer(
 ) {
     Row(
         modifier = Modifier
-            .width(180.dp)
-            .height(40.dp)
+            .width(240.dp)
+            .height(45.dp)
             .border(border = border, shape = MaterialTheme.shapes.medium)
             .background(
                 color = MaterialTheme.colorScheme.secondary,
@@ -303,9 +323,9 @@ private fun InputContainer(
 private fun Label(color: Color) {
     Box(
         modifier = Modifier
-            .width(90.dp)
-            .height(10.dp)
-            .absoluteOffset(x = 10.dp, y = (-5).dp)
+            .width(110.dp)
+            .height(12.dp)
+            .absoluteOffset(x = 12.dp, y = (-6).dp)
     ) {
         Text(
             text = "GitHub username",
@@ -348,7 +368,7 @@ private fun ErrorMessage(isShown: Boolean) {
             modifier = Modifier
                 .width(155.dp)
                 .height(30.dp)
-                .absoluteOffset(x = 15.dp, y = 44.dp),
+                .absoluteOffset(x = 15.dp, y = 49.dp),
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.bodySmall
         )
@@ -370,9 +390,11 @@ private fun LoginButton(
     Button(
         onClick = onClick,
         modifier = Modifier
-            .width(180.dp)
-            .height(40.dp),
+            .width(240.dp)
+            .height(45.dp)
+            .testTag("login-button"),
         enabled = enabled,
+        shape = MaterialTheme.shapes.medium,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
@@ -405,6 +427,7 @@ private fun VerificationPage(
     flow: VerifyLogin,
     toMentionsPage: () -> Unit
 ) {
+    flow.waitForAuthCompletion(onSuccess = toMentionsPage)
     val userCode by flow.userCode.collectAsState()
     val verificationUrl by flow.verificationUrl.collectAsState()
     val expiresIn by flow.expiresIn.collectAsState()
@@ -417,24 +440,19 @@ private fun VerificationPage(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         VerificationTitle()
-        Spacer(Modifier.height(15.dp))
+        Spacer(Modifier.height(25.dp))
         UserCodeField(
             userCode = userCode,
             isExpired = isUserCodeExpired
         )
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(25.dp))
         if (isUserCodeExpired) {
             Spacer(Modifier.height(5.dp))
             CodeExpiredErrorMessage(flow)
         } else {
-            VerificationText(
+            VerifyLoginSection(
                 verificationUrl = verificationUrl,
                 expiresIn = expiresIn
-            )
-            Spacer(Modifier.height(20.dp))
-            SubmitButton(
-                flow = flow,
-                toMentionsPage = toMentionsPage
             )
         }
     }
@@ -447,7 +465,7 @@ private fun VerificationPage(
 private fun VerificationTitle() {
     Text(
         text = "Verify your login",
-        fontSize = 18.sp,
+        fontSize = 20.sp,
         style = MaterialTheme.typography.displayLarge
     )
 }
@@ -468,15 +486,33 @@ private fun UserCodeField(
     } else {
         MaterialTheme.colorScheme.onSecondary
     }
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
+    Row(
+        modifier = Modifier
+            .width(280.dp)
+            .height(46.dp)
+            .run {
+                if (isExpired) {
+                    this
+                } else {
+                    border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        shape = MaterialTheme.shapes.medium
+                    )
+                }
+            }
+            .padding(horizontal = 15.dp)
+            .testTag("user-code"),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         SelectionContainer {
             Text(
                 text = userCode.value,
+                modifier = Modifier.width(220.dp),
                 color = color,
-                fontSize = 28.sp,
+                fontSize = 30.sp,
+                textAlign = if (isExpired) TextAlign.Center else TextAlign.Start,
                 letterSpacing = 3.sp,
                 style = MaterialTheme.typography.displayLarge
             )
@@ -497,20 +533,16 @@ private fun CopyToClipboardIcon(
     userCode: UserCode
 ) {
     val clipboardManager = LocalClipboardManager.current
-    Box(
-        modifier = Modifier.offset(x = 103.dp)
-    ) {
-        IconButton(
-            icon = Icons.copy,
-            onClick = {
-                clipboardManager.setText(AnnotatedString(userCode.value))
-            },
-            modifier = Modifier.size(30.dp),
-            colors = IconButtonDefaults.iconButtonColors(
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-            )
+    IconButton(
+        icon = Icons.copy,
+        onClick = {
+            clipboardManager.setText(AnnotatedString(userCode.value))
+        },
+        modifier = Modifier.size(30.dp),
+        colors = IconButtonDefaults.iconButtonColors(
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
         )
-    }
+    )
 }
 
 /**
@@ -529,43 +561,41 @@ private fun CodeExpiredErrorMessage(flow: VerifyLogin) {
 }
 
 /**
- * Displays instructions for login verification.
+ * Displays the remaining time for verification and instructions for confirming login.
  *
  * @param verificationUrl The URL of the GitHub verification page.
  * @param expiresIn The duration after which the `userCode` expires.
  */
 @Composable
-private fun VerificationText(
+private fun VerifyLoginSection(
     verificationUrl: Url,
     expiresIn: Duration
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Row(
+        modifier = Modifier.width(280.dp).height(55.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(15.dp)
     ) {
-        Text(
-            text = "Enter this code at",
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
-            style = MaterialTheme.typography.bodyLarge
+        CountdownTimer(
+            minutes = expiresIn.minutesOfHour,
+            seconds = expiresIn.secondsOfMinute,
+            size = 55.dp,
+            indicatorColor = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.background
         )
-        Spacer(Modifier.height(3.dp))
-        VerificationUrlButton(verificationUrl)
-        Spacer(Modifier.height(3.dp))
-        Text(
-            text = "The code is valid for ${toMinutes(expiresIn)} minutes.",
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
-            style = MaterialTheme.typography.bodyLarge
-        )
+        VerificationText(verificationUrl)
     }
 }
 
 /**
- * Displays a URL of the GitHub verification page.
+ * Displays instructions for login verification.
  *
  * @param url The URL of the GitHub verification page.
  */
+// TODO:2024-11-06:mykyta.pimonov: Rewrite using an `AnnotatedString` with a `LinkAnnotation`
+//  when upgrading to Compose Multiplatform 1.7.0.
 @Composable
-private fun VerificationUrlButton(url: Url) {
+private fun VerificationText(url: Url) {
     val uriHandler = LocalUriHandler.current
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -574,90 +604,34 @@ private fun VerificationUrlButton(url: Url) {
     } else {
         TextDecoration.None
     }
-    Text(
-        text = url.spec,
-        modifier = Modifier
-            .hoverable(interactionSource)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null
-            ) {
-                uriHandler.openUri(url.spec)
-            },
-        color = MaterialTheme.colorScheme.primary,
-        textDecoration = decoration,
-        style = MaterialTheme.typography.bodyLarge
-    )
-}
-
-/**
- * Displays a button to confirm verification.
- *
- * @param flow The control flow of the GitHub login process stage
- *   where the user must verify their login.
- * @param toMentionsPage The navigation to the 'Mentions' page.
- */
-@Composable
-private fun SubmitButton(
-    flow: VerifyLogin,
-    toMentionsPage: () -> Unit
-) {
-    val enabled by flow.canAskForNewTokens.collectAsState()
-    val onClick = {
-        flow.confirm(
-            onSuccess = {
-                toMentionsPage()
-            }
-        )
-    }
-    Box(
-        modifier = Modifier
-            .width(210.dp)
-            .height(32.dp),
-        contentAlignment = Alignment.TopCenter
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center
     ) {
-        Button(
-            onClick = onClick,
-            modifier = Modifier.fillMaxSize(),
-            enabled = enabled,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
-        ) {
+        Text(
+            text = "Enter this code at",
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Spacer(Modifier.height(5.dp))
+        Row {
             Text(
-                text = "I have entered the code",
-                style = MaterialTheme.typography.displayMedium
+                text = url.spec,
+                modifier = Modifier
+                    .hoverable(interactionSource)
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null
+                    ) {
+                        uriHandler.openUri(url.spec)
+                    },
+                color = MaterialTheme.colorScheme.primary,
+                textDecoration = decoration,
+                style = MaterialTheme.typography.bodyLarge
             )
-        }
-        if (!enabled) {
-            NoResponseErrorMessage(
-                flow = flow
-            )
+            Text(".")
         }
     }
-}
-
-/**
- * Displays an error message indicating that GitHub could not verify the login.
- *
- * @param flow The control flow of the GitHub login process stage
- *   where the user must verify their login.
- */
-@Composable
-private fun NoResponseErrorMessage(flow: VerifyLogin) {
-    val interval by flow.interval.collectAsState()
-    ClickableErrorMessage(
-        text = """
-                No response from GitHub yet.
-                Try again in ${interval.seconds} seconds, or start over.
-            """.trimIndent(),
-        clickablePartOfText = "start over",
-        onClick = flow::requestNewUserCode,
-        modifier = Modifier
-            .width(180.dp)
-            .offset(y = 40.dp)
-    )
 }
 
 /**
@@ -732,11 +706,11 @@ private fun FailedPage(flow: LoginFailed) {
     ) {
         Text(
             text = flow.errorMessage.value,
-            modifier = Modifier.width(210.dp),
+            modifier = Modifier.width(240.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyLarge
         )
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(25.dp))
         RestartButton(flow)
     }
 }
@@ -751,8 +725,9 @@ private fun RestartButton(flow: LoginFailed) {
     Button(
         onClick = flow::restartLogin,
         modifier = Modifier
-            .width(210.dp)
-            .height(32.dp),
+            .width(240.dp)
+            .height(40.dp),
+        shape = MaterialTheme.shapes.medium,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary

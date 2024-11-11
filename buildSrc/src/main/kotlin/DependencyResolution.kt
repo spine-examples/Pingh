@@ -26,6 +26,7 @@
 
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Guava
+import io.spine.internal.dependency.Protobuf
 import org.gradle.api.artifacts.ConfigurationContainer
 
 /**
@@ -39,7 +40,9 @@ public fun forceGrpcDependencies(configurations: ConfigurationContainer) {
             force(
                 Guava.lib,
                 Grpc.netty,
-                Grpc.inprocess
+                Grpc.inprocess,
+                Protobuf.java,
+                Protobuf.javaUtil
             )
         }
     }

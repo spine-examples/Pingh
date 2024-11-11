@@ -24,7 +24,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.BuildSettings
 import io.spine.internal.dependency.Coil
 import io.spine.internal.dependency.Compose
 import io.spine.internal.dependency.Guava
@@ -34,6 +33,7 @@ import io.spine.internal.dependency.Pingh
 import io.spine.internal.gradle.AppVersion
 import io.spine.internal.gradle.allowBackgroundExecution
 import io.spine.internal.gradle.extractSemanticVersion
+import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -45,6 +45,9 @@ plugins {
 
     // Adds and configures the Detekt for analysis code.
     id("detekt-code-analysis")
+
+    // Adds dependencies for testing and configure test-running tasks.
+    id("tests-configuration")
 }
 
 /**
@@ -73,7 +76,6 @@ repositories {
 }
 
 kotlin {
-    jvmToolchain(BuildSettings.javaVersion.asInt())
     explicitApi()
 }
 
@@ -87,11 +89,17 @@ dependencies {
     implementation(Compose.Runtime.lib)
     implementation(compose.desktop.currentOs)
     implementation(Material3.Desktop.lib)
+    implementation(Guava.lib)
     implementation(Coil.lib)
     implementation(Coil.networkKtor)
     implementation(Coil.compose)
     implementation(Ktor.Client.android)
     implementation(Pingh.client)
+
+    testImplementation(Pingh.testutilClient)
+    testImplementation(kotlin("test"))
+    @OptIn(ExperimentalComposeLibrary::class)
+    testImplementation(compose.uiTest)
 }
 
 compose.desktop {
@@ -102,6 +110,9 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageVersion = pinghVersion.extractSemanticVersion().value
             macOS {
+                // Changes tray the icon color depending on the screen theme.
+                // See: https://bugs.openjdk.org/browse/JDK-8255597.
+                jvmArgs += "-Dapple.awt.enableTemplateImages=true"
                 iconFile = iconForMacOs()
                 infoPlist {
                     allowBackgroundExecution()
