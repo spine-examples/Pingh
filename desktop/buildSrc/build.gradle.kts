@@ -66,6 +66,8 @@ val dokkaVersion = "1.9.20"
 /**
  * The version of Compose Multiplatform.
  *
+ * Please keep in sync. with [io.spine.internal.dependency.Compose.version].
+ *
  * @see <a href="https://github.com/JetBrains/compose-multiplatform">Compose Multiplatform</a>
  */
 val composeVersion = "1.7.0"

@@ -25,9 +25,9 @@
  */
 
 import io.spine.internal.dependency.Coil
+import io.spine.internal.dependency.Compose
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.Ktor
-import io.spine.internal.dependency.Material3
 import io.spine.internal.dependency.Pingh
 import io.spine.internal.gradle.AppVersion
 import io.spine.internal.gradle.allowBackgroundExecution
@@ -87,7 +87,7 @@ configurations.all {
 dependencies {
     implementation(compose.desktop.currentOs)
     implementation(compose.components.resources)
-    implementation(Material3.Desktop.lib)
+    implementation(Compose.Material3.lib)
     implementation(Guava.lib)
     implementation(Coil.lib)
     implementation(Coil.networkKtor)
