@@ -43,7 +43,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
+import coil3.compose.rememberAsyncImagePainter
 import io.spine.examples.pingh.github.Username
 import io.spine.net.Url
 
@@ -60,8 +60,9 @@ internal fun Avatar(
     url: Url,
     modifier: Modifier = Modifier
 ) {
-    AsyncImage(
-        model = url.spec,
+    val painter = rememberAsyncImagePainter(url.spec)
+    Image(
+        painter = painter,
         contentDescription = null,
         modifier = modifier
             .clip(CircleShape)
