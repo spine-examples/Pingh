@@ -31,11 +31,8 @@ package io.spine.examples.pingh.desktop
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,7 +46,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -71,16 +67,21 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.protobuf.Duration
+import io.spine.example.pingh.desktop.generated.resources.Res
+import io.spine.example.pingh.desktop.generated.resources.copy
+import io.spine.example.pingh.desktop.generated.resources.pingh
 import io.spine.examples.pingh.client.LoginFlow
 import io.spine.examples.pingh.client.EnterUsername
 import io.spine.examples.pingh.client.LoginFailed
@@ -90,6 +91,7 @@ import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.github.isValidUsername
 import io.spine.net.Url
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * Displays the page with the current login stage.
@@ -190,7 +192,7 @@ private fun ApplicationInfo() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = Icons.pingh,
+                painter = painterResource(Res.drawable.pingh),
                 contentDescription = null,
                 modifier = Modifier.size(50.dp),
                 tint = MaterialTheme.colorScheme.onSecondary
@@ -534,7 +536,7 @@ private fun CopyToClipboardIcon(
 ) {
     val clipboardManager = LocalClipboardManager.current
     IconButton(
-        icon = Icons.copy,
+        icon = painterResource(Res.drawable.copy),
         onClick = {
             clipboardManager.setText(AnnotatedString(userCode.value))
         },
@@ -574,7 +576,7 @@ private fun VerifyLoginSection(
     Row(
         modifier = Modifier.width(280.dp).height(55.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(15.dp)
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         CountdownTimer(
             minutes = expiresIn.minutesOfHour,
@@ -592,46 +594,36 @@ private fun VerifyLoginSection(
  *
  * @param url The URL of the GitHub verification page.
  */
-// TODO:2024-11-06:mykyta.pimonov: Rewrite using an `AnnotatedString` with a `LinkAnnotation`
-//  when upgrading to Compose Multiplatform 1.7.0.
 @Composable
 private fun VerificationText(url: Url) {
-    val uriHandler = LocalUriHandler.current
-    val interactionSource = remember { MutableInteractionSource() }
-    val isHovered by interactionSource.collectIsHoveredAsState()
-    val decoration = if (isHovered) {
-        TextDecoration.Underline
-    } else {
-        TextDecoration.None
-    }
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "Enter this code at",
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Spacer(Modifier.height(5.dp))
-        Row {
-            Text(
-                text = url.spec,
-                modifier = Modifier
-                    .hoverable(interactionSource)
-                    .clickable(
-                        interactionSource = interactionSource,
-                        indication = null
-                    ) {
-                        uriHandler.openUri(url.spec)
-                    },
-                color = MaterialTheme.colorScheme.primary,
-                textDecoration = decoration,
-                style = MaterialTheme.typography.bodyLarge
+    val annotatedString = buildAnnotatedString {
+        append("Enter this code at")
+        appendLine()
+        withLink(
+            LinkAnnotation.Url(
+                url = url.spec,
+                styles = TextLinkStyles(
+                    style = SpanStyle(
+                        color = MaterialTheme.colorScheme.primary,
+                        textDecoration = TextDecoration.None
+                    ),
+                    hoveredStyle = SpanStyle(
+                        textDecoration = TextDecoration.Underline
+                    )
+                )
             )
-            Text(".")
+        ) {
+            append(url.spec)
         }
+        append(".")
     }
+    Text(
+        text = annotatedString,
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.onSecondaryContainer,
+        lineHeight = 24.sp,
+        style = MaterialTheme.typography.bodyLarge
+    )
 }
 
 /**
@@ -653,39 +645,36 @@ private fun ClickableErrorMessage(
     require(text.contains(clickablePartOfText)) {
         "The `clickablePartOfText` must be a substring of the `text`."
     }
-    val startPosition = text.indexOf(clickablePartOfText)
-    val endPosition = startPosition + clickablePartOfText.length
+    val index = text.indexOf(clickablePartOfText)
     val annotatedString = buildAnnotatedString {
-        append(text)
-        addStringAnnotation(
-            tag = "Action",
-            annotation = clickablePartOfText,
-            start = startPosition,
-            end = endPosition
-        )
-        addStyle(
-            style = SpanStyle(
-                color = MaterialTheme.colorScheme.primary,
-                textDecoration = TextDecoration.Underline
-            ),
-            start = startPosition,
-            end = endPosition
-        )
+        append(text.substring(0, index))
+        withLink(
+            LinkAnnotation.Clickable(
+                tag = "Action",
+                styles = TextLinkStyles(
+                    style = SpanStyle(
+                        color = MaterialTheme.colorScheme.primary,
+                        textDecoration = TextDecoration.None
+                    ),
+                    hoveredStyle = SpanStyle(
+                        textDecoration = TextDecoration.Underline
+                    )
+                ),
+                linkInteractionListener = { onClick() }
+            )
+        ) {
+            append(clickablePartOfText)
+        }
+        append(text.substring(index + clickablePartOfText.length, text.length))
     }
-    ClickableText(
+    Text(
         text = annotatedString,
         modifier = modifier,
         style = MaterialTheme.typography.bodyMedium.copy(
             color = MaterialTheme.colorScheme.error,
             textAlign = TextAlign.Center
         )
-    ) { offset ->
-        annotatedString
-            .getStringAnnotations(offset, offset)
-            .firstOrNull()?.let {
-                onClick()
-            }
-    }
+    )
 }
 
 /**
