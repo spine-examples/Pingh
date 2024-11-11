@@ -75,7 +75,10 @@ internal fun ApplicationScope.Tray(state: AppState) {
 
     val destiny = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
-    val awtIcon = painterResource(Res.drawable.tray).toAwtImage(destiny, layoutDirection)
+    val icon = painterResource(Res.drawable.tray)
+    val awtIcon = remember(icon) {
+        icon.toAwtImage(destiny, layoutDirection)
+    }
 
     val menu = remember {
         Menu {
