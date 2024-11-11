@@ -28,7 +28,6 @@ package io.spine.examples.pingh.client.e2e
 
 import com.google.protobuf.Duration
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.shouldBe
 import io.spine.examples.pingh.client.EnterUsername
 import io.spine.examples.pingh.client.MentionsFlow
 import io.spine.examples.pingh.client.VerifyLogin
@@ -181,14 +180,12 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
      */
     @Test
     internal fun `notifications about new and unsnoozed mentions should be sent to the user`() {
-        notificationsCount() shouldBe allMentions.size
+        assertNotifications().hasSize(allMentions.size)
         val mentionsFlow = app().startMentionsFlow()
-        val snoozedMentionId = mentionsFlow.snoozeRandomMention(milliseconds(500))
+        mentionsFlow.snoozeRandomMention(milliseconds(500))
         sleep(1000)
-        val observer = app().observeEvents<MentionUnsnoozed>(snoozedMentionId)
         emitTimePassedEvent()
-        observer.waitUntilEmitted()
-        notificationsCount() shouldBe (allMentions.size + 1)
+        assertNotifications().hasSize(allMentions.size + 1)
     }
 
     private fun MentionsFlow.snoozeRandomMention(snoozeTime: Duration = hours(2)): MentionId {

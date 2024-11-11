@@ -133,7 +133,8 @@ public abstract class IntegrationTest {
     }
 
     /**
-     * Returns the count of sent notifications.
+     * Obtains the subject for checking notifications.
      */
-    protected fun notificationsCount(): Int = notificationSender.notificationsCount()
+    protected fun assertNotifications(): DelayedNotificationAssertion =
+        DelayedNotificationAssertion(notificationSender)
 }
