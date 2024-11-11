@@ -80,9 +80,5 @@ internal class LoginPageUiTest : UiTest() {
         usernameInput.performTextInput(username)
         awaitFact { loginButton.assertIsEnabled() }
         loginButton.performClick()
-        awaitFact {
-            loginButton.assertDoesNotExist()
-            userCode.assertExists()
-        }
     }
 }

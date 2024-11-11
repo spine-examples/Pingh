@@ -26,7 +26,9 @@
 
 package io.spine.examples.pingh.desktop
 
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsEnabled
@@ -63,7 +65,9 @@ internal abstract class UiTest : IntegrationTest() {
         setContent {
             Theme {
                 state = remember { AppState(serverEndpoint) }
-                Window(state!!.window, state!!.app, uriHandler)
+                CompositionLocalProvider(LocalUriHandler provides uriHandler) {
+                    CurrentPage(state!!.app)
+                }
             }
         }
     }
