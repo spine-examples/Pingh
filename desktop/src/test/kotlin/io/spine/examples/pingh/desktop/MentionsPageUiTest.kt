@@ -37,7 +37,6 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.runComposeUiTest
 import io.kotest.matchers.floats.shouldBeLessThan
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
@@ -53,8 +52,7 @@ internal class MentionsPageUiTest : UiTest() {
 
     @Test
     internal fun `allow users to open a mentions URL even after it has been read`() =
-        runComposeUiTest {
-            runApp()
+        runPinghUiTest {
             logIn()
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
             val tag = mentionCards().random().testTag
@@ -66,8 +64,7 @@ internal class MentionsPageUiTest : UiTest() {
 
     @Test
     internal fun `have snooze button disabled after it is clicked`() =
-        runComposeUiTest {
-            runApp()
+        runPinghUiTest {
             logIn()
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
             val tag = mentionCards().random().testTag
@@ -82,8 +79,7 @@ internal class MentionsPageUiTest : UiTest() {
 
     @Test
     internal fun `have snooze button disabled if mention has been read`() =
-        runComposeUiTest {
-            runApp()
+        runPinghUiTest {
             logIn()
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
             val tag = mentionCards().random().testTag
@@ -96,8 +92,7 @@ internal class MentionsPageUiTest : UiTest() {
 
     @Test
     internal fun `have mentions sorted after their states have been changed`() =
-        runComposeUiTest {
-            runApp()
+        runPinghUiTest {
             logIn()
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 2 }
             val mentionsCards = mentionCards().sortedBy { it.positionInRoot.y }

@@ -35,11 +35,9 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.res.loadImageBitmap
-import androidx.compose.ui.res.useResource
 import java.awt.Cursor
 
 /**
@@ -60,10 +58,10 @@ private const val iconSizeMultiplier = 0.75f
  */
 @Composable
 internal fun IconButton(
-    icon: BitmapPainter,
+    icon: Painter,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    colors: IconButtonColors = IconButtonDefaults.iconButtonColors()
+    colors: IconButtonColors = IconButtonDefaults.filledIconButtonColors()
 ) {
     FilledIconButton(
         onClick = onClick,
@@ -79,28 +77,4 @@ internal fun IconButton(
             tint = colors.contentColor
         )
     }
-}
-
-/**
- * Icons used in the Pingh desktop client.
- *
- * These icons are [free](https://bit.ly/3Tjmsqg) for personal and commercial
- * use with attribution.
- *
- * Created by [Icon Hubs](https://www.flaticon.com/authors/icon-hubs).
- */
-@Suppress("MagicNumber" /* Colors are defined using RGB components. */)
-internal object Icons {
-    internal val pingh: BitmapPainter =
-        BitmapPainter(useResource("icons/pingh.png", ::loadImageBitmap))
-    internal val snooze: BitmapPainter =
-        BitmapPainter(useResource("icons/snooze.png", ::loadImageBitmap))
-    internal val refresh: BitmapPainter =
-        BitmapPainter(useResource("icons/refresh.png", ::loadImageBitmap))
-    internal val back: BitmapPainter =
-        BitmapPainter(useResource("icons/back.png", ::loadImageBitmap))
-    internal val copy: BitmapPainter =
-        BitmapPainter(useResource("icons/copy.png", ::loadImageBitmap))
-    internal val tray: BitmapPainter =
-        BitmapPainter(useResource("icons/tray.png", ::loadImageBitmap))
 }

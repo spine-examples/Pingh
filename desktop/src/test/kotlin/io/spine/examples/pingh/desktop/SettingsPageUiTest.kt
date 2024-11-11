@@ -31,7 +31,6 @@ import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.runComposeUiTest
 import io.spine.examples.pingh.desktop.given.DelayedFactAssertion.Companion.awaitFact
 import kotlin.test.Test
 import org.junit.jupiter.api.DisplayName
@@ -51,8 +50,7 @@ internal class SettingsPageUiTest : UiTest() {
 
     @Test
     internal fun `have settings retained after the user logs in again`() =
-        runComposeUiTest {
-            runApp()
+        runPinghUiTest {
             logIn()
             awaitFact { settingsButton.assertExists() }
             settingsButton.performClick()
