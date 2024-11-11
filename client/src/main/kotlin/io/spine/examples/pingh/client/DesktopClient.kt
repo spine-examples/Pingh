@@ -193,7 +193,7 @@ internal class DesktopClient(
      *
      * @param subscription The subscription to be canceled.
      */
-    internal fun cancel(subscription: Subscription) {
+    private fun cancel(subscription: Subscription) {
         client.subscriptions()
             .cancel(subscription)
     }
