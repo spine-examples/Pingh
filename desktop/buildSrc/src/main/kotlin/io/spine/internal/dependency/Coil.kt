@@ -34,15 +34,9 @@ package io.spine.internal.dependency
  *     Coil with Compose Multiplatform</a>
  */
 public object Coil {
-    // Compose Multiplatform requires Coil version 3.x for compatibility,
-    // but it is currently in the alpha phase.
-    // TODO:2024-07-17:mykyta.pimonov: Bump this version from 3.0.0-alpha08 to 3.0.0
-    //  upon its release.
-    //  See: https://github.com/spine-examples/Pingh/issues/25.
-    private const val version = "3.0.0-alpha08"
+    private const val version = "3.0.2"
     private const val group = "io.coil-kt.coil3"
 
-    public const val lib: String = "$group:coil:$version"
-    public const val networkKtor: String = "$group:coil-network-ktor:$version"
     public const val compose: String = "$group:coil-compose:$version"
+    public const val network: String = "$group:coil-network-okhttp:$version"
 }
