@@ -30,6 +30,8 @@ package io.spine.examples.pingh.desktop
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,22 +49,22 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
@@ -71,10 +73,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.spine.example.pingh.desktop.generated.resources.Res
+import io.spine.example.pingh.desktop.generated.resources.back
 import io.spine.examples.pingh.client.SettingsFlow
 import io.spine.examples.pingh.client.SettingsState
 import io.spine.examples.pingh.client.SnoozeTime
 import io.spine.examples.pingh.github.Username
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * Displays an application settings.
@@ -124,7 +129,7 @@ private fun SettingsHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
-            icon = Icons.back,
+            icon = painterResource(Res.drawable.back),
             onClick = toMentionsPage,
             modifier = Modifier.size(35.dp),
             colors = IconButtonDefaults.iconButtonColors(
@@ -363,7 +368,6 @@ private fun Option(
  * @param state The state of the application settings.
  */
 @Composable
-@OptIn(ExperimentalMaterial3Api::class /* Required for `SegmentedButtonDefaults.itemShape()` */)
 private fun SnoozeTimeSegmentedButtonRow(state: SettingsState) {
     val snoozeTimeOptions = SnoozeTime.entries
     val currentSnoozeTime by state.snoozeTime.collectAsState()
@@ -418,25 +422,25 @@ private fun SegmentedButton(
         1.dp,
         if (selected) containerColor else MaterialTheme.colorScheme.onBackground
     )
-    Surface(
-        selected = selected,
-        onClick = onClick,
+    Box(
         modifier = Modifier
             .width(70.dp)
             .height(20.dp)
-            .semantics { role = Role.RadioButton },
-        shape = shape,
-        color = containerColor,
-        contentColor = contentColor,
-        border = border
+            .semantics { role = Role.RadioButton }
+            .background(containerColor, shape)
+            .border(border, shape)
+            .clip(shape)
+            .clickable { onClick() }
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(0.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            label()
+        CompositionLocalProvider(LocalContentColor provides contentColor) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(0.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                label()
+            }
         }
     }
 }

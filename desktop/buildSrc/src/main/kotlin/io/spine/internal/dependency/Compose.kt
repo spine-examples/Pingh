@@ -28,10 +28,11 @@ package io.spine.internal.dependency
 
 // https://github.com/JetBrains/compose-multiplatform
 public object Compose {
-    private const val group = "androidx.compose"
+    private const val group = "org.jetbrains.compose"
+    private const val version = "1.7.0"
 
-    public object Runtime {
-        private const val version = "1.6.0"
-        public const val lib: String = "$group.runtime:runtime:$version"
+    public object Material3 {
+        private const val group = "${Compose.group}.material3"
+        public const val lib: String = "$group:material3-desktop:$version"
     }
 }

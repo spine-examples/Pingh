@@ -28,7 +28,6 @@ import io.spine.internal.dependency.Coil
 import io.spine.internal.dependency.Compose
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.Ktor
-import io.spine.internal.dependency.Material3
 import io.spine.internal.dependency.Pingh
 import io.spine.internal.gradle.AppVersion
 import io.spine.internal.gradle.allowBackgroundExecution
@@ -86,9 +85,9 @@ configurations.all {
 }
 
 dependencies {
-    implementation(Compose.Runtime.lib)
     implementation(compose.desktop.currentOs)
-    implementation(Material3.Desktop.lib)
+    implementation(compose.components.resources)
+    implementation(Compose.Material3.lib)
     implementation(Guava.lib)
     implementation(Coil.lib)
     implementation(Coil.networkKtor)
@@ -100,6 +99,13 @@ dependencies {
     testImplementation(kotlin("test"))
     @OptIn(ExperimentalComposeLibrary::class)
     testImplementation(compose.uiTest)
+}
+
+compose.resources {
+    customDirectory(
+        sourceSetName = "main",
+        directoryProvider = provider { layout.projectDirectory.dir("src/main/composeResources") }
+    )
 }
 
 compose.desktop {
