@@ -82,12 +82,9 @@ internal abstract class UiTest : IntegrationTest() {
      */
     @OptIn(ExperimentalTestApi::class)
     protected fun ComposeUiTest.logIn() {
+        enterUserCode()
         onNodeWithTag("username-input").performTextInput(username)
         awaitFact { onNodeWithTag("login-button").assertIsEnabled() }
         onNodeWithTag("login-button").performClick()
-        awaitFact { onNodeWithTag("submit-button").assertExists() }
-        enterUserCode()
-        onNodeWithTag("submit-button").performClick()
-        awaitFact { onNodeWithTag("submit-button").assertDoesNotExist() }
     }
 }
