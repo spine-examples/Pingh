@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.client
 
+import com.google.gson.Gson
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -33,9 +34,17 @@ import kotlin.io.path.createFile
 import kotlin.io.path.exists
 import net.harawata.appdirs.AppDirsFactory
 
+private val gson = Gson()
+
 internal object AppDataStorage {
     private const val storageName = ".storage.json"
     private val appDirPath = AppDirPath.withoutVersion()
+
+    private lateinit var state: AppState
+
+    init {
+        load()
+    }
 
     /**
      * Returns a file for storing the application state.
@@ -53,7 +62,34 @@ internal object AppDataStorage {
         }
         return child.toFile()
     }
+
+    private fun load() {
+        val content = storage().readText()
+        if (content.isNotBlank()) {
+            state = gson.fromJson(content, AppState::class.java)
+        } else {
+            state = AppState(AppSettings(false, SnoozeTime.TWO_HOURS))
+            save()
+        }
+    }
+
+    internal val data: AppState
+        get() = state
+
+    internal fun save() {
+        val json = gson.toJson(state)
+        storage().writeText(json)
+    }
 }
+
+internal data class AppState(
+    var settings: AppSettings
+)
+
+internal data class AppSettings(
+    var enabledDndMode: Boolean,
+    var snoozeTime: SnoozeTime
+)
 
 /**
  * Provides the path to platform-specific application data
