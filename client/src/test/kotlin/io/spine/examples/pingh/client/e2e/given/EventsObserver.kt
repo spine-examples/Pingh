@@ -56,7 +56,7 @@ internal inline fun <reified E : EventMessage> PinghApplication.observeEvents(
     vararg ids: Message
 ): Observer {
     require(ids.isNotEmpty()) {
-        "At least one index must be specified for the observation, but none were provided."
+        "At least one index must be specified for the observation, but none was provided."
     }
     val future = CompletableFuture<Unit>()
     val subscriptions = mutableSetOf<Subscription>()
@@ -90,7 +90,6 @@ internal class Observer(private val future: CompletableFuture<Unit>) {
      *
      * @see [CompletableFuture.get]
      */
-
     internal fun waitUntilEmitted() {
         future.get(5, TimeUnit.SECONDS)
     }

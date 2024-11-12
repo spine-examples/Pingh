@@ -84,7 +84,7 @@ public class DelayedNotificationAssertion internal constructor(
     }
 
     /**
-     * Fails if the notification count does not match the specified `size`.
+     * Fails if the notification count does not match the specified size.
      */
     public fun hasSize(expected: Int) {
         awaitFact { sender.notificationsCount() shouldBe expected }

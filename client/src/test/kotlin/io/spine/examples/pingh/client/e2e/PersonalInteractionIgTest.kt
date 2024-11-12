@@ -148,14 +148,14 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
     @Test
     internal fun `the user should log in, log out, and log in again`() {
         val settingsFlow = app().startSettingsFlow()
-        val future = CompletableFuture<Void>()
+        val future = CompletableFuture<Unit>()
         settingsFlow.logOut {
             shouldThrow<IllegalStateException> {
                 val mentionsFlow = app().startMentionsFlow()
                 mentionsFlow.allMentions()
             }
             logIn()
-            future.complete(null)
+            future.complete(Unit)
         }
         future.get(5, TimeUnit.SECONDS)
     }
