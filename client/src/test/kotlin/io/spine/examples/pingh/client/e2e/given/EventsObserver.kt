@@ -32,7 +32,6 @@ import io.spine.client.Subscription
 import io.spine.examples.pingh.client.PinghApplication
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 
 /**
  * Begins observing the emission of multiple events of the specified [type][E],
@@ -50,7 +49,7 @@ import java.util.concurrent.TimeoutException
  *
  * @param E The type of the observed event.
  *
- * @param ids Event identifiers to be observed.
+ * @param ids IDs of the event messages to be observed.
  */
 internal inline fun <reified E : EventMessage> PinghApplication.observeEvents(
     vararg ids: Message
@@ -85,8 +84,7 @@ internal class Observer(private val future: CompletableFuture<Unit>) {
     /**
      * Waits for the specified event emissions to occur.
      *
-     * If completion does not occur within 5 seconds of the method call,
-     * a [TimeoutException] will be thrown.
+     * After 5 seconds, this future is completed in any case.
      *
      * @see [CompletableFuture.get]
      */
