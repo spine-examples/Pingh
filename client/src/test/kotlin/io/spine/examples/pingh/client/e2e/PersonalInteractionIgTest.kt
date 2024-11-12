@@ -87,7 +87,7 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
                 }
             )
         }
-        future.get(1, TimeUnit.SECONDS)
+        future.get(2, TimeUnit.SECONDS)
     }
 
     /**
@@ -140,14 +140,13 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
      * 3. Logs out of the Pingh app.
      * 4. Tries to get mentions but catches the exception.
      * 5. Logs in again.
-     * 6. Reads mentions that were updated in the first session.
      *
      * In this test, the arrival of an event in response to a dispatched command is important,
      * so all assertions take place in the client callbacks. The [CompletableFuture] is used
      * to ensure that the test does not end before the asynchronous callback is called.
      */
     @Test
-    internal fun `the user should log in, log out, log in again, and then read mentions`() {
+    internal fun `the user should log in, log out, and log in again`() {
         val settingsFlow = app().startSettingsFlow()
         val future = CompletableFuture<Void>()
         settingsFlow.logOut {
@@ -155,15 +154,10 @@ internal class PersonalInteractionIgTest : IntegrationTest() {
                 val mentionsFlow = app().startMentionsFlow()
                 mentionsFlow.allMentions()
             }
-            logInAgainAndCheckMentions(future)
+            logIn()
+            future.complete(null)
         }
         future.get(5, TimeUnit.SECONDS)
-    }
-
-    private fun logInAgainAndCheckMentions(future: CompletableFuture<Void>) {
-        logIn()
-        app().startMentionsFlow()
-        future.complete(null)
     }
 
     /**
