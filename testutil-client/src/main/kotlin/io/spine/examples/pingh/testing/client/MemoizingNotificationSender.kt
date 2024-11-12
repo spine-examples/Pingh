@@ -26,7 +26,15 @@
 
 package io.spine.examples.pingh.testing.client
 
+import com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly
+import io.kotest.matchers.shouldBe
 import io.spine.examples.pingh.client.NotificationSender
+import java.lang.AssertionError
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Memorizes the number of notifications that should be sent.
@@ -51,4 +59,54 @@ internal class MemoizingNotificationSender : NotificationSender {
      * Obtains the count of notifications that should be sent.
      */
     internal fun notificationsCount(): Int = notificationsCount
+}
+
+/**
+ * Checks for notifications sent by the `MemoizingNotificationSender`.
+ *
+ * The server may not send the notification immediately,
+ * so the check will be repeated at intervals until it succeeds.
+ */
+public class DelayedNotificationAssertion internal constructor(
+    private val sender: MemoizingNotificationSender
+) {
+
+    private companion object {
+        /**
+         * The waiting period before performing the next check after an unsuccessful attempt.
+         */
+        private val intervalBetweenChecks = 100.milliseconds
+
+        /**
+         * The duration within which a successful check must occur.
+         */
+        private val maxExpectation = 5.seconds
+    }
+
+    /**
+     * Fails if the notification count does not match the specified size.
+     */
+    public fun hasSize(expected: Int) {
+        awaitFact { sender.notificationsCount() shouldBe expected }
+    }
+
+    private fun awaitFact(assertion: () -> Unit) {
+        var error: AssertionError? = null
+        val timer = CompletableFuture.supplyAsync { delay(maxExpectation) }
+        while (!timer.isDone) {
+            try {
+                assertion()
+                return
+            } catch (e: AssertionError) {
+                error = e
+            } finally {
+                delay(intervalBetweenChecks)
+            }
+        }
+        throw error ?: AssertionError("No checks have been made.")
+    }
+}
+
+private fun delay(duration: Duration) {
+    sleepUninterruptibly(duration.inWholeMilliseconds, TimeUnit.MILLISECONDS)
 }

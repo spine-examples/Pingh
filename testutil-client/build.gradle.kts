@@ -25,6 +25,7 @@
  */
 
 import io.spine.internal.dependency.JUnit
+import io.spine.internal.dependency.Kotest
 import io.spine.internal.dependency.Spine
 
 dependencies {
@@ -35,4 +36,5 @@ dependencies {
     implementation(JUnit.api)
     implementation(Spine.GCloud.datastore)
     implementation(Spine.GCloud.testutil)
+    implementation(Kotest.assertions)
 }
