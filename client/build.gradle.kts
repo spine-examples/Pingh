@@ -24,6 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.dependency.AppDirs
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.KotlinX
@@ -52,6 +53,7 @@ dependencies {
     implementation(Grpc.netty)
     implementation(Grpc.inprocess)
     implementation(KotlinX.Coroutines.core)
+    implementation(AppDirs.lib)
 
     testImplementation(project(":testutil-client"))
     testImplementation(project(":testutil-mentions"))
