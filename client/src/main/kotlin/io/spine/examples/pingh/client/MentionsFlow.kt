@@ -58,7 +58,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 public class MentionsFlow internal constructor(
     private val client: DesktopClient,
     private val session: MutableStateFlow<UserSession?>,
-    private val settings: SettingsState
+    private val settings: UserSettings
 ) {
     /**
      * User mentions.
@@ -122,7 +122,7 @@ public class MentionsFlow internal constructor(
      * @param id The identifier of the mention to be snoozed.
      */
     public fun snooze(id: MentionId) {
-        snooze(id, settings.snoozeTime.value.value)
+        snooze(id, settings.data.snoozeTime.value)
     }
 
     /**

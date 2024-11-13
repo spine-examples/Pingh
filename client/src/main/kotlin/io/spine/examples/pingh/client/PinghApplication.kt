@@ -77,9 +77,9 @@ public class PinghApplication private constructor(
         private set
 
     /**
-     * State of application settings.
+     * The state of application settings.
      */
-    private val settings = SettingsState()
+    private val settings = UserSettings()
 
     /**
      * Information about the current user session.
@@ -87,14 +87,14 @@ public class PinghApplication private constructor(
     private val session = MutableStateFlow<UserSession?>(null)
 
     /**
-     * Controls the lifecycle of mentions and handles the user's action in relation to them.
-     */
-    private var mentionsFlow: MentionsFlow? = null
-
-    /**
      * Describes the login to GitHub via GitHub's device flow.
      */
     private var loginFlow: LoginFlow? = null
+
+    /**
+     * Controls the lifecycle of mentions and handles the user's action in relation to them.
+     */
+    private var mentionsFlow: MentionsFlow? = null
 
     /**
      * Flow that manages the sending of notifications within the app.
@@ -164,6 +164,7 @@ public class PinghApplication private constructor(
      */
     public fun close() {
         loginFlow?.close()
+        settings.save()
         sessionObservation.cancel()
         client.close()
         channel.shutdown()

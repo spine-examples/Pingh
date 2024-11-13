@@ -34,22 +34,30 @@ import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.protobuf.Durations2.hours
 import io.spine.protobuf.Durations2.minutes
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * The application settings control flow.
  *
  * Allows changing application settings and logging out.
  *
+ * To persist the settings across application relaunches,
+ * use [saveSettings()][saveSettings] method.
+ *
  * @property client Enables interaction with the Pingh server.
  * @property session The information about the current user session.
- * @property settings The state of application settings.
+ * @property userSettings The application settings stored on the device.
  */
 public class SettingsFlow internal constructor(
     private val client: DesktopClient,
     private val session: MutableStateFlow<UserSession?>,
-    @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
-    public val settings: SettingsState
+    private val userSettings: UserSettings
 ) {
+    /**
+     * The state of application settings.
+     */
+    public val settings: SettingsState = SettingsState(userSettings.data)
+
     /**
      * The username to which the current session belongs.
      */
@@ -69,23 +77,52 @@ public class SettingsFlow internal constructor(
         }
         client.send(command)
     }
+
+    /**
+     * Saves the current application setting.
+     */
+    @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
+    public fun saveSettings() {
+        userSettings.save()
+    }
 }
 
 /**
  * State of application settings.
  */
-public class SettingsState {
+public class SettingsState internal constructor(
+    private val data: SettingsData
+) {
+    private val _enabledDndMode = MutableStateFlow(data.enabledDndMode)
+    private val _snoozeTime = MutableStateFlow(data.snoozeTime)
 
     /**
      * If `true`, the user is not notified about new mentions and snooze expirations.
      * If `false`, the user receives notifications.
      */
-    public val enabledDndMode: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    public val enabledDndMode: StateFlow<Boolean> = _enabledDndMode
 
     /**
      * The interval after which the new mention notification is repeated.
      */
-    public val snoozeTime: MutableStateFlow<SnoozeTime> = MutableStateFlow(SnoozeTime.TWO_HOURS)
+    public val snoozeTime: StateFlow<SnoozeTime> = _snoozeTime
+
+    /**
+     * Sets whether the user should NOT receive notifications
+     * for new mentions or the expiration of the waiting period.
+     */
+    public fun setDndMode(isEnabled: Boolean) {
+        _enabledDndMode.value = isEnabled
+        data.enabledDndMode = isEnabled
+    }
+
+    /**
+     * Sets the interval after which the new mention notification is repeated.
+     */
+    public fun setSnoozeTime(snoozeTime: SnoozeTime) {
+        _snoozeTime.value = snoozeTime
+        data.snoozeTime = snoozeTime
+    }
 }
 
 /**

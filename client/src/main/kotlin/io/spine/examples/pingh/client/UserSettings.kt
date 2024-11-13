@@ -27,7 +27,7 @@
 package io.spine.examples.pingh.client
 
 /**
- * Application settings stored on the device.
+ * An application settings stored on the device.
  *
  * @see [UserData]
  */

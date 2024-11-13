@@ -70,7 +70,7 @@ public interface NotificationSender {
  */
 internal class NotificationsFlow(
     private val sender: NotificationSender,
-    private val settings: SettingsState
+    private val settings: UserSettings
 ) {
     companion object {
         /**
@@ -115,7 +115,7 @@ internal class NotificationsFlow(
             notification.onEvent,
             eq(usernameField(), username)
         ) { event ->
-            if (!settings.enabledDndMode.value) {
+            if (!settings.data.enabledDndMode) {
                 sender.send(notification.title, notification.content(event))
             }
         }
