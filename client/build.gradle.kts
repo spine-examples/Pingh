@@ -26,6 +26,7 @@
 
 import io.spine.internal.dependency.AppDirs
 import io.spine.internal.dependency.Grpc
+import io.spine.internal.dependency.Gson
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.KotlinX
 import io.spine.internal.dependency.Spine
@@ -54,6 +55,7 @@ dependencies {
     implementation(Grpc.inprocess)
     implementation(KotlinX.Coroutines.core)
     implementation(AppDirs.lib)
+    implementation(Gson.lib)
 
     testImplementation(project(":testutil-client"))
     testImplementation(project(":testutil-mentions"))
