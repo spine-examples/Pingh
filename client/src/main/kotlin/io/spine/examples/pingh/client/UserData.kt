@@ -32,64 +32,100 @@ import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createFile
 import kotlin.io.path.exists
+import kotlin.reflect.KClass
 import net.harawata.appdirs.AppDirsFactory
 
 private val gson = Gson()
 
-internal object AppDataStorage {
-    private const val storageName = ".storage.json"
-    private val appDirPath = AppDirPath.withoutVersion()
+/**
+ * The path to application data within the user’s home directory.
+ */
+private val appDirPath = AppDirPath.withoutVersion()
 
-    private lateinit var state: AppState
+/**
+ * User data stored on the device.
+ *
+ * Data is initially loaded from [storage][FileStorage].
+ * If the `storage` is empty, the `default` value is used.
+ *
+ * To preserve data between restarts, the current [data] must be [saved][save] manually.
+ *
+ * @param T The type of data stored.
+ *
+ * @param storageFileName The name of the file where user data is stored.
+ * @param type The class of the stored data type.
+ * @param default The default value to use if the repository is empty.
+ */
+@Suppress("UnnecessaryAbstractClass" /* Avoids creating instances; only for inheritance. */)
+internal abstract class UserData<T : Any>(
+    storageFileName: String,
+    default: () -> T,
+    type: KClass<T>
+) {
+    /**
+     * A repository that allows reading from and writing user data to the disk.
+     */
+    private val storage = FileStorage(storageFileName, appDirPath, type)
 
-    init {
-        load()
+    /**
+     * A current user data.
+     */
+    internal val data: T = storage.loadOr(default)
+
+    /**
+     * Saves the current user [data] to a file on disk.
+     */
+    internal fun save() {
+        storage.save(data)
     }
+}
 
+/**
+ * A repository that stores data in JSON format on a file on disk.
+ */
+private class FileStorage<T : Any>(
+    private val fileName: String,
+    private val dir: String,
+    private val type: KClass<T>
+) {
     /**
      * Returns a file for storing the application state.
      *
      * If the file or its parent directories do not exist, they are created.
      */
-    private fun storage(): File {
-        val parent = Path(appDirPath)
+    fun storage(): File {
+        val parent = Path(dir)
         if (!parent.exists()) {
             parent.createDirectories()
         }
-        val child = parent.resolve(storageName)
+        val child = parent.resolve(fileName)
         if (!child.exists()) {
             child.createFile()
         }
         return child.toFile()
     }
 
-    private fun load() {
+    /**
+     * Returns the data from the storage file if it contains content;
+     * otherwise, returns the `default`.
+     */
+    fun loadOr(default: () -> T): T {
         val content = storage().readText()
-        if (content.isNotBlank()) {
-            state = gson.fromJson(content, AppState::class.java)
+        return if (content.isNotBlank()) {
+            gson.fromJson(content, type.java)
         } else {
-            state = AppState(AppSettings(false, SnoozeTime.TWO_HOURS))
-            save()
+            default()
         }
     }
 
-    internal val data: AppState
-        get() = state
-
-    internal fun save() {
-        val json = gson.toJson(state)
+    /**
+     * Writes `data` to the storage file.
+     */
+    fun save(data: T) {
+        val json = gson.toJson(data)
         storage().writeText(json)
     }
 }
-
-internal data class AppState(
-    var settings: AppSettings
-)
-
-internal data class AppSettings(
-    var enabledDndMode: Boolean,
-    var snoozeTime: SnoozeTime
-)
 
 /**
  * Provides the path to platform-specific application data
