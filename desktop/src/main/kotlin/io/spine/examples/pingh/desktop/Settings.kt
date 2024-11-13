@@ -101,7 +101,10 @@ internal fun SettingsPage(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        SettingsHeader(toMentionsPage)
+        SettingsHeader {
+            flow.saveSettings()
+            toMentionsPage()
+        }
         SettingsBox {
             Profile(flow, toLoginPage)
             SnoozeTimeOption(flow.settings)
@@ -115,11 +118,11 @@ internal fun SettingsPage(
  *
  * Includes a button to return to the `Mentions` page.
  *
- * @param toMentionsPage The navigation to the 'Mentions' page.
+ * @param onExit Called when exiting the page.
  */
 @Composable
 private fun SettingsHeader(
-    toMentionsPage: () -> Unit
+    onExit: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -130,7 +133,7 @@ private fun SettingsHeader(
     ) {
         IconButton(
             icon = painterResource(Res.drawable.back),
-            onClick = toMentionsPage,
+            onClick = onExit,
             modifier = Modifier.size(35.dp),
             colors = IconButtonDefaults.iconButtonColors(
                 contentColor = MaterialTheme.colorScheme.onSecondary
@@ -234,6 +237,7 @@ private fun ProfileControl(
         )
         Spacer(Modifier.height(5.dp))
         LogOutButton {
+            flow.saveSettings()
             flow.logOut {
                 toLoginPage()
             }
@@ -304,7 +308,7 @@ private fun DndOption(
         Switch(
             checked = enabledDndMode,
             onCheckedChange = {
-                state.enabledDndMode.value = it
+                state.setDndMode(it)
             },
             modifier = Modifier
                 .scale(switchScale)
@@ -380,7 +384,7 @@ private fun SnoozeTimeSegmentedButtonRow(state: SettingsState) {
             SegmentedButton(
                 selected = currentSnoozeTime == snoozeTime,
                 onClick = {
-                    state.snoozeTime.value = snoozeTime
+                    state.setSnoozeTime(snoozeTime)
                 },
                 shape = SegmentedButtonDefaults.itemShape(index, snoozeTimeOptions.size)
             ) {
