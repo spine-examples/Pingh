@@ -26,20 +26,82 @@
 
 package io.spine.examples.pingh.client
 
+import com.google.protobuf.util.Timestamps
 import io.spine.examples.pingh.github.Username
+import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.sessions.SessionId
+import io.spine.examples.pingh.sessions.of
 
 /**
  * Information about the current user session.
  *
- * @property id The ID of current session.
+ * A session can be in one of two states:
+ *
+ * - Guest: The user does not have access to mentions or settings.
+ * - Authenticated: The user has access to personal data and can receive mentions
+ *
+ * @param whoCreated The name of the creator of this session.
+ * @param whenCreated The time when the session was created
+ *   in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format.
  */
-internal class UserSession(
-    internal val id: SessionId
+internal data class UserSession(
+    private var whoCreated: String? = null,
+    private var whenCreated: String? = null
 ) {
     /**
      * The username to which the current session belongs.
      */
     internal val username: Username
-        get() = id.username
+        get() = Username::class.of(whoCreated ?: "guest")
+
+    /**
+     * The ID of current session.
+     */
+    internal val id: SessionId
+        get() = SessionId::class.of(username, Timestamps.parse(whenCreated))
+
+    /**
+     * Authenticates the current session.
+     *
+     * @param id The ID of the session.
+     */
+    internal fun authenticate(id: SessionId) {
+        whoCreated = id.username.value
+        whenCreated = Timestamps.toString(id.whenCreated)
+    }
+
+    /**
+     * Turns a session into a guest session.
+     */
+    internal fun guest() {
+        whoCreated = null
+        whenCreated = null
+    }
+
+    /**
+     * Returns true if the session is authenticated, and false if it is a guest session.
+     */
+    internal fun isAuthenticated() = whoCreated != null && whenCreated != null
+
+    /**
+     * Saves the user session data to a file in the user's data directory.
+     */
+    internal fun save() {
+        FileStorage.save(location, this)
+    }
+
+    internal companion object {
+        /**
+         * The location on disk of the file that stores the user session data.
+         */
+        private val location = FileLocation.Session
+
+        /**
+         * Loads the user session data from a file in the user's data directory.
+         *
+         * Returns a null session if the file is empty.
+         */
+        internal fun loadOrDefault(): UserSession =
+            FileStorage.loadOrDefault(location) { UserSession() }
+    }
 }
