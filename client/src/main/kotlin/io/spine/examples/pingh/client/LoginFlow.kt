@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.client
 
+import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -62,16 +63,18 @@ public abstract class LoginStage<T> {
  *
  * @property client Enables interaction with the Pingh server.
  * @property session The information about the current user session.
+ * @property establishSession Updates the application state when a session is established.
  */
 public class LoginFlow internal constructor(
     private val client: DesktopClient,
-    private val session: MutableStateFlow<UserSession?>
+    private val session: UserSession,
+    private val establishSession: (SessionId) -> Unit
 ) {
     /**
      * Current stage of the GitHub login process.
      */
     private val stage: MutableStateFlow<LoginStage<*>> =
-        MutableStateFlow(EnterUsername(client, session, ::moveToNextStage))
+        MutableStateFlow(EnterUsername(client, establishSession, ::moveToNextStage))
 
     /**
      * Returns the immutable state of the current login stage.
@@ -111,7 +114,7 @@ public class LoginFlow internal constructor(
             }
 
             is LoginFailed -> {
-                stage.value = EnterUsername(client, session, ::moveToNextStage)
+                stage.value = EnterUsername(client, establishSession, ::moveToNextStage)
             }
         }
     }

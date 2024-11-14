@@ -65,7 +65,7 @@ import kotlinx.coroutines.launch
 @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
 public class VerifyLogin internal constructor(
     private val client: DesktopClient,
-    private val session: MutableStateFlow<UserSession?>,
+    private val session: UserSession,
     private val moveToNextStage: () -> Unit,
     event: UserCodeReceived
 ) : LoginStage<String>() {
@@ -160,7 +160,7 @@ public class VerifyLogin internal constructor(
      */
     private fun confirm(): ActionOutcome {
         val future = CompletableFuture<ActionOutcome>()
-        val command = VerifyUserLoginToGitHub::class.withSession(session.value!!.id)
+        val command = VerifyUserLoginToGitHub::class.withSession(session.id)
         client.observeEither(
             EventObserver(command.id, UserLoggedIn::class) {
                 codeExpirationJob.cancel()
@@ -202,7 +202,7 @@ public class VerifyLogin internal constructor(
     public fun requestNewUserCode(
         onSuccess: (event: UserCodeReceived) -> Unit = {}
     ) {
-        client.requestUserCode(session.value!!.username) { event ->
+        client.requestUserCode(session.username) { event ->
             userCode.value = event.userCode
             verificationUrl.value = event.verificationUrl
             expiresIn.value = event.expiresIn
