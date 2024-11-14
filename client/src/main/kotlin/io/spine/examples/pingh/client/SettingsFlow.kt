@@ -126,30 +126,3 @@ public class SettingsState internal constructor(
         data.snoozeTime = snoozeTime
     }
 }
-
-/**
- * Time after which the notification about the new mention is repeated.
- *
- * @property label The text corresponding to this interval.
- * @property value The duration corresponding to this interval.
- */
-@Suppress("MagicNumber" /* The durations are specified using numbers. */)
-public enum class SnoozeTime(
-    public val label: String,
-    public val value: Duration
-) {
-    /**
-     * The interval is 30 minutes in duration.
-     */
-    THIRTY_MINUTES("30 mins", minutes(30)),
-
-    /**
-     * The interval is 2 hours in duration.
-     */
-    TWO_HOURS("2 hours", hours(2)),
-
-    /**
-     * The interval is one day in duration.
-     */
-    ONE_DAY("1 day", hours(24))
-}
