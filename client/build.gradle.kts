@@ -37,6 +37,11 @@ plugins {
 }
 
 spine {
+    // Enable the code generation for the elements of the ubiquitous language,
+    // declared in Proto files.
+    assembleModel()
+    enableJava()
+
     // Add and configure required dependencies for developing a Spine-based Java client.
     // See: https://github.com/SpineEventEngine/bootstrap#java-projects
     enableJava().client()
