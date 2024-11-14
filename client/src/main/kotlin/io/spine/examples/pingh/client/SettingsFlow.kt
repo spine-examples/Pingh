@@ -46,23 +46,25 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * @property client Enables interaction with the Pingh server.
  * @property session The information about the current user session.
- * @property userSettings The application settings stored on the device.
+ * @property userSettings The information about the application settings.
+ * @property closeSession Updates the application state when a session is closed.
  */
 public class SettingsFlow internal constructor(
     private val client: DesktopClient,
-    private val session: MutableStateFlow<UserSession?>,
-    private val userSettings: UserSettings
+    private val session: UserSession,
+    private val userSettings: UserSettings,
+    private val closeSession: () -> Unit
 ) {
     /**
      * The state of application settings.
      */
-    public val settings: SettingsState = SettingsState(userSettings.data)
+    public val settings: SettingsState = SettingsState(userSettings)
 
     /**
      * The username to which the current session belongs.
      */
     public val username: Username
-        get() = session.value!!.username
+        get() = session.username
 
     /**
      * Logs the user out, cancels all subscriptions and clears the session ID.
@@ -70,9 +72,9 @@ public class SettingsFlow internal constructor(
      * @param onSuccess Called when the user successfully logs out.
      */
     public fun logOut(onSuccess: (event: UserLoggedOut) -> Unit = {}) {
-        val command = LogUserOut::class.withSession(session.value!!.id)
+        val command = LogUserOut::class.withSession(session.id)
         client.observeEvent(command.id, UserLoggedOut::class) { event ->
-            session.value = null
+            closeSession()
             onSuccess(event)
         }
         client.send(command)
@@ -91,7 +93,7 @@ public class SettingsFlow internal constructor(
  * State of application settings.
  */
 public class SettingsState internal constructor(
-    private val data: SettingsData
+    private val data: UserSettings
 ) {
     private val _enabledDndMode = MutableStateFlow(data.enabledDndMode)
     private val _snoozeTime = MutableStateFlow(data.snoozeTime)

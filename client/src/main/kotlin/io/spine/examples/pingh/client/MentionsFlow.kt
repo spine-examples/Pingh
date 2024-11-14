@@ -53,11 +53,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
  *
  * @property client Enables interaction with the Pingh server.
  * @property session The information about the current user session.
- * @property settings The state of application settings.
+ * @property settings The information about the application settings.
  */
 public class MentionsFlow internal constructor(
     private val client: DesktopClient,
-    private val session: MutableStateFlow<UserSession?>,
+    private val session: UserSession,
     private val settings: UserSettings
 ) {
     /**
@@ -75,7 +75,7 @@ public class MentionsFlow internal constructor(
      */
     private fun subscribeToMentionsUpdates() {
         ensureLoggedIn()
-        val id = UserMentionsId::class.of(session.value!!.username)
+        val id = UserMentionsId::class.of(session.username)
         client.observeEntity(id, UserMentions::class) { entity ->
             mentions.value = entity.mentionList
         }
@@ -91,7 +91,7 @@ public class MentionsFlow internal constructor(
     public fun updateMentions() {
         ensureLoggedIn()
         val command = UpdateMentionsFromGitHub::class.buildBy(
-            GitHubClientId::class.of(session.value!!.username)
+            GitHubClientId::class.of(session.username)
         )
         client.send(command)
     }
@@ -104,7 +104,7 @@ public class MentionsFlow internal constructor(
     public fun allMentions(): List<MentionView> {
         ensureLoggedIn()
         val userMentions = client.readById(
-            UserMentionsId::class.of(session.value!!.username),
+            UserMentionsId::class.of(session.username),
             UserMentions::class
         )
         return userMentions
@@ -122,7 +122,7 @@ public class MentionsFlow internal constructor(
      * @param id The identifier of the mention to be snoozed.
      */
     public fun snooze(id: MentionId) {
-        snooze(id, settings.data.snoozeTime.value)
+        snooze(id, settings.snoozeTime.value)
     }
 
     /**
@@ -152,7 +152,7 @@ public class MentionsFlow internal constructor(
      * Throws an `IllegalStateException` exception if the user is not logged in.
      */
     private fun ensureLoggedIn() {
-        check(session.value != null) { "The user is not logged in." }
+        check(!session.isAuthenticated()) { "The user is not logged in." }
     }
 }
 
