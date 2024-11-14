@@ -29,11 +29,8 @@ package io.spine.examples.pingh.client
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import io.spine.core.UserId
+import io.spine.examples.pingh.sessions.SessionId
 import java.util.concurrent.TimeUnit
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 
 /**
  * Manages the logic for the Pingh app.
@@ -71,20 +68,28 @@ public class PinghApplication private constructor(
         .build()
 
     /**
-     * Enables interaction with the Pingh server.
-     */
-    internal var client = DesktopClient(channel)
-        private set
-
-    /**
-     * The state of application settings.
-     */
-    private val settings = UserSettings()
-
-    /**
      * Information about the current user session.
      */
-    private val session = MutableStateFlow<UserSession?>(null)
+    private val session = UserSession.loadOrDefault()
+
+    /**
+     * Information about the application settings.
+     */
+    private val settings = UserSettings.loadOrDefault()
+
+    /**
+     * Enables interaction with the Pingh server.
+     */
+    internal var client: DesktopClient
+        private set
+
+    init {
+        client = if (session.isAuthenticated()) {
+            DesktopClient(channel, session.id.asUserId())
+        } else {
+            DesktopClient(channel)
+        }
+    }
 
     /**
      * Describes the login to GitHub via GitHub's device flow.
@@ -101,44 +106,51 @@ public class PinghApplication private constructor(
      */
     private val notificationsFlow = NotificationsFlow(notificationSender, settings)
 
-    /**
-     * Asynchronously updates the state of the Pingh application after the [session] is updated.
-     *
-     * If the `session` is closed:
-     * - a guest [client] is created;
-     * - the [mentions flow][mentionsFlow] for previous session is deleted.
-     *
-     * If a new `session` is established:
-     * - a `client` is created to make requests on behalf of the user;
-     * - notifications are enabled for the newly created client.
-     *
-     * In all cases, prior to creating a new `client`, all subscriptions of
-     * the previous `client` are closed.
-     */
-    private val sessionObservation = CoroutineScope(Dispatchers.Default).launch {
-        session.collect { value ->
-            client.close()
-            if (value != null) {
-                client = DesktopClient(channel, value.asUserId())
-                notificationsFlow.enableNotifications(client, value.username)
-            } else {
-                client = DesktopClient(channel)
-                mentionsFlow = null
-            }
+    init {
+        if (session.isAuthenticated()) {
+            notificationsFlow.enableNotifications(client, session.username)
         }
     }
 
     /**
-     * Returns `true` if a user session exists, otherwise `false`.
+     * Updates the application state when a session is established:
+     *
+     * - a `client` is created to make requests on behalf of the user;
+     * - notifications are enabled for the newly created client.
      */
-    public fun isLoggedIn(): Boolean = session.value != null
+    private fun establishSession(id: SessionId) {
+        client.close()
+        session.authenticate(id)
+        client = DesktopClient(channel, id.asUserId())
+        notificationsFlow.enableNotifications(client, id.username)
+        session.save()
+    }
+
+    /**
+     * Updates the application state when a session is closed:
+     *
+     * - a guest [client] is created;
+     * - the [mentions flow][mentionsFlow] for previous session is deleted.
+     */
+    private fun closeSession() {
+        client.close()
+        session.guest()
+        client = DesktopClient(channel)
+        mentionsFlow = null
+        session.save()
+    }
+
+    /**
+     * Returns `true` if the user is logged in to the application.
+     */
+    public fun isLoggedIn(): Boolean = session.isAuthenticated()
 
     /**
      * Initiates the login flow and terminates any previous flow, if it exists.
      */
-    public fun startLoginFlow(): LoginFlow  {
+    public fun startLoginFlow(): LoginFlow {
         loginFlow?.close()
-        loginFlow = LoginFlow(client, session)
+        loginFlow = LoginFlow(client, session, ::establishSession)
         return loginFlow!!
     }
 
@@ -157,15 +169,16 @@ public class PinghApplication private constructor(
     /**
      * Initiates the settings flow.
      */
-    public fun startSettingsFlow(): SettingsFlow = SettingsFlow(client, session, settings)
+    public fun startSettingsFlow(): SettingsFlow =
+        SettingsFlow(client, session, settings, ::closeSession)
 
     /**
      * Closes the client.
      */
     public fun close() {
         loginFlow?.close()
+        session.save()
         settings.save()
-        sessionObservation.cancel()
         client.close()
         channel.shutdown()
             .awaitTermination(defaultShutdownTimeout, TimeUnit.SECONDS)
@@ -229,9 +242,9 @@ public class PinghApplication private constructor(
 }
 
 /**
- * Creates a new `UserId` using the username contained in this `UserSession`.
+ * Creates a new `UserId` using the username contained in this `SessionId`.
  */
-private fun UserSession.asUserId(): UserId =
+private fun SessionId.asUserId(): UserId =
     UserId.newBuilder()
-        .setValue(id.username.value)
+        .setValue(username.value)
         .vBuild()

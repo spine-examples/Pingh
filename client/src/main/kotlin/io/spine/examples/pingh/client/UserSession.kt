@@ -79,7 +79,7 @@ internal data class UserSession(
     }
 
     /**
-     * Returns true if the session is authenticated, and false if it is a guest session.
+     * Returns `true` if the session is authenticated, and `false` if it is a guest session.
      */
     internal fun isAuthenticated() = whoCreated != null && whenCreated != null
 
