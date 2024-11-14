@@ -152,7 +152,7 @@ public class MentionsFlow internal constructor(
      * Throws an `IllegalStateException` exception if the user is not logged in.
      */
     private fun ensureLoggedIn() {
-        check(!session.isAuthenticated()) { "The user is not logged in." }
+        check(session.isAuthenticated()) { "The user is not logged in." }
     }
 }
 
