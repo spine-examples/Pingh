@@ -26,36 +26,25 @@
 
 package io.spine.examples.pingh.client
 
+import kotlin.reflect.KClass
+
+private val defaultUserSettings = UserSettings.newBuilder()
+    .setEnabledDndMode(false)
+    .setSnoozeTime(SnoozeTime.TWO_HOURS)
+    .vBuild()
+
 /**
- * Information about the current application settings.
- *
- * @property enabledDndMode Whether the user should NOT receive notifications
- *   for new mentions or the expiration of the snooze time.
- * @property snoozeTime The interval after which the new mention notification is repeated.
+ * Saves the application settings to a file in the user's data directory.
  */
-internal data class UserSettings(
-    internal var enabledDndMode: Boolean = false,
-    internal var snoozeTime: SnoozeTime = SnoozeTime.TWO_HOURS
-) {
-    /**
-     * Saves the application settings to a file in the user's data directory.
-     */
-    internal fun save() {
-        FileStorage.save(location, this)
-    }
-
-    internal companion object {
-        /**
-         * The location on disk of the file that stores the application settings.
-         */
-        private val location = FileLocation.Settings
-
-        /**
-         * Loads the application settings from a file in the user's data directory.
-         *
-         * If the file is empty, the default configured settings are returned.
-         */
-        internal fun loadOrDefault(): UserSettings =
-            FileStorage.loadOrDefault(location) { UserSettings() }
-    }
+internal fun UserSettings.save() {
+    FileStorage.save(FileLocation.Settings, this)
 }
+
+/**
+ * Loads the application settings from a file in the user's data directory.
+ *
+ * If the file is empty, the [default][defaultUserSettings] configured settings are returned.
+ */
+@Suppress("UnusedReceiverParameter" /* Associated with the class but doesn't use its data. */)
+internal fun KClass<UserSettings>.loadOrDefault(): UserSettings =
+    FileStorage.loadOrDefault(FileLocation.Settings) { defaultUserSettings }
