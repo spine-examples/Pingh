@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.client
 
+import com.google.common.annotations.VisibleForTesting
 import com.google.gson.Gson
 import java.io.File
 import kotlin.io.path.Path
@@ -72,6 +73,21 @@ internal object FileStorage {
     }
 
     /**
+     * Deletes a file by its location.
+     *
+     * If the file does not exist, does nothing.
+     *
+     * @param file The location of the file to be deleted.
+     */
+    internal fun delete(file: FileLocation) {
+        storage(file).apply {
+            if (exists()) {
+                delete()
+            }
+        }
+    }
+
+    /**
      * Returns a file for storing the application state.
      *
      * If the file or its parent directories do not exist, they are created.
@@ -115,6 +131,18 @@ internal data class FileLocation(
          */
         internal val Settings = FileLocation(appDirPath, ".settings.json")
     }
+}
+
+/**
+ * Deletes all files containing application state information
+ * in the user data directory.
+ *
+ * For testing purposes only.
+ */
+@VisibleForTesting
+public fun clearFileStorage() {
+    FileStorage.delete(FileLocation.Session)
+    FileStorage.delete(FileLocation.Settings)
 }
 
 /**

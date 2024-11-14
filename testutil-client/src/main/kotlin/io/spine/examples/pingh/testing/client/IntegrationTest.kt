@@ -29,6 +29,7 @@ package io.spine.examples.pingh.testing.client
 import io.spine.environment.Tests
 import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.client.PinghApplication
+import io.spine.examples.pingh.client.clearFileStorage
 import io.spine.examples.pingh.mentions.newMentionsContext
 import io.spine.examples.pingh.server.datastore.DatastoreStorageFactory
 import io.spine.examples.pingh.sessions.newSessionsContext
@@ -100,6 +101,7 @@ public abstract class IntegrationTest {
 
     @BeforeEach
     internal fun createApplication() {
+        clearFileStorage()
         notificationSender = MemoizingNotificationSender()
         application = PinghApplication.builder()
             .withAddress(address)
