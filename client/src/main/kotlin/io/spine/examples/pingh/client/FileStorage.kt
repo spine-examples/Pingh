@@ -32,87 +32,27 @@ import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createFile
 import kotlin.io.path.exists
-import kotlin.reflect.KClass
 import net.harawata.appdirs.AppDirsFactory
-
-private val gson = Gson()
-
-/**
- * The path to application data within the user’s home directory.
- */
-private val appDirPath = AppDirPath.withoutVersion()
-
-/**
- * User data stored on the device.
- *
- * Data is initially loaded from [storage][FileStorage].
- * If the `storage` is empty, the `default` value is used.
- *
- * To preserve data between restarts, the current [data] must be [saved][save] manually.
- *
- * @param T The type of data stored.
- *
- * @param storageFileName The name of the file where user data is stored.
- * @param type The class of the stored data type.
- * @param default The default value to use if the repository is empty.
- */
-@Suppress("UnnecessaryAbstractClass" /* Avoids creating instances; only for inheritance. */)
-internal abstract class UserData<T : Any>(
-    storageFileName: String,
-    default: () -> T,
-    type: KClass<T>
-) {
-    /**
-     * A repository that allows reading from and writing user data to the disk.
-     */
-    private val storage = FileStorage(storageFileName, appDirPath, type)
-
-    /**
-     * A current user data.
-     */
-    internal val data: T = storage.loadOr(default)
-
-    /**
-     * Saves the current user [data] to a file on disk.
-     */
-    internal fun save() {
-        storage.save(data)
-    }
-}
 
 /**
  * A repository that stores data in JSON format on a file on disk.
  */
-private class FileStorage<T : Any>(
-    private val fileName: String,
-    private val dir: String,
-    private val type: KClass<T>
-) {
-    /**
-     * Returns a file for storing the application state.
-     *
-     * If the file or its parent directories do not exist, they are created.
-     */
-    fun storage(): File {
-        val parent = Path(dir)
-        if (!parent.exists()) {
-            parent.createDirectories()
-        }
-        val child = parent.resolve(fileName)
-        if (!child.exists()) {
-            child.createFile()
-        }
-        return child.toFile()
-    }
+internal object FileStorage {
+    private val gson = Gson()
 
     /**
      * Returns the data from the storage file if it contains content;
      * otherwise, returns the `default`.
+     *
+     * @param T The type of class being loaded.
+     *
+     * @param from The location of the file from which the data is read.
+     * @param default Calculates the default value to use when no data is found in the file.
      */
-    fun loadOr(default: () -> T): T {
-        val content = storage().readText()
+    internal inline fun <reified T> loadOrDefault(from: FileLocation, default: () -> T): T {
+        val content = storage(from).readText()
         return if (content.isNotBlank()) {
-            gson.fromJson(content, type.java)
+            gson.fromJson(content, T::class.java)
         } else {
             default()
         }
@@ -120,10 +60,60 @@ private class FileStorage<T : Any>(
 
     /**
      * Writes `data` to the storage file.
+     *
+     * @param T The type of class being saved.
+     *
+     * @param to The location of the file to which the data is written.
+     * @param data The object that is converted to JSON and written to a file.
      */
-    fun save(data: T) {
+    internal fun <T> save(to: FileLocation, data: T) {
         val json = gson.toJson(data)
-        storage().writeText(json)
+        storage(to).writeText(json)
+    }
+
+    /**
+     * Returns a file for storing the application state.
+     *
+     * If the file or its parent directories do not exist, they are created.
+     */
+    private fun storage(file: FileLocation): File {
+        val parent = Path(file.dir)
+        if (!parent.exists()) {
+            parent.createDirectories()
+        }
+        val child = parent.resolve(file.name)
+        if (!child.exists()) {
+            child.createFile()
+        }
+        return child.toFile()
+    }
+}
+
+/**
+ * A location of a file on disk.
+ *
+ * @property dir The absolute path to the directory where the file is located.
+ * @property name The name of the file.
+ */
+internal data class FileLocation(
+    internal val dir: String,
+    internal val name: String
+) {
+    internal companion object {
+        /**
+         * The path to application data within the user’s home directory.
+         */
+        private val appDirPath = AppDirPath.withoutVersion()
+
+        /**
+         * The location of the file with user session data.
+         */
+        internal val Session = FileLocation(appDirPath, ".session.json")
+
+        /**
+         * The location of the application settings file.
+         */
+        internal val Settings = FileLocation(appDirPath, ".settings.json")
     }
 }
 
