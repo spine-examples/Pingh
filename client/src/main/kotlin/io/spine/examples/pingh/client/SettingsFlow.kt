@@ -111,7 +111,7 @@ public class SettingsState internal constructor(
 
     /**
      * Sets whether the user should NOT receive notifications
-     * for new mentions or the expiration of the waiting period.
+     * for new mentions or the expiration of the snooze time.
      */
     public fun setDndMode(isEnabled: Boolean) {
         _enabledDndMode.value = isEnabled

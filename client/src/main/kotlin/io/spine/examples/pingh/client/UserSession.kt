@@ -40,8 +40,8 @@ import io.spine.examples.pingh.sessions.of
  * - Guest: The user does not have access to mentions or settings.
  * - Authenticated: The user has access to personal data and can receive mentions
  *
- * @param whoCreated The name of the creator of this session.
- * @param whenCreated The time when the session was created
+ * @property whoCreated The name of the creator of this session.
+ * @property whenCreated The time when the session was created
  *   in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) format.
  */
 internal data class UserSession(
@@ -71,7 +71,7 @@ internal data class UserSession(
     }
 
     /**
-     * Turns a session into a guest session.
+     * Turns a session into a guest.
      */
     internal fun guest() {
         whoCreated = null
@@ -99,7 +99,7 @@ internal data class UserSession(
         /**
          * Loads the user session data from a file in the user's data directory.
          *
-         * Returns a null session if the file is empty.
+         * Returns a guest session if the file is empty.
          */
         internal fun loadOrDefault(): UserSession =
             FileStorage.loadOrDefault(location) { UserSession() }

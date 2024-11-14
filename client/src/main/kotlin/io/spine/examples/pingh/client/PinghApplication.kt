@@ -115,7 +115,7 @@ public class PinghApplication private constructor(
     /**
      * Updates the application state when a session is established:
      *
-     * - a `client` is created to make requests on behalf of the user;
+     * - a [client] is created to make requests on behalf of the user;
      * - notifications are enabled for the newly created client.
      */
     private fun establishSession(id: SessionId) {

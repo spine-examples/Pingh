@@ -29,8 +29,8 @@ package io.spine.examples.pingh.client
 /**
  * Information about the current application settings.
  *
- * @property enabledDndMode Whether the user should not receive notifications
- *   for new mentions or the expiration of the waiting period.
+ * @property enabledDndMode Whether the user should NOT receive notifications
+ *   for new mentions or the expiration of the snooze time.
  * @property snoozeTime The interval after which the new mention notification is repeated.
  */
 internal data class UserSettings(
