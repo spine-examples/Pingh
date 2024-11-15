@@ -78,6 +78,8 @@ import io.spine.example.pingh.desktop.generated.resources.back
 import io.spine.examples.pingh.client.SettingsFlow
 import io.spine.examples.pingh.client.SettingsState
 import io.spine.examples.pingh.client.SnoozeTime
+import io.spine.examples.pingh.client.label
+import io.spine.examples.pingh.client.supported
 import io.spine.examples.pingh.github.Username
 import org.jetbrains.compose.resources.painterResource
 
@@ -373,7 +375,7 @@ private fun Option(
  */
 @Composable
 private fun SnoozeTimeSegmentedButtonRow(state: SettingsState) {
-    val snoozeTimeOptions = SnoozeTime.entries
+    val snoozeTimeOptions = SnoozeTime::class.supported
     val currentSnoozeTime by state.snoozeTime.collectAsState()
     Row(
         modifier = Modifier.selectableGroup(),
