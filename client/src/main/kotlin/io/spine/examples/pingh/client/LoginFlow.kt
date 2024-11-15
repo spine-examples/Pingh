@@ -62,7 +62,7 @@ public abstract class LoginStage<T> {
  * [confirmed][VerifyLogin.confirm] in the Pingh app.
  *
  * @property client Enables interaction with the Pingh server.
- * @property local The local user data
+ * @property local The local user data.
  * @property establishSession Updates the application state when a session is established.
  */
 public class LoginFlow internal constructor(

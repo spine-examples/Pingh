@@ -44,7 +44,7 @@ internal object FileStorage {
      * Returns the data from the storage file if it contains content;
      * otherwise, returns the `default`.
      *
-     * @param T The type of class being loaded.
+     * @param T The type of message being loaded.
      *
      * @param from The location of the file from which the data is read.
      * @param parser Deserializes a byte sequence into a message.
@@ -66,16 +66,16 @@ internal object FileStorage {
     }
 
     /**
-     * Writes `data` to the storage file.
+     * Writes `message` to the storage file.
      *
-     * @param T The type of class being saved.
+     * @param T The type of message being saved.
      *
      * @param to The location of the file to which the data is written.
-     * @param data The object that is serialized and saved to a file.
+     * @param message The message that is serialized and saved to a file.
      */
-    internal fun <T : Message> save(to: FileLocation, data: T) {
+    internal fun <T : Message> save(to: FileLocation, message: T) {
         FileOutputStream(storage(to)).use { file ->
-            data.toByteString().writeTo(file)
+            message.toByteString().writeTo(file)
         }
     }
 
