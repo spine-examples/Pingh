@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.client.preferences
+package io.spine.examples.pingh.client.settings
 
 import com.google.protobuf.Duration
 import com.google.protobuf.util.Durations

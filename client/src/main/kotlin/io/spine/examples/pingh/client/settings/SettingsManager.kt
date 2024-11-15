@@ -24,31 +24,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.client.preferences
+package io.spine.examples.pingh.client.settings
 
-import io.spine.examples.pingh.client.storage.FileLocation
+import io.spine.examples.pingh.client.storage.FileLocation.Companion.inAppDir
 import io.spine.examples.pingh.client.storage.FileStorage
-import io.spine.examples.pingh.client.storage.FileStorage.loadOrDefault
-import kotlin.reflect.KClass
 
 /**
- * Saves the application settings to a file in the user's data directory.
- */
-internal fun UserSettings.save() {
-    FileStorage.save(FileLocation.Settings, this)
-}
-
-/**
- * Loads the application settings from a file in the user's data directory.
+ * Manages application settings.
  *
- * If the file is empty, the [default][defaultUserSettings] configured settings are returned.
+ * All settings changes are saved to a file in the user's data directory,
+ * ensuring persistence across application restarts.
  */
-@Suppress("UnusedReceiverParameter" /* Associated with the class but doesn't use its data. */)
-internal fun KClass<UserSettings>.loadOrDefault(): UserSettings =
-    loadOrDefault(FileLocation.Settings, UserSettings::parseFrom) { defaultUserSettings }
+internal class SettingsManager {
+    /**
+     * A repository for storing current application settings.
+     */
+    private val storage = FileStorage<UserSettings>(inAppDir(".settings"))
 
-private val defaultUserSettings: UserSettings
-    get() = UserSettings.newBuilder()
-        .setEnabledDndMode(false)
-        .setSnoozeTime(SnoozeTime.TWO_HOURS)
-        .vBuild()
+    /**
+     * The current application settings.
+     */
+    internal var current: UserSettings
+        private set
+
+    init {
+        current = storage.loadOrDefault(UserSettings::parseFrom, default)
+    }
+
+    /**
+     * Sets and saves updated application settings.
+     */
+    internal fun update(settings: UserSettings) {
+        current = settings
+        storage.save(settings)
+    }
+
+    private companion object {
+        private val default = UserSettings.newBuilder()
+            .setEnabledDndMode(false)
+            .setSnoozeTime(SnoozeTime.TWO_HOURS)
+            .vBuild()
+    }
+}
