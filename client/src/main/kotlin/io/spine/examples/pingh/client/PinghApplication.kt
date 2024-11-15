@@ -30,11 +30,7 @@ import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import io.spine.core.UserId
 import io.spine.examples.pingh.client.preferences.LocalData
-import io.spine.examples.pingh.client.preferences.UserSession
-import io.spine.examples.pingh.client.preferences.authenticated
-import io.spine.examples.pingh.client.preferences.guest
-import io.spine.examples.pingh.client.preferences.isAuthenticated
-import io.spine.examples.pingh.client.preferences.username
+import io.spine.examples.pingh.client.session.SessionManager
 import io.spine.examples.pingh.sessions.SessionId
 import java.util.concurrent.TimeUnit
 
@@ -79,16 +75,21 @@ public class PinghApplication private constructor(
     private val local = LocalData()
 
     /**
+     * Manages application sessions.
+     */
+    private val session = SessionManager()
+
+    /**
      * Enables interaction with the Pingh server.
      */
     internal var client: DesktopClient
         private set
 
     init {
-        client = if (local.session.isAuthenticated()) {
-            DesktopClient(channel, local.session.id.asUserId())
-        } else {
+        client = if (session.isGuest()) {
             DesktopClient(channel)
+        } else {
+            DesktopClient(channel, local.session.id.asUserId())
         }
     }
 
@@ -113,8 +114,8 @@ public class PinghApplication private constructor(
     private val notificationsFlow = NotificationsFlow(notificationSender, local)
 
     init {
-        if (local.session.isAuthenticated()) {
-            notificationsFlow.enableNotifications(client, local.session.username)
+        if (!session.isGuest()) {
+            notificationsFlow.enableNotifications(client, session.current.username)
         }
     }
 
@@ -126,7 +127,7 @@ public class PinghApplication private constructor(
      */
     private fun establishSession(id: SessionId) {
         client.close()
-        local.session = UserSession::class.authenticated(id)
+        session.establish(id)
         client = DesktopClient(channel, id.asUserId())
         notificationsFlow.enableNotifications(client, id.username)
     }
@@ -139,7 +140,7 @@ public class PinghApplication private constructor(
      */
     private fun closeSession() {
         client.close()
-        local.session = UserSession::class.guest()
+        session.resetToGuest()
         client = DesktopClient(channel)
         mentionsFlow = null
     }
@@ -147,14 +148,14 @@ public class PinghApplication private constructor(
     /**
      * Returns `true` if the user is logged in to the application.
      */
-    public fun isLoggedIn(): Boolean = local.session.isAuthenticated()
+    public fun isLoggedIn(): Boolean = !session.isGuest()
 
     /**
      * Initiates the login flow and terminates any previous flow, if it exists.
      */
     public fun startLoginFlow(): LoginFlow {
         loginFlow?.close()
-        loginFlow = LoginFlow(client, local, ::establishSession)
+        loginFlow = LoginFlow(client, session, local, ::establishSession)
         return loginFlow!!
     }
 
@@ -165,7 +166,7 @@ public class PinghApplication private constructor(
      */
     public fun startMentionsFlow(): MentionsFlow {
         if (mentionsFlow == null) {
-            mentionsFlow = MentionsFlow(client, local)
+            mentionsFlow = MentionsFlow(client, session, local)
         }
         return mentionsFlow!!
     }
@@ -177,7 +178,7 @@ public class PinghApplication private constructor(
      */
     public fun startSettingsFlow(): SettingsFlow {
         if (settingsFlow == null) {
-            settingsFlow = SettingsFlow(client, local, ::closeSession)
+            settingsFlow = SettingsFlow(client, session, local, ::closeSession)
         }
         return settingsFlow!!
     }

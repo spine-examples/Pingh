@@ -30,9 +30,8 @@ import com.google.protobuf.Duration
 import com.google.protobuf.util.Timestamps
 import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.client.preferences.LocalData
-import io.spine.examples.pingh.client.preferences.isAuthenticated
-import io.spine.examples.pingh.client.preferences.username
 import io.spine.examples.pingh.client.preferences.value
+import io.spine.examples.pingh.client.session.SessionManager
 import io.spine.examples.pingh.mentions.GitHubClientId
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionView
@@ -56,10 +55,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
  *  as commands to the server-side.
  *
  * @property client Enables interaction with the Pingh server.
+ * @property session Manages application sessions.
  * @property local The local user data.
  */
 public class MentionsFlow internal constructor(
     private val client: DesktopClient,
+    private val session: SessionManager,
     private val local: LocalData
 ) {
     /**
@@ -77,7 +78,7 @@ public class MentionsFlow internal constructor(
      */
     private fun subscribeToMentionsUpdates() {
         ensureLoggedIn()
-        val id = UserMentionsId::class.of(local.session.username)
+        val id = UserMentionsId::class.of(session.current.username)
         client.observeEntity(id, UserMentions::class) { entity ->
             mentions.value = entity.mentionList
         }
@@ -93,7 +94,7 @@ public class MentionsFlow internal constructor(
     public fun updateMentions() {
         ensureLoggedIn()
         val command = UpdateMentionsFromGitHub::class.buildBy(
-            GitHubClientId::class.of(local.session.username)
+            GitHubClientId::class.of(session.current.username)
         )
         client.send(command)
     }
@@ -106,7 +107,7 @@ public class MentionsFlow internal constructor(
     public fun allMentions(): List<MentionView> {
         ensureLoggedIn()
         val userMentions = client.readById(
-            UserMentionsId::class.of(local.session.username),
+            UserMentionsId::class.of(session.current.username),
             UserMentions::class
         )
         return userMentions
@@ -154,7 +155,7 @@ public class MentionsFlow internal constructor(
      * Throws an `IllegalStateException` exception if the user is not logged in.
      */
     private fun ensureLoggedIn() {
-        check(local.session.isAuthenticated()) { "The user is not logged in." }
+        check(!session.isGuest()) { "The user is not logged in." }
     }
 }
 

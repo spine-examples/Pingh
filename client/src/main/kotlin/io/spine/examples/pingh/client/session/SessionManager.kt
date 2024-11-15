@@ -48,18 +48,18 @@ internal class SessionManager {
     /**
      * The current session with the Pingh server.
      */
-    internal var session: SessionId
+    internal var current: SessionId
         private set
 
     init {
-        session = storage.loadOrDefault(SessionId::parseFrom) { guest }
+        current = storage.loadOrDefault(SessionId::parseFrom) { guest }
     }
 
     /**
      * Sets a new session for the authenticated user.
      */
     internal fun establish(session: SessionId) {
-        this.session = session
+        current = session
         storage.save(session)
     }
 
@@ -67,14 +67,14 @@ internal class SessionManager {
      * Replaces the current session with a guest session.
      */
     internal fun resetToGuest() {
-        session = guest
+        current = guest
         storage.clear()
     }
 
     /**
-     * Returns `true` if the current [session] is a guest session.
+     * Returns `true` if the current [session][current] is a guest session.
      */
-    internal fun isGuest(): Boolean = session == guest
+    internal fun isGuest(): Boolean = current == guest
 
     private companion object {
         private val guest = SessionId.getDefaultInstance()

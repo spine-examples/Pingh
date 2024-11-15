@@ -29,7 +29,7 @@ package io.spine.examples.pingh.client
 import io.spine.examples.pingh.client.preferences.LocalData
 import io.spine.examples.pingh.client.preferences.SnoozeTime
 import io.spine.examples.pingh.client.preferences.UserSettings
-import io.spine.examples.pingh.client.preferences.username
+import io.spine.examples.pingh.client.session.SessionManager
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.withSession
 import io.spine.examples.pingh.sessions.command.LogUserOut
@@ -46,11 +46,13 @@ import kotlinx.coroutines.flow.StateFlow
  * use [saveSettings()][saveSettings] method.
  *
  * @property client Enables interaction with the Pingh server.
+ * @property session Manages application sessions.
  * @property local The local user data.
  * @property closeSession Updates the application state when a session is closed.
  */
 public class SettingsFlow internal constructor(
     private val client: DesktopClient,
+    private val session: SessionManager,
     private val local: LocalData,
     private val closeSession: () -> Unit
 ) {
@@ -65,7 +67,7 @@ public class SettingsFlow internal constructor(
      * The username to which the current session belongs.
      */
     public val username: Username
-        get() = local.session.username
+        get() = session.current.username
 
     /**
      * Logs the user out, cancels all subscriptions and clears the session ID.
@@ -73,7 +75,7 @@ public class SettingsFlow internal constructor(
      * @param onSuccess Called when the user successfully logs out.
      */
     public fun logOut(onSuccess: (event: UserLoggedOut) -> Unit = {}) {
-        val command = LogUserOut::class.withSession(local.session.id)
+        val command = LogUserOut::class.withSession(session.current)
         client.observeEvent(command.id, UserLoggedOut::class) { event ->
             closeSession()
             onSuccess(event)
