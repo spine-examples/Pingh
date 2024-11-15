@@ -53,7 +53,7 @@ public val KClass<SnoozeTime>.supported: List<SnoozeTime>
 
 @Suppress("MagicNumber" /* The durations are specified using numbers. */)
 private val snoozeTimeDetails = mapOf(
-    SnoozeTime.THIRTY_MINUTES to SnoozeTimeDetails("30 mins", minutes(1)),
+    SnoozeTime.THIRTY_MINUTES to SnoozeTimeDetails("30 mins", minutes(30)),
     SnoozeTime.TWO_HOURS to SnoozeTimeDetails("2 hours", hours(2)),
     SnoozeTime.ONE_DAY to SnoozeTimeDetails("1 day", hours(24))
 )
