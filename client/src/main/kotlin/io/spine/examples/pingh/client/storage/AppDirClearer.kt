@@ -26,27 +26,23 @@
 
 package io.spine.examples.pingh.client.storage
 
-/**
- * A location of a file on disk.
- *
- * @property dir The absolute path to the directory where the file is located.
- * @property name The name of the file.
- */
-internal class FileLocation private constructor(
-    internal val dir: String,
-    internal val name: String
-) {
-    internal companion object {
-        /**
-         * The path to application data within the user’s home directory.
-         */
-        private val appDirPath = AppDirPath.withoutVersion()
+import com.google.common.annotations.VisibleForTesting
+import java.io.File
 
-        /**
-         * Creates a location of the file within the application's folder
-         * in the user data directory.
-         */
-        internal fun inAppDir(fileName: String): FileLocation =
-            FileLocation(appDirPath, fileName)
+/**
+ * Deletes all files in the application's folder
+ * within the user data directory.
+ *
+ * For testing purposes only.
+ */
+@VisibleForTesting
+public fun clearAppDir() {
+    val path = AppDirPath.withoutVersion()
+    File(path).listFiles()?.forEach { file ->
+        if (file.isFile) {
+            file.delete()
+        } else {
+            file.deleteRecursively()
+        }
     }
 }

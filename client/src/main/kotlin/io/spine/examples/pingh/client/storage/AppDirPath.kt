@@ -26,27 +26,24 @@
 
 package io.spine.examples.pingh.client.storage
 
-/**
- * A location of a file on disk.
- *
- * @property dir The absolute path to the directory where the file is located.
- * @property name The name of the file.
- */
-internal class FileLocation private constructor(
-    internal val dir: String,
-    internal val name: String
-) {
-    internal companion object {
-        /**
-         * The path to application data within the user’s home directory.
-         */
-        private val appDirPath = AppDirPath.withoutVersion()
+import net.harawata.appdirs.AppDirsFactory
 
-        /**
-         * Creates a location of the file within the application's folder
-         * in the user data directory.
-         */
-        internal fun inAppDir(fileName: String): FileLocation =
-            FileLocation(appDirPath, fileName)
+/**
+ * Provides the path to platform-specific application data
+ * within the user’s home directory.
+ */
+internal object AppDirPath {
+    private const val author = "spine-examples"
+    private const val name = "Pingh"
+    private const val version = "1.0.0"
+
+    /**
+     * Returns the path to the application data,
+     * without including the current application version.
+     */
+    internal fun withoutVersion(): String {
+        val versionedPath = AppDirsFactory.getInstance()
+            .getUserDataDir(name, version, author)
+        return versionedPath.substring(0, versionedPath.length - version.length - 1)
     }
 }

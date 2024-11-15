@@ -52,7 +52,7 @@ internal class SessionManager {
         private set
 
     init {
-        current = storage.loadOrDefault(SessionId::parseFrom) { guest }
+        current = storage.loadOrDefault(SessionId::parseFrom, guest)
     }
 
     /**

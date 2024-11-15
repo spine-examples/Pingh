@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.client.storage
 
-import com.google.common.annotations.VisibleForTesting
 import com.google.protobuf.Message
 import java.io.File
 import java.io.FileInputStream
@@ -38,29 +37,44 @@ import kotlin.io.path.exists
 
 /**
  * Stores data on disk in a sequence of bytes.
+ *
+ * @param T The type of the stored message.
  */
-internal object FileStorage {
+internal class FileStorage<T : Message>(location: FileLocation) {
+    /**
+     * A file on disk, serving as a repository.
+     */
+    private val file: File
+
+    /**
+     * If the file or its parent directories do not exist, they are created.
+     */
+    init {
+        val parent = Path(location.dir)
+        if (!parent.exists()) {
+            parent.createDirectories()
+        }
+        val child = parent.resolve(location.name)
+        if (!child.exists()) {
+            child.createFile()
+        }
+        file = child.toFile()
+    }
+
     /**
      * Returns the data from the storage file if it contains content;
      * otherwise, returns the `default`.
      *
-     * @param T The type of message being loaded.
-     *
-     * @param from The location of the file from which the data is read.
      * @param parser Deserializes a byte sequence into a message.
-     * @param default Calculates the default value to use when no data is found in the file.
+     * @param default The default value returned when no data is found in the file.
      */
-    internal inline fun <reified T : Message> loadOrDefault(
-        from: FileLocation,
-        parser: (ByteArray) -> T,
-        default: () -> T
-    ): T {
-        FileInputStream(storage(from)).use { file ->
-            val bytes = file.readAllBytes()
+    internal fun loadOrDefault(parser: (ByteArray) -> T, default: T): T {
+        FileInputStream(file).use { stream ->
+            val bytes = stream.readAllBytes()
             return if (bytes.isNotEmpty()) {
                 parser(bytes)
             } else {
-                default()
+                default
             }
         }
     }
@@ -68,58 +82,18 @@ internal object FileStorage {
     /**
      * Writes `message` to the storage file.
      *
-     * @param T The type of message being saved.
-     *
-     * @param to The location of the file to which the data is written.
      * @param message The message that is serialized and saved to a file.
      */
-    internal fun <T : Message> save(to: FileLocation, message: T) {
-        FileOutputStream(storage(to)).use { file ->
-            message.toByteString().writeTo(file)
+    internal fun save(message: T) {
+        FileOutputStream(file).use { stream ->
+            message.toByteString().writeTo(stream)
         }
     }
 
     /**
-     * Deletes a file by its location.
-     *
-     * If the file does not exist, does nothing.
-     *
-     * @param file The location of the file to be deleted.
+     * Clears all data inside the storage file.
      */
-    internal fun delete(file: FileLocation) {
-        storage(file).apply {
-            if (exists()) {
-                delete()
-            }
-        }
+    internal fun clear() {
+        FileOutputStream(file).close()
     }
-
-    /**
-     * Returns a file for storing the application state.
-     *
-     * If the file or its parent directories do not exist, they are created.
-     */
-    private fun storage(file: FileLocation): File {
-        val parent = Path(file.dir)
-        if (!parent.exists()) {
-            parent.createDirectories()
-        }
-        val child = parent.resolve(file.name)
-        if (!child.exists()) {
-            child.createFile()
-        }
-        return child.toFile()
-    }
-}
-
-/**
- * Deletes all files containing application state information
- * in the user data directory.
- *
- * For testing purposes only.
- */
-@VisibleForTesting
-public fun clearFileStorage() {
-    FileStorage.delete(FileLocation.Session)
-    FileStorage.delete(FileLocation.Settings)
 }
