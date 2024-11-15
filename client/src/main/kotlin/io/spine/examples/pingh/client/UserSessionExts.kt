@@ -46,7 +46,7 @@ private val guestUsername: Username
 /**
  * Returns `true` if the session is authenticated, and `false` if it is a guest session.
  */
-internal fun UserSession.isAuthenticated() = !this.hasId()
+internal fun UserSession.isAuthenticated() = this.hasId()
 
 /**
  * Saves the user session data to a file in the user's data directory.
