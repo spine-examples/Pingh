@@ -35,6 +35,18 @@ option java_package = "io.spine.examples.pingh.client";
 option java_outer_classname = "SettingsProto";
 option java_multiple_files = true;
 
+// Information about the current application settings.
+message UserSettings {
+
+    // Whether the user should NOT receive notifications
+    // for new mentions or the expiration of the snooze time.
+    //
+    bool enabled_dnd_mode = 1 [(required) = true];
+
+    // The interval after which the new mention notification is repeated.
+    SnoozeTime snooze_time = 2 [(required) = true];
+}
+
 // Time after which the notification about the new mention is repeated.
 enum SnoozeTime {
     ST_UNSPECIFIED = 0;
@@ -47,16 +59,4 @@ enum SnoozeTime {
 
     // The interval is one day in duration.
     ONE_DAY = 3;
-}
-
-// Information about the current application settings.
-message UserSettings {
-
-    // Whether the user should NOT receive notifications
-    // for new mentions or the expiration of the snooze time.
-    //
-    bool enabled_dnd_mode = 1 [(required) = true];
-
-    // The interval after which the new mention notification is repeated.
-    SnoozeTime snooze_time = 2 [(required) = true];
 }
