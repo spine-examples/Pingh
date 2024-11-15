@@ -26,10 +26,10 @@
 
 package io.spine.examples.pingh.client
 
-import io.spine.examples.pingh.client.preferences.LocalData
-import io.spine.examples.pingh.client.preferences.SnoozeTime
-import io.spine.examples.pingh.client.preferences.UserSettings
 import io.spine.examples.pingh.client.session.SessionManager
+import io.spine.examples.pingh.client.settings.SettingsManager
+import io.spine.examples.pingh.client.settings.SnoozeTime
+import io.spine.examples.pingh.client.settings.UserSettings
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.withSession
 import io.spine.examples.pingh.sessions.command.LogUserOut
@@ -47,16 +47,16 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * @property client Enables interaction with the Pingh server.
  * @property session Manages application sessions.
- * @property local The local user data.
+ * @property settingsManager Manages application settings.
  * @property closeSession Updates the application state when a session is closed.
  */
 public class SettingsFlow internal constructor(
     private val client: DesktopClient,
     private val session: SessionManager,
-    private val local: LocalData,
+    private val settingsManager: SettingsManager,
     private val closeSession: () -> Unit
 ) {
-    private val mutableSettings = local.settings.toBuilder()
+    private val mutableSettings = settingsManager.current.toBuilder()
 
     /**
      * The state of application settings.
@@ -88,7 +88,8 @@ public class SettingsFlow internal constructor(
      */
     @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
     public fun saveSettings() {
-        local.settings = mutableSettings.vBuild()
+        val settings = mutableSettings.vBuild()
+        settingsManager.update(settings)
     }
 }
 

@@ -29,8 +29,8 @@ package io.spine.examples.pingh.client
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import io.spine.core.UserId
-import io.spine.examples.pingh.client.preferences.LocalData
 import io.spine.examples.pingh.client.session.SessionManager
+import io.spine.examples.pingh.client.settings.SettingsManager
 import io.spine.examples.pingh.sessions.SessionId
 import java.util.concurrent.TimeUnit
 
@@ -70,14 +70,14 @@ public class PinghApplication private constructor(
         .build()
 
     /**
-     * The local user data.
-     */
-    private val local = LocalData()
-
-    /**
      * Manages application sessions.
      */
     private val session = SessionManager()
+
+    /**
+     * Manages application settings.
+     */
+    private val settings = SettingsManager()
 
     /**
      * Enables interaction with the Pingh server.
@@ -89,7 +89,7 @@ public class PinghApplication private constructor(
         client = if (session.isGuest()) {
             DesktopClient(channel)
         } else {
-            DesktopClient(channel, local.session.id.asUserId())
+            DesktopClient(channel, session.current.asUserId())
         }
     }
 
@@ -111,7 +111,7 @@ public class PinghApplication private constructor(
     /**
      * Flow that manages the sending of notifications within the app.
      */
-    private val notificationsFlow = NotificationsFlow(notificationSender, local)
+    private val notificationsFlow = NotificationsFlow(notificationSender, settings)
 
     init {
         if (!session.isGuest()) {
@@ -155,7 +155,7 @@ public class PinghApplication private constructor(
      */
     public fun startLoginFlow(): LoginFlow {
         loginFlow?.close()
-        loginFlow = LoginFlow(client, session, local, ::establishSession)
+        loginFlow = LoginFlow(client, session, ::establishSession)
         return loginFlow!!
     }
 
@@ -166,7 +166,7 @@ public class PinghApplication private constructor(
      */
     public fun startMentionsFlow(): MentionsFlow {
         if (mentionsFlow == null) {
-            mentionsFlow = MentionsFlow(client, session, local)
+            mentionsFlow = MentionsFlow(client, session, settings)
         }
         return mentionsFlow!!
     }
@@ -178,7 +178,7 @@ public class PinghApplication private constructor(
      */
     public fun startSettingsFlow(): SettingsFlow {
         if (settingsFlow == null) {
-            settingsFlow = SettingsFlow(client, session, local, ::closeSession)
+            settingsFlow = SettingsFlow(client, session, settings, ::closeSession)
         }
         return settingsFlow!!
     }

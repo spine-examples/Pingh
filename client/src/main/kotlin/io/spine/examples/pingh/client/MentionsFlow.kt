@@ -29,9 +29,9 @@ package io.spine.examples.pingh.client
 import com.google.protobuf.Duration
 import com.google.protobuf.util.Timestamps
 import io.spine.base.Time.currentTime
-import io.spine.examples.pingh.client.preferences.LocalData
-import io.spine.examples.pingh.client.preferences.value
+import io.spine.examples.pingh.client.settings.value
 import io.spine.examples.pingh.client.session.SessionManager
+import io.spine.examples.pingh.client.settings.SettingsManager
 import io.spine.examples.pingh.mentions.GitHubClientId
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionView
@@ -56,12 +56,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
  *
  * @property client Enables interaction with the Pingh server.
  * @property session Manages application sessions.
- * @property local The local user data.
+ * @property settings Manages application settings.
  */
 public class MentionsFlow internal constructor(
     private val client: DesktopClient,
     private val session: SessionManager,
-    private val local: LocalData
+    private val settings: SettingsManager
 ) {
     /**
      * User mentions.
@@ -125,7 +125,7 @@ public class MentionsFlow internal constructor(
      * @param id The identifier of the mention to be snoozed.
      */
     public fun snooze(id: MentionId) {
-        snooze(id, local.settings.snoozeTime.value)
+        snooze(id, settings.current.snoozeTime.value)
     }
 
     /**

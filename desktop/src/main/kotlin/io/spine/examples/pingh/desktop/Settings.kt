@@ -77,9 +77,9 @@ import io.spine.example.pingh.desktop.generated.resources.Res
 import io.spine.example.pingh.desktop.generated.resources.back
 import io.spine.examples.pingh.client.SettingsFlow
 import io.spine.examples.pingh.client.SettingsState
-import io.spine.examples.pingh.client.preferences.SnoozeTime
-import io.spine.examples.pingh.client.preferences.label
-import io.spine.examples.pingh.client.preferences.supported
+import io.spine.examples.pingh.client.settings.SnoozeTime
+import io.spine.examples.pingh.client.settings.label
+import io.spine.examples.pingh.client.settings.supported
 import io.spine.examples.pingh.github.Username
 import org.jetbrains.compose.resources.painterResource
 
