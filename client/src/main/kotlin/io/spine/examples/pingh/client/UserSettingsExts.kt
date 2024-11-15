@@ -26,12 +26,8 @@
 
 package io.spine.examples.pingh.client
 
+import io.spine.examples.pingh.client.FileStorage.loadOrDefault
 import kotlin.reflect.KClass
-
-private val defaultUserSettings = UserSettings.newBuilder()
-    .setEnabledDndMode(false)
-    .setSnoozeTime(SnoozeTime.TWO_HOURS)
-    .vBuild()
 
 /**
  * Saves the application settings to a file in the user's data directory.
@@ -47,4 +43,10 @@ internal fun UserSettings.save() {
  */
 @Suppress("UnusedReceiverParameter" /* Associated with the class but doesn't use its data. */)
 internal fun KClass<UserSettings>.loadOrDefault(): UserSettings =
-    FileStorage.loadOrDefault(FileLocation.Settings) { defaultUserSettings }
+    loadOrDefault(FileLocation.Settings, UserSettings::parseFrom) { defaultUserSettings }
+
+private val defaultUserSettings: UserSettings
+    get() = UserSettings.newBuilder()
+        .setEnabledDndMode(false)
+        .setSnoozeTime(SnoozeTime.TWO_HOURS)
+        .vBuild()

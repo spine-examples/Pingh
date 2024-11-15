@@ -30,6 +30,7 @@ import com.google.protobuf.Duration
 import com.google.protobuf.util.Durations
 import io.spine.protobuf.Durations2.hours
 import io.spine.protobuf.Durations2.minutes
+import kotlin.reflect.KClass
 
 /**
  * The text corresponding to this interval.
@@ -40,8 +41,15 @@ public val SnoozeTime.label: String
 /**
  * The duration corresponding to this interval.
  */
-public val SnoozeTime.value: Duration
+internal val SnoozeTime.value: Duration
     get() = snoozeTimeDetails[this]?.value ?: Durations.ZERO
+
+/**
+ * The set of snooze intervals currently supported by the app.
+ */
+@Suppress("UnusedReceiverParameter" /* Associated with the class but doesn't use its data. */)
+public val KClass<SnoozeTime>.supported: List<SnoozeTime>
+    get() = snoozeTimeDetails.keys.toList()
 
 @Suppress("MagicNumber" /* The durations are specified using numbers. */)
 private val snoozeTimeDetails = mapOf(

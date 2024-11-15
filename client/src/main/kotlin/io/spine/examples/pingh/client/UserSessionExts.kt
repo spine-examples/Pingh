@@ -24,22 +24,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("UnusedReceiverParameter" /* Class extensions don't use class as a parameter. */)
+
 package io.spine.examples.pingh.client
 
+import io.spine.examples.pingh.client.FileStorage.loadOrDefault
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
+import io.spine.examples.pingh.sessions.SessionId
 import kotlin.reflect.KClass
 
 /**
  * The username to which the current session belongs.
  */
 internal val UserSession.username: Username
-    get() = this.id?.username ?: Guest.username
+    get() = this.id?.username ?: guestUsername
+
+private val guestUsername: Username
+    get() = Username::class.of("unauthenticated-guest")
 
 /**
  * Returns `true` if the session is authenticated, and `false` if it is a guest session.
  */
-internal fun UserSession.isAuthenticated() = this != Guest.session
+internal fun UserSession.isAuthenticated() = !this.hasId()
 
 /**
  * Saves the user session data to a file in the user's data directory.
@@ -49,15 +56,24 @@ internal fun UserSession.save() {
 }
 
 /**
+ * Returns the guest session.
+ */
+internal fun KClass<UserSession>.guest(): UserSession = UserSession.getDefaultInstance()
+
+/**
+ * Creates authenticated `UserSession` with specified session ID.
+ *
+ * @param id The ID of the session.
+ */
+internal fun KClass<UserSession>.authenticated(id: SessionId): UserSession =
+    UserSession.newBuilder()
+        .setId(id)
+        .vBuild()
+
+/**
  * Loads the user session data from a file in the user's data directory.
  *
  * Returns a guest session if the file is empty.
  */
-@Suppress("UnusedReceiverParameter" /* Associated with the class but doesn't use its data. */)
 internal fun KClass<UserSession>.loadOrDefault(): UserSession =
-    FileStorage.loadOrDefault(FileLocation.Session) { Guest.session }
-
-internal object Guest {
-    internal val session = UserSession.getDefaultInstance()!!
-    internal val username = Username::class.of("unauthenticated-guest")
-}
+    loadOrDefault(FileLocation.Session, UserSession::parseFrom) { UserSession::class.guest() }
