@@ -26,9 +26,11 @@
 
 @file:Suppress("UnusedReceiverParameter" /* Class extensions don't use class as a parameter. */)
 
-package io.spine.examples.pingh.client
+package io.spine.examples.pingh.client.preferences
 
-import io.spine.examples.pingh.client.FileStorage.loadOrDefault
+import io.spine.examples.pingh.client.storage.FileLocation
+import io.spine.examples.pingh.client.storage.FileStorage
+import io.spine.examples.pingh.client.storage.FileStorage.loadOrDefault
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.sessions.SessionId

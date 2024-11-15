@@ -29,7 +29,7 @@ package io.spine.examples.pingh.testing.client
 import io.spine.environment.Tests
 import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.client.PinghApplication
-import io.spine.examples.pingh.client.clearFileStorage
+import io.spine.examples.pingh.client.storage.clearFileStorage
 import io.spine.examples.pingh.mentions.newMentionsContext
 import io.spine.examples.pingh.server.datastore.DatastoreStorageFactory
 import io.spine.examples.pingh.sessions.newSessionsContext

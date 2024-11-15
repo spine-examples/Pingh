@@ -26,6 +26,10 @@
 
 package io.spine.examples.pingh.client
 
+import io.spine.examples.pingh.client.preferences.LocalData
+import io.spine.examples.pingh.client.preferences.SnoozeTime
+import io.spine.examples.pingh.client.preferences.UserSettings
+import io.spine.examples.pingh.client.preferences.username
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.withSession
 import io.spine.examples.pingh.sessions.command.LogUserOut

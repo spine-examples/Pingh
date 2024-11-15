@@ -29,6 +29,10 @@ package io.spine.examples.pingh.client
 import com.google.protobuf.Duration
 import com.google.protobuf.util.Timestamps
 import io.spine.base.Time.currentTime
+import io.spine.examples.pingh.client.preferences.LocalData
+import io.spine.examples.pingh.client.preferences.isAuthenticated
+import io.spine.examples.pingh.client.preferences.username
+import io.spine.examples.pingh.client.preferences.value
 import io.spine.examples.pingh.mentions.GitHubClientId
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionView

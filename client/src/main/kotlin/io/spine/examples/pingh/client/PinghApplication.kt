@@ -29,6 +29,12 @@ package io.spine.examples.pingh.client
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import io.spine.core.UserId
+import io.spine.examples.pingh.client.preferences.LocalData
+import io.spine.examples.pingh.client.preferences.UserSession
+import io.spine.examples.pingh.client.preferences.authenticated
+import io.spine.examples.pingh.client.preferences.guest
+import io.spine.examples.pingh.client.preferences.isAuthenticated
+import io.spine.examples.pingh.client.preferences.username
 import io.spine.examples.pingh.sessions.SessionId
 import java.util.concurrent.TimeUnit
 

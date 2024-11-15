@@ -24,29 +24,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.client
-
-import io.spine.examples.pingh.client.FileStorage.loadOrDefault
-import kotlin.reflect.KClass
+package io.spine.examples.pingh.client.preferences
 
 /**
- * Saves the application settings to a file in the user's data directory.
- */
-internal fun UserSettings.save() {
-    FileStorage.save(FileLocation.Settings, this)
-}
-
-/**
- * Loads the application settings from a file in the user's data directory.
+ * Stores local user data, including session information and application settings.
  *
- * If the file is empty, the [default][defaultUserSettings] configured settings are returned.
+ * Each field is immutable. Updating a value automatically writes the changes
+ * to the application folder within the user data directory.
+ *
+ * At startup, data is loaded from the application folder,
+ * restoring the application state to its previous state before termination.
  */
-@Suppress("UnusedReceiverParameter" /* Associated with the class but doesn't use its data. */)
-internal fun KClass<UserSettings>.loadOrDefault(): UserSettings =
-    loadOrDefault(FileLocation.Settings, UserSettings::parseFrom) { defaultUserSettings }
+internal class LocalData {
+    /**
+     * Information about the current user session.
+     */
+    internal var session: UserSession = UserSession::class.loadOrDefault()
+        set(value) {
+            field = value
+            value.save()
+        }
 
-private val defaultUserSettings: UserSettings
-    get() = UserSettings.newBuilder()
-        .setEnabledDndMode(false)
-        .setSnoozeTime(SnoozeTime.TWO_HOURS)
-        .vBuild()
+    /**
+     * Information about the current application settings.
+     */
+    internal var settings: UserSettings = UserSettings::class.loadOrDefault()
+        set(value) {
+            field = value
+            value.save()
+        }
+}

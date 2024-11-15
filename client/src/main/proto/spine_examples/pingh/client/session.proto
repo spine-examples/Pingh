@@ -31,7 +31,7 @@ package spine_examples.pingh.client;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.pingh.spine.io";
-option java_package = "io.spine.examples.pingh.client";
+option java_package = "io.spine.examples.pingh.client.preferences";
 option java_outer_classname = "SessionProto";
 option java_multiple_files = true;
 

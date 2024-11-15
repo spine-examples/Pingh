@@ -31,6 +31,7 @@ import io.spine.base.EventMessage
 import io.spine.base.EventMessageField
 import io.spine.base.Field
 import io.spine.client.EventFilter.eq
+import io.spine.examples.pingh.client.preferences.LocalData
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed

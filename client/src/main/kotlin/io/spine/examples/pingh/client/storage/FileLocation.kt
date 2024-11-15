@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.client
+package io.spine.examples.pingh.client.storage
 
 import net.harawata.appdirs.AppDirsFactory
 

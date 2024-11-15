@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.client
 
+import io.spine.examples.pingh.client.preferences.LocalData
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import kotlinx.coroutines.flow.MutableStateFlow

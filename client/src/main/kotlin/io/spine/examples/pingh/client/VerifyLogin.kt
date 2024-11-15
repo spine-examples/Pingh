@@ -28,6 +28,8 @@ package io.spine.examples.pingh.client
 
 import com.google.protobuf.Duration
 import io.spine.examples.pingh.client.ExponentialBackoffStrategy.ActionOutcome
+import io.spine.examples.pingh.client.preferences.UserSession
+import io.spine.examples.pingh.client.preferences.username
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.SessionId
