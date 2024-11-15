@@ -68,14 +68,9 @@ public class PinghApplication private constructor(
         .build()
 
     /**
-     * Information about the current user session.
+     * The local user data.
      */
-    private val session = UserSession.loadOrDefault()
-
-    /**
-     * Information about the application settings.
-     */
-    private val settings = UserSettings.loadOrDefault()
+    private val local = LocalData()
 
     /**
      * Enables interaction with the Pingh server.
@@ -84,8 +79,8 @@ public class PinghApplication private constructor(
         private set
 
     init {
-        client = if (session.isAuthenticated()) {
-            DesktopClient(channel, session.id.asUserId())
+        client = if (local.session.isAuthenticated()) {
+            DesktopClient(channel, local.session.id.asUserId())
         } else {
             DesktopClient(channel)
         }
@@ -102,13 +97,18 @@ public class PinghApplication private constructor(
     private var mentionsFlow: MentionsFlow? = null
 
     /**
+     * The application settings control flow.
+     */
+    private var settingsFlow: SettingsFlow? = null
+
+    /**
      * Flow that manages the sending of notifications within the app.
      */
-    private val notificationsFlow = NotificationsFlow(notificationSender, settings)
+    private val notificationsFlow = NotificationsFlow(notificationSender, local)
 
     init {
-        if (session.isAuthenticated()) {
-            notificationsFlow.enableNotifications(client, session.username)
+        if (local.session.isAuthenticated()) {
+            notificationsFlow.enableNotifications(client, local.session.username)
         }
     }
 
@@ -120,10 +120,9 @@ public class PinghApplication private constructor(
      */
     private fun establishSession(id: SessionId) {
         client.close()
-        session.authenticate(id)
+        local.session = UserSession::class.authenticated(id)
         client = DesktopClient(channel, id.asUserId())
         notificationsFlow.enableNotifications(client, id.username)
-        session.save()
     }
 
     /**
@@ -134,23 +133,22 @@ public class PinghApplication private constructor(
      */
     private fun closeSession() {
         client.close()
-        session.guest()
+        local.session = UserSession::class.guest()
         client = DesktopClient(channel)
         mentionsFlow = null
-        session.save()
     }
 
     /**
      * Returns `true` if the user is logged in to the application.
      */
-    public fun isLoggedIn(): Boolean = session.isAuthenticated()
+    public fun isLoggedIn(): Boolean = local.session.isAuthenticated()
 
     /**
      * Initiates the login flow and terminates any previous flow, if it exists.
      */
     public fun startLoginFlow(): LoginFlow {
         loginFlow?.close()
-        loginFlow = LoginFlow(client, session, ::establishSession)
+        loginFlow = LoginFlow(client, local, ::establishSession)
         return loginFlow!!
     }
 
@@ -161,24 +159,29 @@ public class PinghApplication private constructor(
      */
     public fun startMentionsFlow(): MentionsFlow {
         if (mentionsFlow == null) {
-            mentionsFlow = MentionsFlow(client, session, settings)
+            mentionsFlow = MentionsFlow(client, local)
         }
         return mentionsFlow!!
     }
 
     /**
      * Initiates the settings flow.
+     *
+     * If the settings flow does not already exist, it is initialized.
      */
-    public fun startSettingsFlow(): SettingsFlow =
-        SettingsFlow(client, session, settings, ::closeSession)
+    public fun startSettingsFlow(): SettingsFlow {
+        if (settingsFlow == null) {
+            settingsFlow = SettingsFlow(client, local, ::closeSession)
+        }
+        return settingsFlow!!
+    }
 
     /**
      * Closes the client.
      */
     public fun close() {
         loginFlow?.close()
-        session.save()
-        settings.save()
+        settingsFlow?.saveSettings()
         client.close()
         channel.shutdown()
             .awaitTermination(defaultShutdownTimeout, TimeUnit.SECONDS)
