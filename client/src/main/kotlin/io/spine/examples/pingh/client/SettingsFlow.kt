@@ -26,13 +26,10 @@
 
 package io.spine.examples.pingh.client
 
-import com.google.protobuf.Duration
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.withSession
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
-import io.spine.protobuf.Durations2.hours
-import io.spine.protobuf.Durations2.minutes
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -45,26 +42,26 @@ import kotlinx.coroutines.flow.StateFlow
  * use [saveSettings()][saveSettings] method.
  *
  * @property client Enables interaction with the Pingh server.
- * @property session The information about the current user session.
- * @property userSettings The information about the application settings.
+ * @property local The local user data.
  * @property closeSession Updates the application state when a session is closed.
  */
 public class SettingsFlow internal constructor(
     private val client: DesktopClient,
-    private val session: UserSession,
-    private val userSettings: UserSettings,
+    private val local: LocalData,
     private val closeSession: () -> Unit
 ) {
+    private val mutableSettings = local.settings.toBuilder()
+
     /**
      * The state of application settings.
      */
-    public val settings: SettingsState = SettingsState(userSettings)
+    public val settings: SettingsState = SettingsState(mutableSettings)
 
     /**
      * The username to which the current session belongs.
      */
     public val username: Username
-        get() = session.username
+        get() = local.session.username
 
     /**
      * Logs the user out, cancels all subscriptions and clears the session ID.
@@ -72,7 +69,7 @@ public class SettingsFlow internal constructor(
      * @param onSuccess Called when the user successfully logs out.
      */
     public fun logOut(onSuccess: (event: UserLoggedOut) -> Unit = {}) {
-        val command = LogUserOut::class.withSession(session.id)
+        val command = LogUserOut::class.withSession(local.session.id)
         client.observeEvent(command.id, UserLoggedOut::class) { event ->
             closeSession()
             onSuccess(event)
@@ -85,7 +82,7 @@ public class SettingsFlow internal constructor(
      */
     @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
     public fun saveSettings() {
-        userSettings.save()
+        local.settings = mutableSettings.vBuild()
     }
 }
 
@@ -93,7 +90,7 @@ public class SettingsFlow internal constructor(
  * State of application settings.
  */
 public class SettingsState internal constructor(
-    private val data: UserSettings
+    private val data: UserSettings.Builder
 ) {
     private val _enabledDndMode = MutableStateFlow(data.enabledDndMode)
     private val _snoozeTime = MutableStateFlow(data.snoozeTime)
