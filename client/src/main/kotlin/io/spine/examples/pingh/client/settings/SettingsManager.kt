@@ -26,8 +26,8 @@
 
 package io.spine.examples.pingh.client.settings
 
-import io.spine.examples.pingh.client.storage.FileLocation.Companion.inAppDir
-import io.spine.examples.pingh.client.storage.FileStorage
+import io.spine.examples.pingh.client.FileLocation.Companion.inAppDir
+import io.spine.examples.pingh.client.FileStorage
 
 /**
  * Manages application settings.
