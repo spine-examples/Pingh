@@ -62,7 +62,7 @@ internal class LocalDataManager {
     /**
      * A local data for all users who have used this app on a specific device.
      */
-    private val registry: LocalDataRegistry =
+    private var registry: LocalDataRegistry =
         storage.loadOrDefault(LocalDataRegistry::parseFrom) { LocalDataRegistry::class.empty() }
 
     /**
@@ -153,10 +153,13 @@ internal class LocalDataManager {
             return
         }
         val id = registry.dataList.indexOfFirst { it.user.equals(user) }
-        if (id == -1) {
-            registry.dataList.add(data)
-        } else {
-            registry.dataList[id] = data
+        registry = with(registry.toBuilder()) {
+            if (id == -1) {
+                addData(data)
+            } else {
+                setData(id, data)
+            }
+            vBuild()
         }
         storage.save(registry)
     }
