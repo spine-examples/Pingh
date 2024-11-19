@@ -68,15 +68,15 @@ internal class FileStorage<T : Message>(location: FileLocation) {
      * otherwise, returns the `default`.
      *
      * @param parser Deserializes a byte sequence into a message.
-     * @param default The default value returned when no data is found in the file.
+     * @param default Calculated the default value when no data is found in the file.
      */
-    internal fun loadOrDefault(parser: (ByteArray) -> T, default: T): T {
+    internal fun loadOrDefault(parser: (ByteArray) -> T, default: () -> T): T {
         FileInputStream(file).use { stream ->
             val bytes = stream.readAllBytes()
             return if (bytes.isNotEmpty()) {
                 parser(bytes)
             } else {
-                default
+                default()
             }
         }
     }
@@ -90,13 +90,6 @@ internal class FileStorage<T : Message>(location: FileLocation) {
         FileOutputStream(file).use { stream ->
             message.toByteString().writeTo(stream)
         }
-    }
-
-    /**
-     * Clears all data inside the storage file.
-     */
-    internal fun clear() {
-        FileOutputStream(file).close()
     }
 }
 
