@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.client
 
-import io.spine.examples.pingh.client.session.SessionManager
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,12 +62,12 @@ public abstract class LoginStage<T> {
  * [confirmed][VerifyLogin.confirm] in the Pingh app.
  *
  * @property client Enables interaction with the Pingh server.
- * @property session Manages application sessions.
+ * @property local Manages the local data for users of the application.
  * @property establishSession Updates the application state when a session is established.
  */
 public class LoginFlow internal constructor(
     private val client: DesktopClient,
-    private val session: SessionManager,
+    private val local: LocalDataManager,
     private val establishSession: (SessionId) -> Unit
 ) {
     /**
@@ -102,7 +101,7 @@ public class LoginFlow internal constructor(
                             "of the `EnterUsername` stage."
                 }
                 stage.value = VerifyLogin(
-                    client, session, ::moveToNextStage,
+                    client, local, ::moveToNextStage,
                     stage.value.result as UserCodeReceived
                 )
             }

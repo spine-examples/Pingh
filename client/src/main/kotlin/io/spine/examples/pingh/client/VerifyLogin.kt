@@ -28,7 +28,6 @@ package io.spine.examples.pingh.client
 
 import com.google.protobuf.Duration
 import io.spine.examples.pingh.client.ExponentialBackoffStrategy.ActionOutcome
-import io.spine.examples.pingh.client.session.SessionManager
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.SessionId
@@ -59,14 +58,14 @@ import kotlinx.coroutines.launch
  * into GitHub to verify their login.
  *
  * @property client Enables interaction with the Pingh server.
- * @property session Manages application sessions.
+ * @property local Manages the local data for users of the application.
  * @property moveToNextStage Switches the current stage to the [LoginFailed].
  * @param event The event received after the user enters their name.
  */
 @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
 public class VerifyLogin internal constructor(
     private val client: DesktopClient,
-    private val session: SessionManager,
+    private val local: LocalDataManager,
     private val moveToNextStage: () -> Unit,
     event: UserCodeReceived
 ) : LoginStage<String>() {
@@ -161,7 +160,7 @@ public class VerifyLogin internal constructor(
      */
     private fun confirm(): ActionOutcome {
         val future = CompletableFuture<ActionOutcome>()
-        val command = VerifyUserLoginToGitHub::class.withSession(session.current)
+        val command = VerifyUserLoginToGitHub::class.withSession(local.session)
         client.observeEither(
             EventObserver(command.id, UserLoggedIn::class) {
                 codeExpirationJob.cancel()
@@ -203,7 +202,7 @@ public class VerifyLogin internal constructor(
     public fun requestNewUserCode(
         onSuccess: (event: UserCodeReceived) -> Unit = {}
     ) {
-        client.requestUserCode(session.current.username) { event ->
+        client.requestUserCode(local.user) { event ->
             userCode.value = event.userCode
             verificationUrl.value = event.verificationUrl
             expiresIn.value = event.expiresIn

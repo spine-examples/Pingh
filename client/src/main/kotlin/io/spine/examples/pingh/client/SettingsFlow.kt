@@ -26,8 +26,6 @@
 
 package io.spine.examples.pingh.client
 
-import io.spine.examples.pingh.client.session.SessionManager
-import io.spine.examples.pingh.client.settings.SettingsManager
 import io.spine.examples.pingh.client.settings.SnoozeTime
 import io.spine.examples.pingh.client.settings.UserSettings
 import io.spine.examples.pingh.github.Username
@@ -46,17 +44,15 @@ import kotlinx.coroutines.flow.StateFlow
  * use [saveSettings()][saveSettings] method.
  *
  * @property client Enables interaction with the Pingh server.
- * @property session Manages application sessions.
- * @property settingsManager Manages application settings.
+ * @property local Manages the local data for users of the application.
  * @property closeSession Updates the application state when a session is closed.
  */
 public class SettingsFlow internal constructor(
     private val client: DesktopClient,
-    private val session: SessionManager,
-    private val settingsManager: SettingsManager,
+    private val local: LocalDataManager,
     private val closeSession: () -> Unit
 ) {
-    private val mutableSettings = settingsManager.current.toBuilder()
+    private val mutableSettings = local.settings.toBuilder()
 
     /**
      * The state of application settings.
@@ -67,7 +63,7 @@ public class SettingsFlow internal constructor(
      * The username to which the current session belongs.
      */
     public val username: Username
-        get() = session.current.username
+        get() = local.user
 
     /**
      * Logs the user out, cancels all subscriptions and clears the session ID.
@@ -75,7 +71,7 @@ public class SettingsFlow internal constructor(
      * @param onSuccess Called when the user successfully logs out.
      */
     public fun logOut(onSuccess: (event: UserLoggedOut) -> Unit = {}) {
-        val command = LogUserOut::class.withSession(session.current)
+        val command = LogUserOut::class.withSession(local.session)
         client.observeEvent(command.id, UserLoggedOut::class) { event ->
             closeSession()
             onSuccess(event)
@@ -89,7 +85,7 @@ public class SettingsFlow internal constructor(
     @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
     public fun saveSettings() {
         val settings = mutableSettings.vBuild()
-        settingsManager.update(settings)
+        local.update(settings)
     }
 }
 

@@ -31,7 +31,6 @@ import io.spine.base.EventMessage
 import io.spine.base.EventMessageField
 import io.spine.base.Field
 import io.spine.client.EventFilter.eq
-import io.spine.examples.pingh.client.settings.SettingsManager
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
@@ -67,11 +66,11 @@ public interface NotificationSender {
  * before initiating notifications for a new `client`.
  *
  * @property sender Allows to send notifications.
- * @property settings Manages application settings.
+ * @property local Manages the local data for users of the application.
  */
 internal class NotificationsFlow(
     private val sender: NotificationSender,
-    private val settings: SettingsManager
+    private val local: LocalDataManager
 ) {
     companion object {
         /**
@@ -116,7 +115,7 @@ internal class NotificationsFlow(
             notification.onEvent,
             eq(usernameField(), username)
         ) { event ->
-            if (!settings.current.enabledDndMode) {
+            if (!local.settings.enabledDndMode) {
                 sender.send(notification.title, notification.content(event))
             }
         }
