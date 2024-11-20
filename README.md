@@ -9,8 +9,8 @@ of new GitHub `@mention`s. It also runs as a system tray application on macOS.
 - Supports Do Not Disturb mode.
 
 The application stores the current settings and session data in the application folder 
-within the user data directory. The app settings are device-specific, 
-meaning they remain unchanged when the account is switched.
+within the user data directory. The app settings are linked to the user who configured them, 
+and they update accordingly when the account changes.
 
 ## Tech
 
