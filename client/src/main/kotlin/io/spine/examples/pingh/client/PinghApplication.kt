@@ -118,11 +118,11 @@ public class PinghApplication private constructor(
      * - a [client] is created to make requests on behalf of the user;
      * - notifications are enabled for the newly created client.
      */
-    private fun establishSession(id: SessionId) {
+    private fun establishSession(session: SessionId) {
         client.close()
-        local.establish(id)
-        client = DesktopClient(channel, id.asUserId())
-        notificationsFlow.enableNotifications(client, id.username)
+        local.establish(session)
+        client = DesktopClient(channel, session.asUserId())
+        notificationsFlow.enableNotifications(client, session.username)
     }
 
     /**

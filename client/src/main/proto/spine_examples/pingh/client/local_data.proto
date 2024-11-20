@@ -41,7 +41,8 @@ import "spine_examples/pingh/client/settings.proto";
 
 // Local data for all users who have used this app on a specific device.
 //
-// This registry can contain data for either one logged-in user or none.
+// The registry can store data for multiple users,
+// but only one user can be logged in at a time, or none at all.
 // If it holds local data for a logged-in user, it indicates that the user
 // is using the application.
 //

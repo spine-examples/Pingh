@@ -45,7 +45,7 @@ internal val SnoozeTime.value: Duration
     get() = snoozeTimeDetails[this]?.value ?: Durations.ZERO
 
 /**
- * The set of snooze intervals currently supported by the app.
+ * The list of snooze intervals currently supported by the app.
  */
 @Suppress("UnusedReceiverParameter" /* Associated with the class but doesn't use its data. */)
 public val KClass<SnoozeTime>.supported: List<SnoozeTime>

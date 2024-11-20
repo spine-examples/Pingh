@@ -104,7 +104,7 @@ internal class LocalDataManager {
         get() = data.settings
 
     /**
-     * Returns `true` if the current [session] is a guest session.
+     * Whether the current user is logged in to the application.
      */
     internal val isLoggedIn: Boolean
         get() = data.isLoggedIn
@@ -187,6 +187,7 @@ internal class LocalDataManager {
      */
     internal fun clear() {
         if (isNewUnlogged) {
+            isNewUnlogged = false
             modifyRegistry { id ->
                 if (id != -1) {
                     removeData(id)

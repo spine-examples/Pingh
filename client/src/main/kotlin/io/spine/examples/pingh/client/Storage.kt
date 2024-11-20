@@ -41,6 +41,8 @@ import net.harawata.appdirs.AppDirsFactory
  * Stores data on disk in a sequence of bytes.
  *
  * @param T The type of the stored message.
+ *
+ * @param location The location of a file on disk.
  */
 internal class FileStorage<T : Message>(location: FileLocation) {
     /**
@@ -48,10 +50,8 @@ internal class FileStorage<T : Message>(location: FileLocation) {
      */
     private val file: File
 
-    /**
-     * If the file or its parent directories do not exist, they are created.
-     */
     init {
+        // If the file or its parent directories do not exist, they are created.
         val parent = Path(location.dir)
         if (!parent.exists()) {
             parent.createDirectories()
