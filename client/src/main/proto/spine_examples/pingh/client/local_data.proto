@@ -41,9 +41,9 @@ import "spine_examples/pingh/client/settings.proto";
 
 // Local data for all users who have used this app on a specific device.
 //
-// This registry can contain either one user with an active session or none at all.
-// If the registry holds local data for a user with an active session,
-// it indicates that this user is currently using the application.
+// This registry can contain data for either one logged-in user or none.
+// If it holds local data for a logged-in user, it indicates that the user
+// is using the application.
 //
 message LocalDataRegistry {
 
@@ -59,6 +59,10 @@ message LocalDataRegistry {
 // Includes details about the current session, if active,
 // and the application settings configured by the user.
 //
+// Note that having an active session does not necessarily indicate
+// that the user is logged in, as the login process itself involves
+// establishing a session with the server.
+//
 message LocalData {
 
     // The name of the user to whom the data belongs.
@@ -70,6 +74,9 @@ message LocalData {
     //
     spine_examples.pingh.sessions.SessionId session = 2;
 
+    // Whether the user is logged into the application.
+    bool is_logged_in = 3 [(required) = true];
+
     // The application settings applied by this user.
-    UserSettings settings = 3 [(required) = true];
+    UserSettings settings = 4 [(required) = true];
 }

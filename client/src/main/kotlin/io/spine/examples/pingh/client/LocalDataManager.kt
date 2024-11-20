@@ -40,18 +40,15 @@ import kotlin.reflect.KClass
  *
  * Provides details of the [session] and [settings] for each specific [user].
  *
- * The manager can be in one of two states:
+ * Upon creation, retrieves the local data of the user who was logged in during
+ * the last startup. If no user was logged in, it defaults to guest data,
+ * which is replaced when a session is established with the server.
  *
- * 1. Guest: No user is logged in. In this state, the user must log in
- *   and does not have access to mentions or settings.
+ * Having an active session does not necessarily mean the user is logged in.
+ * To designate a user as logged in, use the [confirmLogin()][confirmLogin] method.
  *
- * 2. Authenticated: A user is logged in. In this state,
- *   the user has access to mentions and settings.
- *
- * The current state can be checked using the [isGuest()][isGuest] method.
- *
- * All changes are saved to a file in the user's data directory,
- * ensuring persistence across application restarts.
+ * All changes made for a logged-in user are saved to a file in the user's data directory,
+ * ensuring they persist across application restarts.
  */
 internal class LocalDataManager {
     /**
@@ -72,9 +69,21 @@ internal class LocalDataManager {
 
     init {
         data = registry.dataList
-            .firstOrNull { it.hasSession() }
+            .firstOrNull { it.isLoggedIn }
             ?: guestData
     }
+
+    /**
+     * Whether a specific user has started using the app but
+     * has not completed the login process.
+     *
+     * If this variable is `true`, it means the user has initiated the login process
+     * but has not finished it. In such cases, the user's local data should not be saved
+     * to the [registry] when the app is closed.
+     *
+     * @see [clear]
+     */
+    private var isNewUnlogged = false
 
     /**
      * A name of the user currently using the application.
@@ -95,6 +104,12 @@ internal class LocalDataManager {
         get() = data.settings
 
     /**
+     * Returns `true` if the current [session] is a guest session.
+     */
+    internal val isLoggedIn: Boolean
+        get() = data.isLoggedIn
+
+    /**
      * Sets a new session for the user.
      *
      * Searches for the user's local data in the [registry].
@@ -102,12 +117,18 @@ internal class LocalDataManager {
      * and sets the [default] settings.
      */
     internal fun establish(session: SessionId) {
+        if (isNewUnlogged && !session.username.equals(user)) {
+            clear()
+        }
         data = registry.dataList
             .firstOrNull { it.user.equals(session.username) }
             ?.toBuilder()
             ?.setSession(session)
             ?.vBuild()
-            ?: localDataFor(session)
+            ?: run {
+                isNewUnlogged = true
+                localDataFor(session)
+            }
         save()
     }
 
@@ -119,28 +140,70 @@ internal class LocalDataManager {
             .vBuild()
 
     /**
+     * Indicates that the current user is logged into the app.
+     */
+    internal fun confirmLogin() {
+        isNewUnlogged = false
+        modifyData {
+            setIsLoggedIn(true)
+        }
+    }
+
+    /**
      * Clears the current user session
      * and replaces the local data with guest one.
      */
     internal fun resetToGuest() {
-        data = data.toBuilder()
-            .clearSession()
-            .vBuild()
-        save()
+        modifyData {
+            clearSession()
+            setIsLoggedIn(false)
+        }
         data = guestData
     }
-
-    /**
-     * Returns `true` if the current [session] is a guest session.
-     */
-    internal fun isGuest(): Boolean = !data.hasSession()
 
     /**
      * Sets and saves updated application settings.
      */
     internal fun update(settings: UserSettings) {
+        modifyData {
+            setSettings(settings)
+        }
+    }
+
+    /**
+     * Deletes the current user's local data
+     * if the login process was initiated but not completed.
+     *
+     * Should be used in two scenarios:
+     *
+     * - When the application closes during the login process.
+     * - After a login error, followed by an attempt to log in with a different account.
+     *
+     * Prevents storing data in registry for users who do not use the application,
+     * such as when an incorrect username was entered by mistake.
+     *
+     * Note that it does not delete user data
+     * if the user has successfully logged in at least once.
+     */
+    internal fun clear() {
+        if (isNewUnlogged) {
+            modifyRegistry { id ->
+                if (id != -1) {
+                    removeData(id)
+                } else {
+                    this
+                }
+            }
+        }
+    }
+
+    /**
+     * Applies the `modifier` to the builder of the current local [data]
+     * and saves the resulting data.
+     */
+    private fun modifyData(modifier: LocalData.Builder.() -> LocalData.Builder) {
         data = data.toBuilder()
-            .setSettings(settings)
+            .modifier()
             .vBuild()
         save()
     }
@@ -152,15 +215,30 @@ internal class LocalDataManager {
         if (data.user.equals(guest)) {
             return
         }
-        val id = registry.dataList.indexOfFirst { it.user.equals(user) }
-        registry = with(registry.toBuilder()) {
+        modifyRegistry { id ->
             if (id == -1) {
                 addData(data)
             } else {
                 setData(id, data)
             }
-            vBuild()
         }
+    }
+
+    /**
+     * Applies the `modifier` to the builder of the [registry]
+     * and saves the resulting data.
+     *
+     * @param modifier Updates the `registry` builder. Also provides the identifier
+     *   of the current local [data] in the `registry` as a parameter.
+     *   If no such data exists in the registry, it provides -1.
+     */
+    private fun modifyRegistry(
+        modifier: LocalDataRegistry.Builder.(id: Int) -> LocalDataRegistry.Builder
+    ) {
+        val id = registry.dataList.indexOfFirst { it.user.equals(user) }
+        registry = registry.toBuilder()
+            .modifier(id)
+            .vBuild()
         storage.save(registry)
     }
 
@@ -174,6 +252,7 @@ internal class LocalDataManager {
         private val guestData: LocalData =
             LocalData.newBuilder()
                 .setUser(guest)
+                .setIsLoggedIn(false)
                 .setSettings(UserSettings::class.default())
                 .vBuild()
     }
