@@ -136,6 +136,7 @@ public class PinghApplication private constructor(
         local.resetToGuest()
         client = DesktopClient(channel)
         mentionsFlow = null
+        settingsFlow = null
     }
 
     /**

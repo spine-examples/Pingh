@@ -149,7 +149,7 @@ internal class LocalDataManager {
      * Updates the current [data] in the [registry] and saves it.
      */
     private fun save() {
-        if (data == guestData) {
+        if (data.user.equals(guest)) {
             return
         }
         val id = registry.dataList.indexOfFirst { it.user.equals(user) }
