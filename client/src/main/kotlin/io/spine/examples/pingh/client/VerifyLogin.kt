@@ -60,6 +60,7 @@ import kotlinx.coroutines.launch
  * @property client Enables interaction with the Pingh server.
  * @property local Manages the local data for users of the application.
  * @property moveToNextStage Switches the current stage to the [LoginFailed].
+ * @property confirmLogin Specifies that the user is logged into the app.
  * @param event The event received after the user enters their name.
  */
 @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
@@ -67,6 +68,7 @@ public class VerifyLogin internal constructor(
     private val client: DesktopClient,
     private val local: LocalDataManager,
     private val moveToNextStage: () -> Unit,
+    private val confirmLogin: () -> Unit,
     event: UserCodeReceived
 ) : LoginStage<String>() {
 
@@ -164,6 +166,7 @@ public class VerifyLogin internal constructor(
         client.observeEither(
             EventObserver(command.id, UserLoggedIn::class) {
                 codeExpirationJob.cancel()
+                confirmLogin()
                 future.complete(ActionOutcome.Success)
             },
             EventObserver(command.id, UserIsNotLoggedIntoGitHub::class) {

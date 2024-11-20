@@ -140,7 +140,7 @@ internal class LocalDataManager {
             .vBuild()
 
     /**
-     * Indicates that the current user is logged into the app.
+     * Specifies that the current user is logged into the app.
      */
     internal fun confirmLogin() {
         isNewUnlogged = false
