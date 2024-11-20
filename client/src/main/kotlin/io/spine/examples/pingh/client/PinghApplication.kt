@@ -126,13 +126,6 @@ public class PinghApplication private constructor(
     }
 
     /**
-     * Specifies that the user is logged into the app.
-     */
-    private fun confirmLogin() {
-        local.confirmLogin()
-    }
-
-    /**
      * Updates the application state when a session is closed:
      *
      * - a guest [client] is created;
@@ -156,7 +149,7 @@ public class PinghApplication private constructor(
      */
     public fun startLoginFlow(): LoginFlow {
         loginFlow?.close()
-        loginFlow = LoginFlow(client, local, ::establishSession, ::confirmLogin)
+        loginFlow = LoginFlow(client, local, ::establishSession)
         return loginFlow!!
     }
 

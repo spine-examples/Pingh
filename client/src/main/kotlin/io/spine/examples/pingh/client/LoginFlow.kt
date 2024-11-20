@@ -64,13 +64,11 @@ public abstract class LoginStage<T> {
  * @property client Enables interaction with the Pingh server.
  * @property local Manages the local data for users of the application.
  * @property establishSession Updates the application state when a session is established.
- * @property confirmLogin Specifies that the user is logged into the app.
  */
 public class LoginFlow internal constructor(
     private val client: DesktopClient,
     private val local: LocalDataManager,
     private val establishSession: (SessionId) -> Unit,
-    private val confirmLogin: () -> Unit
 ) {
     /**
      * Current stage of the GitHub login process.
@@ -103,7 +101,7 @@ public class LoginFlow internal constructor(
                             "of the `EnterUsername` stage."
                 }
                 stage.value = VerifyLogin(
-                    client, local, ::moveToNextStage, confirmLogin,
+                    client, local, ::moveToNextStage,
                     stage.value.result as UserCodeReceived
                 )
             }
