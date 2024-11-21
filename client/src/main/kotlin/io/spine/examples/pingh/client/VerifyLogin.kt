@@ -58,14 +58,14 @@ import kotlinx.coroutines.launch
  * into GitHub to verify their login.
  *
  * @property client Enables interaction with the Pingh server.
- * @property local Manages the local data for users of the application.
+ * @property user Manages the local data for users of the application.
  * @property moveToNextStage Switches the current stage to the [LoginFailed].
  * @param event The event received after the user enters their name.
  */
 @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
 public class VerifyLogin internal constructor(
     private val client: DesktopClient,
-    private val local: UserDataManager,
+    private val user: UserDataManager,
     private val moveToNextStage: () -> Unit,
     event: UserCodeReceived
 ) : LoginStage<String>() {
@@ -160,11 +160,11 @@ public class VerifyLogin internal constructor(
      */
     private fun confirm(): ActionOutcome {
         val future = CompletableFuture<ActionOutcome>()
-        val command = VerifyUserLoginToGitHub::class.withSession(local.session)
+        val command = VerifyUserLoginToGitHub::class.withSession(user.session)
         client.observeEither(
             EventObserver(command.id, UserLoggedIn::class) {
                 codeExpirationJob.cancel()
-                local.confirmLogin()
+                user.confirmLogin()
                 future.complete(ActionOutcome.Success)
             },
             EventObserver(command.id, UserIsNotLoggedIntoGitHub::class) {
@@ -203,7 +203,7 @@ public class VerifyLogin internal constructor(
     public fun requestNewUserCode(
         onSuccess: (event: UserCodeReceived) -> Unit = {}
     ) {
-        client.requestUserCode(local.user) { event ->
+        client.requestUserCode(user.name) { event ->
             userCode.value = event.userCode
             verificationUrl.value = event.verificationUrl
             expiresIn.value = event.expiresIn

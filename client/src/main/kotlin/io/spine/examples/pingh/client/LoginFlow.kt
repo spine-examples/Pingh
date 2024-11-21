@@ -62,12 +62,12 @@ public abstract class LoginStage<T> {
  * [confirmed][VerifyLogin.confirm] in the Pingh app.
  *
  * @property client Enables interaction with the Pingh server.
- * @property local Manages the local data for users of the application.
+ * @property user Manages the local data for users of the application.
  * @property establishSession Updates the application state when a session is established.
  */
 public class LoginFlow internal constructor(
     private val client: DesktopClient,
-    private val local: UserDataManager,
+    private val user: UserDataManager,
     private val establishSession: (SessionId) -> Unit,
 ) {
     /**
@@ -101,7 +101,7 @@ public class LoginFlow internal constructor(
                             "of the `EnterUsername` stage."
                 }
                 stage.value = VerifyLogin(
-                    client, local, ::moveToNextStage,
+                    client, user, ::moveToNextStage,
                     stage.value.result as UserCodeReceived
                 )
             }

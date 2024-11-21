@@ -301,14 +301,14 @@ private fun DndOption(
     state: SettingsState,
     switchScale: Float = 0.6f
 ) {
-    val enabledDndMode by state.dndEnabled.collectAsState()
+    val dndEnabled by state.dndEnabled.collectAsState()
     Option(
         title = "Do not disturb",
         description = "Turn off notifications for new mentions or snooze expirations.",
         titleWight = 324.dp
     ) {
         Switch(
-            checked = enabledDndMode,
+            checked = dndEnabled,
             onCheckedChange = {
                 state.setDndMode(it)
             },

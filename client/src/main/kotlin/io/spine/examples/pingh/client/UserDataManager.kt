@@ -38,7 +38,7 @@ import kotlin.reflect.KClass
 /**
  * Manages the local data for users of the application.
  *
- * Provides details of the [session] and [settings] for each specific [user].
+ * Provides details of the [session] and [settings] for each specific [user][name].
  *
  * Upon creation, retrieves the local data of the user who was logged in during
  * the last startup. If no user was logged in, it defaults to guest data,
@@ -88,7 +88,7 @@ internal class UserDataManager {
     /**
      * A name of the user currently using the application.
      */
-    internal val user: Username
+    internal val name: Username
         get() = data.user
 
     /**
@@ -117,7 +117,7 @@ internal class UserDataManager {
      * and sets the [default] settings.
      */
     internal fun establish(session: SessionId) {
-        if (isNewUnlogged && !session.username.equals(user)) {
+        if (isNewUnlogged && !session.username.equals(data.user)) {
             clear()
         }
         data = registry.dataList
@@ -236,7 +236,7 @@ internal class UserDataManager {
     private fun modifyRegistry(
         modifier: UserDataRegistry.Builder.(id: Int) -> UserDataRegistry.Builder
     ) {
-        val id = registry.dataList.indexOfFirst { it.user.equals(user) }
+        val id = registry.dataList.indexOfFirst { it.user.equals(data.user) }
         registry = registry.toBuilder()
             .modifier(id)
             .vBuild()

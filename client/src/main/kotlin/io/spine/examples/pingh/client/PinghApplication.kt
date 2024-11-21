@@ -70,7 +70,7 @@ public class PinghApplication private constructor(
     /**
      * Manages the local data for users of the application.
      */
-    private val local = UserDataManager()
+    private val user = UserDataManager()
 
     /**
      * Enables interaction with the Pingh server.
@@ -79,8 +79,8 @@ public class PinghApplication private constructor(
         private set
 
     init {
-        client = if (local.isLoggedIn) {
-            DesktopClient(channel, local.session.asUserId())
+        client = if (user.isLoggedIn) {
+            DesktopClient(channel, user.session.asUserId())
         } else {
             DesktopClient(channel)
         }
@@ -104,11 +104,11 @@ public class PinghApplication private constructor(
     /**
      * Flow that manages the sending of notifications within the app.
      */
-    private val notificationsFlow = NotificationsFlow(notificationSender, local)
+    private val notificationsFlow = NotificationsFlow(notificationSender, user)
 
     init {
-        if (local.isLoggedIn) {
-            notificationsFlow.enableNotifications(client, local.user)
+        if (user.isLoggedIn) {
+            notificationsFlow.enableNotifications(client, user.name)
         }
     }
 
@@ -120,7 +120,7 @@ public class PinghApplication private constructor(
      */
     private fun establishSession(session: SessionId) {
         client.close()
-        local.establish(session)
+        user.establish(session)
         client = DesktopClient(channel, session.asUserId())
         notificationsFlow.enableNotifications(client, session.username)
     }
@@ -133,7 +133,7 @@ public class PinghApplication private constructor(
      */
     private fun closeSession() {
         client.close()
-        local.resetToGuest()
+        user.resetToGuest()
         client = DesktopClient(channel)
         mentionsFlow = null
         settingsFlow = null
@@ -142,14 +142,14 @@ public class PinghApplication private constructor(
     /**
      * Returns `true` if the user is logged in to the application.
      */
-    public fun isLoggedIn(): Boolean = local.isLoggedIn
+    public fun isLoggedIn(): Boolean = user.isLoggedIn
 
     /**
      * Initiates the login flow and terminates any previous flow, if it exists.
      */
     public fun startLoginFlow(): LoginFlow {
         loginFlow?.close()
-        loginFlow = LoginFlow(client, local, ::establishSession)
+        loginFlow = LoginFlow(client, user, ::establishSession)
         return loginFlow!!
     }
 
@@ -160,7 +160,7 @@ public class PinghApplication private constructor(
      */
     public fun startMentionsFlow(): MentionsFlow {
         if (mentionsFlow == null) {
-            mentionsFlow = MentionsFlow(client, local)
+            mentionsFlow = MentionsFlow(client, user)
         }
         return mentionsFlow!!
     }
@@ -172,7 +172,7 @@ public class PinghApplication private constructor(
      */
     public fun startSettingsFlow(): SettingsFlow {
         if (settingsFlow == null) {
-            settingsFlow = SettingsFlow(client, local, ::closeSession)
+            settingsFlow = SettingsFlow(client, user, ::closeSession)
         }
         return settingsFlow!!
     }
@@ -183,7 +183,7 @@ public class PinghApplication private constructor(
     public fun close() {
         loginFlow?.close()
         settingsFlow?.saveSettings()
-        local.clear()
+        user.clear()
         client.close()
         channel.shutdown()
             .awaitTermination(defaultShutdownTimeout, TimeUnit.SECONDS)

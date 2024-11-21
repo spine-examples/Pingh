@@ -44,15 +44,15 @@ import kotlinx.coroutines.flow.StateFlow
  * use [saveSettings()][saveSettings] method.
  *
  * @property client Enables interaction with the Pingh server.
- * @property local Manages the local data for users of the application.
+ * @property user Manages the local data for users of the application.
  * @property closeSession Updates the application state when a session is closed.
  */
 public class SettingsFlow internal constructor(
     private val client: DesktopClient,
-    private val local: UserDataManager,
+    private val user: UserDataManager,
     private val closeSession: () -> Unit
 ) {
-    private val mutableSettings = local.settings.toBuilder()
+    private val mutableSettings = user.settings.toBuilder()
 
     /**
      * The state of application settings.
@@ -63,7 +63,7 @@ public class SettingsFlow internal constructor(
      * The username to which the current session belongs.
      */
     public val username: Username
-        get() = local.user
+        get() = user.name
 
     /**
      * Logs the user out, cancels all subscriptions and clears the session ID.
@@ -71,7 +71,7 @@ public class SettingsFlow internal constructor(
      * @param onSuccess Called when the user successfully logs out.
      */
     public fun logOut(onSuccess: (event: UserLoggedOut) -> Unit = {}) {
-        val command = LogUserOut::class.withSession(local.session)
+        val command = LogUserOut::class.withSession(user.session)
         client.observeEvent(command.id, UserLoggedOut::class) { event ->
             closeSession()
             onSuccess(event)
@@ -85,7 +85,7 @@ public class SettingsFlow internal constructor(
     @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
     public fun saveSettings() {
         val settings = mutableSettings.vBuild()
-        local.update(settings)
+        user.update(settings)
     }
 }
 

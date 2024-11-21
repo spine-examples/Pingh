@@ -53,11 +53,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
  *  as commands to the server-side.
  *
  * @property client Enables interaction with the Pingh server.
- * @property local Manages the local data for users of the application.
+ * @property user Manages the local data for users of the application.
  */
 public class MentionsFlow internal constructor(
     private val client: DesktopClient,
-    private val local: UserDataManager
+    private val user: UserDataManager
 ) {
     /**
      * User mentions.
@@ -74,7 +74,7 @@ public class MentionsFlow internal constructor(
      */
     private fun subscribeToMentionsUpdates() {
         ensureLoggedIn()
-        val id = UserMentionsId::class.of(local.user)
+        val id = UserMentionsId::class.of(user.name)
         client.observeEntity(id, UserMentions::class) { entity ->
             mentions.value = entity.mentionList
         }
@@ -90,7 +90,7 @@ public class MentionsFlow internal constructor(
     public fun updateMentions() {
         ensureLoggedIn()
         val command = UpdateMentionsFromGitHub::class.buildBy(
-            GitHubClientId::class.of(local.user)
+            GitHubClientId::class.of(user.name)
         )
         client.send(command)
     }
@@ -103,7 +103,7 @@ public class MentionsFlow internal constructor(
     public fun allMentions(): List<MentionView> {
         ensureLoggedIn()
         val userMentions = client.readById(
-            UserMentionsId::class.of(local.user),
+            UserMentionsId::class.of(user.name),
             UserMentions::class
         )
         return userMentions
@@ -121,7 +121,7 @@ public class MentionsFlow internal constructor(
      * @param id The identifier of the mention to be snoozed.
      */
     public fun snooze(id: MentionId) {
-        snooze(id, local.settings.snoozeTime.value)
+        snooze(id, user.settings.snoozeTime.value)
     }
 
     /**
@@ -151,7 +151,7 @@ public class MentionsFlow internal constructor(
      * Throws an `IllegalStateException` exception if the user is not logged in.
      */
     private fun ensureLoggedIn() {
-        check(local.isLoggedIn) { "The user is not logged in." }
+        check(user.isLoggedIn) { "The user is not logged in." }
     }
 }
 
