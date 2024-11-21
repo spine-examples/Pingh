@@ -65,7 +65,7 @@ import kotlinx.coroutines.launch
 @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
 public class VerifyLogin internal constructor(
     private val client: DesktopClient,
-    private val local: LocalDataManager,
+    private val local: UserDataManager,
     private val moveToNextStage: () -> Unit,
     event: UserCodeReceived
 ) : LoginStage<String>() {

@@ -36,26 +36,26 @@ import kotlin.reflect.KClass
  * The text corresponding to this interval.
  */
 public val SnoozeTime.label: String
-    get() = snoozeTimeDetails[this]?.label ?: ""
+    get() = snoozeOptions[this]?.label ?: ""
 
 /**
  * The duration corresponding to this interval.
  */
 internal val SnoozeTime.value: Duration
-    get() = snoozeTimeDetails[this]?.value ?: Durations.ZERO
+    get() = snoozeOptions[this]?.value ?: Durations.ZERO
 
 /**
  * The list of snooze intervals currently supported by the app.
  */
 @Suppress("UnusedReceiverParameter" /* Associated with the class but doesn't use its data. */)
 public val KClass<SnoozeTime>.supported: List<SnoozeTime>
-    get() = snoozeTimeDetails.keys.toList()
+    get() = snoozeOptions.keys.toList()
 
 @Suppress("MagicNumber" /* The durations are specified using numbers. */)
-private val snoozeTimeDetails = mapOf(
-    SnoozeTime.THIRTY_MINUTES to SnoozeTimeDetails("30 mins", minutes(30)),
-    SnoozeTime.TWO_HOURS to SnoozeTimeDetails("2 hours", hours(2)),
-    SnoozeTime.ONE_DAY to SnoozeTimeDetails("1 day", hours(24))
+private val snoozeOptions = mapOf(
+    SnoozeTime.THIRTY_MINUTES to SnoozeOption("30 mins", minutes(30)),
+    SnoozeTime.TWO_HOURS to SnoozeOption("2 hours", hours(2)),
+    SnoozeTime.ONE_DAY to SnoozeOption("1 day", hours(24))
 )
 
 /**
@@ -64,7 +64,7 @@ private val snoozeTimeDetails = mapOf(
  * @property label The text corresponding to this interval.
  * @property value The duration corresponding to this interval.
  */
-private data class SnoozeTimeDetails(
+private data class SnoozeOption(
     val label: String,
     val value: Duration
 )

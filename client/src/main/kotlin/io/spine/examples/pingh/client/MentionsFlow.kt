@@ -57,7 +57,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
  */
 public class MentionsFlow internal constructor(
     private val client: DesktopClient,
-    private val local: LocalDataManager
+    private val local: UserDataManager
 ) {
     /**
      * User mentions.

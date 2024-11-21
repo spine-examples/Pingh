@@ -301,7 +301,7 @@ private fun DndOption(
     state: SettingsState,
     switchScale: Float = 0.6f
 ) {
-    val enabledDndMode by state.enabledDndMode.collectAsState()
+    val enabledDndMode by state.dndEnabled.collectAsState()
     Option(
         title = "Do not disturb",
         description = "Turn off notifications for new mentions or snooze expirations.",

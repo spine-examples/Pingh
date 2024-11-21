@@ -49,7 +49,7 @@ import kotlinx.coroutines.flow.StateFlow
  */
 public class SettingsFlow internal constructor(
     private val client: DesktopClient,
-    private val local: LocalDataManager,
+    private val local: UserDataManager,
     private val closeSession: () -> Unit
 ) {
     private val mutableSettings = local.settings.toBuilder()
@@ -95,14 +95,14 @@ public class SettingsFlow internal constructor(
 public class SettingsState internal constructor(
     private val data: UserSettings.Builder
 ) {
-    private val _enabledDndMode = MutableStateFlow(data.enabledDndMode)
+    private val _dndEnabled = MutableStateFlow(data.dndEnabled)
     private val _snoozeTime = MutableStateFlow(data.snoozeTime)
 
     /**
      * If `true`, the user is not notified about new mentions and snooze expirations.
      * If `false`, the user receives notifications.
      */
-    public val enabledDndMode: StateFlow<Boolean> = _enabledDndMode
+    public val dndEnabled: StateFlow<Boolean> = _dndEnabled
 
     /**
      * The interval after which the new mention notification is repeated.
@@ -114,8 +114,8 @@ public class SettingsState internal constructor(
      * for new mentions or the expiration of the snooze time.
      */
     public fun setDndMode(isEnabled: Boolean) {
-        _enabledDndMode.value = isEnabled
-        data.enabledDndMode = isEnabled
+        _dndEnabled.value = isEnabled
+        data.dndEnabled = isEnabled
     }
 
     /**

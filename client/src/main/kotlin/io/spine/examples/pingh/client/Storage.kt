@@ -82,7 +82,7 @@ internal class FileStorage<T : Message>(location: FileLocation) {
     }
 
     /**
-     * Writes `message` to the storage file.
+     * Writes [message] to the storage file.
      *
      * @param message The message that is serialized and saved to a file.
      */

@@ -32,7 +32,7 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.pingh.spine.io";
 option java_package = "io.spine.examples.pingh.client";
-option java_outer_classname = "LocalDataProto";
+option java_outer_classname = "UserDataProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/github/values.proto";
@@ -46,13 +46,13 @@ import "spine_examples/pingh/client/settings.proto";
 // If it holds local data for a logged-in user, it indicates that the user
 // is using the application.
 //
-message LocalDataRegistry {
+message UserDataRegistry {
 
     // A list containing the local data of all users.
     //
     // The list is empty if no user has logged into the app on this device.
     //
-    repeated LocalData data = 1;
+    repeated UserData data = 1;
 }
 
 // Local data specific to a user, stored on the device.
@@ -64,19 +64,19 @@ message LocalDataRegistry {
 // that the user is logged in, as the login process itself involves
 // establishing a session with the server.
 //
-message LocalData {
+message UserData {
 
     // The name of the user to whom the data belongs.
     spine_examples.pingh.github.Username user = 1 [(required) = true];
 
     // The identifier of the current session with the Pingh server.
     //
-    // If the user has no active session, this field will be empty.
+    // If the user has no active session, this field is empty.
     //
     spine_examples.pingh.sessions.SessionId session = 2;
 
     // Whether the user is logged into the application.
-    bool is_logged_in = 3 [(required) = true];
+    bool logged_in = 3;
 
     // The application settings applied by this user.
     UserSettings settings = 4 [(required) = true];

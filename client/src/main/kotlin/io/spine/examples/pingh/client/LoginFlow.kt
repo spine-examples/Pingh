@@ -67,7 +67,7 @@ public abstract class LoginStage<T> {
  */
 public class LoginFlow internal constructor(
     private val client: DesktopClient,
-    private val local: LocalDataManager,
+    private val local: UserDataManager,
     private val establishSession: (SessionId) -> Unit,
 ) {
     /**

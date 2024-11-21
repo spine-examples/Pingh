@@ -70,7 +70,7 @@ public class PinghApplication private constructor(
     /**
      * Manages the local data for users of the application.
      */
-    private val local = LocalDataManager()
+    private val local = UserDataManager()
 
     /**
      * Enables interaction with the Pingh server.

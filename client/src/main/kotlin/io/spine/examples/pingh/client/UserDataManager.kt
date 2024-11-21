@@ -50,26 +50,26 @@ import kotlin.reflect.KClass
  * All changes made for a logged-in user are saved to a file in the user's data directory,
  * ensuring they persist across application restarts.
  */
-internal class LocalDataManager {
+internal class UserDataManager {
     /**
      * A repository for storing local data for all users.
      */
-    private val storage = FileStorage<LocalDataRegistry>(inAppDir(".local-data-registry"))
+    private val storage = FileStorage<UserDataRegistry>(inAppDir(".local-data-registry"))
 
     /**
      * A local data for all users who have used this app on a specific device.
      */
-    private var registry: LocalDataRegistry =
-        storage.loadOrDefault(LocalDataRegistry::parseFrom) { LocalDataRegistry::class.empty() }
+    private var registry: UserDataRegistry =
+        storage.loadOrDefault(UserDataRegistry::parseFrom) { UserDataRegistry::class.empty() }
 
     /**
      * A local data specific to a user, stored on the device.
      */
-    private var data: LocalData
+    private var data: UserData
 
     init {
         data = registry.dataList
-            .firstOrNull { it.isLoggedIn }
+            .firstOrNull { it.loggedIn }
             ?: guestData
     }
 
@@ -107,7 +107,7 @@ internal class LocalDataManager {
      * Whether the current user is logged in to the application.
      */
     internal val isLoggedIn: Boolean
-        get() = data.isLoggedIn
+        get() = data.loggedIn
 
     /**
      * Sets a new session for the user.
@@ -127,13 +127,13 @@ internal class LocalDataManager {
             ?.vBuild()
             ?: run {
                 isNewUnlogged = true
-                localDataFor(session)
+                userDataFor(session)
             }
         save()
     }
 
-    private fun localDataFor(session: SessionId): LocalData =
-        LocalData.newBuilder()
+    private fun userDataFor(session: SessionId): UserData =
+        UserData.newBuilder()
             .setUser(session.username)
             .setSession(session)
             .setSettings(UserSettings::class.default())
@@ -145,7 +145,7 @@ internal class LocalDataManager {
     internal fun confirmLogin() {
         isNewUnlogged = false
         modifyData {
-            setIsLoggedIn(true)
+            setLoggedIn(true)
         }
     }
 
@@ -156,7 +156,7 @@ internal class LocalDataManager {
     internal fun resetToGuest() {
         modifyData {
             clearSession()
-            setIsLoggedIn(false)
+            setLoggedIn(false)
         }
         data = guestData
     }
@@ -202,7 +202,7 @@ internal class LocalDataManager {
      * Applies the `modifier` to the builder of the current local [data]
      * and saves the resulting data.
      */
-    private fun modifyData(modifier: LocalData.Builder.() -> LocalData.Builder) {
+    private fun modifyData(modifier: UserData.Builder.() -> UserData.Builder) {
         data = data.toBuilder()
             .modifier()
             .vBuild()
@@ -226,7 +226,7 @@ internal class LocalDataManager {
     }
 
     /**
-     * Applies the `modifier` to the builder of the [registry]
+     * Applies the [modifier] to the builder of the [registry]
      * and saves the resulting data.
      *
      * @param modifier Updates the `registry` builder. Also provides the identifier
@@ -234,7 +234,7 @@ internal class LocalDataManager {
      *   If no such data exists in the registry, it provides -1.
      */
     private fun modifyRegistry(
-        modifier: LocalDataRegistry.Builder.(id: Int) -> LocalDataRegistry.Builder
+        modifier: UserDataRegistry.Builder.(id: Int) -> UserDataRegistry.Builder
     ) {
         val id = registry.dataList.indexOfFirst { it.user.equals(user) }
         registry = registry.toBuilder()
@@ -250,10 +250,10 @@ internal class LocalDataManager {
             // so that there is no collision with real usernames.
             .buildPartial()
 
-        private val guestData: LocalData =
-            LocalData.newBuilder()
+        private val guestData: UserData =
+            UserData.newBuilder()
                 .setUser(guest)
-                .setIsLoggedIn(false)
+                .setLoggedIn(false)
                 .setSettings(UserSettings::class.default())
                 .vBuild()
     }
@@ -262,14 +262,14 @@ internal class LocalDataManager {
 /**
  * Creates a new `LocalDataRegistry` with an empty data list.
  */
-private fun KClass<LocalDataRegistry>.empty(): LocalDataRegistry =
-    LocalDataRegistry.newBuilder().vBuild()
+private fun KClass<UserDataRegistry>.empty(): UserDataRegistry =
+    UserDataRegistry.newBuilder().vBuild()
 
 /**
  * Create a new `UserSettings` with default settings values.
  */
 private fun KClass<UserSettings>.default(): UserSettings =
     UserSettings.newBuilder()
-        .setEnabledDndMode(false)
+        .setDndEnabled(false)
         .setSnoozeTime(SnoozeTime.TWO_HOURS)
         .vBuild()
