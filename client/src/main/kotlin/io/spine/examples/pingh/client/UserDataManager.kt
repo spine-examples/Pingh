@@ -106,7 +106,7 @@ internal class UserDataManager {
     /**
      * Whether the current user is logged in to the application.
      */
-    internal val isLoggedIn: Boolean
+    internal val loggedIn: Boolean
         get() = data.loggedIn
 
     /**

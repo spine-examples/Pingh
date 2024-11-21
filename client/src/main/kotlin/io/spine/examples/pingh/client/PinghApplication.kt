@@ -79,7 +79,7 @@ public class PinghApplication private constructor(
         private set
 
     init {
-        client = if (user.isLoggedIn) {
+        client = if (user.loggedIn) {
             DesktopClient(channel, user.session.asUserId())
         } else {
             DesktopClient(channel)
@@ -107,7 +107,7 @@ public class PinghApplication private constructor(
     private val notificationsFlow = NotificationsFlow(notificationSender, user)
 
     init {
-        if (user.isLoggedIn) {
+        if (user.loggedIn) {
             notificationsFlow.enableNotifications(client, user.name)
         }
     }
@@ -142,7 +142,7 @@ public class PinghApplication private constructor(
     /**
      * Returns `true` if the user is logged in to the application.
      */
-    public fun isLoggedIn(): Boolean = user.isLoggedIn
+    public fun isLoggedIn(): Boolean = user.loggedIn
 
     /**
      * Initiates the login flow and terminates any previous flow, if it exists.
