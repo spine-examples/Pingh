@@ -65,10 +65,10 @@ internal class FileStorage<T : Message>(location: FileLocation) {
 
     /**
      * Returns the data from the storage file if it contains content;
-     * otherwise, returns the `default`.
+     * otherwise, returns the [default].
      *
      * @param parser Deserializes a byte sequence into a message.
-     * @param default Calculated the default value when no data is found in the file.
+     * @param default Calculates the default value when no data is found in the file.
      */
     internal fun loadOrDefault(parser: (ByteArray) -> T, default: () -> T): T {
         FileInputStream(file).use { stream ->

@@ -113,7 +113,7 @@ internal class UserDataManager {
      * Sets a new session for the user.
      *
      * Searches for the user's local data in the [registry].
-     * If it does not exist, creates the local data for the session
+     * If it does not exist, creates the user data for the session
      * and sets the [default] settings.
      */
     internal fun establish(session: SessionId) {
@@ -145,7 +145,7 @@ internal class UserDataManager {
     internal fun confirmLogin() {
         isNewUnlogged = false
         modifyData {
-            setLoggedIn(true)
+            loggedIn = true
         }
     }
 
@@ -156,7 +156,7 @@ internal class UserDataManager {
     internal fun resetToGuest() {
         modifyData {
             clearSession()
-            setLoggedIn(false)
+            loggedIn = false
         }
         data = guestData
     }
@@ -166,7 +166,7 @@ internal class UserDataManager {
      */
     internal fun update(settings: UserSettings) {
         modifyData {
-            setSettings(settings)
+            this.settings = settings
         }
     }
 
@@ -191,8 +191,6 @@ internal class UserDataManager {
             modifyRegistry { id ->
                 if (id != -1) {
                     removeData(id)
-                } else {
-                    this
                 }
             }
         }
@@ -202,10 +200,11 @@ internal class UserDataManager {
      * Applies the `modifier` to the builder of the current local [data]
      * and saves the resulting data.
      */
-    private fun modifyData(modifier: UserData.Builder.() -> UserData.Builder) {
-        data = data.toBuilder()
-            .modifier()
-            .vBuild()
+    private fun modifyData(modifier: UserData.Builder.() -> Unit) {
+        data = with(data.toBuilder()) {
+            modifier()
+            vBuild()
+        }
         save()
     }
 
@@ -233,13 +232,12 @@ internal class UserDataManager {
      *   of the current local [data] in the `registry` as a parameter.
      *   If no such data exists in the registry, it provides -1.
      */
-    private fun modifyRegistry(
-        modifier: UserDataRegistry.Builder.(id: Int) -> UserDataRegistry.Builder
-    ) {
+    private fun modifyRegistry(modifier: UserDataRegistry.Builder.(id: Int) -> Unit) {
         val id = registry.dataList.indexOfFirst { it.user.equals(data.user) }
-        registry = registry.toBuilder()
-            .modifier(id)
-            .vBuild()
+        registry = with(registry.toBuilder()) {
+            modifier(id)
+            vBuild()
+        }
         storage.save(registry)
     }
 
