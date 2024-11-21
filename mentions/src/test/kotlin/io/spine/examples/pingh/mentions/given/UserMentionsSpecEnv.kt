@@ -30,6 +30,7 @@ package io.spine.examples.pingh.mentions.given
 
 import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.github.NodeId
+import io.spine.examples.pingh.github.Repo
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
@@ -58,6 +59,7 @@ internal fun KClass<UserMentioned>.generateWith(whoWasMentioned: Username): User
         title = randomString()
         whenMentioned = currentTime()
         url = Url::class.of(randomString())
+        whereMentioned = Repo::class.of(randomString(), randomString())
         vBuild()
     }
 

@@ -99,6 +99,9 @@ message MentionView {
 
     // The read status of the mention.
     MentionStatus status = 6 [(required) = true];
+
+    // The repository where the user was mentioned.
+    spine_examples.pingh.github.Repo where_mentioned = 7 [(required) = true];
 }
 
 // The read status of mention.

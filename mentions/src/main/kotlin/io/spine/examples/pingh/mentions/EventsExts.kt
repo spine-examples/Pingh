@@ -134,4 +134,5 @@ public fun KClass<UserMentioned>.buildBy(mention: Mention, whoWasMentioned: User
         .setTitle(mention.title)
         .setWhenMentioned(mention.whenMentioned)
         .setUrl(mention.url)
+        .setWhereMentioned(mention.whereMentioned)
         .vBuild()

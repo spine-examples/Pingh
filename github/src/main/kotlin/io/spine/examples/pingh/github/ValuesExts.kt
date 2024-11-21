@@ -94,14 +94,28 @@ public fun KClass<User>.of(username: String, avatarUrl: String): User =
     )
 
 /**
+ * Creates a new `Repo` with the passed name and owner.
+ */
+public fun KClass<Repo>.of(owner: String, name: String): Repo =
+    Repo.newBuilder()
+        .setName(name)
+        .setOwner(owner)
+        .vBuild()
+
+/**
  * Returns the `Repo` where this issue or pull request was created.
  */
-public fun IssueOrPullRequestFragment.repo(): Repo {
+public fun IssueOrPullRequestFragment.repo(): Repo = repoFrom(htmlUrl)
+
+/**
+ * Parses a URL of an HTML GitHub item within the repository.
+ *
+ * Repository items are e.g. issues, fix requests, comments on issues,
+ * reviews, review comments, etc.
+ */
+private fun repoFrom(htmlUrl: String): Repo {
     val pathSegments = htmlUrl.substring("https://".length).split("/")
-    return Repo.newBuilder()
-        .setOwner(pathSegments[1])
-        .setName(pathSegments[2])
-        .vBuild()
+    return Repo::class.of(pathSegments[1], pathSegments[2])
 }
 
 /**
@@ -117,6 +131,7 @@ public fun KClass<Mention>.from(fragment: IssueOrPullRequestFragment): Mention =
         title = fragment.title
         whenMentioned = Timestamp::class.parse(fragment.whenCreated)
         url = Url::class.of(fragment.htmlUrl)
+        whereMentioned = fragment.repo()
         vBuild()
     }
 
@@ -139,6 +154,7 @@ public fun KClass<Mention>.from(fragment: CommentFragment, itemTitle: String): M
         title = "Comment on $itemTitle"
         whenMentioned = Timestamp::class.parse(fragment.whenCreated)
         url = Url::class.of(fragment.htmlUrl)
+        whereMentioned = repoFrom(fragment.htmlUrl)
         vBuild()
     }
 
@@ -161,6 +177,7 @@ public fun KClass<Mention>.from(fragment: ReviewFragment, prTitle: String): Ment
         title = "Review of $prTitle"
         whenMentioned = Timestamp::class.parse(fragment.whenSubmitted)
         url = Url::class.of(fragment.htmlUrl)
+        whereMentioned = repoFrom(fragment.htmlUrl)
         vBuild()
     }
 
