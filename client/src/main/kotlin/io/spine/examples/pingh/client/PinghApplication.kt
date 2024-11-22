@@ -70,12 +70,18 @@ public class PinghApplication private constructor(
     /**
      * Manages the session with Pingh server.
      */
-    private val session = Session.create()
+    private val session: Session
 
     /**
      * Manages the application settings configured by a user.
      */
-    private val settings = Settings.create()
+    private val settings: Settings
+
+    init {
+        val storage = UserDataStorage()
+        session = Session(storage)
+        settings = Settings(storage)
+    }
 
     /**
      * Enables interaction with the Pingh server.

@@ -36,11 +36,6 @@ import io.spine.examples.pingh.sessions.SessionId
 import kotlin.reflect.KClass
 
 /**
- * Stores user data in the application's folder within the user data directory.
- */
-private val userDataStorage = UserDataStorage()
-
-/**
  * Manages the session with Pingh server.
  *
  * A session with the server begins when the user successfully completes
@@ -56,7 +51,7 @@ private val userDataStorage = UserDataStorage()
  * @property storage Stores user data in the application's folder
  *   within the user data directory.
  */
-internal class Session private constructor(
+internal class Session(
     private val storage: UserDataStorage
 ) {
     /**
@@ -113,14 +108,6 @@ internal class Session private constructor(
         }
         storage.data = Guest.data
     }
-
-    internal companion object {
-        /**
-         * Creates a new `Session` stored in the application's folder
-         * within the user data directory.
-         */
-        internal fun create(): Session = Session(userDataStorage)
-    }
 }
 
 /**
@@ -135,7 +122,7 @@ internal class Session private constructor(
  * @property storage Stores user data in the application's folder
  *   within the user data directory.
  */
-internal class Settings private constructor(
+internal class Settings(
     private val storage: UserDataStorage
 ) {
     /**
@@ -152,14 +139,6 @@ internal class Settings private constructor(
             this.settings = settings
         }
     }
-
-    internal companion object {
-        /**
-         * Creates a new `Settings` stored in the application's folder
-         * within the user data directory.
-         */
-        internal fun create(): Settings = Settings(userDataStorage)
-    }
 }
 
 /**
@@ -171,7 +150,7 @@ internal class Settings private constructor(
  *
  * Note that guest data is not saved in the repository.
  */
-private class UserDataStorage {
+internal class UserDataStorage {
     /**
      * A repository for storing local data for all users.
      */
