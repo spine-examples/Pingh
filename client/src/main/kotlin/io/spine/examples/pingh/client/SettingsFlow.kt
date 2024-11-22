@@ -82,7 +82,7 @@ public class SettingsFlow internal constructor(
     }
 
     /**
-     * Saves the current application setting.
+     * Saves the current application settings.
      */
     @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
     public fun saveSettings() {

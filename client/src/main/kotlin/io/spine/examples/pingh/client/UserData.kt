@@ -93,6 +93,7 @@ internal class Session private constructor(
             ?.setSession(session)
             ?.vBuild()
             ?: userDataFor(session)
+        storage.save()
     }
 
     private fun userDataFor(session: SessionId): UserData =
@@ -184,14 +185,8 @@ private class UserDataStorage {
 
     /**
      * A local data specific to a user, stored on the device.
-     *
-     * When a new value is set, saves it to storage.
      */
     var data: UserData = findOrNull { it.hasSession() } ?: Guest.data
-        set(value) {
-            field = value
-            save()
-        }
 
     /**
      * Returns the first element matching the given [predicate],
@@ -215,7 +210,7 @@ private class UserDataStorage {
     /**
      * Updates the current [data] in the [registry] and saves it.
      */
-    private fun save() {
+    fun save() {
         if (data.user.equals(Guest.name)) {
             return
         }
