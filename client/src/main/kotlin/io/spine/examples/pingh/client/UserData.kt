@@ -36,21 +36,121 @@ import io.spine.examples.pingh.sessions.SessionId
 import kotlin.reflect.KClass
 
 /**
- * Manages the local data for users of the application.
+ * Manages the session with Pingh server.
  *
- * Provides details of the [session] and [settings] for each specific [user][name].
+ * A session with the server begins when the user successfully completes
+ * the login process and ends when the user logs out of the application.
  *
- * Upon creation, retrieves the local data of the user who was logged in during
- * the last startup. If no user was logged in, it defaults to guest data,
- * which is replaced when a session is established with the server.
+ * The application can have either one active session with the server or none.
+ * If a user has an active session, they were the last to log in
+ * and are currently using the application.
  *
- * Having an active session does not necessarily mean the user is logged in.
- * To designate a user as logged in, use the [confirmLogin()][confirmLogin] method.
- *
- * All changes made for a logged-in user are saved to a file in the user's data directory,
+ * All changes made for a user are saved to a file in the user's data directory,
  * ensuring they persist across application restarts.
+ *
+ * @property storage Stores user data in the application's folder
+ *   within the user data directory.
  */
-internal class UserDataManager {
+internal class Session(
+    private val storage: UserDataStorage
+) {
+    /**
+     * An identifier of the current session with the Pingh server.
+     */
+    internal val id: SessionId
+        get() = storage.data.session
+
+    /**
+     * A name of the user currently using the application.
+     */
+    internal val username: Username
+        get() = id.username
+
+    /**
+     * Whether the user currently has an active session with the server.
+     *
+     * If a session is active, the user is considered logged in.
+     */
+    internal val isActive: Boolean
+        get() = storage.data.hasSession()
+
+    /**
+     * Sets a new session for the user.
+     *
+     * Searches for the user's local data in the registry.
+     * If it does not exist, creates the user data for the session
+     * and sets the [default] settings.
+     */
+    internal fun establish(session: SessionId) {
+        storage.data = storage
+            .findOrNull { it.user.equals(session.username) }
+            ?.toBuilder()
+            ?.setSession(session)
+            ?.vBuild()
+            ?: userDataFor(session)
+        storage.save()
+    }
+
+    private fun userDataFor(session: SessionId): UserData =
+        UserData.newBuilder()
+            .setUser(session.username)
+            .setSession(session)
+            .setSettings(UserSettings::class.default())
+            .vBuild()
+
+    /**
+     * Clears the current user session
+     * and replaces the local data with guest one.
+     */
+    internal fun resetToGuest() {
+        storage.modifyData {
+            clearSession()
+        }
+        storage.data = Guest.data
+    }
+}
+
+/**
+ * Manages the application settings configured by a user.
+ *
+ * Settings are user-specific. When a new user [establishes][Session.establish]
+ * a session with the server, the [current] settings are replaced by those of the new user.
+ *
+ * All changes made by a user are saved to a file in the user's data directory,
+ * ensuring persistence across application restarts.
+ *
+ * @property storage Stores user data in the application's folder
+ *   within the user data directory.
+ */
+internal class Settings(
+    private val storage: UserDataStorage
+) {
+    /**
+     * An application settings applied by this user.
+     */
+    internal val current: UserSettings
+        get() = storage.data.settings
+
+    /**
+     * Sets and saves updated application settings.
+     */
+    internal fun update(settings: UserSettings) {
+        storage.modifyData {
+            this.settings = settings
+        }
+    }
+}
+
+/**
+ * Stores user data in the application's folder
+ * within the user data directory.
+ *
+ * Upon creation, it loads user data from storage.
+ * If no data is found, [guest][Guest] data is used instead.
+ *
+ * Note that guest data is not saved in the repository.
+ */
+internal class UserDataStorage {
     /**
      * A repository for storing local data for all users.
      */
@@ -65,142 +165,20 @@ internal class UserDataManager {
     /**
      * A local data specific to a user, stored on the device.
      */
-    private var data: UserData
-
-    init {
-        data = registry.dataList
-            .firstOrNull { it.loggedIn }
-            ?: guestData
-    }
+    var data: UserData = findOrNull { it.hasSession() } ?: Guest.data
 
     /**
-     * Whether a specific user has started using the app but
-     * has not completed the login process.
-     *
-     * If this variable is `true`, it means the user has initiated the login process
-     * but has not finished it. In such cases, the user's local data should not be saved
-     * to the [registry] when the app is closed.
-     *
-     * @see [clear]
+     * Returns the first element matching the given [predicate],
+     * or `null` if element was not found.
      */
-    private var isNewUnlogged = false
-
-    /**
-     * A name of the user currently using the application.
-     */
-    internal val name: Username
-        get() = data.user
-
-    /**
-     * An identifier of the current session with the Pingh server.
-     */
-    internal val session: SessionId
-        get() = data.session
-
-    /**
-     * An application settings applied by this user.
-     */
-    internal val settings: UserSettings
-        get() = data.settings
-
-    /**
-     * Whether the current user is logged in to the application.
-     */
-    internal val loggedIn: Boolean
-        get() = data.loggedIn
-
-    /**
-     * Sets a new session for the user.
-     *
-     * Searches for the user's local data in the [registry].
-     * If it does not exist, creates the user data for the session
-     * and sets the [default] settings.
-     */
-    internal fun establish(session: SessionId) {
-        if (isNewUnlogged && !session.username.equals(data.user)) {
-            clear()
-        }
-        data = registry.dataList
-            .firstOrNull { it.user.equals(session.username) }
-            ?.toBuilder()
-            ?.setSession(session)
-            ?.vBuild()
-            ?: run {
-                isNewUnlogged = true
-                userDataFor(session)
-            }
-        save()
-    }
-
-    private fun userDataFor(session: SessionId): UserData =
-        UserData.newBuilder()
-            .setUser(session.username)
-            .setSession(session)
-            .setSettings(UserSettings::class.default())
-            .vBuild()
-
-    /**
-     * Specifies that the current user is logged into the app.
-     */
-    internal fun confirmLogin() {
-        isNewUnlogged = false
-        modifyData {
-            loggedIn = true
-        }
-    }
-
-    /**
-     * Clears the current user session
-     * and replaces the local data with guest one.
-     */
-    internal fun resetToGuest() {
-        modifyData {
-            clearSession()
-            loggedIn = false
-        }
-        data = guestData
-    }
-
-    /**
-     * Sets and saves updated application settings.
-     */
-    internal fun update(settings: UserSettings) {
-        modifyData {
-            this.settings = settings
-        }
-    }
-
-    /**
-     * Deletes the current user's local data
-     * if the login process was initiated but not completed.
-     *
-     * Should be used in two scenarios:
-     *
-     * - When the application closes during the login process.
-     * - After a login error, followed by an attempt to log in with a different account.
-     *
-     * Prevents storing data in registry for users who do not use the application,
-     * such as when an incorrect username was entered by mistake.
-     *
-     * Note that it does not delete user data
-     * if the user has successfully logged in at least once.
-     */
-    internal fun clear() {
-        if (isNewUnlogged) {
-            isNewUnlogged = false
-            modifyRegistry { id ->
-                if (id != -1) {
-                    removeData(id)
-                }
-            }
-        }
-    }
+    fun findOrNull(predicate: (UserData) -> Boolean): UserData? =
+        registry.dataList.firstOrNull(predicate)
 
     /**
      * Applies the `modifier` to the builder of the current local [data]
      * and saves the resulting data.
      */
-    private fun modifyData(modifier: UserData.Builder.() -> Unit) {
+    fun modifyData(modifier: UserData.Builder.() -> Unit) {
         data = with(data.toBuilder()) {
             modifier()
             vBuild()
@@ -211,8 +189,8 @@ internal class UserDataManager {
     /**
      * Updates the current [data] in the [registry] and saves it.
      */
-    private fun save() {
-        if (data.user.equals(guest)) {
+    fun save() {
+        if (data.user.equals(Guest.name)) {
             return
         }
         modifyRegistry { id ->
@@ -240,21 +218,23 @@ internal class UserDataManager {
         }
         storage.save(registry)
     }
+}
 
-    private companion object {
-        private val guest: Username = Username.newBuilder()
-            .setValue("Guest username")
-            // Uses invalid GitHub username and avoids validation
-            // so that there is no collision with real usernames.
-            .buildPartial()
+/**
+ * Data used for the guest account when no active sessions are available.
+ */
+private object Guest {
+    val name: Username = Username.newBuilder()
+        .setValue("Guest username")
+        // Uses invalid GitHub username and avoids validation
+        // so that there is no collision with real usernames.
+        .buildPartial()
 
-        private val guestData: UserData =
-            UserData.newBuilder()
-                .setUser(guest)
-                .setLoggedIn(false)
-                .setSettings(UserSettings::class.default())
-                .vBuild()
-    }
+    val data: UserData =
+        UserData.newBuilder()
+            .setUser(name)
+            .setSettings(UserSettings::class.default())
+            .vBuild()
 }
 
 /**

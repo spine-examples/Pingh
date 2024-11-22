@@ -62,19 +62,17 @@ public abstract class LoginStage<T> {
  * [confirmed][VerifyLogin.confirm] in the Pingh app.
  *
  * @property client Enables interaction with the Pingh server.
- * @property user Manages the local data for users of the application.
  * @property establishSession Updates the application state when a session is established.
  */
 public class LoginFlow internal constructor(
     private val client: DesktopClient,
-    private val user: UserDataManager,
     private val establishSession: (SessionId) -> Unit,
 ) {
     /**
      * Current stage of the GitHub login process.
      */
     private val stage: MutableStateFlow<LoginStage<*>> =
-        MutableStateFlow(EnterUsername(client, establishSession, ::moveToNextStage))
+        MutableStateFlow(EnterUsername(client, ::moveToNextStage))
 
     /**
      * Returns the immutable state of the current login stage.
@@ -101,7 +99,7 @@ public class LoginFlow internal constructor(
                             "of the `EnterUsername` stage."
                 }
                 stage.value = VerifyLogin(
-                    client, user, ::moveToNextStage,
+                    client, establishSession, ::moveToNextStage,
                     stage.value.result as UserCodeReceived
                 )
             }
@@ -114,7 +112,7 @@ public class LoginFlow internal constructor(
             }
 
             is LoginFailed -> {
-                stage.value = EnterUsername(client, establishSession, ::moveToNextStage)
+                stage.value = EnterUsername(client, ::moveToNextStage)
             }
         }
     }

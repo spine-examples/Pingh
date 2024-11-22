@@ -58,14 +58,14 @@ import kotlinx.coroutines.launch
  * into GitHub to verify their login.
  *
  * @property client Enables interaction with the Pingh server.
- * @property user Manages the local data for users of the application.
+ * @property establishSession Updates the application state when a session is established.
  * @property moveToNextStage Switches the current stage to the [LoginFailed].
  * @param event The event received after the user enters their name.
  */
 @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
 public class VerifyLogin internal constructor(
     private val client: DesktopClient,
-    private val user: UserDataManager,
+    private val establishSession: (SessionId) -> Unit,
     private val moveToNextStage: () -> Unit,
     event: UserCodeReceived
 ) : LoginStage<String>() {
@@ -97,6 +97,11 @@ public class VerifyLogin internal constructor(
      * The minimum duration that must pass before user can make a new access token request.
      */
     private val interval = event.interval
+
+    /**
+     * The session with Pingh server.
+     */
+    private val session = event.id
 
     /**
      * Job that marks a [userCode] as expired after the [time][expiresIn] has passed.
@@ -160,11 +165,11 @@ public class VerifyLogin internal constructor(
      */
     private fun confirm(): ActionOutcome {
         val future = CompletableFuture<ActionOutcome>()
-        val command = VerifyUserLoginToGitHub::class.withSession(user.session)
+        val command = VerifyUserLoginToGitHub::class.withSession(session)
         client.observeEither(
             EventObserver(command.id, UserLoggedIn::class) {
                 codeExpirationJob.cancel()
-                user.confirmLogin()
+                establishSession(session)
                 future.complete(ActionOutcome.Success)
             },
             EventObserver(command.id, UserIsNotLoggedIntoGitHub::class) {
@@ -203,7 +208,7 @@ public class VerifyLogin internal constructor(
     public fun requestNewUserCode(
         onSuccess: (event: UserCodeReceived) -> Unit = {}
     ) {
-        client.requestUserCode(user.name) { event ->
+        client.requestUserCode(session.username) { event ->
             userCode.value = event.userCode
             verificationUrl.value = event.verificationUrl
             expiresIn.value = event.expiresIn

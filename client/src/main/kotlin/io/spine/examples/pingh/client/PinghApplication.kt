@@ -68,9 +68,20 @@ public class PinghApplication private constructor(
         .build()
 
     /**
-     * Manages the local data for users of the application.
+     * Manages the session with Pingh server.
      */
-    private val user = UserDataManager()
+    private val session: Session
+
+    /**
+     * Manages the application settings configured by a user.
+     */
+    private val settings: Settings
+
+    init {
+        val storage = UserDataStorage()
+        session = Session(storage)
+        settings = Settings(storage)
+    }
 
     /**
      * Enables interaction with the Pingh server.
@@ -79,8 +90,8 @@ public class PinghApplication private constructor(
         private set
 
     init {
-        client = if (user.loggedIn) {
-            DesktopClient(channel, user.session.asUserId())
+        client = if (session.isActive) {
+            DesktopClient(channel, session.id.asUserId())
         } else {
             DesktopClient(channel)
         }
@@ -104,11 +115,11 @@ public class PinghApplication private constructor(
     /**
      * Flow that manages the sending of notifications within the app.
      */
-    private val notificationsFlow = NotificationsFlow(notificationSender, user)
+    private val notificationsFlow = NotificationsFlow(notificationSender, settings)
 
     init {
-        if (user.loggedIn) {
-            notificationsFlow.enableNotifications(client, user.name)
+        if (session.isActive) {
+            notificationsFlow.enableNotifications(client, session.username)
         }
     }
 
@@ -118,11 +129,11 @@ public class PinghApplication private constructor(
      * - a [client] is created to make requests on behalf of the user;
      * - notifications are enabled for the newly created client.
      */
-    private fun establishSession(session: SessionId) {
+    private fun establishSession(id: SessionId) {
         client.close()
-        user.establish(session)
-        client = DesktopClient(channel, session.asUserId())
-        notificationsFlow.enableNotifications(client, session.username)
+        session.establish(id)
+        client = DesktopClient(channel, id.asUserId())
+        notificationsFlow.enableNotifications(client, id.username)
     }
 
     /**
@@ -133,7 +144,7 @@ public class PinghApplication private constructor(
      */
     private fun closeSession() {
         client.close()
-        user.resetToGuest()
+        session.resetToGuest()
         client = DesktopClient(channel)
         mentionsFlow = null
         settingsFlow = null
@@ -142,14 +153,14 @@ public class PinghApplication private constructor(
     /**
      * Returns `true` if the user is logged in to the application.
      */
-    public fun isLoggedIn(): Boolean = user.loggedIn
+    public fun isLoggedIn(): Boolean = session.isActive
 
     /**
      * Initiates the login flow and terminates any previous flow, if it exists.
      */
     public fun startLoginFlow(): LoginFlow {
         loginFlow?.close()
-        loginFlow = LoginFlow(client, user, ::establishSession)
+        loginFlow = LoginFlow(client, ::establishSession)
         return loginFlow!!
     }
 
@@ -160,7 +171,7 @@ public class PinghApplication private constructor(
      */
     public fun startMentionsFlow(): MentionsFlow {
         if (mentionsFlow == null) {
-            mentionsFlow = MentionsFlow(client, user)
+            mentionsFlow = MentionsFlow(client, session, settings)
         }
         return mentionsFlow!!
     }
@@ -172,7 +183,7 @@ public class PinghApplication private constructor(
      */
     public fun startSettingsFlow(): SettingsFlow {
         if (settingsFlow == null) {
-            settingsFlow = SettingsFlow(client, user, ::closeSession)
+            settingsFlow = SettingsFlow(client, session, settings, ::closeSession)
         }
         return settingsFlow!!
     }
@@ -183,7 +194,6 @@ public class PinghApplication private constructor(
     public fun close() {
         loginFlow?.close()
         settingsFlow?.saveSettings()
-        user.clear()
         client.close()
         channel.shutdown()
             .awaitTermination(defaultShutdownTimeout, TimeUnit.SECONDS)

@@ -66,11 +66,11 @@ public interface NotificationSender {
  * before initiating notifications for a new `client`.
  *
  * @property sender Allows to send notifications.
- * @property user Manages the local data for users of the application.
+ * @property settings Manages the application settings configured by a user.
  */
 internal class NotificationsFlow(
     private val sender: NotificationSender,
-    private val user: UserDataManager
+    private val settings: Settings
 ) {
     companion object {
         /**
@@ -115,7 +115,7 @@ internal class NotificationsFlow(
             notification.onEvent,
             eq(usernameField(), username)
         ) { event ->
-            if (!user.settings.dndEnabled) {
+            if (!settings.current.dndEnabled) {
                 sender.send(notification.title, notification.content(event))
             }
         }
