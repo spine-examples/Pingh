@@ -38,12 +38,10 @@ import io.spine.examples.pingh.sessions.withSession
  * and receives a user code in return.
  *
  * @property client Enables interaction with the Pingh server.
- * @property establishSession Updates the application state when a session is established.
  * @property moveToNextStage Switches the current stage to the [VerifyLogin].
  */
 public class EnterUsername internal constructor(
     private val client: DesktopClient,
-    private val establishSession: (SessionId) -> Unit,
     private val moveToNextStage: () -> Unit
 ) : LoginStage<UserCodeReceived>() {
 
@@ -61,7 +59,6 @@ public class EnterUsername internal constructor(
             SessionId::class.of(username)
         )
         client.observeEvent(command.id, UserCodeReceived::class) { event ->
-            establishSession(event.id)
             result = event
             moveToNextStage()
             onSuccess(event)

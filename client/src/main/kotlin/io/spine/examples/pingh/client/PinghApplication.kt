@@ -149,7 +149,7 @@ public class PinghApplication private constructor(
      */
     public fun startLoginFlow(): LoginFlow {
         loginFlow?.close()
-        loginFlow = LoginFlow(client, user, ::establishSession)
+        loginFlow = LoginFlow(client, ::establishSession)
         return loginFlow!!
     }
 
@@ -183,7 +183,6 @@ public class PinghApplication private constructor(
     public fun close() {
         loginFlow?.close()
         settingsFlow?.saveSettings()
-        user.clear()
         client.close()
         channel.shutdown()
             .awaitTermination(defaultShutdownTimeout, TimeUnit.SECONDS)

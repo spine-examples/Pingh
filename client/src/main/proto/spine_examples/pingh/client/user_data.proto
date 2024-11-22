@@ -60,9 +60,8 @@ message UserDataRegistry {
 // Includes details about the current session, if active,
 // and the application settings configured by the user.
 //
-// Note that having an active session does not necessarily indicate
-// that the user is logged in, as the login process itself involves
-// establishing a session with the server.
+// A user is considered logged in if they have
+// an active session with the Pingh server.
 //
 message UserData {
 
@@ -75,9 +74,6 @@ message UserData {
     //
     spine_examples.pingh.sessions.SessionId session = 2;
 
-    // Whether the user is logged into the application.
-    bool logged_in = 3;
-
     // The application settings applied by this user.
-    UserSettings settings = 4 [(required) = true];
+    UserSettings settings = 3 [(required) = true];
 }

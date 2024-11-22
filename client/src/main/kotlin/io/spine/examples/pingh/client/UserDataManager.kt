@@ -44,9 +44,6 @@ import kotlin.reflect.KClass
  * the last startup. If no user was logged in, it defaults to guest data,
  * which is replaced when a session is established with the server.
  *
- * Having an active session does not necessarily mean the user is logged in.
- * To designate a user as logged in, use the [confirmLogin()][confirmLogin] method.
- *
  * All changes made for a logged-in user are saved to a file in the user's data directory,
  * ensuring they persist across application restarts.
  */
@@ -69,21 +66,9 @@ internal class UserDataManager {
 
     init {
         data = registry.dataList
-            .firstOrNull { it.loggedIn }
+            .firstOrNull { it.hasSession() }
             ?: guestData
     }
-
-    /**
-     * Whether a specific user has started using the app but
-     * has not completed the login process.
-     *
-     * If this variable is `true`, it means the user has initiated the login process
-     * but has not finished it. In such cases, the user's local data should not be saved
-     * to the [registry] when the app is closed.
-     *
-     * @see [clear]
-     */
-    private var isNewUnlogged = false
 
     /**
      * A name of the user currently using the application.
@@ -107,7 +92,7 @@ internal class UserDataManager {
      * Whether the current user is logged in to the application.
      */
     internal val loggedIn: Boolean
-        get() = data.loggedIn
+        get() = data.hasSession()
 
     /**
      * Sets a new session for the user.
@@ -117,18 +102,12 @@ internal class UserDataManager {
      * and sets the [default] settings.
      */
     internal fun establish(session: SessionId) {
-        if (isNewUnlogged && !session.username.equals(data.user)) {
-            clear()
-        }
         data = registry.dataList
             .firstOrNull { it.user.equals(session.username) }
             ?.toBuilder()
             ?.setSession(session)
             ?.vBuild()
-            ?: run {
-                isNewUnlogged = true
-                userDataFor(session)
-            }
+            ?: userDataFor(session)
         save()
     }
 
@@ -140,23 +119,12 @@ internal class UserDataManager {
             .vBuild()
 
     /**
-     * Specifies that the current user is logged into the app.
-     */
-    internal fun confirmLogin() {
-        isNewUnlogged = false
-        modifyData {
-            loggedIn = true
-        }
-    }
-
-    /**
      * Clears the current user session
      * and replaces the local data with guest one.
      */
     internal fun resetToGuest() {
         modifyData {
             clearSession()
-            loggedIn = false
         }
         data = guestData
     }
@@ -167,32 +135,6 @@ internal class UserDataManager {
     internal fun update(settings: UserSettings) {
         modifyData {
             this.settings = settings
-        }
-    }
-
-    /**
-     * Deletes the current user's local data
-     * if the login process was initiated but not completed.
-     *
-     * Should be used in two scenarios:
-     *
-     * - When the application closes during the login process.
-     * - After a login error, followed by an attempt to log in with a different account.
-     *
-     * Prevents storing data in registry for users who do not use the application,
-     * such as when an incorrect username was entered by mistake.
-     *
-     * Note that it does not delete user data
-     * if the user has successfully logged in at least once.
-     */
-    internal fun clear() {
-        if (isNewUnlogged) {
-            isNewUnlogged = false
-            modifyRegistry { id ->
-                if (id != -1) {
-                    removeData(id)
-                }
-            }
         }
     }
 
@@ -251,7 +193,6 @@ internal class UserDataManager {
         private val guestData: UserData =
             UserData.newBuilder()
                 .setUser(guest)
-                .setLoggedIn(false)
                 .setSettings(UserSettings::class.default())
                 .vBuild()
     }
