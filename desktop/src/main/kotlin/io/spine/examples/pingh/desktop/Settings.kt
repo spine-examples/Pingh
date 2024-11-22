@@ -77,7 +77,9 @@ import io.spine.example.pingh.desktop.generated.resources.Res
 import io.spine.example.pingh.desktop.generated.resources.back
 import io.spine.examples.pingh.client.SettingsFlow
 import io.spine.examples.pingh.client.SettingsState
-import io.spine.examples.pingh.client.SnoozeTime
+import io.spine.examples.pingh.client.settings.SnoozeTime
+import io.spine.examples.pingh.client.settings.label
+import io.spine.examples.pingh.client.settings.supported
 import io.spine.examples.pingh.github.Username
 import org.jetbrains.compose.resources.painterResource
 
@@ -101,7 +103,10 @@ internal fun SettingsPage(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        SettingsHeader(toMentionsPage)
+        SettingsHeader {
+            flow.saveSettings()
+            toMentionsPage()
+        }
         SettingsBox {
             Profile(flow, toLoginPage)
             SnoozeTimeOption(flow.settings)
@@ -115,11 +120,11 @@ internal fun SettingsPage(
  *
  * Includes a button to return to the `Mentions` page.
  *
- * @param toMentionsPage The navigation to the 'Mentions' page.
+ * @param onExit Called when exiting the page.
  */
 @Composable
 private fun SettingsHeader(
-    toMentionsPage: () -> Unit
+    onExit: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -130,7 +135,7 @@ private fun SettingsHeader(
     ) {
         IconButton(
             icon = painterResource(Res.drawable.back),
-            onClick = toMentionsPage,
+            onClick = onExit,
             modifier = Modifier.size(35.dp),
             colors = IconButtonDefaults.iconButtonColors(
                 contentColor = MaterialTheme.colorScheme.onSecondary
@@ -234,6 +239,7 @@ private fun ProfileControl(
         )
         Spacer(Modifier.height(5.dp))
         LogOutButton {
+            flow.saveSettings()
             flow.logOut {
                 toLoginPage()
             }
@@ -295,16 +301,16 @@ private fun DndOption(
     state: SettingsState,
     switchScale: Float = 0.6f
 ) {
-    val enabledDndMode by state.enabledDndMode.collectAsState()
+    val dndEnabled by state.dndEnabled.collectAsState()
     Option(
         title = "Do not disturb",
         description = "Turn off notifications for new mentions or snooze expirations.",
         titleWight = 324.dp
     ) {
         Switch(
-            checked = enabledDndMode,
+            checked = dndEnabled,
             onCheckedChange = {
-                state.enabledDndMode.value = it
+                state.setDndMode(it)
             },
             modifier = Modifier
                 .scale(switchScale)
@@ -369,7 +375,7 @@ private fun Option(
  */
 @Composable
 private fun SnoozeTimeSegmentedButtonRow(state: SettingsState) {
-    val snoozeTimeOptions = SnoozeTime.entries
+    val snoozeTimeOptions = SnoozeTime::class.supported
     val currentSnoozeTime by state.snoozeTime.collectAsState()
     Row(
         modifier = Modifier.selectableGroup(),
@@ -380,7 +386,7 @@ private fun SnoozeTimeSegmentedButtonRow(state: SettingsState) {
             SegmentedButton(
                 selected = currentSnoozeTime == snoozeTime,
                 onClick = {
-                    state.snoozeTime.value = snoozeTime
+                    state.setSnoozeTime(snoozeTime)
                 },
                 shape = SegmentedButtonDefaults.itemShape(index, snoozeTimeOptions.size)
             ) {

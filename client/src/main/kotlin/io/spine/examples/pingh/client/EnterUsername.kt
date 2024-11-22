@@ -32,19 +32,16 @@ import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.of
 import io.spine.examples.pingh.sessions.withSession
-import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * A stage of the login flow on which the user enters their GitHub username
  * and receives a user code in return.
  *
  * @property client Enables interaction with the Pingh server.
- * @property session The information about the current user session.
  * @property moveToNextStage Switches the current stage to the [VerifyLogin].
  */
 public class EnterUsername internal constructor(
     private val client: DesktopClient,
-    private val session: MutableStateFlow<UserSession?>,
     private val moveToNextStage: () -> Unit
 ) : LoginStage<UserCodeReceived>() {
 
@@ -62,7 +59,6 @@ public class EnterUsername internal constructor(
             SessionId::class.of(username)
         )
         client.observeEvent(command.id, UserCodeReceived::class) { event ->
-            session.value = UserSession(event.id)
             result = event
             moveToNextStage()
             onSuccess(event)

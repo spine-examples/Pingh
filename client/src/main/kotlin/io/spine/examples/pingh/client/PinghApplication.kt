@@ -29,11 +29,8 @@ package io.spine.examples.pingh.client
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import io.spine.core.UserId
+import io.spine.examples.pingh.sessions.SessionId
 import java.util.concurrent.TimeUnit
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 
 /**
  * Manages the logic for the Pingh app.
@@ -71,25 +68,34 @@ public class PinghApplication private constructor(
         .build()
 
     /**
+     * Manages the session with Pingh server.
+     */
+    private val session: Session
+
+    /**
+     * Manages the application settings configured by a user.
+     */
+    private val settings: Settings
+
+    init {
+        val storage = UserDataStorage()
+        session = Session(storage)
+        settings = Settings(storage)
+    }
+
+    /**
      * Enables interaction with the Pingh server.
      */
-    internal var client = DesktopClient(channel)
+    internal var client: DesktopClient
         private set
 
-    /**
-     * State of application settings.
-     */
-    private val settings = SettingsState()
-
-    /**
-     * Information about the current user session.
-     */
-    private val session = MutableStateFlow<UserSession?>(null)
-
-    /**
-     * Controls the lifecycle of mentions and handles the user's action in relation to them.
-     */
-    private var mentionsFlow: MentionsFlow? = null
+    init {
+        client = if (session.isActive) {
+            DesktopClient(channel, session.id.asUserId())
+        } else {
+            DesktopClient(channel)
+        }
+    }
 
     /**
      * Describes the login to GitHub via GitHub's device flow.
@@ -97,48 +103,64 @@ public class PinghApplication private constructor(
     private var loginFlow: LoginFlow? = null
 
     /**
+     * Controls the lifecycle of mentions and handles the user's action in relation to them.
+     */
+    private var mentionsFlow: MentionsFlow? = null
+
+    /**
+     * The application settings control flow.
+     */
+    private var settingsFlow: SettingsFlow? = null
+
+    /**
      * Flow that manages the sending of notifications within the app.
      */
     private val notificationsFlow = NotificationsFlow(notificationSender, settings)
 
-    /**
-     * Asynchronously updates the state of the Pingh application after the [session] is updated.
-     *
-     * If the `session` is closed:
-     * - a guest [client] is created;
-     * - the [mentions flow][mentionsFlow] for previous session is deleted.
-     *
-     * If a new `session` is established:
-     * - a `client` is created to make requests on behalf of the user;
-     * - notifications are enabled for the newly created client.
-     *
-     * In all cases, prior to creating a new `client`, all subscriptions of
-     * the previous `client` are closed.
-     */
-    private val sessionObservation = CoroutineScope(Dispatchers.Default).launch {
-        session.collect { value ->
-            client.close()
-            if (value != null) {
-                client = DesktopClient(channel, value.asUserId())
-                notificationsFlow.enableNotifications(client, value.username)
-            } else {
-                client = DesktopClient(channel)
-                mentionsFlow = null
-            }
+    init {
+        if (session.isActive) {
+            notificationsFlow.enableNotifications(client, session.username)
         }
     }
 
     /**
-     * Returns `true` if a user session exists, otherwise `false`.
+     * Updates the application state when a session is established:
+     *
+     * - a [client] is created to make requests on behalf of the user;
+     * - notifications are enabled for the newly created client.
      */
-    public fun isLoggedIn(): Boolean = session.value != null
+    private fun establishSession(id: SessionId) {
+        client.close()
+        session.establish(id)
+        client = DesktopClient(channel, id.asUserId())
+        notificationsFlow.enableNotifications(client, id.username)
+    }
+
+    /**
+     * Updates the application state when a session is closed:
+     *
+     * - a guest [client] is created;
+     * - the [mentions flow][mentionsFlow] for previous session is deleted.
+     */
+    private fun closeSession() {
+        client.close()
+        session.resetToGuest()
+        client = DesktopClient(channel)
+        mentionsFlow = null
+        settingsFlow = null
+    }
+
+    /**
+     * Returns `true` if the user is logged in to the application.
+     */
+    public fun isLoggedIn(): Boolean = session.isActive
 
     /**
      * Initiates the login flow and terminates any previous flow, if it exists.
      */
-    public fun startLoginFlow(): LoginFlow  {
+    public fun startLoginFlow(): LoginFlow {
         loginFlow?.close()
-        loginFlow = LoginFlow(client, session)
+        loginFlow = LoginFlow(client, ::establishSession)
         return loginFlow!!
     }
 
@@ -156,15 +178,22 @@ public class PinghApplication private constructor(
 
     /**
      * Initiates the settings flow.
+     *
+     * If the settings flow does not already exist, it is initialized.
      */
-    public fun startSettingsFlow(): SettingsFlow = SettingsFlow(client, session, settings)
+    public fun startSettingsFlow(): SettingsFlow {
+        if (settingsFlow == null) {
+            settingsFlow = SettingsFlow(client, session, settings, ::closeSession)
+        }
+        return settingsFlow!!
+    }
 
     /**
      * Closes the client.
      */
     public fun close() {
         loginFlow?.close()
-        sessionObservation.cancel()
+        settingsFlow?.saveSettings()
         client.close()
         channel.shutdown()
             .awaitTermination(defaultShutdownTimeout, TimeUnit.SECONDS)
@@ -228,9 +257,9 @@ public class PinghApplication private constructor(
 }
 
 /**
- * Creates a new `UserId` using the username contained in this `UserSession`.
+ * Creates a new `UserId` using the username contained in this `SessionId`.
  */
-private fun UserSession.asUserId(): UserId =
+private fun SessionId.asUserId(): UserId =
     UserId.newBuilder()
-        .setValue(id.username.value)
+        .setValue(username.value)
         .vBuild()

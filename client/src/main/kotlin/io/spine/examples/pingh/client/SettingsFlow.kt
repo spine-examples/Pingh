@@ -26,35 +26,46 @@
 
 package io.spine.examples.pingh.client
 
-import com.google.protobuf.Duration
+import io.spine.examples.pingh.client.settings.SnoozeTime
+import io.spine.examples.pingh.client.settings.UserSettings
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.withSession
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
-import io.spine.protobuf.Durations2.hours
-import io.spine.protobuf.Durations2.minutes
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * The application settings control flow.
  *
  * Allows changing application settings and logging out.
  *
+ * To persist the settings across application relaunches,
+ * use [saveSettings()][saveSettings] method.
+ *
  * @property client Enables interaction with the Pingh server.
- * @property session The information about the current user session.
- * @property settings The state of application settings.
+ * @property session Manages the session with Pingh server.
+ * @property localSettings Manages the application settings configured by a user.
+ * @property closeSession Updates the application state when a session is closed.
  */
 public class SettingsFlow internal constructor(
     private val client: DesktopClient,
-    private val session: MutableStateFlow<UserSession?>,
-    @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
-    public val settings: SettingsState
+    private val session: Session,
+    private val localSettings: Settings,
+    private val closeSession: () -> Unit
 ) {
+    private val mutableSettings = localSettings.current.toBuilder()
+
+    /**
+     * The state of application settings.
+     */
+    public val settings: SettingsState = SettingsState(mutableSettings)
+
     /**
      * The username to which the current session belongs.
      */
     public val username: Username
-        get() = session.value!!.username
+        get() = session.username
 
     /**
      * Logs the user out, cancels all subscriptions and clears the session ID.
@@ -62,55 +73,58 @@ public class SettingsFlow internal constructor(
      * @param onSuccess Called when the user successfully logs out.
      */
     public fun logOut(onSuccess: (event: UserLoggedOut) -> Unit = {}) {
-        val command = LogUserOut::class.withSession(session.value!!.id)
+        val command = LogUserOut::class.withSession(session.id)
         client.observeEvent(command.id, UserLoggedOut::class) { event ->
-            session.value = null
+            closeSession()
             onSuccess(event)
         }
         client.send(command)
+    }
+
+    /**
+     * Saves the current application settings.
+     */
+    @Suppress("MemberVisibilityCanBePrivate" /* Accessed from `desktop` module. */)
+    public fun saveSettings() {
+        val settings = mutableSettings.vBuild()
+        localSettings.update(settings)
     }
 }
 
 /**
  * State of application settings.
  */
-public class SettingsState {
+public class SettingsState internal constructor(
+    private val data: UserSettings.Builder
+) {
+    private val _dndEnabled = MutableStateFlow(data.dndEnabled)
+    private val _snoozeTime = MutableStateFlow(data.snoozeTime)
 
     /**
      * If `true`, the user is not notified about new mentions and snooze expirations.
      * If `false`, the user receives notifications.
      */
-    public val enabledDndMode: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    public val dndEnabled: StateFlow<Boolean> = _dndEnabled
 
     /**
      * The interval after which the new mention notification is repeated.
      */
-    public val snoozeTime: MutableStateFlow<SnoozeTime> = MutableStateFlow(SnoozeTime.TWO_HOURS)
-}
-
-/**
- * Time after which the notification about the new mention is repeated.
- *
- * @property label The text corresponding to this interval.
- * @property value The duration corresponding to this interval.
- */
-@Suppress("MagicNumber" /* The durations are specified using numbers. */)
-public enum class SnoozeTime(
-    public val label: String,
-    public val value: Duration
-) {
-    /**
-     * The interval is 30 minutes in duration.
-     */
-    THIRTY_MINUTES("30 mins", minutes(30)),
+    public val snoozeTime: StateFlow<SnoozeTime> = _snoozeTime
 
     /**
-     * The interval is 2 hours in duration.
+     * Sets whether the user should NOT receive notifications
+     * for new mentions or the expiration of the snooze time.
      */
-    TWO_HOURS("2 hours", hours(2)),
+    public fun setDndMode(isEnabled: Boolean) {
+        _dndEnabled.value = isEnabled
+        data.dndEnabled = isEnabled
+    }
 
     /**
-     * The interval is one day in duration.
+     * Sets the interval after which the new mention notification is repeated.
      */
-    ONE_DAY("1 day", hours(24))
+    public fun setSnoozeTime(snoozeTime: SnoozeTime) {
+        _snoozeTime.value = snoozeTime
+        data.snoozeTime = snoozeTime
+    }
 }

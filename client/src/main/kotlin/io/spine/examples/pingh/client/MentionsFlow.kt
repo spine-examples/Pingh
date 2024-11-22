@@ -29,6 +29,7 @@ package io.spine.examples.pingh.client
 import com.google.protobuf.Duration
 import com.google.protobuf.util.Timestamps
 import io.spine.base.Time.currentTime
+import io.spine.examples.pingh.client.settings.value
 import io.spine.examples.pingh.mentions.GitHubClientId
 import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionView
@@ -52,13 +53,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
  *  as commands to the server-side.
  *
  * @property client Enables interaction with the Pingh server.
- * @property session The information about the current user session.
- * @property settings The state of application settings.
+ * @property session Manages the session with Pingh server.
+ * @property settings Manages the application settings configured by a user.
  */
 public class MentionsFlow internal constructor(
     private val client: DesktopClient,
-    private val session: MutableStateFlow<UserSession?>,
-    private val settings: SettingsState
+    private val session: Session,
+    private val settings: Settings
 ) {
     /**
      * User mentions.
@@ -75,7 +76,7 @@ public class MentionsFlow internal constructor(
      */
     private fun subscribeToMentionsUpdates() {
         ensureLoggedIn()
-        val id = UserMentionsId::class.of(session.value!!.username)
+        val id = UserMentionsId::class.of(session.username)
         client.observeEntity(id, UserMentions::class) { entity ->
             mentions.value = entity.mentionList
         }
@@ -91,7 +92,7 @@ public class MentionsFlow internal constructor(
     public fun updateMentions() {
         ensureLoggedIn()
         val command = UpdateMentionsFromGitHub::class.buildBy(
-            GitHubClientId::class.of(session.value!!.username)
+            GitHubClientId::class.of(session.username)
         )
         client.send(command)
     }
@@ -104,7 +105,7 @@ public class MentionsFlow internal constructor(
     public fun allMentions(): List<MentionView> {
         ensureLoggedIn()
         val userMentions = client.readById(
-            UserMentionsId::class.of(session.value!!.username),
+            UserMentionsId::class.of(session.username),
             UserMentions::class
         )
         return userMentions
@@ -122,7 +123,7 @@ public class MentionsFlow internal constructor(
      * @param id The identifier of the mention to be snoozed.
      */
     public fun snooze(id: MentionId) {
-        snooze(id, settings.snoozeTime.value.value)
+        snooze(id, settings.current.snoozeTime.value)
     }
 
     /**
@@ -152,7 +153,7 @@ public class MentionsFlow internal constructor(
      * Throws an `IllegalStateException` exception if the user is not logged in.
      */
     private fun ensureLoggedIn() {
-        check(session.value != null) { "The user is not logged in." }
+        check(session.isActive) { "The user is not logged in." }
     }
 }
 

@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The version of the `Pingh` to publish.
- */
-val pinghVersion: String by extra("1.0.0-SNAPSHOT.24")
+package io.spine.internal.dependency
+
+// https://github.com/harawata/appdirs
+public object AppDirs {
+    private const val group = "net.harawata"
+    private const val version = "1.2.2"
+    public const val lib: String = "$group:appdirs:$version"
+}

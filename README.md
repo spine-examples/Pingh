@@ -8,6 +8,10 @@ of new GitHub `@mention`s. It also runs as a system tray application on macOS.
 - Notifies upon receiving new mentions or when the snooze time for a mention has expired.
 - Supports Do Not Disturb mode.
 
+The application stores the current settings and session data in the application folder 
+within the user data directory. The app settings are linked to the user who configured them, 
+and they update accordingly when the account changes.
+
 ## Tech
 
 Server stack:

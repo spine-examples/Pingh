@@ -1,0 +1,79 @@
+/*
+ * Copyright 2024, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+syntax = "proto3";
+
+package spine_examples.pingh.client;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.pingh.spine.io";
+option java_package = "io.spine.examples.pingh.client";
+option java_outer_classname = "UserDataProto";
+option java_multiple_files = true;
+
+import "spine_examples/pingh/github/values.proto";
+import "spine_examples/pingh/sessions/identifiers.proto";
+import "spine_examples/pingh/client/settings.proto";
+
+// Local data for all users who have used this app on a specific device.
+//
+// The registry can store data for multiple users,
+// but only one user can be logged in at a time, or none at all.
+// If it holds local data for a logged-in user, it indicates that the user
+// is using the application.
+//
+message UserDataRegistry {
+
+    // A list containing the local data of all users.
+    //
+    // The list is empty if no user has logged into the app on this device.
+    //
+    repeated UserData data = 1;
+}
+
+// Local data specific to a user, stored on the device.
+//
+// Includes details about the current session, if active,
+// and the application settings configured by the user.
+//
+// A user is considered logged in if they have
+// an active session with the Pingh server.
+//
+message UserData {
+
+    // The name of the user to whom the data belongs.
+    spine_examples.pingh.github.Username user = 1 [(required) = true];
+
+    // The identifier of the current session with the Pingh server.
+    //
+    // If the user has no active session, this field is empty.
+    //
+    spine_examples.pingh.sessions.SessionId session = 2;
+
+    // The application settings applied by this user.
+    UserSettings settings = 3 [(required) = true];
+}

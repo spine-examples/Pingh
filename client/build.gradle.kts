@@ -24,6 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.dependency.AppDirs
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.KotlinX
@@ -36,6 +37,9 @@ plugins {
 }
 
 spine {
+    // Enable the code generation for the elements declared in Proto files.
+    assembleModel()
+
     // Add and configure required dependencies for developing a Spine-based Java client.
     // See: https://github.com/SpineEventEngine/bootstrap#java-projects
     enableJava().client()
@@ -52,6 +56,7 @@ dependencies {
     implementation(Grpc.netty)
     implementation(Grpc.inprocess)
     implementation(KotlinX.Coroutines.core)
+    implementation(AppDirs.lib)
 
     testImplementation(project(":testutil-client"))
     testImplementation(project(":testutil-mentions"))
