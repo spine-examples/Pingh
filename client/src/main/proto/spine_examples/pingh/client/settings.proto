@@ -35,6 +35,8 @@ option java_package = "io.spine.examples.pingh.client.settings";
 option java_outer_classname = "SettingsProto";
 option java_multiple_files = true;
 
+import "spine_examples/pingh/github/values.proto";
+
 // Information about the application settings for specific user.
 message UserSettings {
 
@@ -45,6 +47,12 @@ message UserSettings {
 
     // The interval after which the new mention notification is repeated.
     SnoozeTime snooze_time = 2 [(required) = true];
+
+    // List of ignored organizations and repositories.
+    //
+    // Mentions from these sources are ignored.
+    //
+    repeated IgnoredSource ignored = 3;
 }
 
 // Time after which the notification about the new mention is repeated.
@@ -59,4 +67,26 @@ enum SnoozeTime {
 
     // The interval is one day in duration.
     ONE_DAY = 3;
+}
+
+// A ignored source of mention.
+//
+// Mentions from ignored sources are not displayed on the Mentions page,
+// and no notifications are sent when new mentions occur in these sources.
+//
+message IgnoredSource {
+    oneof value {
+
+        // An ignored organization.
+        //
+        // User mentions within any repository of this organization are ignored.
+        //
+        spine_examples.pingh.github.OrganizationLogin organization = 1;
+
+        // An ignored repository.
+        //
+        // User mentions within this repository are ignored.
+        //
+        spine_examples.pingh.github.Repo repository = 2;
+    }
 }
