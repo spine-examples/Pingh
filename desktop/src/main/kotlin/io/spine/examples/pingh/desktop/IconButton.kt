@@ -27,17 +27,27 @@
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.unit.dp
 import java.awt.Cursor
 
 /**
@@ -45,7 +55,7 @@ import java.awt.Cursor
  * Since the button is circular, the icon should be scaled down
  * to avoid truncation at the edges.
  */
-private const val iconSizeMultiplier = 0.75f
+private const val circularIconSizeMultiplier = 0.75f
 
 /**
  * Displays a round button that contains icon.
@@ -53,28 +63,89 @@ private const val iconSizeMultiplier = 0.75f
  * @param icon The painter to draw icon.
  * @param onClick Called when this icon button is clicked.
  * @param modifier The modifier to be applied to this icon button.
+ * @param enabled Controls the enabled state of this icon button.
+ * @param shape The shape of this icon button's container.
  * @param colors The `IconButtonColors` that is used to resolve the colors used for this icon button
  *   in different states.
+ * @param tooltip The text to be displayed in the tooltip. If `null`, no tooltip is shown.
+ * @param sizeMultiplier The proportion of the button's size that the icon occupies.
  */
 @Composable
 internal fun IconButton(
     icon: Painter,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    colors: IconButtonColors = IconButtonDefaults.filledIconButtonColors()
+    enabled: Boolean = true,
+    shape: Shape = CircleShape,
+    colors: IconButtonColors = IconButtonDefaults.filledIconButtonColors(),
+    tooltip: String? = null,
+    sizeMultiplier: Float = circularIconSizeMultiplier
 ) {
-    FilledIconButton(
-        onClick = onClick,
-        modifier = modifier
-            .clip(CircleShape)
-            .pointerHoverIcon(PointerIcon(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))),
-        colors = colors
+    val wrapper = if (tooltip != null) wrapInTooltipArea(tooltip) else noWrap()
+    wrapper {
+        FilledIconButton(
+            onClick = onClick,
+            modifier = modifier
+                .pointerHoverIcon(PointerIcon(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))),
+            enabled = enabled,
+            shape = shape,
+            colors = colors
+        ) {
+            Icon(
+                painter = icon,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(sizeMultiplier),
+                tint = colors.contentColor
+            )
+        }
+    }
+}
+
+/**
+ * Returns composable function that wraps the content within
+ * a [tooltip] area using [TooltipBox].
+ *
+ * @param tooltip The text to be displayed in the tooltip.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+private fun wrapInTooltipArea(
+    tooltip: String
+): @Composable (content: @Composable () -> Unit) -> Unit =
+    { content ->
+        TooltipBox(
+            positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
+            tooltip = { TooltipContent(tooltip) },
+            state = rememberTooltipState(),
+            content = content
+        )
+    }
+
+/**
+ * Displays the tooltip's content.
+ *
+ * @param text The text to be displayed in the tooltip.
+ */
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun TooltipContent(text: String) {
+    val shape = TooltipDefaults.plainTooltipContainerShape
+    Surface(
+        modifier = Modifier.shadow(
+            elevation = 4.dp,
+            shape = shape
+        ),
+        color = MaterialTheme.colorScheme.secondary,
+        shape = shape
     ) {
-        Icon(
-            painter = icon,
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(iconSizeMultiplier),
-            tint = colors.contentColor
+        Text(
+            text = text,
+            modifier = Modifier.padding(10.dp),
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 }
+
+/**
+ * Returns a function that executes the given composable function.
+ */
+private fun noWrap(): @Composable (content: @Composable () -> Unit) -> Unit = { it() }
