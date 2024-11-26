@@ -32,6 +32,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +41,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -46,6 +49,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.Divider
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -59,28 +64,43 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import io.spine.example.pingh.desktop.generated.resources.Res
+import io.spine.example.pingh.desktop.generated.resources.add
 import io.spine.example.pingh.desktop.generated.resources.back
+import io.spine.example.pingh.desktop.generated.resources.remove
 import io.spine.examples.pingh.client.SettingsFlow
 import io.spine.examples.pingh.client.SettingsState
+import io.spine.examples.pingh.client.settings.IgnoredSource
 import io.spine.examples.pingh.client.settings.SnoozeTime
 import io.spine.examples.pingh.client.settings.label
 import io.spine.examples.pingh.client.settings.supported
+import io.spine.examples.pingh.github.OrganizationLogin
+import io.spine.examples.pingh.github.Repo
 import io.spine.examples.pingh.github.Username
+import io.spine.examples.pingh.github.of
 import org.jetbrains.compose.resources.painterResource
 
 /**
@@ -111,6 +131,7 @@ internal fun SettingsPage(
             Profile(flow, toLoginPage)
             SnoozeTimeOption(flow.settings)
             DndOption(flow.settings)
+            IgnoredSourcesOption(flow.settings)
         }
     }
 }
@@ -256,19 +277,63 @@ private fun ProfileControl(
 private fun LogOutButton(
     onClick: () -> Unit
 ) {
-    OutlinedButton(
+    SettingsButton(
         onClick = onClick,
-        modifier = Modifier.height(22.dp).testTag("logout-button"),
-        colors = ButtonDefaults.outlinedButtonColors(
+        text = "Log out",
+        modifier = Modifier.height(22.dp).testTag("logout-button")
+    )
+}
+
+/**
+ * Displays the button in the style of the settings page.
+ *
+ * @param onClick Called when this button is clicked.
+ * @param text The text displayed on this button.
+ * @param modifier The modifier to be applied to this button.
+ * @param enabled Controls the enabled state of this button.
+ *   If `false`, the button cannot be pressed.
+ * @param contentPadding The spacing values to apply internally between
+ *   the container and the content.
+ * @param usePrimaryColors If `true`, the button uses primary colors for its various states.
+ *   If `false`, it uses secondary colors instead.
+ */
+@Composable
+@Suppress("LongParameterList" /* For detailed customization. */)
+private fun SettingsButton(
+    onClick: () -> Unit,
+    text: String,
+    modifier: Modifier,
+    enabled: Boolean = true,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    usePrimaryColors: Boolean = false
+) {
+    val colors = if (usePrimaryColors) {
+        ButtonDefaults.outlinedButtonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        )
+    } else {
+        ButtonDefaults.outlinedButtonColors(
             containerColor = MaterialTheme.colorScheme.secondary,
             contentColor = MaterialTheme.colorScheme.onSecondary
-        ),
-        shape = MaterialTheme.shapes.medium,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground),
-        contentPadding = PaddingValues(0.dp),
+        )
+    }
+    val border = if (enabled && usePrimaryColors) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onBackground
+    }
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
+        shape = MaterialTheme.shapes.extraSmall,
+        colors = colors,
+        border = BorderStroke(1.dp, border),
+        contentPadding = contentPadding
     ) {
         Text(
-            text = "Log out",
+            text = text,
             style = MaterialTheme.typography.bodyMedium
         )
     }
@@ -448,5 +513,450 @@ private fun SegmentedButton(
                 label()
             }
         }
+    }
+}
+
+/**
+ * Displays a setting option for adding and removing ignored sources.
+ *
+ * @param state The state of the application settings.
+ */
+@Composable
+private fun IgnoredSourcesOption(state: SettingsState) {
+    var addDialogOpened by remember { mutableStateOf(false) }
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Option(
+            title = "Ignored repositories",
+            description = "Mentions from the following sources will be ignored.",
+            titleWight = 360.dp
+        ) {}
+        IgnoredSourceList(
+            state = state,
+            openDialog = { addDialogOpened = true }
+        )
+    }
+    if (addDialogOpened) {
+        AddIgnoredSourceDialog(
+            state = state,
+            onExit = { addDialogOpened = false }
+        )
+    }
+}
+
+/**
+ * Displays a list of ignored sources along with list controls.
+ *
+ * @param state The state of the application settings.
+ * @param openDialog Opens a dialog to add a new source.
+ */
+@Composable
+private fun IgnoredSourceList(
+    state: SettingsState,
+    openDialog: () -> Unit
+) {
+    val ignored by state.ignored.collectAsState()
+    val selected = remember { mutableStateOf<IgnoredSource?>(null) }
+    Column(
+        Modifier.fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.onBackground,
+                shape = MaterialTheme.shapes.extraSmall
+            )
+    ) {
+        IgnoredSourcesControl(
+            onAdd = openDialog,
+            onRemove = {
+                selected.value?.let { source ->
+                    state.removeFromIgnored(source)
+                }
+            },
+            sourceSelected = selected
+        )
+        if (ignored.isNotEmpty()) {
+            Divider(Modifier.fillMaxWidth())
+            ignored.forEach {
+                IgnoredSourceItem(it, selected)
+            }
+        }
+    }
+}
+
+/**
+ * Displays list controls for adding and removing sources.
+ *
+ * @param onAdd Called when the add button is clicked.
+ * @param onRemove Called when the remove button is clicked.
+ * @param sourceSelected The state of the selected source.
+ *   If no source is selected, the state value is `null`.
+ */
+@Composable
+private fun IgnoredSourcesControl(
+    onAdd: () -> Unit,
+    onRemove: () -> Unit,
+    sourceSelected: MutableState<IgnoredSource?>
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth()
+            .padding(2.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        SettingsIconButton(
+            icon = painterResource(Res.drawable.add),
+            onClick = onAdd,
+            tooltip = "Add new to ignored"
+        )
+        SettingsIconButton(
+            icon = painterResource(Res.drawable.remove),
+            onClick = {
+                onRemove()
+                sourceSelected.value = null
+            },
+            tooltip = "Remove selected from ignored",
+            enabled = sourceSelected.value != null,
+        )
+    }
+}
+
+/**
+ * Displays the icon button in the style of the settings page.
+ *
+ * @param icon The painter to draw icon.
+ * @param onClick Called when this icon button is clicked.
+ * @param tooltip The text to be displayed in the tooltip.
+ * @param enabled Controls the enabled state of this icon button.
+ * @param sizeMultiplier The proportion of the button's size that the icon occupies.
+ */
+@Composable
+private fun SettingsIconButton(
+    icon: Painter,
+    onClick: () -> Unit,
+    tooltip: String,
+    enabled: Boolean = true,
+    sizeMultiplier: Float = 0.85f
+) {
+    val contentColor = if (enabled) {
+        MaterialTheme.colorScheme.onSecondary
+    } else {
+        MaterialTheme.colorScheme.onBackground
+    }
+    IconButton(
+        icon = icon,
+        onClick = onClick,
+        modifier = Modifier.size(26.dp),
+        enabled = enabled,
+        shape = MaterialTheme.shapes.small,
+        colors = IconButtonDefaults.filledIconButtonColors(
+            containerColor = MaterialTheme.colorScheme.secondary,
+            contentColor = contentColor,
+            disabledContainerColor = MaterialTheme.colorScheme.secondary
+        ),
+        tooltip = tooltip,
+        sizeMultiplier = sizeMultiplier
+    )
+}
+
+/**
+ * Displays information about the ignored repository or organization.
+ *
+ * @param source The ignored repository or organization.
+ * @param selected The state of the selected source.
+ *   If no source is selected, the state value is `null`.
+ */
+@Composable
+private fun IgnoredSourceItem(
+    source: IgnoredSource,
+    selected: MutableState<IgnoredSource?>
+) {
+    val isSelected = selected.value?.equals(source) ?: false
+    val containerColor = if (isSelected) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.secondary
+    }
+    val contentColor = if (isSelected) {
+        MaterialTheme.colorScheme.onPrimary
+    } else {
+        MaterialTheme.colorScheme.onSecondary
+    }
+    val annotationString = buildAnnotatedString {
+        withStyle(
+            style = SpanStyle(color = contentColor)
+        ) {
+            if (source.hasOrganization()) {
+                append(source.organization.value.toString())
+            } else {
+                append(source.repository.run { "$owner/$name" })
+            }
+        }
+        if (source.hasOrganization()) {
+            withStyle(
+                style = SpanStyle(
+                    color = if (isSelected) {
+                        MaterialTheme.colorScheme.onPrimary
+                    } else {
+                        MaterialTheme.colorScheme.secondaryContainer
+                    }
+                )
+            ) {
+                append(" [All repos]")
+            }
+        }
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(30.dp)
+            .background(containerColor)
+            .semantics { role = Role.RadioButton }
+            .clickable {
+                selected.value = if (!isSelected) source else null
+            }
+            .padding(start = 5.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = annotationString,
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+
+/**
+ * Displays a dialog to specify a new ignored repository or organization.
+ *
+ * @param state The state of the application settings.
+ * @param onExit Closes the dialog.
+ */
+@Composable
+private fun AddIgnoredSourceDialog(
+    state: SettingsState,
+    onExit: () -> Unit
+) {
+    var org by remember { mutableStateOf("") }
+    var repos by remember { mutableStateOf("") }
+    val allRepos = remember { mutableStateOf(false) }
+    Dialog(
+        onDismissRequest = onExit
+    ) {
+        Column(
+            modifier = Modifier
+                .width(320.dp)
+                .height(240.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.secondary,
+                    shape = MaterialTheme.shapes.medium
+                )
+                .padding(horizontal = 30.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(15.dp, Alignment.CenterVertically)
+        ) {
+            OutlinedTextField(
+                value = org,
+                onValueChange = { org = it },
+                label = "Organization:"
+            )
+            AllReposSwitch(allRepos)
+            OutlinedTextField(
+                value = repos,
+                onValueChange = { repos = it },
+                label = "or specified repositories (comma-separated):",
+                enabled = !allRepos.value
+            )
+            DialogControl(
+                onCancel = onExit,
+                state = state,
+                org = org,
+                repos = repos,
+                allRepos = allRepos.value
+            )
+        }
+    }
+}
+
+/**
+ * Displays the text field in the style of the settings page.
+ *
+ * @param value The input text to be shown in the text field.
+ * @param onValueChange Called when the input service updates the text.
+ * @param label The text of the label displayed above the text field.
+ * @param enabled Controls the enabled state of this text field.
+ *   If `false`, the field value cannot be changed.
+ */
+@Composable
+private fun OutlinedTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    enabled: Boolean = true
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val borderWidth = if (isFocused) 2.dp else 1.dp
+    val borderColor = when {
+        !enabled -> MaterialTheme.colorScheme.onBackground
+        isFocused -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.secondaryContainer
+    }
+    val textColor = if (enabled) {
+        MaterialTheme.colorScheme.onSecondary
+    } else {
+        MaterialTheme.colorScheme.onBackground
+    }
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        Text(
+            text = label,
+            color = textColor,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(30.dp),
+            enabled = enabled,
+            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                color = textColor
+            ),
+            interactionSource = interactionSource,
+            singleLine = true
+        ) { innerTextField ->
+            Box(Modifier.fillMaxSize()) {
+                OutlinedTextFieldContainer(
+                    textField = innerTextField,
+                    border = BorderStroke(borderWidth, borderColor)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Displays a container for the text field.
+ *
+ * @param textField The composable function that displays the content of an input field.
+ * @param border The border of this input.
+ */
+@Composable
+private fun OutlinedTextFieldContainer(
+    textField: @Composable () -> Unit,
+    border: BorderStroke
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(30.dp)
+            .border(border = border, shape = MaterialTheme.shapes.extraSmall)
+            .background(
+                color = MaterialTheme.colorScheme.secondary,
+                shape = MaterialTheme.shapes.extraSmall
+            )
+            .padding(horizontal = 10.dp, vertical = 3.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            textField()
+        }
+    }
+}
+
+/**
+ * Displays a switch to add all repositories in the organization
+ * to the list of ignored sources.
+ *
+ * @param checked Whether switch is checked.
+ * @param switchScale The multiplier to scale switch along the horizontal and vertical axis.
+ */
+@Composable
+private fun AllReposSwitch(
+    checked: MutableState<Boolean>,
+    switchScale: Float = 0.5f
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        Switch(
+            checked = checked.value,
+            onCheckedChange = { checked.value = it },
+            modifier = Modifier
+                .scale(switchScale)
+                .width(30.dp)
+                .height(16.dp),
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.colorScheme.secondary,
+                checkedTrackColor = MaterialTheme.colorScheme.primary,
+                checkedBorderColor = MaterialTheme.colorScheme.primary,
+                uncheckedThumbColor = MaterialTheme.colorScheme.secondaryContainer,
+                uncheckedTrackColor = MaterialTheme.colorScheme.secondary,
+                uncheckedBorderColor = MaterialTheme.colorScheme.secondaryContainer
+            )
+        )
+        Text(
+            text = "All within organization",
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+
+/**
+ * Displays dialog box controls, such as closing the dialog box and adding a new source.
+ *
+ * @param state The state of the application settings.
+ * @param onCancel Called when cancel button is pressed.
+ * @param org The entered name of the organization.
+ * @param repos The entered name of the comma-separated repositories.
+ * @param allRepos Whether to include all repositories in the organization in the ignore list.
+ */
+@Composable
+private fun DialogControl(
+    state: SettingsState,
+    onCancel: () -> Unit,
+    org: String,
+    repos: String,
+    allRepos: Boolean
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().height(30.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End)
+    ) {
+        SettingsButton(
+            onClick = onCancel,
+            text = "Cancel",
+            modifier = Modifier.fillMaxHeight()
+        )
+        SettingsButton(
+            onClick = {
+                if (allRepos) {
+                    val source = OrganizationLogin::class.of(org)
+                    state.addToIgnored(source)
+                } else {
+                    repos.split(""",\s*""".toRegex())
+                        .map { name -> Repo::class.of(org, name) }
+                        .forEach { repo ->
+                            state.addToIgnored(repo)
+                        }
+                }
+                onCancel()
+            },
+            text = "Add to ignored",
+            modifier = Modifier.fillMaxHeight(),
+            enabled = org.isNotEmpty() && (allRepos || repos.isNotEmpty()),
+            contentPadding = PaddingValues(horizontal = 7.dp, vertical = 0.dp),
+            usePrimaryColors = true
+        )
     }
 }

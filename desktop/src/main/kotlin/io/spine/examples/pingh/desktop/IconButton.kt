@@ -71,6 +71,7 @@ private const val circularIconSizeMultiplier = 0.75f
  * @param sizeMultiplier The proportion of the button's size that the icon occupies.
  */
 @Composable
+@Suppress("LongParameterList" /* For detailed customization. */)
 internal fun IconButton(
     icon: Painter,
     onClick: () -> Unit,
