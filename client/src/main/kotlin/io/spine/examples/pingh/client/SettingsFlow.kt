@@ -102,7 +102,7 @@ public class SettingsState internal constructor(
 ) {
     private val _dndEnabled = MutableStateFlow(data.dndEnabled)
     private val _snoozeTime = MutableStateFlow(data.snoozeTime)
-    private val _ignored = MutableStateFlow(data.ignoredList)
+    private val _ignored = MutableStateFlow(data.ignoredList.filteredAndSorted())
 
     /**
      * If `true`, the user is not notified about new mentions and snooze expirations.
@@ -191,6 +191,27 @@ public class SettingsState internal constructor(
 }
 
 /**
+ * Filters and sorts ignored sources based on the following rules:
  *
+ * 1. Repositories belonging to any ignored organization are skipped.
+ * 2. Duplicates of sources are removed.
+ * 3. Organizations are listed first in ascending order,
+ *   followed by repositories in ascending order.
  */
-private fun List<IgnoredSource>.filteredAndSorted(): List<IgnoredSource> = this
+private fun List<IgnoredSource>.filteredAndSorted(): List<IgnoredSource> {
+    val orgs = this
+        .filter { it.hasOrganization() }
+        .distinct()
+        .sortedBy { it.organization.value }
+    val orgNames = orgs.map { it.organization.value }.toSet()
+    val repos = this
+        .filter { source ->
+            source.hasRepository() && !orgNames.contains(source.repository.owner)
+        }
+        .distinct()
+        .sortedWith(compareBy(
+            { it.repository.owner },
+            { it.repository.name }
+        ))
+    return orgs + repos
+}
