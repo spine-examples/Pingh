@@ -29,6 +29,7 @@ package io.spine.examples.pingh.client
 import com.google.protobuf.Duration
 import com.google.protobuf.util.Timestamps
 import io.spine.base.Time.currentTime
+import io.spine.examples.pingh.client.settings.isIgnored
 import io.spine.examples.pingh.client.settings.value
 import io.spine.examples.pingh.mentions.GitHubClientId
 import io.spine.examples.pingh.mentions.MentionId
@@ -78,7 +79,7 @@ public class MentionsFlow internal constructor(
         ensureLoggedIn()
         val id = UserMentionsId::class.of(session.username)
         client.observeEntity(id, UserMentions::class) { entity ->
-            mentions.value = entity.mentionList
+            mentions.value = entity.mentionList.notIgnored()
         }
     }
 
@@ -110,9 +111,15 @@ public class MentionsFlow internal constructor(
         )
         return userMentions
             ?.mentionList
-            ?.sortedByDescending { mention -> mention.whenMentioned.seconds }
+            ?.notIgnored()
             ?: emptyList()
     }
+
+    /**
+     * Returns a list of mentions from repositories that the user does not ignore.
+     */
+    private fun MentionsList.notIgnored(): MentionsList =
+        filter { mention -> !settings.current.isIgnored(mention.whereMentioned) }
 
     /**
      * Snoozes the mention.
@@ -147,6 +154,13 @@ public class MentionsFlow internal constructor(
         ensureLoggedIn()
         val command = MarkMentionAsRead::class.buildBy(id)
         client.send(command)
+    }
+
+    /**
+     * Updates the flow state by applying the current application settings.
+     */
+    internal fun applySettings() {
+        mentions.value = allMentions()
     }
 
     /**

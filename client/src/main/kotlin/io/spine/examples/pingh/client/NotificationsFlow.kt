@@ -31,6 +31,8 @@ import io.spine.base.EventMessage
 import io.spine.base.EventMessageField
 import io.spine.base.Field
 import io.spine.client.EventFilter.eq
+import io.spine.examples.pingh.client.settings.isIgnored
+import io.spine.examples.pingh.github.Repo
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
@@ -77,12 +79,22 @@ internal class NotificationsFlow(
          * List of information about available notifications.
          */
         private val notifications = listOf(
-            NotificationInfo(UserMentioned::class, "Pingh") { event ->
-                content(event.whenMentioned, event.whoMentioned, event.title)
-            },
-            NotificationInfo(MentionUnsnoozed::class, "Pingh") { event ->
-                content(event.whenMentioned, event.whoMentioned, event.title)
-            }
+            NotificationInfo(
+                UserMentioned::class,
+                "Pingh",
+                whereMentioned = { it.whereMentioned },
+                content = { event ->
+                    content(event.whenMentioned, event.whoMentioned, event.title)
+                }
+            ),
+            NotificationInfo(
+                MentionUnsnoozed::class,
+                "Pingh",
+                whereMentioned = { it.whereMentioned },
+                content = { event ->
+                    content(event.whenMentioned, event.whoMentioned, event.title)
+                }
+            )
         )
 
         private fun content(whenMentioned: Timestamp, whoMentioned: User, title: String): String =
@@ -115,7 +127,10 @@ internal class NotificationsFlow(
             notification.onEvent,
             eq(usernameField(), username)
         ) { event ->
-            if (!settings.current.dndEnabled) {
+            if (settings.current.run {
+                    !dndEnabled && !isIgnored(notification.whereMentioned(event))
+                }
+            ) {
                 sender.send(notification.title, notification.content(event))
             }
         }
@@ -134,11 +149,13 @@ internal class NotificationsFlow(
      *
      * @property onEvent The event that triggers the sending of a notification.
      * @property title The notification's title.
+     * @property whereMentioned Returns the repository where the user was mentioned.
      * @property content The notification's content.
      */
     private data class NotificationInfo<E : EventMessage>(
         val onEvent: KClass<E>,
         val title: String,
+        val whereMentioned: (event: E) -> Repo,
         val content: (event: E) -> String
     )
 }
