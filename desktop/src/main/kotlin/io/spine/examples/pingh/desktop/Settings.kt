@@ -48,8 +48,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -186,6 +188,7 @@ private fun SettingsHeader(
 private fun SettingsBox(
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val scrollState = rememberScrollState(0)
     Box(
         Modifier
             .fillMaxSize()
@@ -202,7 +205,8 @@ private fun SettingsBox(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 20.dp, vertical = 10.dp),
+                    .padding(horizontal = 20.dp, vertical = 10.dp)
+                    .verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(25.dp),
                 content = content
             )
