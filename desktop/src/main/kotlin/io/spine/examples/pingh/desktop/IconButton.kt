@@ -38,7 +38,6 @@ import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -90,7 +89,7 @@ internal fun IconButton(
     tooltip: String? = null,
     sizeMultiplier: Float = circularIconSizeMultiplier
 ) {
-    val wrapper = if (tooltip != null) wrapInTooltipArea(tooltip) else noWrap()
+    val wrapper = if (tooltip != null) wrapInTooltipBox(tooltip) else noWrap()
     wrapper {
         FilledIconButton(
             onClick = onClick,
@@ -117,7 +116,7 @@ internal fun IconButton(
  * @param tooltip The text to be displayed in the tooltip.
  */
 @OptIn(ExperimentalMaterial3Api::class)
-private fun wrapInTooltipArea(
+private fun wrapInTooltipBox(
     tooltip: String
 ): @Composable (content: @Composable () -> Unit) -> Unit =
     { content ->
@@ -142,9 +141,10 @@ private fun wrapInTooltipArea(
  */
 @Composable
 private fun rememberPositionProvider(tooltipAnchorSpacing: Dp = 0.dp): PopupPositionProvider {
-    val tooltipAnchorSpacingPx =
-        with(LocalDensity.current) { tooltipAnchorSpacing.roundToPx() }
-    return remember {
+    val tooltipAnchorSpacingPx = with(LocalDensity.current) {
+        tooltipAnchorSpacing.roundToPx()
+    }
+    return remember(tooltipAnchorSpacingPx) {
         object : PopupPositionProvider {
             override fun calculatePosition(
                 anchorBounds: IntRect,
@@ -172,9 +172,8 @@ private fun rememberPositionProvider(tooltipAnchorSpacing: Dp = 0.dp): PopupPosi
  * @param text The text to be displayed in the tooltip.
  */
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 private fun TooltipContent(text: String) {
-    val shape = TooltipDefaults.plainTooltipContainerShape
+    val shape = MaterialTheme.shapes.small
     Surface(
         modifier = Modifier.shadow(
             elevation = 4.dp,

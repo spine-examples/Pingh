@@ -29,8 +29,7 @@ package io.spine.examples.pingh.github
 import io.spine.validate.Validate
 
 /**
- * Returns `true` if the specified value is the valid [Username] value;
- * otherwise, returns `false`.
+ * Returns `true` if the specified value is the valid [Username] value.
  *
  * @param value The string to be validated against the `Username` value.
  */

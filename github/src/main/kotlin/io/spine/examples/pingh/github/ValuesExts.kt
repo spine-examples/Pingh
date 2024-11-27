@@ -110,7 +110,7 @@ public fun IssueOrPullRequestFragment.repo(): Repo = repoFrom(htmlUrl)
 /**
  * Parses a URL of an HTML GitHub item within the repository.
  *
- * Repository items are e.g. issues, fix requests, comments on issues,
+ * Repository items are e.g. issues, pull requests, comments on issues,
  * reviews, review comments, etc.
  */
 private fun repoFrom(htmlUrl: String): Repo {

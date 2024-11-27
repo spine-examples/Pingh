@@ -749,7 +749,7 @@ private fun AddIgnoredSourceDialog(state: SettingsState, onExit: () -> Unit) {
     val allRepos = remember { mutableStateOf(false) }
     val isAddButtonTriggered = remember { mutableStateOf(false) }
     val isAddButtonEnabled = isOrgValid && (isReposValid || allRepos.value)
-        Dialog(onDismissRequest = onExit) {
+    Dialog(onDismissRequest = onExit) {
         Column(
             modifier = Modifier
                 .width(320.dp)
@@ -817,7 +817,7 @@ private fun OutlinedTextField(
     label: String,
     enabled: Boolean = true,
     isError: Boolean = false,
-    onEnterPressed: () -> Unit
+    onEnterPressed: () -> Unit = {}
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
