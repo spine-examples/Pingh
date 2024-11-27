@@ -50,6 +50,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
@@ -76,6 +77,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.key.Key
@@ -587,8 +589,8 @@ private fun IgnoredSourceList(
         )
         if (ignored.isNotEmpty()) {
             Divider(Modifier.fillMaxWidth())
-            ignored.forEach {
-                IgnoredSourceItem(it, selected)
+            ignored.forEachIndexed { id, source ->
+                IgnoredSourceItem(id, ignored.size, source, selected)
             }
         }
     }
@@ -671,12 +673,16 @@ private fun SettingsIconButton(
 /**
  * Displays information about the ignored repository or organization.
  *
+ * @param index The index for this item in the list of ignored sources.
+ * @param count The count of items in the list of ignored sources.
  * @param source The ignored repository or organization.
  * @param selected The state of the selected source.
  *   If no source is selected, the state value is `null`.
  */
 @Composable
 private fun IgnoredSourceItem(
+    index: Int,
+    count: Int,
     source: IgnoredSource,
     selected: MutableState<IgnoredSource?>
 ) {
@@ -690,6 +696,14 @@ private fun IgnoredSourceItem(
         MaterialTheme.colorScheme.onPrimary
     } else {
         MaterialTheme.colorScheme.onSecondary
+    }
+    val shape = if (index + 1 < count) {
+        RectangleShape
+    } else {
+        MaterialTheme.shapes.extraSmall.copy(
+            topStart = CornerSize(0.dp),
+            topEnd = CornerSize(0.dp)
+        )
     }
     val annotationString = buildAnnotatedString {
         withStyle(
@@ -719,8 +733,12 @@ private fun IgnoredSourceItem(
         modifier = Modifier
             .fillMaxWidth()
             .height(30.dp)
-            .background(containerColor)
+            .background(
+                color = containerColor,
+                shape = shape
+            )
             .semantics { role = Role.RadioButton }
+            .clip(shape)
             .clickable {
                 selected.value = if (!isSelected) source else null
             }
