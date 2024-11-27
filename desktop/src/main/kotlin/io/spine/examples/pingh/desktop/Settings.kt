@@ -76,6 +76,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -734,18 +737,15 @@ private fun IgnoredSourceItem(
  * @param onExit Closes the dialog.
  */
 @Composable
-private fun AddIgnoredSourceDialog(
-    state: SettingsState,
-    onExit: () -> Unit
-) {
+private fun AddIgnoredSourceDialog(state: SettingsState, onExit: () -> Unit) {
     var org by remember { mutableStateOf("") }
     var isOrgValid by remember { mutableStateOf(false) }
     var repos by remember { mutableStateOf("") }
     var isReposValid by remember { mutableStateOf(false) }
     val allRepos = remember { mutableStateOf(false) }
-    Dialog(
-        onDismissRequest = onExit
-    ) {
+    val isAddButtonTriggered = remember { mutableStateOf(false) }
+    val isAddButtonEnabled = isOrgValid && (isReposValid || allRepos.value)
+        Dialog(onDismissRequest = onExit) {
         Column(
             modifier = Modifier
                 .width(320.dp)
@@ -765,7 +765,8 @@ private fun AddIgnoredSourceDialog(
                     org = value
                 },
                 label = "Organization:",
-                isError = !isOrgValid
+                isError = !isOrgValid,
+                onEnterPressed = { if (isAddButtonEnabled) isAddButtonTriggered.value = true }
             )
             AllReposSwitch(allRepos)
             OutlinedTextField(
@@ -777,12 +778,14 @@ private fun AddIgnoredSourceDialog(
                 },
                 label = "or specified repositories (comma-separated):",
                 enabled = !allRepos.value,
-                isError = !isReposValid
+                isError = !isReposValid,
+                onEnterPressed = { if (isAddButtonEnabled) isAddButtonTriggered.value = true }
             )
             DialogControl(
                 state = state,
                 onCancel = onExit,
-                addEnabled = isOrgValid && (isReposValid || allRepos.value),
+                addEnabled = isAddButtonEnabled,
+                isAddTriggered = isAddButtonTriggered,
                 org = org,
                 repos = repos,
                 allRepos = allRepos.value
@@ -799,14 +802,18 @@ private fun AddIgnoredSourceDialog(
  * @param label The text of the label displayed above the text field.
  * @param enabled Controls the enabled state of this text field.
  *   If `false`, the field value cannot be changed.
+ * @param isError Whether the input's current value is in error.
+ * @param onEnterPressed Called when this input is focused and the "Enter" key is pressed.
  */
 @Composable
+@Suppress("LongParameterList" /* For detailed customization. */)
 private fun OutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
     enabled: Boolean = true,
-    isError: Boolean = false
+    isError: Boolean = false,
+    onEnterPressed: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -840,7 +847,15 @@ private fun OutlinedTextField(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(30.dp),
+                .height(30.dp)
+                .onKeyEvent { event ->
+                    if (event.key == Key.Enter) {
+                        onEnterPressed()
+                        true
+                    } else {
+                        false
+                    }
+                },
             enabled = enabled,
             textStyle = MaterialTheme.typography.bodyMedium.copy(
                 color = textColor
@@ -942,6 +957,7 @@ private fun AllReposSwitch(
  * @param org The entered name of the organization.
  * @param repos The entered name of the comma-separated repositories.
  * @param allRepos Whether to include all repositories in the organization in the ignore list.
+ * @param isAddTriggered Whether the add button press is triggered externally.
  */
 @Composable
 @Suppress("LongParameterList" /* Requires a lot of data from the dialog form. */)
@@ -951,8 +967,26 @@ private fun DialogControl(
     addEnabled: Boolean,
     org: String,
     repos: String,
-    allRepos: Boolean
+    allRepos: Boolean,
+    isAddTriggered: MutableState<Boolean>
 ) {
+    val onAdd = {
+        if (allRepos) {
+            val source = OrganizationLogin::class.of(org)
+            state.addToIgnored(source)
+        } else {
+            repos.split(""",\s*""".toRegex())
+                .map { name -> Repo::class.of(org, name) }
+                .forEach { repo ->
+                    state.addToIgnored(repo)
+                }
+        }
+        onCancel()
+    }
+    if (addEnabled && isAddTriggered.value) {
+        onAdd()
+    }
+    isAddTriggered.value = false
     Row(
         modifier = Modifier.fillMaxWidth().height(30.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End)
@@ -963,19 +997,7 @@ private fun DialogControl(
             modifier = Modifier.fillMaxHeight()
         )
         SettingsButton(
-            onClick = {
-                if (allRepos) {
-                    val source = OrganizationLogin::class.of(org)
-                    state.addToIgnored(source)
-                } else {
-                    repos.split(""",\s*""".toRegex())
-                        .map { name -> Repo::class.of(org, name) }
-                        .forEach { repo ->
-                            state.addToIgnored(repo)
-                        }
-                }
-                onCancel()
-            },
+            onClick = onAdd,
             text = "Add to ignored",
             modifier = Modifier.fillMaxHeight(),
             enabled = addEnabled,
