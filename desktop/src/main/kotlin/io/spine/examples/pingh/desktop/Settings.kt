@@ -100,6 +100,8 @@ import io.spine.examples.pingh.client.settings.supported
 import io.spine.examples.pingh.github.OrganizationLogin
 import io.spine.examples.pingh.github.Repo
 import io.spine.examples.pingh.github.Username
+import io.spine.examples.pingh.github.isValidOrganization
+import io.spine.examples.pingh.github.isValidRepoName
 import io.spine.examples.pingh.github.of
 import org.jetbrains.compose.resources.painterResource
 
@@ -737,7 +739,9 @@ private fun AddIgnoredSourceDialog(
     onExit: () -> Unit
 ) {
     var org by remember { mutableStateOf("") }
+    var isOrgValid by remember { mutableStateOf(false) }
     var repos by remember { mutableStateOf("") }
+    var isReposValid by remember { mutableStateOf(false) }
     val allRepos = remember { mutableStateOf(false) }
     Dialog(
         onDismissRequest = onExit
@@ -756,19 +760,29 @@ private fun AddIgnoredSourceDialog(
         ) {
             OutlinedTextField(
                 value = org,
-                onValueChange = { org = it },
-                label = "Organization:"
+                onValueChange = { value ->
+                    isOrgValid = isValidOrganization(value)
+                    org = value
+                },
+                label = "Organization:",
+                isError = !isOrgValid
             )
             AllReposSwitch(allRepos)
             OutlinedTextField(
                 value = repos,
-                onValueChange = { repos = it },
+                onValueChange = { value ->
+                    isReposValid = value.split(""",\s*""".toRegex())
+                        .all { isValidRepoName(it) }
+                    repos = value
+                },
                 label = "or specified repositories (comma-separated):",
-                enabled = !allRepos.value
+                enabled = !allRepos.value,
+                isError = !isReposValid
             )
             DialogControl(
-                onCancel = onExit,
                 state = state,
+                onCancel = onExit,
+                addEnabled = isOrgValid && (isReposValid || allRepos.value),
                 org = org,
                 repos = repos,
                 allRepos = allRepos.value
@@ -791,13 +805,16 @@ private fun OutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    isError: Boolean = false
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     val borderWidth = if (isFocused) 2.dp else 1.dp
+    var wasChanged by remember { mutableStateOf(false) }
     val borderColor = when {
         !enabled -> MaterialTheme.colorScheme.onBackground
+        isError && wasChanged -> MaterialTheme.colorScheme.error
         isFocused -> MaterialTheme.colorScheme.primary
         else -> MaterialTheme.colorScheme.secondaryContainer
     }
@@ -817,7 +834,10 @@ private fun OutlinedTextField(
         )
         BasicTextField(
             value = value,
-            onValueChange = onValueChange,
+            onValueChange = { value ->
+                wasChanged = true
+                onValueChange(value)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(30.dp),
@@ -917,14 +937,18 @@ private fun AllReposSwitch(
  *
  * @param state The state of the application settings.
  * @param onCancel Called when cancel button is pressed.
+ * @param addEnabled Controls the enabled state of the add button.
+ *   If `false`, the add  button cannot be pressed.
  * @param org The entered name of the organization.
  * @param repos The entered name of the comma-separated repositories.
  * @param allRepos Whether to include all repositories in the organization in the ignore list.
  */
 @Composable
+@Suppress("LongParameterList" /* Requires a lot of data from the dialog form. */)
 private fun DialogControl(
     state: SettingsState,
     onCancel: () -> Unit,
+    addEnabled: Boolean,
     org: String,
     repos: String,
     allRepos: Boolean
@@ -954,7 +978,7 @@ private fun DialogControl(
             },
             text = "Add to ignored",
             modifier = Modifier.fillMaxHeight(),
-            enabled = org.isNotEmpty() && (allRepos || repos.isNotEmpty()),
+            enabled = addEnabled,
             contentPadding = PaddingValues(horizontal = 7.dp, vertical = 0.dp),
             usePrimaryColors = true
         )

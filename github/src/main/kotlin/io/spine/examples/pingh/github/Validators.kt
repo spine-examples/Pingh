@@ -38,7 +38,34 @@ public fun isValidUsername(value: String): Boolean {
     val unvalidatedUsername = Username.newBuilder()
         .setValue(value)
         .buildPartial()
-    return Validate
-        .violationsOf(unvalidatedUsername)
+    return Validate.violationsOf(unvalidatedUsername)
         .isEmpty()
+}
+
+/**
+ * Returns `true` if the specified value is the valid [OrganizationLogin] value.
+ *
+ * @param value The string to be validated against the `OrganizationLogin` value.
+ */
+public fun isValidOrganization(value: String): Boolean {
+    val unvalidatedOrganization = OrganizationLogin.newBuilder()
+        .setValue(value)
+        .buildPartial()
+    return Validate.violationsOf(unvalidatedOrganization)
+        .isEmpty()
+}
+
+/**
+ * Returns `true` if the specified value is the valid name of [Repo] value.
+ *
+ * @param value The string to be validated against the name of `Repo` value.
+ */
+public fun isValidRepoName(value: String): Boolean {
+    val repoWithNameOnly = Repo.newBuilder()
+        .setName(value)
+        .buildPartial()
+    // The repository owner is not specified, which is required.
+    // Therefore, if the repository name is valid,
+    // the validation should return only one violation.
+    return Validate.violationsOf(repoWithNameOnly).size == 1
 }
