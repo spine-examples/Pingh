@@ -706,9 +706,7 @@ private fun IgnoredSourceItem(
         )
     }
     val annotationString = buildAnnotatedString {
-        withStyle(
-            style = SpanStyle(color = contentColor)
-        ) {
+        withStyle(style = SpanStyle(color = contentColor)) {
             if (source.hasOrganization()) {
                 append(source.organization.value.toString())
             } else {
@@ -730,18 +728,12 @@ private fun IgnoredSourceItem(
         }
     }
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
             .height(30.dp)
-            .background(
-                color = containerColor,
-                shape = shape
-            )
+            .background(containerColor, shape)
             .semantics { role = Role.RadioButton }
             .clip(shape)
-            .clickable {
-                selected.value = if (!isSelected) source else null
-            }
+            .clickable { selected.value = if (!isSelected) source else null }
             .padding(start = 5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
