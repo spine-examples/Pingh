@@ -69,3 +69,10 @@ message LogUserOut {
     // The ID of user session.
     SessionId id = 1;
 }
+
+// Tells to close this session, and delete its data.
+message CloseSession {
+
+    // The ID of user session.
+    SessionId id = 1;
+}

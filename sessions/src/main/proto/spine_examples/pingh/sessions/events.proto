@@ -100,3 +100,10 @@ message UserLoggedOut {
     // The ID of user session.
     SessionId id = 1;
 }
+
+// The user session was closed, and its data was deleted.
+message SessionClosed {
+
+    // The ID of user session.
+    SessionId id = 1;
+}
