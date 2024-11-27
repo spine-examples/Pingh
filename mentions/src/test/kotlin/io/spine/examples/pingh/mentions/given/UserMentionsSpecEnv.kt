@@ -87,5 +87,6 @@ internal fun KClass<MentionUnsnoozed>.from(event: UserMentioned): MentionUnsnooz
         whoMentioned = event.whoMentioned
         title = event.title
         whenMentioned = event.whenMentioned
+        whereMentioned = event.whereMentioned
         vBuild()
     }

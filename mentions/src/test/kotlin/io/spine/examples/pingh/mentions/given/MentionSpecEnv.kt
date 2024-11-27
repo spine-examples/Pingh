@@ -90,6 +90,7 @@ internal fun KClass<Mention>.buildBy(
         whoMentioned = event.whoMentioned
         title = event.title
         whenMentioned = event.whenMentioned
+        whereMentioned = event.whereMentioned
         if (!Objects.equals(snoozedUntilWhen, null)) {
             this.snoozeUntilWhen = snoozedUntilWhen
         }
