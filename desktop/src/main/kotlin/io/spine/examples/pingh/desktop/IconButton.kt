@@ -41,13 +41,21 @@ import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupPositionProvider
 import java.awt.Cursor
 
 /**
@@ -114,12 +122,49 @@ private fun wrapInTooltipArea(
 ): @Composable (content: @Composable () -> Unit) -> Unit =
     { content ->
         TooltipBox(
-            positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
+            positionProvider = rememberPositionProvider(4.dp),
             tooltip = { TooltipContent(tooltip) },
             state = rememberTooltipState(),
             content = content
         )
     }
+
+/**
+ * Creates a `PopupPositionProvider` to calculate the tooltip's coordinates
+ * based on the anchor data.
+ *
+ * The tooltip is positioned below the anchor by default, shifting to the right
+ * if the tooltip content fits within the screen. If there isn't enough space below,
+ * the tooltip appears above the anchor. If there isn't enough space on the right,
+ * the tooltip shifts to the left.
+ *
+ * @param tooltipAnchorSpacing The spacing between the tooltip and the anchor content.
+ */
+@Composable
+private fun rememberPositionProvider(tooltipAnchorSpacing: Dp = 0.dp): PopupPositionProvider {
+    val tooltipAnchorSpacingPx =
+        with(LocalDensity.current) { tooltipAnchorSpacing.roundToPx() }
+    return remember {
+        object : PopupPositionProvider {
+            override fun calculatePosition(
+                anchorBounds: IntRect,
+                windowSize: IntSize,
+                layoutDirection: LayoutDirection,
+                popupContentSize: IntSize
+            ): IntOffset {
+                var x = anchorBounds.left
+                if (x + popupContentSize.width > windowSize.width) {
+                    x = anchorBounds.right - popupContentSize.width
+                }
+                var y = anchorBounds.bottom + tooltipAnchorSpacingPx
+                if (y + popupContentSize.height > windowSize.height) {
+                    y = anchorBounds.top - popupContentSize.height - tooltipAnchorSpacingPx
+                }
+                return IntOffset(x, y)
+            }
+        }
+    }
+}
 
 /**
  * Displays the tooltip's content.
