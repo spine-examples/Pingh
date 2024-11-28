@@ -23,6 +23,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 syntax = "proto3";
 
 package spine_examples.pingh.sessions;
@@ -30,29 +31,30 @@ package spine_examples.pingh.sessions;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.pingh.spine.io";
-option java_package = "io.spine.examples.pingh.sessions";
-option java_outer_classname = "IdentifiersProto";
+option java_package = "io.spine.examples.pingh.sessions.event";
+option java_outer_classname = "TokenMonitorEventsProto";
 option java_multiple_files = true;
 
-import "spine_examples/pingh/github/values.proto";
+import "spine_examples/pingh/sessions/identifiers.proto";
 import "google/protobuf/timestamp.proto";
 
-// Identifies a user session.
-//
-// A single user can have multiple sessions created at different times.
-//
-message SessionId {
+// The process of monitoring token expiration was started.
+message TokenMonitoringStarted {
 
-    // The name of GitHub user that created session.
-    spine_examples.pingh.github.Username username = 1 [(required) = true];
-
-    // The time when the session was created.
-    google.protobuf.Timestamp when_created = 2 [(required) = true];
+    // The identifier of the token expiration monitoring process.
+    TokenMonitorId id = 1;
 }
 
-// The identifier of the token expiration monitoring process.
-message TokenMonitorId {
+// The process of monitoring token expiration was finished.
+message TokenMonitoringFinished {
 
-    // The identifier of the session whose token is being monitored.
-    SessionId session = 1 [(required) = true];
+    // The identifier of the token expiration monitoring process.
+    TokenMonitorId id = 1;
+}
+
+// The expiration time of the access token was updated.
+message TokenExpirationTimeUpdated {
+
+    // The identifier of the token expiration monitoring process.
+    TokenMonitorId id = 1;
 }

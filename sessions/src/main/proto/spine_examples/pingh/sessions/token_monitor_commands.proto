@@ -30,29 +30,19 @@ package spine_examples.pingh.sessions;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.pingh.spine.io";
-option java_package = "io.spine.examples.pingh.sessions";
-option java_outer_classname = "IdentifiersProto";
+option java_package = "io.spine.examples.pingh.sessions.command";
+option java_outer_classname = "TokenMonitorCommandsProto";
 option java_multiple_files = true;
 
-import "spine_examples/pingh/github/values.proto";
+import "spine_examples/pingh/sessions/identifiers.proto";
 import "google/protobuf/timestamp.proto";
 
-// Identifies a user session.
-//
-// A single user can have multiple sessions created at different times.
-//
-message SessionId {
+// Tells to update GitHub personal access token.
+message UpdateToken {
 
-    // The name of GitHub user that created session.
-    spine_examples.pingh.github.Username username = 1 [(required) = true];
+    // The identifier of the token expiration monitoring process.
+    TokenMonitorId id = 1;
 
-    // The time when the session was created.
-    google.protobuf.Timestamp when_created = 2 [(required) = true];
-}
-
-// The identifier of the token expiration monitoring process.
-message TokenMonitorId {
-
-    // The identifier of the session whose token is being monitored.
-    SessionId session = 1 [(required) = true];
+    // The time when the access token update is requested.
+    google.protobuf.Timestamp when_requested = 2 [(required) = true];
 }

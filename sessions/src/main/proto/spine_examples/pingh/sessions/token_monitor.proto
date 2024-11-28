@@ -23,6 +23,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 syntax = "proto3";
 
 package spine_examples.pingh.sessions;
@@ -31,28 +32,33 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.pingh.spine.io";
 option java_package = "io.spine.examples.pingh.sessions";
-option java_outer_classname = "IdentifiersProto";
+option java_outer_classname = "TokenMonitorProto";
 option java_multiple_files = true;
 
-import "spine_examples/pingh/github/values.proto";
+import "spine_examples/pingh/sessions/identifiers.proto";
 import "google/protobuf/timestamp.proto";
 
-// Identifies a user session.
+// A process that observes the expiration of the GitHub access token.
 //
-// A single user can have multiple sessions created at different times.
+// This process sends an `UpdateToken` command when the current access token expires.
+// If a new access token for the session is not obtained within one minute of the update request,
+// it sends another `UpdateToken` command. This cycle continues until
+// a new access token is received.
 //
-message SessionId {
+// Token observation begins when the user logs in and ends when the user logs out.
+//
+message TokenMonitor {
+    option (entity) = { kind: PROCESS_MANAGER };
 
-    // The name of GitHub user that created session.
-    spine_examples.pingh.github.Username username = 1 [(required) = true];
+    // The identifier of the token expiration monitoring process.
+    TokenMonitorId id = 1;
 
-    // The time when the session was created.
-    google.protobuf.Timestamp when_created = 2 [(required) = true];
-}
+    // The expiration time of the token.
+    google.protobuf.Timestamp when_expires = 2 [(required) = true];
 
-// The identifier of the token expiration monitoring process.
-message TokenMonitorId {
-
-    // The identifier of the session whose token is being monitored.
-    SessionId session = 1 [(required) = true];
+    // The time when the last token update command was sent.
+    //
+    // This field remains empty if the access token has not expired.
+    //
+    google.protobuf.Timestamp when_update_requested = 3;
 }

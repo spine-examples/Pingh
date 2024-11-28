@@ -36,7 +36,6 @@ option java_multiple_files = true;
 
 import "spine_examples/pingh/sessions/identifiers.proto";
 import "spine_examples/pingh/github/values.proto";
-import "google/protobuf/timestamp.proto";
 
 // The process of session existence.
 //
@@ -57,15 +56,12 @@ message UserSession {
     //
     spine_examples.pingh.github.DeviceCode device_code = 2;
 
-    // The expiration time of the `PersonalAccessToken` received at login.
-    //
-    // This field is specified if the user is logged in.
-    //
-    google.protobuf.Timestamp when_access_token_expires = 3;
-
     // The token used to renew the `PersonalAccessToken` when it expires.
     //
     // This field is specified if the user is logged in.
     //
     spine_examples.pingh.github.RefreshToken refresh_token = 4;
+
+    reserved 3;
+    reserved "when_access_token_expires";
 }
