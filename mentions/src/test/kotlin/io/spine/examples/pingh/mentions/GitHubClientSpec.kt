@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.mentions
 
 import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Timestamps
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import io.ktor.http.HttpStatusCode
@@ -49,8 +50,7 @@ import io.spine.examples.pingh.mentions.given.expectedUserMentionedSet
 import io.spine.examples.pingh.mentions.given.generate
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.sessions.SessionId
-import io.spine.examples.pingh.sessions.buildBy
-import io.spine.examples.pingh.sessions.event.TokenRefreshed
+import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.examples.pingh.sessions.of
@@ -104,7 +104,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
     private fun emitUserLoggedInEvent() {
         token = PersonalAccessToken::class.of(randomString())
         sessionId = SessionId::class.of(gitHubClientId.username)
-        val userLoggedIn = UserLoggedIn::class.buildBy(sessionId, token)
+        val userLoggedIn = UserLoggedIn::class.with(sessionId, token, Timestamps.MAX_VALUE)
         sessionContext.receivesEvent(userLoggedIn)
     }
 
@@ -144,7 +144,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
         @BeforeEach
         internal fun emitTokenRefreshedEvent() {
             newToken = PersonalAccessToken::class.of(randomString())
-            val event = TokenRefreshed::class.with(sessionId, newToken, currentTime())
+            val event = TokenUpdated::class.with(sessionId, newToken, currentTime())
             sessionContext.receivesEvent(event)
         }
 

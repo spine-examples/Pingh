@@ -158,7 +158,7 @@ internal class UserSessionProcess :
         val tokens = auth.refreshAccessToken(state().refreshToken)
         builder().setRefreshToken(tokens.refreshToken)
         return TokenUpdated::class.with(
-            command.id, tokens.accessToken, command.whenRequested
+            command.id, tokens.accessToken, tokens.whenExpires
         )
     }
 
@@ -168,7 +168,7 @@ internal class UserSessionProcess :
     @Assign
     internal fun handle(command: LogUserOut): UserLoggedOut {
         deleted = true
-        return UserLoggedOut::class.buildBy(command.id)
+        return UserLoggedOut::class.with(command.id)
     }
 
     /**

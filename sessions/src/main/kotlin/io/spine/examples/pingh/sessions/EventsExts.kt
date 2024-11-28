@@ -111,7 +111,7 @@ public fun KClass<TokenUpdated>.with(
 /**
  * Creates a new `UserLoggedOut` event with the specified ID of the session.
  */
-public fun KClass<UserLoggedOut>.buildBy(id: SessionId): UserLoggedOut =
+public fun KClass<UserLoggedOut>.with(id: SessionId): UserLoggedOut =
     UserLoggedOut.newBuilder()
         .setId(id)
         .vBuild()

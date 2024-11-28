@@ -1,0 +1,188 @@
+/*
+ * Copyright 2024, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package io.spine.examples.pingh.sessions
+
+import com.google.protobuf.Timestamp
+import io.spine.base.Time.currentTime
+import io.spine.examples.pingh.clock.buildBy
+import io.spine.examples.pingh.clock.event.TimePassed
+import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.sessions.command.UpdateToken
+import io.spine.examples.pingh.sessions.event.TokenExpirationTimeUpdated
+import io.spine.examples.pingh.sessions.event.TokenMonitoringFinished
+import io.spine.examples.pingh.sessions.event.TokenMonitoringStarted
+import io.spine.examples.pingh.sessions.event.TokenUpdated
+import io.spine.examples.pingh.sessions.event.UserLoggedIn
+import io.spine.examples.pingh.sessions.event.UserLoggedOut
+import io.spine.examples.pingh.sessions.given.generate
+import io.spine.examples.pingh.sessions.given.with
+import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
+import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubUsersResponses
+import io.spine.protobuf.Durations2.minutes
+import io.spine.protobuf.Durations2.seconds
+import io.spine.server.BoundedContextBuilder
+import io.spine.server.integration.ThirdPartyContext
+import io.spine.testing.core.given.GivenUserId
+import io.spine.testing.server.blackbox.ContextAwareTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+
+@DisplayName("`TokenMonitor` should")
+internal class TokenMonitorSpec : ContextAwareTest() {
+
+    private lateinit var session: SessionId
+    private lateinit var id: TokenMonitorId
+    private lateinit var whenExpired: Timestamp
+
+    override fun contextBuilder(): BoundedContextBuilder = newSessionsContext(
+        PredefinedGitHubAuthenticationResponses(),
+        PredefinedGitHubUsersResponses()
+    )
+
+    @BeforeEach
+    internal fun startProcess() {
+        session = SessionId::class.generate()
+        id = TokenMonitorId::class.of(session)
+        whenExpired = currentTime()
+        val event = UserLoggedIn::class.with(
+            session, PersonalAccessToken::class.generate(), whenExpired
+        )
+        context().receivesEvent(event)
+    }
+
+    @Nested
+    internal inner class
+    `React on 'UserLoggedIn' event, and` {
+
+        @Test
+        internal fun `specifies expiration time`() {
+            val state = TokenMonitor::class.with(id, whenExpired)
+            context().assertState(id, state)
+        }
+
+        @Test
+        internal fun `emits 'TokenMonitoringStarted' event`() {
+            val event = TokenMonitoringStarted::class.with(id)
+            context().assertEvent(event)
+        }
+    }
+
+    @Nested internal inner class
+    `React on 'TimePassed' event, and` {
+
+        @Test
+        internal fun `do nothing if token doesn't expire`() {
+            emitTimePassedEvent(whenExpired.add(minutes(-1)))
+            context().assertCommands()
+                .withType(UpdateToken::class.java)
+                .hasSize(0)
+        }
+
+        @Test
+        internal fun `send 'UpdateToken' command if token expires`() {
+            val time = whenExpired.add(minutes(1))
+            emitTimePassedEvent(time)
+            val command = UpdateToken::class.with(session, time)
+            val subject = context().assertCommands()
+                .withType(UpdateToken::class.java)
+            subject.hasSize(1)
+            subject.message(0)
+                .isEqualTo(command)
+        }
+
+        @Test
+        internal fun `do nothing if update process is in progress`() {
+            val time = whenExpired.add(minutes(1))
+            emitTimePassedEvent(time)
+            context().assertCommands()
+                .withType(UpdateToken::class.java)
+                .hasSize(1)
+            emitTimePassedEvent(time.add(seconds(1)))
+            context().assertCommands()
+                .withType(UpdateToken::class.java)
+                .hasSize(1)
+        }
+
+        private fun emitTimePassedEvent(time: Timestamp) {
+            val clockContext = ThirdPartyContext.singleTenant("Clock")
+            val event = TimePassed::class.buildBy(time)
+            val actor = GivenUserId.generated()
+            clockContext.emittedEvent(event, actor)
+        }
+    }
+
+    @Nested
+    internal inner class
+    `React on 'TokenUpdated' event, and` {
+
+        @BeforeEach
+        internal fun emit() {
+            whenExpired = whenExpired.add(minutes(1))
+            val event = TokenUpdated::class.with(
+                session, PersonalAccessToken::class.generate(), whenExpired
+            )
+            context().receivesEvent(event)
+        }
+
+        @Test
+        internal fun `update the expiration time and finishes the token update process`() {
+            val state = TokenMonitor::class.with(id, whenExpired)
+            context().assertState(id, state)
+        }
+
+        @Test
+        internal fun `emits 'TokenExpirationTimeUpdated' event`() {
+            val event = TokenExpirationTimeUpdated::class.with(id)
+            context().assertEvent(event)
+        }
+    }
+
+    @Nested
+    internal inner class
+    `React on 'UserLoggedOut' event, and` {
+
+        @BeforeEach
+        internal fun emit() {
+            val event = UserLoggedOut::class.with(session)
+            context().receivesEvent(event)
+        }
+
+        @Test
+        internal fun `delete process state`() {
+            context().assertEntity(id, TokenMonitorProcess::class.java)
+                .deletedFlag()
+        }
+
+        @Test
+        internal fun `emits 'TokenMonitoringFinished' event`() {
+            val event = TokenMonitoringFinished::class.with(id)
+            context().assertEvent(event)
+        }
+    }
+}

@@ -44,7 +44,7 @@ import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
 import io.spine.examples.pingh.mentions.event.RequestMentionsFromGitHubFailed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.MentionsUpdateIsAlreadyInProgress
-import io.spine.examples.pingh.sessions.event.TokenRefreshed
+import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.protobuf.Durations2.minutes
 import io.spine.protobuf.Durations2.toNanos
@@ -101,7 +101,7 @@ internal class GitHubClientProcess :
      * Updates the user's [PersonalAccessToken] each time it is refreshed.
      */
     @React
-    internal fun on(@External event: TokenRefreshed): GitHubTokenUpdated {
+    internal fun on(@External event: TokenUpdated): GitHubTokenUpdated {
         builder().setToken(event.token)
         return GitHubTokenUpdated::class.buildBy(
             GitHubClientId::class.of(event.id.username),
