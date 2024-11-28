@@ -33,15 +33,18 @@ import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.command.RefreshToken
 import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
+import io.spine.examples.pingh.sessions.event.SessionClosed
 import io.spine.examples.pingh.sessions.event.TokenRefreshed
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.examples.pingh.sessions.rejection.NotMemberOfPermittedOrgs
+import io.spine.examples.pingh.sessions.rejection.Rejections
 import io.spine.examples.pingh.sessions.rejection.UsernameMismatch
 import io.spine.server.command.Assign
 import io.spine.server.command.Command
+import io.spine.server.event.React
 import io.spine.server.procman.ProcessManager
 import io.spine.server.tuple.EitherOf2
 import java.util.Optional
@@ -186,6 +189,32 @@ internal class UserSessionProcess :
     internal fun handle(command: LogUserOut): UserLoggedOut {
         deleted = true
         return UserLoggedOut::class.buildBy(command.id)
+    }
+
+    /**
+     * Closes the user session if a `UsernameMismatch` rejection is emitted
+     * during the login process.
+     *
+     * A `UsernameMismatch` rejection is a critical exception
+     * that prevents the login process from being completed.
+     */
+    @React
+    internal fun on(rejection: Rejections.UsernameMismatch): SessionClosed {
+        deleted = true
+        return SessionClosed::class.with(rejection.id)
+    }
+
+    /**
+     * Closes the user session if a `NotMemberOfPermittedOrgs` rejection is emitted
+     * during the login process.
+     *
+     * A `NotMemberOfPermittedOrgs` rejection is a critical exception
+     * that prevents the login process from being completed.
+     */
+    @React
+    internal fun on(rejection: Rejections.NotMemberOfPermittedOrgs): SessionClosed {
+        deleted = true
+        return SessionClosed::class.with(rejection.id)
     }
 
     /**

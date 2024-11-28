@@ -32,6 +32,7 @@ import com.google.protobuf.Duration
 import com.google.protobuf.Timestamp
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.UserCode
+import io.spine.examples.pingh.sessions.event.SessionClosed
 import io.spine.examples.pingh.sessions.event.TokenRefreshed
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
@@ -104,5 +105,13 @@ public fun KClass<TokenRefreshed>.with(
  */
 public fun KClass<UserLoggedOut>.buildBy(id: SessionId): UserLoggedOut =
     UserLoggedOut.newBuilder()
+        .setId(id)
+        .vBuild()
+
+/**
+ * Creates a new `SessionClosed` event with the passed ID of the session.
+ */
+public fun KClass<SessionClosed>.with(id: SessionId): SessionClosed =
+    SessionClosed.newBuilder()
         .setId(id)
         .vBuild()
