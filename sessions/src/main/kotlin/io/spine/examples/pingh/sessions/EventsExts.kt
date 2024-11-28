@@ -33,7 +33,10 @@ import com.google.protobuf.Timestamp
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.sessions.event.SessionClosed
-import io.spine.examples.pingh.sessions.event.TokenRefreshed
+import io.spine.examples.pingh.sessions.event.TokenExpirationTimeUpdated
+import io.spine.examples.pingh.sessions.event.TokenMonitoringFinished
+import io.spine.examples.pingh.sessions.event.TokenMonitoringStarted
+import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
@@ -68,13 +71,18 @@ public fun KClass<UserCodeReceived>.buildWith(
         .vBuild()
 
 /**
- * Creates a new `UserLoggedIn` event with the specified ID of the session
- * and `PersonalAccessToken`.
+ * Creates a new `UserLoggedIn` event with the specified ID of the session,
+ * `PersonalAccessToken` and time this token expires.
  */
-public fun KClass<UserLoggedIn>.buildBy(id: SessionId, token: PersonalAccessToken): UserLoggedIn =
+public fun KClass<UserLoggedIn>.with(
+    id: SessionId,
+    token: PersonalAccessToken,
+    whenTokenExpires: Timestamp
+): UserLoggedIn =
     UserLoggedIn.newBuilder()
         .setId(id)
         .setToken(token)
+        .setWhenTokenExpires(whenTokenExpires)
         .vBuild()
 
 /**
@@ -86,18 +94,18 @@ public fun KClass<UserIsNotLoggedIntoGitHub>.withSession(id: SessionId): UserIsN
         .vBuild()
 
 /**
- * Creates a new `TokenRefreshed` event with the specified ID of the session, `PersonalAccessToken`,
- * and the time the refresh occurred.
+ * Creates a new `TokenUpdated` event with the specified ID of the session,
+ * `PersonalAccessToken`, and the time the update occurred.
  */
-public fun KClass<TokenRefreshed>.with(
+public fun KClass<TokenUpdated>.with(
     id: SessionId,
     token: PersonalAccessToken,
-    whenRefreshed: Timestamp
-): TokenRefreshed =
-    TokenRefreshed.newBuilder()
+    whenUpdated: Timestamp
+): TokenUpdated =
+    TokenUpdated.newBuilder()
         .setId(id)
         .setToken(token)
-        .setWhenRefreshed(whenRefreshed)
+        .setWhenUpdated(whenUpdated)
         .vBuild()
 
 /**
@@ -113,5 +121,32 @@ public fun KClass<UserLoggedOut>.buildBy(id: SessionId): UserLoggedOut =
  */
 public fun KClass<SessionClosed>.with(id: SessionId): SessionClosed =
     SessionClosed.newBuilder()
+        .setId(id)
+        .vBuild()
+
+/**
+ * Creates a new `TokenMonitoringStarted` event
+ * with the passed ID of the token monitoring process.
+ */
+public fun KClass<TokenMonitoringStarted>.with(id: TokenMonitorId): TokenMonitoringStarted =
+    TokenMonitoringStarted.newBuilder()
+        .setId(id)
+        .vBuild()
+
+/**
+ * Creates a new `TokenMonitoringFinished` event
+ * with the passed ID of the token monitoring process.
+ */
+public fun KClass<TokenMonitoringFinished>.with(id: TokenMonitorId): TokenMonitoringFinished =
+    TokenMonitoringFinished.newBuilder()
+        .setId(id)
+        .vBuild()
+
+/**
+ * Creates a new `TokenExpirationTimeUpdated` event
+ * with the passed ID of the token monitoring process.
+ */
+public fun KClass<TokenExpirationTimeUpdated>.with(id: TokenMonitorId): TokenExpirationTimeUpdated =
+    TokenExpirationTimeUpdated.newBuilder()
         .setId(id)
         .vBuild()
