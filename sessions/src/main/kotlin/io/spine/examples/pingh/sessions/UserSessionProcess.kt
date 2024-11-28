@@ -26,15 +26,13 @@
 
 package io.spine.examples.pingh.sessions
 
-import io.spine.core.External
-import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
-import io.spine.examples.pingh.sessions.command.RefreshToken
+import io.spine.examples.pingh.sessions.command.UpdateToken
 import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
 import io.spine.examples.pingh.sessions.event.SessionClosed
-import io.spine.examples.pingh.sessions.event.TokenRefreshed
+import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
@@ -43,11 +41,9 @@ import io.spine.examples.pingh.sessions.rejection.NotMemberOfPermittedOrgs
 import io.spine.examples.pingh.sessions.rejection.Rejections
 import io.spine.examples.pingh.sessions.rejection.UsernameMismatch
 import io.spine.server.command.Assign
-import io.spine.server.command.Command
 import io.spine.server.event.React
 import io.spine.server.procman.ProcessManager
 import io.spine.server.tuple.EitherOf2
-import java.util.Optional
 import kotlin.jvm.Throws
 
 /**
@@ -82,9 +78,7 @@ internal class UserSessionProcess :
     @Assign
     internal fun handle(command: LogUserIn): UserCodeReceived {
         val codes = auth.requestVerificationCodes()
-        with(builder()) {
-            deviceCode = codes.deviceCode
-        }
+        builder().setDeviceCode(codes.deviceCode)
         return UserCodeReceived::class.buildWith(
             command.id,
             codes.userCode,
@@ -119,10 +113,11 @@ internal class UserSessionProcess :
         ensureMembershipInPermittedOrgs(tokens.accessToken)
         with(builder()) {
             refreshToken = tokens.refreshToken
-            whenAccessTokenExpires = tokens.whenExpires
             clearDeviceCode()
         }
-        return EitherOf2.withA(UserLoggedIn::class.buildBy(command.id, tokens.accessToken))
+        return EitherOf2.withA(
+            UserLoggedIn::class.with(command.id, tokens.accessToken, tokens.whenExpires)
+        )
     }
 
     /**
@@ -156,30 +151,15 @@ internal class UserSessionProcess :
     }
 
     /**
-     * Sends a `RefreshToken` command if the user is logged in
-     * and the personal access token is expired.
-     */
-    @Command
-    internal fun on(@External event: TimePassed): Optional<RefreshToken> {
-        val isUserLoggedIn = isActive && state().hasRefreshToken()
-        return if (isUserLoggedIn && event.time >= state().whenAccessTokenExpires) {
-            Optional.of(RefreshToken::class.with(state().id, event.time))
-        } else {
-            Optional.empty()
-        }
-    }
-
-    /**
      * Renews GitHub access tokens using the refresh token.
      */
     @Assign
-    internal fun handle(command: RefreshToken): TokenRefreshed {
+    internal fun handle(command: UpdateToken): TokenUpdated {
         val tokens = auth.refreshAccessToken(state().refreshToken)
-        with(builder()) {
-            whenAccessTokenExpires = tokens.whenExpires
-            refreshToken = tokens.refreshToken
-        }
-        return TokenRefreshed::class.with(command.id, tokens.accessToken, command.whenRequested)
+        builder().setRefreshToken(tokens.refreshToken)
+        return TokenUpdated::class.with(
+            command.id, tokens.accessToken, command.whenRequested
+        )
     }
 
     /**

@@ -35,6 +35,7 @@ option java_outer_classname = "CommandsProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/sessions/identifiers.proto";
+import "google/protobuf/timestamp.proto";
 
 // Tells to start the login process for a Pingh app via GitHub.
 message LogUserIn {
@@ -49,6 +50,16 @@ message VerifyUserLoginToGitHub {
 
     // The ID of the user session.
     SessionId id = 1;
+}
+
+// Tells to update GitHub personal access token.
+message UpdateToken {
+
+    // The identifier of the token expiration monitoring process.
+    SessionId id = 1;
+
+    // The time when the access token update is requested.
+    google.protobuf.Timestamp when_requested = 2 [(required) = true];
 }
 
 // Tells to log user out.

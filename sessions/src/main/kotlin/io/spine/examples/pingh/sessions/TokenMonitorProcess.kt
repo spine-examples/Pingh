@@ -82,7 +82,7 @@ internal class TokenMonitorProcess :
             return Optional.empty()
         }
         builder().setWhenUpdateRequested(time)
-        return Optional.of(UpdateToken::class.with(state().id, time))
+        return Optional.of(UpdateToken::class.with(state().id.session, time))
     }
 
     /**

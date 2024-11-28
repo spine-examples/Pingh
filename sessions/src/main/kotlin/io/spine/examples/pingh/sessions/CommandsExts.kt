@@ -52,22 +52,22 @@ public fun KClass<VerifyUserLoginToGitHub>.withSession(id: SessionId): VerifyUse
         .vBuild()
 
 /**
- * Creates a new `LogUserOut` command with the specified ID of the session.
- */
-public fun KClass<LogUserOut>.withSession(id: SessionId): LogUserOut =
-    LogUserOut.newBuilder()
-        .setId(id)
-        .vBuild()
-
-/**
- * Creates a new `UpdateToken` command with the specified ID of the token monitoring process
+ * Creates a new `UpdateToken` command with the specified ID of the session
  * and the time the token update is requested.
  */
 public fun KClass<UpdateToken>.with(
-    id: TokenMonitorId,
+    id: SessionId,
     whenRequested: Timestamp
 ): UpdateToken =
     UpdateToken.newBuilder()
         .setId(id)
         .setWhenRequested(whenRequested)
+        .vBuild()
+
+/**
+ * Creates a new `LogUserOut` command with the specified ID of the session.
+ */
+public fun KClass<LogUserOut>.withSession(id: SessionId): LogUserOut =
+    LogUserOut.newBuilder()
+        .setId(id)
         .vBuild()

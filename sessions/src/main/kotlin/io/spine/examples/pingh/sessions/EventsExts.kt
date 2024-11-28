@@ -95,17 +95,17 @@ public fun KClass<UserIsNotLoggedIntoGitHub>.withSession(id: SessionId): UserIsN
 
 /**
  * Creates a new `TokenUpdated` event with the specified ID of the session,
- * `PersonalAccessToken`, and the time the update occurred.
+ * `PersonalAccessToken`, and the time the token expires.
  */
 public fun KClass<TokenUpdated>.with(
     id: SessionId,
     token: PersonalAccessToken,
-    whenUpdated: Timestamp
+    whenTokenExpires: Timestamp
 ): TokenUpdated =
     TokenUpdated.newBuilder()
         .setId(id)
         .setToken(token)
-        .setWhenUpdated(whenUpdated)
+        .setWhenTokenExpires(whenTokenExpires)
         .vBuild()
 
 /**
