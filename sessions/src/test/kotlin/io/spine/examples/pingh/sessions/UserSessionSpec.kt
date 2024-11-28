@@ -30,12 +30,15 @@ import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Timestamps.between
 import io.kotest.matchers.shouldBe
 import io.spine.base.Time.currentTime
+import io.spine.examples.pingh.clock.buildBy
+import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.command.UpdateToken
 import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
+import io.spine.examples.pingh.sessions.event.SessionClosed
 import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
@@ -53,7 +56,10 @@ import io.spine.examples.pingh.sessions.rejection.Rejections.UsernameMismatch
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubUsersResponses
 import io.spine.protobuf.AnyPacker
+import io.spine.protobuf.Durations2.minutes
 import io.spine.server.BoundedContextBuilder
+import io.spine.server.integration.ThirdPartyContext
+import io.spine.testing.core.given.GivenUserId
 import io.spine.testing.server.blackbox.ContextAwareTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -210,6 +216,67 @@ internal class UserSessionSpec : ContextAwareTest() {
         internal fun `update refresh token in 'UserSession' entity`() {
             val expected = expectedUserSessionAfterTokenUpdate(id)
             context().assertState(id, expected)
+        }
+    }
+
+    @Nested internal inner class
+    `React on 'TimePassed' event, and` {
+
+        private lateinit var session: SessionId
+
+        @BeforeEach
+        internal fun startLogin() {
+            session = SessionId::class.generate()
+            val command = LogUserIn::class.withSession(session)
+            context().receivesCommand(command)
+        }
+
+        @Test
+        internal fun `do nothing if the login deadline has not yet passed`() {
+            emitTimePassedEvent(currentTime())
+            assertThatNothingHappened()
+        }
+
+        @Test
+        internal fun `do nothing if login deadline is not specified`() {
+            auth.enterUserCode()
+            users.username = session.username
+            context().receivesCommand(VerifyUserLoginToGitHub::class.withSession(session))
+            emitTimePassedEvent(currentTime())
+            assertThatNothingHappened()
+        }
+
+        @Test
+        internal fun `emit 'SessionClosed' if the login deadline has passed`() {
+            val time = currentTime().add(minutes(20))
+            emitTimePassedEvent(time)
+            val expected = SessionClosed::class.with(session)
+            context().assertEvent(expected)
+        }
+
+        @Test
+        internal fun `mark state as deleted if the login deadline has passed`() {
+            val time = currentTime().add(minutes(20))
+            emitTimePassedEvent(time)
+            context().assertEntity(session, UserSessionProcess::class.java)
+                .deletedFlag()
+                .isTrue()
+        }
+
+        private fun assertThatNothingHappened() {
+            context().assertEvents()
+                .withType(SessionClosed::class.java)
+                .hasSize(0)
+            context().assertEntity(session, UserSessionProcess::class.java)
+                .deletedFlag()
+                .isFalse()
+        }
+
+        private fun emitTimePassedEvent(time: Timestamp) {
+            val clockContext = ThirdPartyContext.singleTenant("Clock")
+            val event = TimePassed::class.buildBy(time)
+            val actor = GivenUserId.generated()
+            clockContext.emittedEvent(event, actor)
         }
     }
 

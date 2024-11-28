@@ -177,6 +177,7 @@ internal class TokenMonitorSpec : ContextAwareTest() {
         internal fun `delete process state`() {
             context().assertEntity(id, TokenMonitorProcess::class.java)
                 .deletedFlag()
+                .isTrue()
         }
 
         @Test

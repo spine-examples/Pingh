@@ -34,6 +34,7 @@ import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.UserSession
+import io.spine.examples.pingh.sessions.UserSessionProcess.Companion.maxLoginTime
 import io.spine.examples.pingh.sessions.of
 import io.spine.examples.pingh.sessions.buildWith
 import io.spine.examples.pingh.sessions.event.TokenUpdated
@@ -108,7 +109,7 @@ internal fun expectedUserSessionAfterTokenUpdate(id: SessionId): UserSession =
  */
 internal fun expectedUserCodeReceivedEvent(id: SessionId): UserCodeReceived =
     with(loadVerificationCodes()) {
-        UserCodeReceived::class.buildWith(id, userCode, verificationUrl, expiresIn, interval)
+        UserCodeReceived::class.buildWith(id, userCode, verificationUrl, maxLoginTime, interval)
     }
 
 /**
