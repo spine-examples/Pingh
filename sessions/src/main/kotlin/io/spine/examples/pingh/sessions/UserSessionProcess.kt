@@ -28,6 +28,9 @@ package io.spine.examples.pingh.sessions
 
 import com.google.protobuf.Duration
 import com.google.protobuf.util.Durations
+import io.spine.base.Time.currentTime
+import io.spine.core.External
+import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
@@ -47,6 +50,7 @@ import io.spine.server.command.Assign
 import io.spine.server.event.React
 import io.spine.server.procman.ProcessManager
 import io.spine.server.tuple.EitherOf2
+import java.util.Optional
 import kotlin.jvm.Throws
 
 /**
@@ -87,7 +91,10 @@ internal class UserSessionProcess :
     internal fun handle(command: LogUserIn): UserCodeReceived {
         val codes = auth.requestVerificationCodes()
         val loginTime = min(codes.expiresIn, maxLoginTime)
-        builder().setDeviceCode(codes.deviceCode)
+        with(builder()) {
+            deviceCode = codes.deviceCode
+            loginDeadline = currentTime().add(loginTime)
+        }
         return UserCodeReceived::class.buildWith(
             command.id,
             codes.userCode,
@@ -123,6 +130,7 @@ internal class UserSessionProcess :
         with(builder()) {
             refreshToken = tokens.refreshToken
             clearDeviceCode()
+            clearLoginDeadline()
         }
         return EitherOf2.withA(
             UserLoggedIn::class.with(command.id, tokens.accessToken, tokens.whenExpires)
@@ -205,6 +213,18 @@ internal class UserSessionProcess :
         deleted = true
         return SessionClosed::class.with(rejection.id)
     }
+
+    /**
+     * Closes the session if the login is not completed and the specified time has expired.
+     */
+    @React
+    internal fun on(@External event: TimePassed): Optional<SessionClosed> =
+        if (state().hasLoginDeadline() && state().loginDeadline <= event.time) {
+            deleted = true
+            Optional.of(SessionClosed::class.with(state().id))
+        } else {
+            Optional.empty()
+        }
 
     /**
      * Supplies this instance with a service for generating GitHub verification codes
