@@ -26,6 +26,8 @@
 
 package io.spine.examples.pingh.sessions
 
+import com.google.protobuf.Duration
+import com.google.protobuf.util.Durations
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
@@ -40,11 +42,17 @@ import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.examples.pingh.sessions.rejection.NotMemberOfPermittedOrgs
 import io.spine.examples.pingh.sessions.rejection.Rejections
 import io.spine.examples.pingh.sessions.rejection.UsernameMismatch
+import io.spine.protobuf.Durations2.minutes
 import io.spine.server.command.Assign
 import io.spine.server.event.React
 import io.spine.server.procman.ProcessManager
 import io.spine.server.tuple.EitherOf2
 import kotlin.jvm.Throws
+
+/**
+ * Maximum duration of the login process.
+ */
+private val maxLoginTime = minutes(3)
 
 /**
  * Coordinates session management, that is, user login and logout.
@@ -78,12 +86,13 @@ internal class UserSessionProcess :
     @Assign
     internal fun handle(command: LogUserIn): UserCodeReceived {
         val codes = auth.requestVerificationCodes()
+        val loginTime = min(codes.expiresIn, maxLoginTime)
         builder().setDeviceCode(codes.deviceCode)
         return UserCodeReceived::class.buildWith(
             command.id,
             codes.userCode,
             codes.verificationUrl,
-            codes.expiresIn,
+            loginTime,
             codes.interval
         )
     }
@@ -212,3 +221,9 @@ internal class UserSessionProcess :
         this.users = users
     }
 }
+
+/**
+ * Returns the minimum duration.
+ */
+private fun min(d1: Duration, d2: Duration): Duration =
+    if (Durations.toNanos(d1) < Durations.toNanos(d2)) d1 else d2
