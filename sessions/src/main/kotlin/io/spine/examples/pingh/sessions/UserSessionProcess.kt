@@ -54,11 +54,6 @@ import java.util.Optional
 import kotlin.jvm.Throws
 
 /**
- * Maximum duration of the login process.
- */
-private val maxLoginTime = minutes(3)
-
-/**
  * Coordinates session management, that is, user login and logout.
  */
 internal class UserSessionProcess :
@@ -239,6 +234,13 @@ internal class UserSessionProcess :
     internal fun inject(auth: GitHubAuthentication, users: GitHubUsers) {
         this.auth = auth
         this.users = users
+    }
+
+    internal companion object {
+        /**
+         * Maximum duration of the login process.
+         */
+        internal val maxLoginTime = minutes(3)
     }
 }
 

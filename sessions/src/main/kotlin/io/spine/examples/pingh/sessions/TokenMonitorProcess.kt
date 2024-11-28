@@ -42,12 +42,6 @@ import io.spine.server.procman.ProcessManager
 import java.util.Optional
 
 /**
- * The interval for sending a follow-up command to update the token
- * if no update occurs after the previous command.
- */
-private val updateRetryInterval = minutes(1)
-
-/**
  * Monitors the GitHub access token and starts the token update process when it expires.
  *
  * @see [TokenMonitor]
@@ -107,5 +101,13 @@ internal class TokenMonitorProcess :
         return TokenMonitoringFinished::class.with(
             TokenMonitorId::class.of(event.id)
         )
+    }
+
+    private companion object {
+        /**
+         * The interval for sending a follow-up command to update the token
+         * if no update occurs after the previous command.
+         */
+        private val updateRetryInterval = minutes(1)
     }
 }
