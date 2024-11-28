@@ -50,7 +50,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
@@ -77,7 +76,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.key.Key
@@ -190,7 +188,6 @@ private fun SettingsHeader(
 private fun SettingsBox(
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val scrollState = rememberScrollState(0)
     Box(
         Modifier
             .fillMaxSize()
@@ -207,8 +204,7 @@ private fun SettingsBox(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 20.dp, vertical = 10.dp)
-                    .verticalScroll(scrollState),
+                    .padding(horizontal = 20.dp, vertical = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(25.dp),
                 content = content
             )
@@ -587,13 +583,31 @@ private fun IgnoredSourceList(
             },
             sourceSelected = selected
         )
-        if (ignored.isNotEmpty()) {
-            Divider(Modifier.fillMaxWidth())
-            ignored.forEachIndexed { id, source ->
-                IgnoredSourceItem(id, ignored.size, source, selected)
+        Divider(Modifier.fillMaxWidth())
+        IgnoredSourceItemBox {
+            ignored.forEach { source ->
+                IgnoredSourceItem(source, selected)
             }
         }
     }
+}
+
+/**
+ * Displays a container for items of the list of ignored sources.
+ *
+ * @param content The composable function that displays items of the list of ignored sources.
+ */
+@Composable
+private fun IgnoredSourceItemBox(
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val scrollState = rememberScrollState(0)
+    Column(
+        modifier = Modifier.fillMaxWidth()
+            .height(150.dp)
+            .verticalScroll(scrollState),
+        content = content
+    )
 }
 
 /**
@@ -673,16 +687,12 @@ private fun SettingsIconButton(
 /**
  * Displays information about the ignored repository or organization.
  *
- * @param index The index for this item in the list of ignored sources.
- * @param count The count of items in the list of ignored sources.
  * @param source The ignored repository or organization.
  * @param selected The state of the selected source.
  *   If no source is selected, the state value is `null`.
  */
 @Composable
 private fun IgnoredSourceItem(
-    index: Int,
-    count: Int,
     source: IgnoredSource,
     selected: MutableState<IgnoredSource?>
 ) {
@@ -696,14 +706,6 @@ private fun IgnoredSourceItem(
         MaterialTheme.colorScheme.onPrimary
     } else {
         MaterialTheme.colorScheme.onSecondary
-    }
-    val shape = if (index + 1 < count) {
-        RectangleShape
-    } else {
-        MaterialTheme.shapes.extraSmall.copy(
-            topStart = CornerSize(0.dp),
-            topEnd = CornerSize(0.dp)
-        )
     }
     val annotationString = buildAnnotatedString {
         withStyle(style = SpanStyle(color = contentColor)) {
@@ -730,9 +732,8 @@ private fun IgnoredSourceItem(
     Row(
         modifier = Modifier.fillMaxWidth()
             .height(30.dp)
-            .background(containerColor, shape)
+            .background(containerColor)
             .semantics { role = Role.RadioButton }
-            .clip(shape)
             .clickable { selected.value = if (!isSelected) source else null }
             .padding(start = 5.dp),
         verticalAlignment = Alignment.CenterVertically
