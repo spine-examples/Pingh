@@ -173,7 +173,6 @@ public class VerifyLogin internal constructor(
                 future.complete(ActionOutcome.Success)
             },
             EventObserver(command.id, UserIsNotLoggedIntoGitHub::class) {
-                codeExpirationJob.cancel()
                 future.complete(ActionOutcome.Failure)
             },
             EventObserver(command.id, UsernameMismatch::class) { rejection ->
