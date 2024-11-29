@@ -26,8 +26,11 @@
 
 package io.spine.examples.pingh.client
 
+import io.spine.examples.pingh.client.settings.IgnoredSource
 import io.spine.examples.pingh.client.settings.SnoozeTime
 import io.spine.examples.pingh.client.settings.UserSettings
+import io.spine.examples.pingh.github.OrganizationLogin
+import io.spine.examples.pingh.github.Repo
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.withSession
 import io.spine.examples.pingh.sessions.command.LogUserOut
@@ -99,6 +102,7 @@ public class SettingsState internal constructor(
 ) {
     private val _dndEnabled = MutableStateFlow(data.dndEnabled)
     private val _snoozeTime = MutableStateFlow(data.snoozeTime)
+    private val _ignored = MutableStateFlow(data.ignoredList.filteredAndSorted())
 
     /**
      * If `true`, the user is not notified about new mentions and snooze expirations.
@@ -110,6 +114,13 @@ public class SettingsState internal constructor(
      * The interval after which the new mention notification is repeated.
      */
     public val snoozeTime: StateFlow<SnoozeTime> = _snoozeTime
+
+    /**
+     * List of ignored organizations and repositories.
+     *
+     * Mentions from these sources are ignored.
+     */
+    public val ignored: StateFlow<List<IgnoredSource>> = _ignored
 
     /**
      * Sets whether the user should NOT receive notifications
@@ -127,4 +138,80 @@ public class SettingsState internal constructor(
         _snoozeTime.value = snoozeTime
         data.snoozeTime = snoozeTime
     }
+
+    /**
+     * Adds the [organization][org] to the list of ignored sources.
+     *
+     * Mentions within this organization will be ignored.
+     */
+    public fun addToIgnored(org: OrganizationLogin) {
+        val source = IgnoredSource.newBuilder()
+            .setOrganization(org)
+            .vBuild()
+        addToIgnored(source)
+    }
+
+    /**
+     * Adds the [repository][repo] to the list of ignored sources.
+     *
+     * Mentions within this repository will be ignored.
+     */
+    public fun addToIgnored(repo: Repo) {
+        val source = IgnoredSource.newBuilder()
+            .setRepository(repo)
+            .vBuild()
+        addToIgnored(source)
+    }
+
+    private fun addToIgnored(source: IgnoredSource) {
+        val updatedList = data.ignoredList.toMutableList().run {
+            add(source)
+            filteredAndSorted()
+        }
+        updateIgnore(updatedList)
+    }
+
+    /**
+     * Removes the [source] from the list of ignored sources,
+     * if it is present.
+     */
+    public fun removeFromIgnored(source: IgnoredSource) {
+        val updatedList = data.ignoredList.toMutableList()
+        updatedList.remove(source)
+        updateIgnore(updatedList)
+    }
+
+    private fun updateIgnore(list: List<IgnoredSource>) {
+        data.run {
+            clearIgnored()
+            addAllIgnored(list)
+        }
+        _ignored.value = list
+    }
+}
+
+/**
+ * Filters and sorts ignored sources based on the following rules:
+ *
+ * 1. Repositories belonging to any ignored organization are skipped.
+ * 2. Duplicates of sources are removed.
+ * 3. Organizations are listed first in ascending order,
+ *   followed by repositories in ascending order.
+ */
+private fun List<IgnoredSource>.filteredAndSorted(): List<IgnoredSource> {
+    val orgs = this
+        .filter { it.hasOrganization() }
+        .distinct()
+        .sortedBy { it.organization.value }
+    val orgNames = orgs.map { it.organization.value }.toSet()
+    val repos = this
+        .filter { source ->
+            source.hasRepository() && !orgNames.contains(source.repository.owner)
+        }
+        .distinct()
+        .sortedWith(compareBy(
+            { it.repository.owner },
+            { it.repository.name }
+        ))
+    return orgs + repos
 }

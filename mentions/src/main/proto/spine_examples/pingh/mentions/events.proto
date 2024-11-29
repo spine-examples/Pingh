@@ -69,4 +69,7 @@ message MentionUnsnoozed {
 
     // The time when the user was mentioned.
     google.protobuf.Timestamp when_mentioned = 4 [(required) = true];
+
+    // The repository where the user was mentioned.
+    spine_examples.pingh.github.Repo where_mentioned = 5 [(required) = true];
 }

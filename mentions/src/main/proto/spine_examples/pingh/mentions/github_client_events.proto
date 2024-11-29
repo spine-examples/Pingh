@@ -86,6 +86,9 @@ message UserMentioned {
 
     // The link to the GitHub page where the user was mentioned.
     spine.net.Url url = 5 [(required) = true];
+
+    // The repository where the user was mentioned.
+    spine_examples.pingh.github.Repo where_mentioned = 6 [(required) = true];
 }
 
 // Fetching user mentions from GitHub failed.

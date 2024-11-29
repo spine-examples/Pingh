@@ -42,4 +42,5 @@ public fun KClass<MentionView>.buildBy(event: UserMentioned, status: MentionStat
         .setWhenMentioned(event.whenMentioned)
         .setUrl(event.url)
         .setStatus(status)
+        .setWhereMentioned(event.whereMentioned)
         .vBuild()

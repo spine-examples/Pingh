@@ -32,6 +32,7 @@ import com.google.protobuf.Timestamp
 import io.spine.base.Time.currentTime
 import io.spine.core.UserId
 import io.spine.examples.pingh.github.NodeId
+import io.spine.examples.pingh.github.Repo
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
@@ -70,6 +71,7 @@ internal fun KClass<UserMentioned>.buildBy(id: MentionId): UserMentioned =
         .setUrl(Url::class.of(randomString()))
         .setWhoMentioned(User::class.of(randomString(), randomString()))
         .setWhenMentioned(currentTime())
+        .setWhereMentioned(Repo::class.of(randomString(), randomString()))
         .vBuild()
 
 /**
@@ -88,6 +90,7 @@ internal fun KClass<Mention>.buildBy(
         whoMentioned = event.whoMentioned
         title = event.title
         whenMentioned = event.whenMentioned
+        whereMentioned = event.whereMentioned
         if (!Objects.equals(snoozedUntilWhen, null)) {
             this.snoozeUntilWhen = snoozedUntilWhen
         }

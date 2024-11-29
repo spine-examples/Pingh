@@ -48,24 +48,11 @@ internal fun expectedMentionsList(whoWasMentioned: Username): List<MentionView> 
                 whenMentioned = mention.whenMentioned
                 url = mention.url
                 status = MentionStatus.UNREAD
+                whereMentioned = mention.whereMentioned
                 vBuild()
             }
         }
         .sortedByDescending { it.whenMentioned.seconds }
-
-/**
- * Sets a new `status` in mentions with the specified `id`.
- */
-internal fun List<MentionView>.updateStatusById(id: MentionId, status: MentionStatus):
-        List<MentionView> =
-    this.map { mention ->
-        if (mention.id != id) {
-            return@map mention
-        }
-        mention.toBuilder()
-            .setStatus(status)
-            .vBuild()
-    }
 
 /**
  * Returns a random `MentionView` with `UNREAD` status from this list.

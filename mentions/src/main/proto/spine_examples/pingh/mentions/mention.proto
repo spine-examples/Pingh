@@ -66,6 +66,9 @@ message Mention {
     // The time until which the mention will snooze, if the mention status is `SNOOZED`.
     // If the status is different, the field is empty.
     google.protobuf.Timestamp snooze_until_when = 6;
+
+    // The repository where the user was mentioned.
+    spine_examples.pingh.github.Repo where_mentioned = 7 [(required) = true];
 }
 
 // Information about all mentions of the user.
@@ -99,6 +102,9 @@ message MentionView {
 
     // The read status of the mention.
     MentionStatus status = 6 [(required) = true];
+
+    // The repository where the user was mentioned.
+    spine_examples.pingh.github.Repo where_mentioned = 7 [(required) = true];
 }
 
 // The read status of mention.
