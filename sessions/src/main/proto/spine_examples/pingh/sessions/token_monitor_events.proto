@@ -23,6 +23,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 syntax = "proto3";
 
 package spine_examples.pingh.sessions;
@@ -30,47 +31,30 @@ package spine_examples.pingh.sessions;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.pingh.spine.io";
-option java_package = "io.spine.examples.pingh.sessions";
-option java_outer_classname = "UserSessionProto";
+option java_package = "io.spine.examples.pingh.sessions.event";
+option java_outer_classname = "TokenMonitorEventsProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/sessions/identifiers.proto";
-import "spine_examples/pingh/github/values.proto";
 import "google/protobuf/timestamp.proto";
 
-// The process of session existence.
-//
-// Manages the user's login process to the Pingh app. First, the user code and device code
-// are requested. Then, the user code is provided to the user for entry on GitHub.
-// Finally, it verifies the user code using the device code and obtains `PersonalAccessToken`.
-//
-message UserSession {
-    option (entity) = { kind: PROCESS_MANAGER };
+// The process of monitoring token expiration was started.
+message TokenMonitoringStarted {
 
-    // The ID of user session.
-    SessionId id = 1;
+    // The identifier of the token expiration monitoring process.
+    TokenMonitorId id = 1;
+}
 
-    // The device code used to verify user login on GitHub.
-    //
-    // If this field is specified, the login process starts and
-    // waits for the user to enter their code.
-    //
-    spine_examples.pingh.github.DeviceCode device_code = 2;
+// The process of monitoring token expiration was finished.
+message TokenMonitoringFinished {
 
-    // The token used to renew the `PersonalAccessToken` when it expires.
-    //
-    // This field is specified if the user is logged in.
-    //
-    spine_examples.pingh.github.RefreshToken refresh_token = 4;
+    // The identifier of the token expiration monitoring process.
+    TokenMonitorId id = 1;
+}
 
-    // The time by which the login process must be completed;
-    // otherwise, the login will be considered expired.
-    //
-    // This field is set when the login process begins
-    // and is cleared once the login is successfully completed.
-    //
-    google.protobuf.Timestamp login_deadline = 5;
+// The expiration time of the access token was updated.
+message TokenExpirationTimeUpdated {
 
-    reserved 3;
-    reserved "when_access_token_expires";
+    // The identifier of the token expiration monitoring process.
+    TokenMonitorId id = 1;
 }

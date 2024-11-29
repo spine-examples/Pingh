@@ -26,22 +26,28 @@
 
 package io.spine.examples.pingh.sessions
 
+import com.google.protobuf.Duration
+import com.google.protobuf.util.Durations
+import io.spine.base.Time.currentTime
 import io.spine.core.External
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
-import io.spine.examples.pingh.sessions.command.RefreshToken
+import io.spine.examples.pingh.sessions.command.UpdateToken
 import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
-import io.spine.examples.pingh.sessions.event.TokenRefreshed
+import io.spine.examples.pingh.sessions.event.SessionClosed
+import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.examples.pingh.sessions.rejection.NotMemberOfPermittedOrgs
+import io.spine.examples.pingh.sessions.rejection.Rejections
 import io.spine.examples.pingh.sessions.rejection.UsernameMismatch
+import io.spine.protobuf.Durations2.minutes
 import io.spine.server.command.Assign
-import io.spine.server.command.Command
+import io.spine.server.event.React
 import io.spine.server.procman.ProcessManager
 import io.spine.server.tuple.EitherOf2
 import java.util.Optional
@@ -79,14 +85,16 @@ internal class UserSessionProcess :
     @Assign
     internal fun handle(command: LogUserIn): UserCodeReceived {
         val codes = auth.requestVerificationCodes()
+        val loginTime = min(codes.expiresIn, maxLoginTime)
         with(builder()) {
             deviceCode = codes.deviceCode
+            loginDeadline = currentTime().add(loginTime)
         }
         return UserCodeReceived::class.buildWith(
             command.id,
             codes.userCode,
             codes.verificationUrl,
-            codes.expiresIn,
+            loginTime,
             codes.interval
         )
     }
@@ -116,10 +124,12 @@ internal class UserSessionProcess :
         ensureMembershipInPermittedOrgs(tokens.accessToken)
         with(builder()) {
             refreshToken = tokens.refreshToken
-            whenAccessTokenExpires = tokens.whenExpires
             clearDeviceCode()
+            clearLoginDeadline()
         }
-        return EitherOf2.withA(UserLoggedIn::class.buildBy(command.id, tokens.accessToken))
+        return EitherOf2.withA(
+            UserLoggedIn::class.with(command.id, tokens.accessToken, tokens.whenExpires)
+        )
     }
 
     /**
@@ -153,30 +163,15 @@ internal class UserSessionProcess :
     }
 
     /**
-     * Sends a `RefreshToken` command if the user is logged in
-     * and the personal access token is expired.
-     */
-    @Command
-    internal fun on(@External event: TimePassed): Optional<RefreshToken> {
-        val isUserLoggedIn = isActive && state().hasRefreshToken()
-        return if (isUserLoggedIn && event.time >= state().whenAccessTokenExpires) {
-            Optional.of(RefreshToken::class.with(state().id, event.time))
-        } else {
-            Optional.empty()
-        }
-    }
-
-    /**
      * Renews GitHub access tokens using the refresh token.
      */
     @Assign
-    internal fun handle(command: RefreshToken): TokenRefreshed {
+    internal fun handle(command: UpdateToken): TokenUpdated {
         val tokens = auth.refreshAccessToken(state().refreshToken)
-        with(builder()) {
-            whenAccessTokenExpires = tokens.whenExpires
-            refreshToken = tokens.refreshToken
-        }
-        return TokenRefreshed::class.with(command.id, tokens.accessToken, command.whenRequested)
+        builder().setRefreshToken(tokens.refreshToken)
+        return TokenUpdated::class.with(
+            command.id, tokens.accessToken, tokens.whenExpires
+        )
     }
 
     /**
@@ -185,8 +180,46 @@ internal class UserSessionProcess :
     @Assign
     internal fun handle(command: LogUserOut): UserLoggedOut {
         deleted = true
-        return UserLoggedOut::class.buildBy(command.id)
+        return UserLoggedOut::class.with(command.id)
     }
+
+    /**
+     * Closes the user session if a `UsernameMismatch` rejection is emitted
+     * during the login process.
+     *
+     * A `UsernameMismatch` rejection is a critical exception
+     * that prevents the login process from being completed.
+     */
+    @React
+    internal fun on(rejection: Rejections.UsernameMismatch): SessionClosed {
+        deleted = true
+        return SessionClosed::class.with(rejection.id)
+    }
+
+    /**
+     * Closes the user session if a `NotMemberOfPermittedOrgs` rejection is emitted
+     * during the login process.
+     *
+     * A `NotMemberOfPermittedOrgs` rejection is a critical exception
+     * that prevents the login process from being completed.
+     */
+    @React
+    internal fun on(rejection: Rejections.NotMemberOfPermittedOrgs): SessionClosed {
+        deleted = true
+        return SessionClosed::class.with(rejection.id)
+    }
+
+    /**
+     * Closes the session if the login is not completed and the specified time has expired.
+     */
+    @React
+    internal fun on(@External event: TimePassed): Optional<SessionClosed> =
+        if (state().hasLoginDeadline() && state().loginDeadline <= event.time) {
+            deleted = true
+            Optional.of(SessionClosed::class.with(state().id))
+        } else {
+            Optional.empty()
+        }
 
     /**
      * Supplies this instance with a service for generating GitHub verification codes
@@ -202,4 +235,17 @@ internal class UserSessionProcess :
         this.auth = auth
         this.users = users
     }
+
+    internal companion object {
+        /**
+         * Maximum duration of the login process.
+         */
+        internal val maxLoginTime = minutes(3)
+    }
 }
+
+/**
+ * Returns the minimum duration.
+ */
+private fun min(d1: Duration, d2: Duration): Duration =
+    if (Durations.toNanos(d1) < Durations.toNanos(d2)) d1 else d2

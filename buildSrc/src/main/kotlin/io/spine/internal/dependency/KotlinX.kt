@@ -31,7 +31,7 @@ public object KotlinX {
 
     // https://github.com/Kotlin/kotlinx.coroutines
     public object Coroutines {
-        private const val version = "1.8.1"
+        private const val version = "1.9.0"
         public const val core: String = "$group:kotlinx-coroutines-core:$version"
     }
 }

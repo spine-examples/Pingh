@@ -71,6 +71,9 @@ message UserLoggedIn {
 
     // The GitHub token obtained as a result of logging in.
     spine_examples.pingh.github.PersonalAccessToken token = 2 [(required) = true];
+
+    // The expiration time of the token.
+    google.protobuf.Timestamp when_token_expires = 3 [(required) = true];
 }
 
 // The user has not entered their user code on GitHub,
@@ -81,21 +84,28 @@ message UserIsNotLoggedIntoGitHub {
     SessionId id = 1;
 }
 
-// The personal access token was refreshed.
-message TokenRefreshed {
+// The personal access token was updated.
+message TokenUpdated {
 
     // The ID of user session.
     SessionId id = 1;
 
-    // The GitHub token obtained as a result of the token refresh.
+    // The GitHub token obtained as a result of the token update.
     spine_examples.pingh.github.PersonalAccessToken token = 2 [(required) = true];
 
-    // The time when the access token was refreshed.
-    google.protobuf.Timestamp when_refreshed = 3 [(required) = true];
+    // The expiration time of the token.
+    google.protobuf.Timestamp when_token_expires = 3 [(required) = true];
 }
 
 // The user logged out.
 message UserLoggedOut {
+
+    // The ID of user session.
+    SessionId id = 1;
+}
+
+// The user session was closed, and its data was deleted.
+message SessionClosed {
 
     // The ID of user session.
     SessionId id = 1;

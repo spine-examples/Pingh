@@ -53,3 +53,4 @@ public fun newSessionsContext(
 ): BoundedContextBuilder =
     BoundedContext.singleTenant(NAME)
         .add(UserSessionRepository(auth, users))
+        .add(TokenMonitorRepository())

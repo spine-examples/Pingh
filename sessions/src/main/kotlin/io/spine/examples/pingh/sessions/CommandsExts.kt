@@ -31,7 +31,7 @@ package io.spine.examples.pingh.sessions
 import com.google.protobuf.Timestamp
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
-import io.spine.examples.pingh.sessions.command.RefreshToken
+import io.spine.examples.pingh.sessions.command.UpdateToken
 import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
 import kotlin.reflect.KClass
 
@@ -52,14 +52,14 @@ public fun KClass<VerifyUserLoginToGitHub>.withSession(id: SessionId): VerifyUse
         .vBuild()
 
 /**
- * Creates a new `RefreshToken` command with the specified ID of the session and
- * the time the access token refresh is requested.
+ * Creates a new `UpdateToken` command with the specified ID of the session
+ * and the time the token update is requested.
  */
-public fun KClass<RefreshToken>.with(
+public fun KClass<UpdateToken>.with(
     id: SessionId,
     whenRequested: Timestamp
-): RefreshToken =
-    RefreshToken.newBuilder()
+): UpdateToken =
+    UpdateToken.newBuilder()
         .setId(id)
         .setWhenRequested(whenRequested)
         .vBuild()

@@ -24,53 +24,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.mentions
+package io.spine.examples.pingh.sessions
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
 import io.spine.examples.pingh.clock.event.TimePassed
-import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
+import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.server.procman.ProcessManagerRepository
 import io.spine.server.route.EventRouting
 
 /**
- * Manages instances of [GitHubClientProcess].
+ * Manages instances of [TokenMonitorProcess].
  */
-internal class GitHubClientRepository(
-    private val search: GitHubSearch,
-) : ProcessManagerRepository<GitHubClientId, GitHubClientProcess, GitHubClient>() {
+internal class TokenMonitorRepository :
+    ProcessManagerRepository<TokenMonitorId, TokenMonitorProcess, TokenMonitor>() {
 
     @OverridingMethodsMustInvokeSuper
-    override fun setupEventRouting(routing: EventRouting<GitHubClientId>) {
+    override fun setupEventRouting(routing: EventRouting<TokenMonitorId>) {
         super.setupEventRouting(routing)
         routing
-            .route(UserLoggedIn::class.java) { event, _ ->
-                toGitHubClientId(event.id)
-            }
-            .route(TokenUpdated::class.java) { event, _ ->
-                toGitHubClientId(event.id)
-            }
+            .route(UserLoggedIn::class.java) { event, _ -> toTokenMonitor(event.id) }
+            .route(TokenUpdated::class.java) { event, _ -> toTokenMonitor(event.id) }
+            .route(UserLoggedOut::class.java) { event, _ -> toTokenMonitor(event.id) }
             .route(TimePassed::class.java) { _, _ -> toAll() }
     }
 
-    @OverridingMethodsMustInvokeSuper
-    override fun configure(processManager: GitHubClientProcess) {
-        super.configure(processManager)
-        processManager.inject(search)
-    }
-
     /**
-     * Returns a set with a single GitHub client ID, that corresponds to the passed user session.
+     * Returns a set with a single token monitor ID,
+     * that corresponds to the passed user session.
      */
-    private fun toGitHubClientId(session: SessionId): Set<GitHubClientId> {
-        return setOf(GitHubClientId::class.of(session.username))
-    }
+    private fun toTokenMonitor(session: SessionId) =
+        setOf(TokenMonitorId::class.of(session))
 
     /**
      * Returns a set of identifiers of records in the process manager storage.
      */
-    private fun toAll(): Set<GitHubClientId> =
+    private fun toAll(): Set<TokenMonitorId> =
         storage().index()
             .asSequence()
             .toSet()

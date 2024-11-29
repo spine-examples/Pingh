@@ -45,3 +45,11 @@ public fun KClass<SessionId>.of(
         .setUsername(username)
         .setWhenCreated(whenCreated)
         .vBuild()
+
+/**
+ * Create a new `TokenMonitorId` with the ID of the session whose token is being monitored.
+ */
+public fun KClass<TokenMonitorId>.of(session: SessionId): TokenMonitorId =
+    TokenMonitorId.newBuilder()
+        .setSession(session)
+        .vBuild()

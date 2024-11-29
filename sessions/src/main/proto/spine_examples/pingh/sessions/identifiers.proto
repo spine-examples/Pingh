@@ -49,3 +49,10 @@ message SessionId {
     // The time when the session was created.
     google.protobuf.Timestamp when_created = 2 [(required) = true];
 }
+
+// The identifier of the token expiration monitoring process.
+message TokenMonitorId {
+
+    // The identifier of the session whose token is being monitored.
+    SessionId session = 1 [(required) = true];
+}

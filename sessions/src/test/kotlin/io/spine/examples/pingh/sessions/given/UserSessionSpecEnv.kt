@@ -28,17 +28,16 @@
 
 package io.spine.examples.pingh.sessions.given
 
-import com.google.protobuf.Timestamp
 import io.spine.examples.pingh.github.DeviceCode
 import io.spine.examples.pingh.github.RefreshToken
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.UserSession
-import io.spine.examples.pingh.sessions.buildBy
+import io.spine.examples.pingh.sessions.UserSessionProcess.Companion.maxLoginTime
 import io.spine.examples.pingh.sessions.of
 import io.spine.examples.pingh.sessions.buildWith
-import io.spine.examples.pingh.sessions.event.TokenRefreshed
+import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.rejection.Rejections.UsernameMismatch
@@ -99,7 +98,7 @@ internal fun expectedUserSessionWithRefreshToken(id: SessionId): UserSession =
  * Creates a new `UserSession` with the passed session ID and refresh token
  * from the predefined GitHub response to the token update request.
  */
-internal fun expectedUserSessionAfterTokenRefresh(id: SessionId): UserSession =
+internal fun expectedUserSessionAfterTokenUpdate(id: SessionId): UserSession =
     with(loadRefreshedAccessToken()) {
         UserSession::class.with(id, refreshToken = refreshToken)
     }
@@ -110,7 +109,7 @@ internal fun expectedUserSessionAfterTokenRefresh(id: SessionId): UserSession =
  */
 internal fun expectedUserCodeReceivedEvent(id: SessionId): UserCodeReceived =
     with(loadVerificationCodes()) {
-        UserCodeReceived::class.buildWith(id, userCode, verificationUrl, expiresIn, interval)
+        UserCodeReceived::class.buildWith(id, userCode, verificationUrl, maxLoginTime, interval)
     }
 
 /**
@@ -119,16 +118,16 @@ internal fun expectedUserCodeReceivedEvent(id: SessionId): UserCodeReceived =
  */
 internal fun expectedUserLoggedInEvent(id: SessionId): UserLoggedIn =
     with(loadAccessToken()) {
-        UserLoggedIn::class.buildBy(id, accessToken)
+        UserLoggedIn::class.with(id, accessToken, whenExpires)
     }
 
 /**
  * Creates a new `TokenRefreshed` event with the passed session ID,
  * the time the access token was refreshed, and data from the predefined GitHub response.
  */
-internal fun expectedTokenRefreshedEvent(id: SessionId, whenRefreshed: Timestamp): TokenRefreshed =
+internal fun expectedTokenUpdatedEvent(id: SessionId): TokenUpdated =
     with(loadRefreshedAccessToken()) {
-        TokenRefreshed::class.with(id, accessToken, whenRefreshed)
+        TokenUpdated::class.with(id, accessToken, whenExpires)
     }
 
 /**

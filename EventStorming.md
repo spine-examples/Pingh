@@ -6,7 +6,9 @@ in the identification of two bounded contexts.
 - **Sessions**, describing all interactions with end-users, 
   including their authentication via GitHub.
 
-<img src="./img/event-storming/sessions-bc.jpg" width="700px" alt="Sessions bounded context">
+<img src="./img/event-storming/sessions-bc-1.jpg" width="900px" alt="Sessions bounded context 1">
+
+<img src="./img/event-storming/sessions-bc-2.jpg" width="500px" alt="Sessions bounded context 2">
 
 - **Mentions**, meticulously following all cases of someone mentioning end-users 
   of Pingh at GitHub.

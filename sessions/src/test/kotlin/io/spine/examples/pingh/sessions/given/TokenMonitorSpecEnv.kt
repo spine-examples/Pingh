@@ -24,7 +24,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("UnusedReceiverParameter" /* Class extensions don't use class as a parameter. */)
+
+package io.spine.examples.pingh.sessions.given
+
+import com.google.protobuf.Timestamp
+import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.of
+import io.spine.examples.pingh.sessions.TokenMonitor
+import io.spine.examples.pingh.sessions.TokenMonitorId
+import io.spine.testing.TestValues.randomString
+import kotlin.reflect.KClass
+
 /**
- * The version of the `Pingh` to publish.
+ * Creates a new `PersonalAccessToken` with a randomly generated value.
  */
-val pinghVersion: String by extra("1.0.0-SNAPSHOT.26")
+internal fun KClass<PersonalAccessToken>.generate(): PersonalAccessToken =
+    PersonalAccessToken::class.of(randomString())
+
+/**
+ * Creates a new `TokenMonitor` with the passed ID of the token monitor
+ * and time the monitored token expires.
+ *
+ * Additionally, the time the last update requested can be specified.
+ */
+internal fun KClass<TokenMonitor>.with(
+    id: TokenMonitorId,
+    whenExpires: Timestamp,
+    whenUpdateRequested: Timestamp? = null
+): TokenMonitor =
+    with(TokenMonitor.newBuilder()) {
+        this.id = id
+        this.whenExpires = whenExpires
+        if (whenUpdateRequested != null) {
+            this.whenUpdateRequested = whenUpdateRequested
+        }
+        vBuild()
+    }

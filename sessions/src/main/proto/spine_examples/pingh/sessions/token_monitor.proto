@@ -23,6 +23,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 syntax = "proto3";
 
 package spine_examples.pingh.sessions;
@@ -31,46 +32,33 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.pingh.spine.io";
 option java_package = "io.spine.examples.pingh.sessions";
-option java_outer_classname = "UserSessionProto";
+option java_outer_classname = "TokenMonitorProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/sessions/identifiers.proto";
-import "spine_examples/pingh/github/values.proto";
 import "google/protobuf/timestamp.proto";
 
-// The process of session existence.
+// A process that observes the expiration of the GitHub access token.
 //
-// Manages the user's login process to the Pingh app. First, the user code and device code
-// are requested. Then, the user code is provided to the user for entry on GitHub.
-// Finally, it verifies the user code using the device code and obtains `PersonalAccessToken`.
+// This process sends an `UpdateToken` command when the current access token expires.
+// If a new access token for the session is not obtained within one minute of the update request,
+// it sends another `UpdateToken` command. This cycle continues until
+// a new access token is received.
 //
-message UserSession {
+// Token observation begins when the user logs in and ends when the user logs out.
+//
+message TokenMonitor {
     option (entity) = { kind: PROCESS_MANAGER };
 
-    // The ID of user session.
-    SessionId id = 1;
+    // The identifier of the token expiration monitoring process.
+    TokenMonitorId id = 1;
 
-    // The device code used to verify user login on GitHub.
-    //
-    // If this field is specified, the login process starts and
-    // waits for the user to enter their code.
-    //
-    spine_examples.pingh.github.DeviceCode device_code = 2;
+    // The expiration time of the token.
+    google.protobuf.Timestamp when_expires = 2 [(required) = true];
 
-    // The token used to renew the `PersonalAccessToken` when it expires.
+    // The time when the last token update command was sent.
     //
-    // This field is specified if the user is logged in.
+    // This field remains empty if the access token has not expired.
     //
-    spine_examples.pingh.github.RefreshToken refresh_token = 4;
-
-    // The time by which the login process must be completed;
-    // otherwise, the login will be considered expired.
-    //
-    // This field is set when the login process begins
-    // and is cleared once the login is successfully completed.
-    //
-    google.protobuf.Timestamp login_deadline = 5;
-
-    reserved 3;
-    reserved "when_access_token_expires";
+    google.protobuf.Timestamp when_update_requested = 3;
 }
