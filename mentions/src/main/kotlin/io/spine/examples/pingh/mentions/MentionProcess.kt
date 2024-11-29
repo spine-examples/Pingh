@@ -60,6 +60,7 @@ internal class MentionProcess :
             whoMentioned = event.whoMentioned
             title = event.title
             whenMentioned = event.whenMentioned
+            whereMentioned = event.whereMentioned
             status = MentionStatus.UNREAD
         }
         return nothing()
@@ -118,7 +119,8 @@ internal class MentionProcess :
             state().id,
             state().whoMentioned,
             state().title,
-            state().whenMentioned
+            state().whenMentioned,
+            state().whereMentioned
         ))
     }
 }

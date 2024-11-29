@@ -112,6 +112,7 @@ internal fun expectedUserMentionedSet(whoWasMentioned: Username): Set<UserMentio
                 title = mention.title
                 whenMentioned = mention.whenMentioned
                 url = mention.url
+                whereMentioned = mention.whereMentioned
                 vBuild()
             }
         }

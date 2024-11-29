@@ -172,6 +172,8 @@ public class PinghApplication private constructor(
     public fun startMentionsFlow(): MentionsFlow {
         if (mentionsFlow == null) {
             mentionsFlow = MentionsFlow(client, session, settings)
+        } else {
+            mentionsFlow!!.applySettings()
         }
         return mentionsFlow!!
     }

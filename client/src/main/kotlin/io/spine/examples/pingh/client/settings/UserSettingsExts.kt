@@ -24,21 +24,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.github
+package io.spine.examples.pingh.client.settings
 
-import io.spine.validate.Validate
+import io.spine.examples.pingh.github.Repo
 
 /**
- * Returns `true` if the specified value is the valid [Username] value;
- * otherwise, returns `false`.
- *
- * @param value The string to be validated against the `Username` value.
+ * Returns `true` if the user ignores mentions from this [repository][repo].
  */
-public fun isValidUsername(value: String): Boolean {
-    val unvalidatedUsername = Username.newBuilder()
-        .setValue(value)
-        .buildPartial()
-    return Validate
-        .violationsOf(unvalidatedUsername)
-        .isEmpty()
-}
+internal fun UserSettings.isIgnored(repo: Repo): Boolean =
+    this.ignoredList.any { source ->
+        if (source.hasRepository()) {
+            source.repository.equals(repo)
+        } else {
+            source.organization.value.equals(repo.owner)
+        }
+    }
