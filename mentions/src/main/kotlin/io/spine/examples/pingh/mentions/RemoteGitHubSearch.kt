@@ -180,11 +180,11 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
                 .by(updatedAfter)
                 .setTitle(item.title)
                 .get()
-            if (item.body.contains(user.tag())) {
-                mentions.plus(Mention::class.from(item))
-            } else {
-                mentions
-            }
+            item.takeIf { it.body.contains(user.tag()) }
+                ?.run { Mention::class.from(this) }
+                ?.takeIf { it.whenMentioned > updatedAfter }
+                ?.run { mentions + this }
+                ?: mentions
         }.toSet()
 }
 
