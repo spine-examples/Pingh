@@ -98,7 +98,7 @@ internal class GitHubClientProcess :
     }
 
     /**
-     * Updates the user's [PersonalAccessToken] each time it is refreshed.
+     * Updates the user's [PersonalAccessToken] each time it is updated.
      */
     @React
     internal fun on(@External event: TokenUpdated): GitHubTokenUpdated {

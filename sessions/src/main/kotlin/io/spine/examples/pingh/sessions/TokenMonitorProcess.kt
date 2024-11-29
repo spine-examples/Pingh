@@ -65,7 +65,7 @@ internal class TokenMonitorProcess :
      *
      * Once the update command is sent, the update is considered in progress
      * for the [duration][updateRetryInterval]. If no update occurs within this time,
-     * the update command will be sent again.
+     * the update command is sent again.
      */
     @Command
     internal fun on(@External event: TimePassed): Optional<UpdateToken> {

@@ -55,7 +55,7 @@ message VerifyUserLoginToGitHub {
 // Tells to update GitHub personal access token.
 message UpdateToken {
 
-    // The identifier of the token expiration monitoring process.
+    // The ID of the user session.
     SessionId id = 1;
 
     // The time when the access token update is requested.

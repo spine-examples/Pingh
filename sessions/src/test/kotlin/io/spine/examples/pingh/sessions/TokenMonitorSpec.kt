@@ -76,18 +76,17 @@ internal class TokenMonitorSpec : ContextAwareTest() {
         context().receivesEvent(event)
     }
 
-    @Nested
-    internal inner class
+    @Nested internal inner class
     `React on 'UserLoggedIn' event, and` {
 
         @Test
-        internal fun `specifies expiration time`() {
+        internal fun `specify expiration time`() {
             val state = TokenMonitor::class.with(id, whenExpired)
             context().assertState(id, state)
         }
 
         @Test
-        internal fun `emits 'TokenMonitoringStarted' event`() {
+        internal fun `emit 'TokenMonitoringStarted' event`() {
             val event = TokenMonitoringStarted::class.with(id)
             context().assertEvent(event)
         }
@@ -137,8 +136,7 @@ internal class TokenMonitorSpec : ContextAwareTest() {
         }
     }
 
-    @Nested
-    internal inner class
+    @Nested internal inner class
     `React on 'TokenUpdated' event, and` {
 
         @BeforeEach
@@ -151,20 +149,19 @@ internal class TokenMonitorSpec : ContextAwareTest() {
         }
 
         @Test
-        internal fun `update the expiration time and finishes the token update process`() {
+        internal fun `update the expiration time and finish the token update process`() {
             val state = TokenMonitor::class.with(id, whenExpired)
             context().assertState(id, state)
         }
 
         @Test
-        internal fun `emits 'TokenExpirationTimeUpdated' event`() {
+        internal fun `emit 'TokenExpirationTimeUpdated' event`() {
             val event = TokenExpirationTimeUpdated::class.with(id)
             context().assertEvent(event)
         }
     }
 
-    @Nested
-    internal inner class
+    @Nested internal inner class
     `React on 'UserLoggedOut' event, and` {
 
         @BeforeEach
@@ -181,7 +178,7 @@ internal class TokenMonitorSpec : ContextAwareTest() {
         }
 
         @Test
-        internal fun `emits 'TokenMonitoringFinished' event`() {
+        internal fun `emit 'TokenMonitoringFinished' event`() {
             val event = TokenMonitoringFinished::class.with(id)
             context().assertEvent(event)
         }
