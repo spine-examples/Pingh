@@ -36,10 +36,6 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * @param T The type of result produced upon executing this stage.
  *   If it is `Unit`, it means the stage produces no result.
- *
- * @property isFinal Whether the state is a final state for the process.
- *   If `true`, the process can be [completed][completeProcess]
- *   when the stage is successfully finished.
  */
 @Suppress("UnnecessaryAbstractClass" /* Avoids creating instances; only for inheritance. */)
 public abstract class LoginStage<T>(
@@ -52,27 +48,6 @@ public abstract class LoginStage<T>(
      * must be specified before moving to the next stage.
      */
     internal var result: T? = null
-
-    /**
-     * Whether the process is complete.
-     *
-     * A process can be marked as complete from its final state
-     * by calling the [completeProcess()][completeProcess] method.
-     */
-    internal var hasProcessCompleted: Boolean = false
-        private set
-
-    /**
-     * Marks the process as complete.
-     *
-     * @throws IllegalStateException if this state is not final state.
-     */
-    internal fun completeProcess() {
-        check(isFinal) {
-            "The process can only complete in the final state, but this state is not final."
-        }
-        hasProcessCompleted = true
-    }
 }
 
 /**
@@ -85,7 +60,7 @@ public abstract class LoginStage<T>(
  * the login within the Pingh app.
  * 3. [LoginFailed]: The login process failed due to an error that occurred during authentication.
  *
- * The flow is considered completed whenever the login is successfully
+ * The flow is considered [completed][LoginCompleted] whenever the login is successfully
  * [confirmed][VerifyLogin.confirm] in the Pingh app.
  *
  * @property client Enables interaction with the Pingh server.
@@ -107,9 +82,9 @@ public class LoginFlow internal constructor(
     public fun currentStage(): StateFlow<LoginStage<*>> = stage
 
     /**
-     * Return `true` if the login process is complete.
+     * Whether the login process is completed.
      */
-    public fun isCompleted(): Boolean = stage.value.hasProcessCompleted
+    public fun isCompleted(): Boolean = stage.value is LoginCompleted
 
     /**
      * Switches the [current stage][stage] to the next one.
@@ -137,10 +112,11 @@ public class LoginFlow internal constructor(
             }
 
             is VerifyLogin -> {
-                checkNotNull(stage.value.result) {
-                    "No error message is specified as the result of the `VerifyLogin` stage."
+                if (stage.value.result == null) {
+                    stage.value = LoginCompleted()
+                } else {
+                    stage.value = LoginFailed(::moveToNextStage, stage.value.result as String)
                 }
-                stage.value = LoginFailed(::moveToNextStage, stage.value.result as String)
             }
 
             is LoginFailed -> {
@@ -158,3 +134,9 @@ public class LoginFlow internal constructor(
         }
     }
 }
+
+/**
+ * The final state of the login,
+ * indicating that the login process has been successfully completed.
+ */
+private class LoginCompleted : LoginStage<Unit>()
