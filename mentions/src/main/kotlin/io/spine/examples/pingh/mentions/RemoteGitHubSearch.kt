@@ -181,9 +181,9 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
                 .setTitle(item.title)
                 .get()
             item.takeIf { it.body.contains(user.tag()) }
-                ?.run { Mention::class.from(this) }
+                ?.let { Mention::class.from(it) }
                 ?.takeIf { it.whenMentioned > updatedAfter }
-                ?.run { mentions + this }
+                ?.let { mentions + it }
                 ?: mentions
         }.toSet()
 }
