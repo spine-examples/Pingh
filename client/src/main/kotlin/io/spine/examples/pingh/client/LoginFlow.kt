@@ -80,7 +80,7 @@ public class LoginFlow internal constructor(
     public fun currentStage(): StateFlow<LoginStage<*>> = stage
 
     /**
-     * Returns `true` if login process is completed.
+     * Returns `true` if the login process is completed.
      */
     public fun isCompleted(): Boolean = stage.value is LoginCompleted
 
@@ -134,7 +134,7 @@ public class LoginFlow internal constructor(
 }
 
 /**
- * The terminal state of the login,
+ * The terminal stage of the login process,
  * signifying that the login process has been successfully completed.
  */
 private class LoginCompleted : LoginStage<Unit>()
