@@ -38,9 +38,7 @@ import kotlinx.coroutines.flow.StateFlow
  *   If it is `Unit`, it means the stage produces no result.
  */
 @Suppress("UnnecessaryAbstractClass" /* Avoids creating instances; only for inheritance. */)
-public abstract class LoginStage<T>(
-    private val isFinal: Boolean = false
-) {
+public abstract class LoginStage<T> {
     /**
      * The result of executing this stage.
      *
@@ -82,7 +80,7 @@ public class LoginFlow internal constructor(
     public fun currentStage(): StateFlow<LoginStage<*>> = stage
 
     /**
-     * Whether the login process is completed.
+     * Return `true` if login process is completed.
      */
     public fun isCompleted(): Boolean = stage.value is LoginCompleted
 
