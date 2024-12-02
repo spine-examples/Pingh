@@ -68,7 +68,7 @@ public class VerifyLogin internal constructor(
     private val establishSession: (SessionId) -> Unit,
     private val moveToNextStage: () -> Unit,
     event: UserCodeReceived
-) : LoginStage<String>() {
+) : LoginStage<String>(isFinal = true) {
 
     /**
      * The code a user needs to enter on GitHub to confirm login to the app.
@@ -170,6 +170,7 @@ public class VerifyLogin internal constructor(
             EventObserver(command.id, UserLoggedIn::class) {
                 codeExpirationJob.cancel()
                 establishSession(session)
+                completeProcess()
                 future.complete(ActionOutcome.Success)
             },
             EventObserver(command.id, UserIsNotLoggedIntoGitHub::class) {

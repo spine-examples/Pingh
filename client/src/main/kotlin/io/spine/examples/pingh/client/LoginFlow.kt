@@ -36,9 +36,15 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * @param T The type of result produced upon executing this stage.
  *   If it is `Unit`, it means the stage produces no result.
+ *
+ * @property isFinal Whether the state is a final state for the process.
+ *   If `true`, the process can be [completed][completeProcess]
+ *   when the stage is successfully finished.
  */
 @Suppress("UnnecessaryAbstractClass" /* Avoids creating instances; only for inheritance. */)
-public abstract class LoginStage<T> {
+public abstract class LoginStage<T>(
+    private val isFinal: Boolean = false
+) {
     /**
      * The result of executing this stage.
      *
@@ -46,6 +52,27 @@ public abstract class LoginStage<T> {
      * must be specified before moving to the next stage.
      */
     internal var result: T? = null
+
+    /**
+     * Whether the process is complete.
+     *
+     * A process can be marked as complete from its final state
+     * by calling the [completeProcess()][completeProcess] method.
+     */
+    internal var hasProcessCompleted: Boolean = false
+        private set
+
+    /**
+     * Marks the process as complete.
+     *
+     * @throws IllegalStateException if this state is not final state.
+     */
+    internal fun completeProcess() {
+        check(isFinal) {
+            "The process can only complete in the final state, but this state is not final."
+        }
+        hasProcessCompleted = true
+    }
 }
 
 /**
@@ -78,6 +105,11 @@ public class LoginFlow internal constructor(
      * Returns the immutable state of the current login stage.
      */
     public fun currentStage(): StateFlow<LoginStage<*>> = stage
+
+    /**
+     * Return `true` if the login process is complete.
+     */
+    public fun isCompleted(): Boolean = stage.value.hasProcessCompleted
 
     /**
      * Switches the [current stage][stage] to the next one.
