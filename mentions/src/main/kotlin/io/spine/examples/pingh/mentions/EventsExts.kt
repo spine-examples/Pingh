@@ -143,7 +143,7 @@ public fun KClass<UserMentioned>.buildBy(mention: Mention, whoWasMentioned: User
         .vBuild()
 
 /**
- * Creates a new `MentionArchived` with the passed ID of the archived mention.
+ * Creates a new `MentionArchived` event with the passed ID of the archived mention.
  */
 public fun KClass<MentionArchived>.with(id: MentionId): MentionArchived =
     MentionArchived.newBuilder()

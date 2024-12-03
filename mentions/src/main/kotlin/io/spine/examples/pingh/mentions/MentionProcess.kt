@@ -108,9 +108,9 @@ internal class MentionProcess :
     }
 
     /**
-     * Updates the mention status based on the current time:
+     * Updates the status of the mention based on the current time:
      *
-     * 1. If the mention was snoozed and the snooze time has [expired][isSnoozeTimePassed],
+     * 1. If the mention is snoozed and the snooze time has [expired][isSnoozeTimePassed],
      *   it [exits][unsnooze] the snooze state.
      *
      * 2. If the mention is [obsolete][isObsolete], it is [archived][archive].

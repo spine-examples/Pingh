@@ -70,7 +70,7 @@ message Mention {
     // The repository where the user was mentioned.
     spine_examples.pingh.github.Repo where_mentioned = 7 [(required) = true];
 
-    // Time when the mentions were read.
+    // Time when the mention was read.
     //
     // If the mention is not read, this field is empty.
     //
