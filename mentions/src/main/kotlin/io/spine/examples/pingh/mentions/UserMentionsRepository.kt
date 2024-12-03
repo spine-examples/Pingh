@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.mentions
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
+import io.spine.examples.pingh.mentions.event.MentionArchived
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
@@ -48,6 +49,7 @@ internal class UserMentionsRepository :
             .route(MentionSnoozed::class.java) { event, _ -> toUserMentions(event.id) }
             .route(MentionRead::class.java) { event, _ -> toUserMentions(event.id) }
             .route(MentionUnsnoozed::class.java) { event, _ -> toUserMentions(event.id) }
+            .route(MentionArchived::class.java) { event, _ -> toUserMentions(event.id) }
     }
 
     /**
