@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.common.annotations.VisibleForTesting
 import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Durations
 import io.spine.base.Time.currentTime
@@ -177,15 +178,17 @@ internal class MentionProcess :
         return MentionArchived::class.with(state().id)
     }
 
-    private companion object {
+    internal companion object {
         /**
          * The time during which a read mention is considered relevant.
          */
-        private val lifetimeOfReadMention = Durations.fromDays(2)
+        @VisibleForTesting
+        internal val lifetimeOfReadMention = Durations.fromDays(2)
 
         /**
          * The time during which an unread mention is considered relevant.
          */
-        private val lifetimeOfUnreadMention = Durations.fromDays(7)
+        @VisibleForTesting
+        internal val lifetimeOfUnreadMention = Durations.fromDays(7)
     }
 }
