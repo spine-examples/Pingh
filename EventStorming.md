@@ -15,4 +15,4 @@ in the identification of two bounded contexts.
 
 <img src="./img/event-storming/mentions-bc-1.jpg" width="700px" alt="Mentions bounded context 1">
 
-<img src="./img/event-storming/mentions-bc-2.jpg" width="500px" alt="Mentions bounded context 2">
+<img src="./img/event-storming/mentions-bc-2.jpg" width="700px" alt="Mentions bounded context 2">
