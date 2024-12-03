@@ -126,7 +126,7 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
             page++
             items += searchIssuesOrPullRequests(token, updatedAfter, itemType, page).itemList
         }
-        return items.filterMentions(username, token, itemType)
+        return items.filterMentions(username, token, updatedAfter, itemType)
     }
 
     /**
@@ -169,6 +169,7 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
     private fun Set<IssueOrPullRequestFragment>.filterMentions(
         user: Username,
         token: PersonalAccessToken,
+        updatedAfter: Timestamp,
         itemType: ItemType
     ): Set<Mention> =
         this.flatMap { item ->
@@ -176,13 +177,14 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
                 .findMentionsOn(item.repo(), item.number, itemType)
                 .of(user)
                 .with(token)
+                .by(updatedAfter)
                 .setTitle(item.title)
                 .get()
-            if (item.body.contains(user.tag())) {
-                mentions.plus(Mention::class.from(item))
-            } else {
-                mentions
-            }
+            item.takeIf { it.body.contains(user.tag()) }
+                ?.let { Mention::class.from(it) }
+                ?.takeIf { it.whenMentioned > updatedAfter }
+                ?.let { mentions + it }
+                ?: mentions
         }.toSet()
 }
 
@@ -340,6 +342,12 @@ private class MentionsOnIssueOrPullRequestsBuilder(
     private var token: PersonalAccessToken? = null
 
     /**
+     * The time after which GitHub items containing the searched mentions
+     * should have been updated.
+     */
+    private var updatedAfter: Timestamp? = null
+
+    /**
      * The string to be used as the title for the found mentions.
      *
      * It is recommended to use the title of the GitHub item where
@@ -364,6 +372,15 @@ private class MentionsOnIssueOrPullRequestsBuilder(
     }
 
     /**
+     * Sets the time after which GitHub items containing the searched mentions
+     * should have been updated.
+     */
+    fun by(updatedAfter: Timestamp): MentionsOnIssueOrPullRequestsBuilder {
+        this.updatedAfter = updatedAfter
+        return this
+    }
+
+    /**
      * Sets the string to be used as the title for the found mentions.
      */
     fun setTitle(title: String): MentionsOnIssueOrPullRequestsBuilder {
@@ -383,6 +400,10 @@ private class MentionsOnIssueOrPullRequestsBuilder(
             "The name of the user whose mentions are to be found is not specified."
         }
         checkNotNull(token) { "The the user authentication token on GitHub is not specified." }
+        checkNotNull(updatedAfter) {
+            "The time after which GitHub items containing the searched mentions " +
+                    "should have been updated is not specified."
+        }
         checkNotNull(title) { "The title for the found mentions is not specified." }
         return comments(issueCommentsUrl) + when (itemType) {
             ItemType.ISSUE -> emptySet()
@@ -400,6 +421,7 @@ private class MentionsOnIssueOrPullRequestsBuilder(
             .itemList
             .filter { comment -> comment.body.contains(user!!.tag()) }
             .map { comment -> Mention::class.from(comment, title!!) }
+            .filter { comments -> comments.whenMentioned > updatedAfter!! }
             .toSet()
 
     /**
@@ -412,6 +434,7 @@ private class MentionsOnIssueOrPullRequestsBuilder(
             .itemList
             .filter { review -> review.body.contains(user!!.tag()) }
             .map { review -> Mention::class.from(review, title!!) }
+            .filter { review -> review.whenMentioned > updatedAfter!! }
             .toSet()
 
     /**
