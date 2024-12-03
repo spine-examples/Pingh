@@ -58,7 +58,7 @@ public abstract class LoginStage<T> {
  * the login within the Pingh app.
  * 3. [LoginFailed]: The login process failed due to an error that occurred during authentication.
  *
- * The flow is considered completed whenever the login is successfully
+ * The flow is considered [completed][LoginCompleted] whenever the login is successfully
  * [confirmed][VerifyLogin.confirm] in the Pingh app.
  *
  * @property client Enables interaction with the Pingh server.
@@ -78,6 +78,11 @@ public class LoginFlow internal constructor(
      * Returns the immutable state of the current login stage.
      */
     public fun currentStage(): StateFlow<LoginStage<*>> = stage
+
+    /**
+     * Returns `true` if the login process is completed.
+     */
+    public fun isCompleted(): Boolean = stage.value is LoginCompleted
 
     /**
      * Switches the [current stage][stage] to the next one.
@@ -105,10 +110,11 @@ public class LoginFlow internal constructor(
             }
 
             is VerifyLogin -> {
-                checkNotNull(stage.value.result) {
-                    "No error message is specified as the result of the `VerifyLogin` stage."
+                if (stage.value.result == null) {
+                    stage.value = LoginCompleted()
+                } else {
+                    stage.value = LoginFailed(::moveToNextStage, stage.value.result as String)
                 }
-                stage.value = LoginFailed(::moveToNextStage, stage.value.result as String)
             }
 
             is LoginFailed -> {
@@ -126,3 +132,9 @@ public class LoginFlow internal constructor(
         }
     }
 }
+
+/**
+ * The terminal stage of the login process,
+ * signifying that the login process has been successfully completed.
+ */
+private class LoginCompleted : LoginStage<Unit>()

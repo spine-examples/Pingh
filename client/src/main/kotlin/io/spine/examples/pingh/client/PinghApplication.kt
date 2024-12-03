@@ -159,8 +159,9 @@ public class PinghApplication private constructor(
      * Initiates the login flow and terminates any previous flow, if it exists.
      */
     public fun startLoginFlow(): LoginFlow {
-        loginFlow?.close()
-        loginFlow = LoginFlow(client, ::establishSession)
+        if (loginFlow == null || loginFlow!!.isCompleted()) {
+            loginFlow = LoginFlow(client, ::establishSession)
+        }
         return loginFlow!!
     }
 

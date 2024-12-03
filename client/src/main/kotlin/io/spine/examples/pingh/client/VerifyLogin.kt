@@ -170,6 +170,7 @@ public class VerifyLogin internal constructor(
             EventObserver(command.id, UserLoggedIn::class) {
                 codeExpirationJob.cancel()
                 establishSession(session)
+                moveToNextStage()
                 future.complete(ActionOutcome.Success)
             },
             EventObserver(command.id, UserIsNotLoggedIntoGitHub::class) {
