@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.protobuf.util.Timestamps
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
@@ -40,6 +41,8 @@ import io.spine.testing.TestValues.randomString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 
 @DisplayName("`RemoteGitHubSearch` should")
 internal class RemoteGitHubSearchSpec {
@@ -57,6 +60,16 @@ internal class RemoteGitHubSearchSpec {
         val service = RemoteGitHubSearch(mockEngineThatContainsMentions(token))
         val mentions = service.searchMentions(username, token)
         val expected = expectedMentions()
+        mentions shouldBe expected
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["2024-01-01T00:00:00Z", "2024-05-16T08:35:04Z", "2024-12-31T23:59:59Z"])
+    internal fun `fetch only new mentions, ignoring those already received`(time: String) {
+        val service = RemoteGitHubSearch(mockEngineThatContainsMentions(token))
+        val updateAfter = Timestamps.parse(time)
+        val mentions = service.searchMentions(username, token, updateAfter)
+        val expected = expectedMentions().filter { it.whenMentioned > updateAfter }.toSet()
         mentions shouldBe expected
     }
 
