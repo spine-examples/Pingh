@@ -73,3 +73,10 @@ message MentionUnsnoozed {
     // The repository where the user was mentioned.
     spine_examples.pingh.github.Repo where_mentioned = 5 [(required) = true];
 }
+
+// The mention was archived because it was deemed obsolete.
+message MentionArchived {
+
+    // The ID of the mention.
+    MentionId id = 1;
+}
