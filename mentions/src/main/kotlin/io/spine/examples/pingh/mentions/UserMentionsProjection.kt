@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.mentions
 
 import io.spine.core.Subscribe
+import io.spine.examples.pingh.mentions.event.MentionArchived
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
@@ -75,6 +76,21 @@ internal class UserMentionsProjection :
     @Subscribe
     internal fun on(event: MentionUnsnoozed) {
         setMentionStatus(event.id, MentionStatus.UNREAD)
+    }
+
+    /**
+     * Removes a mention from the user's mentions list once it has been archived.
+     */
+    @Subscribe
+    internal fun on(event: MentionArchived) {
+        with(builder()) {
+            val id = mentionList.indexOfFirst { it.id.equals(event.id) }
+            check(id > 0) {
+                "The mention is not in the user's list, but an attempt was made to remove it.\n" +
+                        "The ID of the mention that was attempted to be removed: ${event.id}."
+            }
+            removeMention(id)
+        }
     }
 
     /**
