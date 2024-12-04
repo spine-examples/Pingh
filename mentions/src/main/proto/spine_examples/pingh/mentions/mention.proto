@@ -69,6 +69,12 @@ message Mention {
 
     // The repository where the user was mentioned.
     spine_examples.pingh.github.Repo where_mentioned = 7 [(required) = true];
+
+    // Time when the mention was read.
+    //
+    // If the mention is not read, this field is empty.
+    //
+    google.protobuf.Timestamp when_read = 8;
 }
 
 // Information about all mentions of the user.
@@ -79,7 +85,10 @@ message UserMentions {
     UserMentionsId id = 1;
 
     // List of user mentions.
-    repeated MentionView mention = 2 [(required) = true];
+    //
+    // The list is empty if the user has no mentions that are not obsolete.
+    //
+    repeated MentionView mention = 2;
 }
 
 // Information about mention of the user.
