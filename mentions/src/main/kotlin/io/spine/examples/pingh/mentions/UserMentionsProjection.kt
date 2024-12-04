@@ -27,8 +27,10 @@
 package io.spine.examples.pingh.mentions
 
 import io.spine.core.Subscribe
+import io.spine.examples.pingh.mentions.event.MentionPinned
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
+import io.spine.examples.pingh.mentions.event.MentionUnpinned
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.server.projection.Projection
@@ -57,7 +59,9 @@ internal class UserMentionsProjection :
      */
     @Subscribe
     internal fun on(event: MentionSnoozed) {
-        setMentionStatus(event.id, MentionStatus.SNOOZED)
+        modify(event.id) {
+            status = MentionStatus.SNOOZED
+        }
     }
 
     /**
@@ -65,7 +69,9 @@ internal class UserMentionsProjection :
      */
     @Subscribe
     internal fun on(event: MentionRead) {
-        setMentionStatus(event.id, MentionStatus.READ)
+        modify(event.id) {
+            status = MentionStatus.READ
+        }
     }
 
     /**
@@ -74,21 +80,45 @@ internal class UserMentionsProjection :
      */
     @Subscribe
     internal fun on(event: MentionUnsnoozed) {
-        setMentionStatus(event.id, MentionStatus.UNREAD)
+        modify(event.id) {
+            status = MentionStatus.UNREAD
+        }
     }
 
     /**
-     * Sets a new status for a mention by its ID.
+     * Marks mention with the specified ID as pinned.
      */
-    private fun setMentionStatus(mentionId: MentionId, status: MentionStatus) {
+    @Subscribe
+    internal fun on(event: MentionPinned) {
+        modify(event.id) {
+            pinned = true
+        }
+    }
+
+    /**
+     * Marks the mention with the specified ID as unpinned.
+     */
+    @Subscribe
+    internal fun on(event: MentionUnpinned) {
+        modify(event.id) {
+            pinned = false
+        }
+    }
+
+    /**
+     * Applies the [modifier] to the builder of the mention with specified [ID][id].
+     */
+    private fun modify(id: MentionId, modifier: MentionView.Builder.() -> Unit) {
         val idInList = builder()
             .mentionList
-            .indexOfFirst { mention -> mention.id == mentionId }
+            .indexOfFirst { mention -> mention.id == id }
         val updatedMention = builder()
             .mentionList[idInList]
             .toBuilder()
-            .setStatus(status)
-            .vBuild()
+            .run {
+                modifier()
+                vBuild()
+            }
         builder().setMention(idInList, updatedMention)
     }
 }
