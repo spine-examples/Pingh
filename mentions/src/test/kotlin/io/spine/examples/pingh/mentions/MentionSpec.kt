@@ -34,6 +34,7 @@ import io.spine.examples.pingh.clock.buildBy
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
 import io.spine.examples.pingh.mentions.command.SnoozeMention
+import io.spine.examples.pingh.mentions.event.MentionArchived
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
@@ -43,6 +44,7 @@ import io.spine.examples.pingh.mentions.given.generate
 import io.spine.examples.pingh.mentions.given.onlyWithId
 import io.spine.examples.pingh.mentions.rejection.Rejections.MentionIsAlreadyRead
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
+import io.spine.protobuf.Durations2.seconds
 import io.spine.server.BoundedContextBuilder
 import io.spine.server.integration.ThirdPartyContext
 import io.spine.testing.server.blackbox.ContextAwareTest
@@ -128,6 +130,78 @@ internal class MentionSpec : ContextAwareTest() {
 
     @Nested internal inner class
     `React on 'TimePassed' event, and` {
+
+        @Nested internal inner class
+        `If mention is unread,` {
+
+            @Test
+            internal fun `do nothing if mention is not obsolete`() {
+                emitTimePassedEvent()
+                context().assertEvents()
+                    .withType(MentionArchived::class.java)
+                    .hasSize(0)
+                val expected = Mention::class.buildBy(id, MentionStatus.UNREAD, userMentioned)
+                context().assertState(id, expected)
+            }
+
+            @Test
+            internal fun `emit 'MentionArchived' event if mention is obsolete`() {
+                emitTimePassedEvent(
+                    currentTime().add(MentionProcess.lifetimeOfUnreadMention).add(seconds(1))
+                )
+                val expected = MentionArchived::class.with(id)
+                context().assertEvent(expected)
+            }
+
+            @Test
+            internal fun `mark entity as archived if mention is obsolete`() {
+                emitTimePassedEvent(
+                    currentTime().add(MentionProcess.lifetimeOfUnreadMention).add(seconds(1))
+                )
+                context().assertEntity(id, MentionProcess::class.java)
+                    .archivedFlag()
+                    .isTrue()
+            }
+        }
+
+        @Nested internal inner class
+        `If mention is read,` {
+
+            @BeforeEach
+            internal fun setReadStatus() {
+                val command = MarkMentionAsRead::class.buildBy(id)
+                context().receivesCommand(command)
+            }
+
+            @Test
+            internal fun `do nothing if mention is not obsolete`() {
+                emitTimePassedEvent()
+                context().assertEvents()
+                    .withType(MentionArchived::class.java)
+                    .hasSize(0)
+                val expected = Mention::class.buildBy(id, MentionStatus.READ, userMentioned)
+                context().assertState(id, expected)
+            }
+
+            @Test
+            internal fun `emit 'MentionArchived' event if mention is obsolete`() {
+                emitTimePassedEvent(
+                    currentTime().add(MentionProcess.lifetimeOfReadMention).add(seconds(1))
+                )
+                val expected = MentionArchived::class.with(id)
+                context().assertEvent(expected)
+            }
+
+            @Test
+            internal fun `mark entity as archived if mention is obsolete`() {
+                emitTimePassedEvent(
+                    currentTime().add(MentionProcess.lifetimeOfReadMention).add(seconds(1))
+                )
+                context().assertEntity(id, MentionProcess::class.java)
+                    .archivedFlag()
+                    .isTrue()
+            }
+        }
 
         @Nested internal inner class
         `If mention is snoozed,` {

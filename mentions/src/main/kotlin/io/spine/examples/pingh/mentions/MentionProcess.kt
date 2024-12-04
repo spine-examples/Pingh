@@ -26,12 +26,17 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.common.annotations.VisibleForTesting
+import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Durations
+import io.spine.base.Time.currentTime
 import io.spine.core.External
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
 import io.spine.examples.pingh.mentions.command.PinMention
 import io.spine.examples.pingh.mentions.command.SnoozeMention
 import io.spine.examples.pingh.mentions.command.UnpinMention
+import io.spine.examples.pingh.mentions.event.MentionArchived
 import io.spine.examples.pingh.mentions.event.MentionPinned
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
@@ -43,7 +48,7 @@ import io.spine.server.command.Assign
 import io.spine.server.event.React
 import io.spine.server.model.Nothing
 import io.spine.server.procman.ProcessManager
-import java.util.Optional
+import io.spine.server.tuple.EitherOf3
 import kotlin.jvm.Throws
 
 /**
@@ -79,9 +84,10 @@ internal class MentionProcess :
         if (state().status == MentionStatus.READ) {
             throw MentionIsAlreadyRead::class.buildBy(command.id)
         }
-        builder()
-            .setStatus(MentionStatus.SNOOZED)
-            .setSnoozeUntilWhen(command.untilWhen)
+        with(builder()) {
+            status = MentionStatus.SNOOZED
+            snoozeUntilWhen = command.untilWhen
+        }
         return MentionSnoozed::class.buildBy(
             command.id,
             command.untilWhen
@@ -97,9 +103,11 @@ internal class MentionProcess :
         if (state().status == MentionStatus.READ) {
             throw MentionIsAlreadyRead::class.buildBy(command.id)
         }
-        builder()
-            .setStatus(MentionStatus.READ)
-            .clearSnoozeUntilWhen()
+        with(builder()) {
+            status = MentionStatus.READ
+            whenRead = currentTime()
+            clearSnoozeUntilWhen()
+        }
         return MentionRead::class.buildBy(command.id)
     }
 
@@ -122,27 +130,87 @@ internal class MentionProcess :
     }
 
     /**
-     * Marks this mention as unread if the snooze time passed.
+     * Updates the status of the mention based on the current time:
      *
-     * @return Empty `Optional`, if the mention is not snoozed or the time in `TimePassed` is less
-     * than the `snoozeUntilWhen`. Otherwise, `MentionUnsnoozed` event wrapped in `Optional`.
+     * 1. If the mention is snoozed and the snooze time has [expired][isSnoozeTimePassed],
+     *   it [exits][unsnooze] the snooze state.
+     *
+     * 2. If the mention is [obsolete][isObsolete], it is [archived][archive].
      */
     @React
-    internal fun on(@External event: TimePassed): Optional<MentionUnsnoozed> {
-        if (state().status != MentionStatus.SNOOZED
-            || state().snoozeUntilWhen.isAfter(event.time)
-        ) {
-            return Optional.empty()
+    internal fun on(
+        @External event: TimePassed
+    ): EitherOf3<MentionUnsnoozed, MentionArchived, Nothing> =
+        when {
+            isSnoozeTimePassed(event.time) -> EitherOf3.withA(unsnooze())
+            isObsolete(event.time) -> EitherOf3.withB(archive())
+            else -> EitherOf3.withC(nothing())
         }
-        builder()
-            .setStatus(MentionStatus.UNREAD)
-            .clearSnoozeUntilWhen()
-        return Optional.of(MentionUnsnoozed::class.with(
+
+    /**
+     * Returns `true` if the mention is snoozed and its snooze time has expired.
+     */
+    private fun isSnoozeTimePassed(time: Timestamp): Boolean =
+        state().status == MentionStatus.SNOOZED && time.isAfter(state().snoozeUntilWhen)
+
+    /**
+     * Marks this mention as unread when the snooze time passed.
+     */
+    private fun unsnooze(): MentionUnsnoozed {
+        with(builder()) {
+            status = MentionStatus.UNREAD
+            clearSnoozeUntilWhen()
+        }
+        return MentionUnsnoozed::class.with(
             state().id,
             state().whoMentioned,
             state().title,
             state().whenMentioned,
             state().whereMentioned
-        ))
+        )
+    }
+
+    /**
+     * Returns `true` if the mention is obsolete.
+     *
+     * A mention is considered obsolete if:
+     *
+     * - It has been read,
+     *   and the [lifetime of the read mention][lifetimeOfReadMention] has expired.
+     *
+     * - It has not been read,
+     *   and the [lifetime of the unread mention][lifetimeOfUnreadMention] has expired.
+     */
+    private fun isObsolete(time: Timestamp): Boolean =
+        when (state().status) {
+            MentionStatus.READ ->
+                time.isAfter(state().whenRead.add(lifetimeOfReadMention))
+
+            MentionStatus.UNREAD ->
+                time.isAfter(state().whenMentioned.add(lifetimeOfUnreadMention))
+
+            else -> false
+        }
+
+    /**
+     * Archives this mention.
+     */
+    private fun archive(): MentionArchived {
+        archived = true
+        return MentionArchived::class.with(state().id)
+    }
+
+    internal companion object {
+        /**
+         * The time during which a read mention is considered relevant.
+         */
+        @VisibleForTesting
+        internal val lifetimeOfReadMention = Durations.fromDays(2)
+
+        /**
+         * The time during which an unread mention is considered relevant.
+         */
+        @VisibleForTesting
+        internal val lifetimeOfUnreadMention = Durations.fromDays(7)
     }
 }

@@ -35,6 +35,7 @@ import io.spine.examples.pingh.github.Repo
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
+import io.spine.examples.pingh.mentions.event.MentionArchived
 import io.spine.examples.pingh.mentions.event.MentionPinned
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
@@ -156,5 +157,13 @@ public fun KClass<MentionPinned>.with(id: MentionId): MentionPinned =
  */
 public fun KClass<MentionUnpinned>.with(id: MentionId): MentionUnpinned =
     MentionUnpinned.newBuilder()
+        .setId(id)
+        .vBuild()
+
+/**
+ * Creates a new `MentionArchived` event with the passed ID of the archived mention.
+ */
+public fun KClass<MentionArchived>.with(id: MentionId): MentionArchived =
+    MentionArchived.newBuilder()
         .setId(id)
         .vBuild()

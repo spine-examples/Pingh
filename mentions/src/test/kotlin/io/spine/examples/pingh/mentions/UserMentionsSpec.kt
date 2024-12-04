@@ -28,6 +28,7 @@ package io.spine.examples.pingh.mentions
 
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
+import io.spine.examples.pingh.mentions.event.MentionArchived
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
@@ -92,6 +93,18 @@ internal class UserMentionsSpec : ContextAwareTest() {
     private fun assertMentionStatus(status: MentionStatus) {
         val mention = MentionView::class.buildBy(userMentioned, status)
         val expected = UserMentions::class.buildBy(id, mention)
+        context().assertState(id, expected)
+    }
+
+    @Test
+    internal fun `react on 'MentionArchived' event, and remove obsolete mention`() {
+        val newMention = UserMentioned::class.generateWith(id.username).run {
+            context().receivesEvent(this)
+            MentionView::class.buildBy(this, MentionStatus.UNREAD)
+        }
+        val event = MentionArchived::class.with(userMentioned.id)
+        context().receivesEvent(event)
+        val expected = UserMentions::class.buildBy(id, newMention)
         context().assertState(id, expected)
     }
 }
