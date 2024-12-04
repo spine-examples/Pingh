@@ -29,9 +29,13 @@ package io.spine.examples.pingh.mentions
 import io.spine.core.External
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
+import io.spine.examples.pingh.mentions.command.PinMention
 import io.spine.examples.pingh.mentions.command.SnoozeMention
+import io.spine.examples.pingh.mentions.command.UnpinMention
+import io.spine.examples.pingh.mentions.event.MentionPinned
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
+import io.spine.examples.pingh.mentions.event.MentionUnpinned
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.MentionIsAlreadyRead
@@ -97,6 +101,24 @@ internal class MentionProcess :
             .setStatus(MentionStatus.READ)
             .clearSnoozeUntilWhen()
         return MentionRead::class.buildBy(command.id)
+    }
+
+    /**
+     * Pins the mention at the top of the mentions list.
+     */
+    @Assign
+    internal fun handle(command: PinMention): MentionPinned {
+        builder().pinned = true
+        return MentionPinned::class.with(command.id)
+    }
+
+    /**
+     * Unpins the mention from the top of the mentions list.
+     */
+    @Assign
+    internal fun handle(command: UnpinMention): MentionUnpinned {
+        builder().pinned = false
+        return MentionUnpinned::class.with(command.id)
     }
 
     /**
