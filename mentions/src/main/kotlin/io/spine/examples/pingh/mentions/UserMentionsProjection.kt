@@ -87,7 +87,7 @@ internal class UserMentionsProjection :
             val id = mentionList.indexOfFirst { it.id.equals(event.id) }
             check(id != -1) {
                 "The mention is not in the user's list, but an attempt was made to remove it.\n" +
-                        "The ID of the mention that was attempted to be removed: ${event.id}."
+                        "The ID of the mention that was attempted to be removed: `${event.id}`."
             }
             removeMention(id)
         }
