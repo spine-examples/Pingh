@@ -73,3 +73,17 @@ message MentionUnsnoozed {
     // The repository where the user was mentioned.
     spine_examples.pingh.github.Repo where_mentioned = 5 [(required) = true];
 }
+
+// The mention was pinned at the top of the mentions list.
+message MentionPinned {
+
+    // The ID of the mention.
+    MentionId id = 1;
+}
+
+// The mention was unpinned from the top of the mentions list.
+message MentionUnpinned {
+
+    // The ID of the mention.
+    MentionId id = 1;
+}
