@@ -33,7 +33,6 @@ import io.spine.examples.pingh.client.settings.isIgnored
 import io.spine.examples.pingh.client.settings.value
 import io.spine.examples.pingh.mentions.GitHubClientId
 import io.spine.examples.pingh.mentions.MentionId
-import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
 import io.spine.examples.pingh.mentions.UserMentions
 import io.spine.examples.pingh.mentions.UserMentionsId
@@ -61,6 +60,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * @property session Manages the session with Pingh server.
  * @property settings Manages the application settings configured by a user.
  */
+@Suppress("TooManyFunctions" /* Managing mentions requires numerous functions. */)
 public class MentionsFlow internal constructor(
     private val client: DesktopClient,
     private val session: Session,
@@ -222,25 +222,3 @@ public fun MentionsList.sorted(): MentionsList =
             Timestamps.compare(secondMentions.whenMentioned, firstMentions.whenMentioned)
         }
     }
-
-public fun main() {
-    val list = listOf(
-        MentionView.newBuilder()
-            .setStatus(MentionStatus.READ)
-            .setPinned(false)
-            .buildPartial(),
-        MentionView.newBuilder()
-            .setStatus(MentionStatus.UNREAD)
-            .setPinned(false)
-            .buildPartial(),
-        MentionView.newBuilder()
-            .setStatus(MentionStatus.SNOOZED)
-            .setPinned(true)
-            .buildPartial(),
-        MentionView.newBuilder()
-            .setStatus(MentionStatus.UNREAD)
-            .setPinned(true)
-            .buildPartial(),
-    )
-    println(list.sorted())
-}
