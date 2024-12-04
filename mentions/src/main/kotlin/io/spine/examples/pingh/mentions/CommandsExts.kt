@@ -31,7 +31,9 @@ package io.spine.examples.pingh.mentions
 import com.google.protobuf.Timestamp
 import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
+import io.spine.examples.pingh.mentions.command.PinMention
 import io.spine.examples.pingh.mentions.command.SnoozeMention
+import io.spine.examples.pingh.mentions.command.UnpinMention
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import kotlin.reflect.KClass
 
@@ -65,4 +67,20 @@ public fun KClass<UpdateMentionsFromGitHub>.buildBy(
     UpdateMentionsFromGitHub.newBuilder()
         .setId(id)
         .setWhenRequested(whenRequested)
+        .vBuild()
+
+/**
+ * Creates a new `PinMention` command with the passed ID of the mention.
+ */
+public fun KClass<PinMention>.with(id: MentionId): PinMention =
+    PinMention.newBuilder()
+        .setId(id)
+        .vBuild()
+
+/**
+ * Creates a new `UnpinMention` command with the passed ID of the mention.
+ */
+public fun KClass<UnpinMention>.with(id: MentionId): UnpinMention =
+    UnpinMention.newBuilder()
+        .setId(id)
         .vBuild()

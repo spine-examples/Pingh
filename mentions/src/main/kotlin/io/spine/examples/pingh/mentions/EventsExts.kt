@@ -35,8 +35,10 @@ import io.spine.examples.pingh.github.Repo
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
+import io.spine.examples.pingh.mentions.event.MentionPinned
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
+import io.spine.examples.pingh.mentions.event.MentionUnpinned
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
@@ -139,4 +141,20 @@ public fun KClass<UserMentioned>.buildBy(mention: Mention, whoWasMentioned: User
         .setWhenMentioned(mention.whenMentioned)
         .setUrl(mention.url)
         .setWhereMentioned(mention.whereMentioned)
+        .vBuild()
+
+/**
+ * Creates a new `MentionPinned` event with the passed ID of the mention.
+ */
+public fun KClass<MentionPinned>.with(id: MentionId): MentionPinned =
+    MentionPinned.newBuilder()
+        .setId(id)
+        .vBuild()
+
+/**
+ * Creates a new `MentionUnpinned` event with the passed ID of the mention.
+ */
+public fun KClass<MentionUnpinned>.with(id: MentionId): MentionUnpinned =
+    MentionUnpinned.newBuilder()
+        .setId(id)
         .vBuild()
