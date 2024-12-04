@@ -180,9 +180,14 @@ internal class MentionProcess :
      *
      * - It has not been read,
      *   and the [lifetime of the unread mention][lifetimeOfUnreadMention] has expired.
+     *
+     * Pinned mentions never become obsolete.
      */
-    private fun isObsolete(time: Timestamp): Boolean =
-        when (state().status) {
+    private fun isObsolete(time: Timestamp): Boolean {
+        if (state().pinned) {
+            return false
+        }
+        return when (state().status) {
             MentionStatus.READ ->
                 time.isAfter(state().whenRead.add(lifetimeOfReadMention))
 
@@ -191,6 +196,7 @@ internal class MentionProcess :
 
             else -> false
         }
+    }
 
     /**
      * Archives this mention.
