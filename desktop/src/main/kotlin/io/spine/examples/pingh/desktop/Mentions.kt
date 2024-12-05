@@ -132,7 +132,7 @@ private fun ToolBar(
                     strokeWidth = 1.dp.toPx()
                 )
             }
-            .padding(start = 27.dp),
+            .padding(start = 27.dp, end = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
@@ -146,7 +146,7 @@ private fun ToolBar(
         Spacer(Modifier.width(7.dp))
         Text(
             text = "Recent mentions",
-            modifier = Modifier.width(250.dp),
+            modifier = Modifier.weight(1f),
             fontSize = 20.sp,
             color = contentColor,
             style = MaterialTheme.typography.displayLarge
@@ -179,19 +179,16 @@ private fun MentionCards(
     val mentions by flow.mentions.collectAsState()
     val scrollState = rememberScrollState()
     Column(
-        Modifier
+        modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 10.dp)
+            .padding(10.dp)
             .verticalScroll(scrollState)
             .background(MaterialTheme.colorScheme.background)
             .testTag("mention-cards"),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         mentions.sorted()
-            .forEach { mention ->
-                Spacer(Modifier.height(10.dp))
-                MentionCard(flow, mention)
-            }
-        Spacer(Modifier.height(10.dp))
+            .forEach { mention -> MentionCard(flow, mention) }
     }
 }
 
@@ -240,8 +237,7 @@ private fun MentionCard(
         )
     ) {
         Row(
-            modifier = Modifier
-                .padding(horizontal = 20.dp),
+            modifier = Modifier.padding(start = 20.dp, end = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -252,7 +248,6 @@ private fun MentionCard(
             MentionCardText(mention, isHovered)
             Row(
                 modifier = Modifier.fillMaxHeight(),
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 SnoozeButton(flow, mention, isHovered.value)
@@ -346,7 +341,7 @@ private fun PinButton(
     flow: MentionsFlow,
     mention: MentionView,
     isParentHovered: Boolean,
-    sizeMultiplier: Float = 0.5f
+    sizeMultiplier: Float = 0.6f
 ) {
     val (iconRes, onClick) = when {
         isParentHovered && !mention.pinned -> Res.drawable.pin to { flow.pin(mention.id) }
@@ -376,7 +371,7 @@ private fun MentionIconButton(
     icon: Painter,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    sizeMultiplier: Float = 0.75f
+    sizeMultiplier: Float = 0.85f
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -388,7 +383,7 @@ private fun MentionIconButton(
     IconButton(
         icon = icon,
         onClick = onClick,
-        modifier = Modifier.size(35.dp)
+        modifier = Modifier.size(30.dp)
             .clip(CircleShape)
             .hoverable(interactionSource)
             .then(modifier),
