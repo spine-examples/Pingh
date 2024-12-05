@@ -94,6 +94,7 @@ internal fun IconButton(
         FilledIconButton(
             onClick = onClick,
             modifier = modifier
+                .padding(0.dp)
                 .pointerHoverIcon(PointerIcon(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))),
             enabled = enabled,
             shape = shape,
