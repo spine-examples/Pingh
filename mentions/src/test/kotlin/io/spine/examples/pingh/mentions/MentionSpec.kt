@@ -73,8 +73,7 @@ internal class MentionSpec : ContextAwareTest() {
         context().receivesEvent(userMentioned)
     }
 
-    @Nested
-    internal inner class
+    @Nested internal inner class
     `React on 'UserMentioned' event, and` {
 
         @Test
@@ -84,8 +83,7 @@ internal class MentionSpec : ContextAwareTest() {
         }
     }
 
-    @Nested
-    internal inner class
+    @Nested internal inner class
     `Handle 'SnoozeMention' command, and` {
 
         private lateinit var untilWhen: Timestamp
@@ -112,8 +110,7 @@ internal class MentionSpec : ContextAwareTest() {
         }
     }
 
-    @Nested
-    internal inner class
+    @Nested internal inner class
     `Handle 'MarkMentionAsRead' command, and` {
 
         @BeforeEach
@@ -135,8 +132,7 @@ internal class MentionSpec : ContextAwareTest() {
         }
     }
 
-    @Nested
-    internal inner class
+    @Nested internal inner class
     `Handle 'PinMention' command, and` {
 
         @BeforeEach
@@ -160,8 +156,7 @@ internal class MentionSpec : ContextAwareTest() {
         }
     }
 
-    @Nested
-    internal inner class
+    @Nested internal inner class
     `Handle 'UnpinMention' command, and` {
 
         @BeforeEach
@@ -187,12 +182,10 @@ internal class MentionSpec : ContextAwareTest() {
         }
     }
 
-    @Nested
-    internal inner class
+    @Nested internal inner class
     `React on 'TimePassed' event, and` {
 
-        @Nested
-        internal inner class
+        @Nested internal inner class
         `If mention is unread,` {
 
             @Test
@@ -236,8 +229,7 @@ internal class MentionSpec : ContextAwareTest() {
             }
         }
 
-        @Nested
-        internal inner class
+        @Nested internal inner class
         `If mention is read,` {
 
             @BeforeEach
@@ -287,8 +279,7 @@ internal class MentionSpec : ContextAwareTest() {
             }
         }
 
-        @Nested
-        internal inner class
+        @Nested internal inner class
         `If mention is snoozed,` {
 
             @BeforeEach

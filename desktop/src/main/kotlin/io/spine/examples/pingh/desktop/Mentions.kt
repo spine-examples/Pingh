@@ -333,14 +333,13 @@ private fun SnoozeButton(
 
 /**
  * Displays the pin icon for a mention when it is not pinned,
- * and the mention card is hovered over. If the mention is pinned,
+ * and the mention card is hovered. If the mention is pinned,
  * the unpin icon is displayed instead.
  *
  * @param flow The flow for managing the lifecycle of mentions.
  * @param mention The mention whose information is displayed.
  * @param isParentHovered Whether the parent mention card is being hovered.
  * @param sizeMultiplier The proportion of the button's size that the icon occupies.
- *
  */
 @Composable
 private fun PinButton(
@@ -349,17 +348,17 @@ private fun PinButton(
     isParentHovered: Boolean,
     sizeMultiplier: Float = 0.5f
 ) {
-    val (iconRes, action) = when {
+    val (iconRes, onClick) = when {
         isParentHovered && !mention.pinned -> Res.drawable.pin to { flow.pin(mention.id) }
         mention.pinned -> Res.drawable.pinned to { flow.unpin(mention.id) }
         else -> null to null
     }
-    if (iconRes != null && action != null) {
+    if (iconRes != null && onClick != null) {
         MentionIconButton(
             icon = painterResource(iconRes),
-            onClick = { action() },
-            sizeMultiplier = sizeMultiplier,
-            modifier = Modifier.testTag("pin-button")
+            onClick = onClick,
+            modifier = Modifier.testTag("pin-button"),
+            sizeMultiplier = sizeMultiplier
         )
     }
 }

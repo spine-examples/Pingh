@@ -204,9 +204,9 @@ public typealias MentionsList = List<MentionView>
 
 /**
  * Returns a `MentionsList` sorted in the following order:
- * unread mentions first, followed by pending mentions, and then read mentions.
+ * unread mentions first, followed by snoozed mentions, and then read mentions.
  *
- * Pinned mentions always appear before unpinned ones.
+ * Pinned mentions are placed before unpinned ones.
  *
  * Within each category, mentions are arranged chronologically by their creation time.
  */
