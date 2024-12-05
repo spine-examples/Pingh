@@ -37,6 +37,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import io.kotest.matchers.floats.shouldBeGreaterThan
 import io.kotest.matchers.floats.shouldBeLessThan
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
@@ -116,6 +117,43 @@ internal class MentionsPageUiTest : UiTest() {
             }
         }
 
+    @Test
+    internal fun `have pinned mention displayed at the top of the mention list`() =
+        runPinghUiTest {
+            logIn()
+            awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
+            val pinnedTag = mentionCards().random().testTag
+            onNodeWithTag(pinnedTag).performHover()
+            awaitFact { onPinButtonWithParentTag(pinnedTag).assertExists() }
+            onPinButtonWithParentTag(pinnedTag).performClick()
+            awaitFact {
+                val mentions = mentionCards()
+                val pinnedMention = mentions.first { it.testTag == pinnedTag }
+                mentions.forEach { mention ->
+                    if (mention != pinnedMention) {
+                        mention.positionInRoot.y shouldBeGreaterThan pinnedMention.positionInRoot.y
+                    }
+                }
+            }
+        }
+
+    @Test
+    internal fun `have pin button displayed when mention is pinned and not displayed otherwise`() =
+        runPinghUiTest {
+            logIn()
+            awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 2 }
+            val mentions = mentionCards().shuffled()
+            val pinnedTag = mentions[0].testTag
+            val anotherTag = mentions[1].testTag
+            onNodeWithTag(anotherTag).performHover()
+            awaitFact { onPinButtonWithParentTag(pinnedTag).assertDoesNotExist() }
+            onNodeWithTag(pinnedTag).performHover()
+            awaitFact { onPinButtonWithParentTag(pinnedTag).assertExists() }
+            onPinButtonWithParentTag(pinnedTag).performClick()
+            onNodeWithTag(anotherTag).performHover()
+            awaitFact { onPinButtonWithParentTag(pinnedTag).assertExists() }
+        }
+
     private fun SemanticsNodeInteractionsProvider.mentionCards(): List<SemanticsNode> =
         onNodeWithTag("mention-cards")
             .onChildren()
@@ -127,4 +165,10 @@ internal class MentionsPageUiTest : UiTest() {
         onNodeWithTag(tag)
             .onChildren()
             .filterToOne(hasTestTag("snooze-button"))
+
+    private fun SemanticsNodeInteractionsProvider.onPinButtonWithParentTag(tag: String):
+            SemanticsNodeInteraction =
+        onNodeWithTag(tag)
+            .onChildren()
+            .filterToOne(hasTestTag("pin-button"))
 }

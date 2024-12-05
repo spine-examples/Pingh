@@ -33,10 +33,14 @@ import io.spine.base.Time.currentTime
 import io.spine.core.External
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
+import io.spine.examples.pingh.mentions.command.PinMention
 import io.spine.examples.pingh.mentions.command.SnoozeMention
+import io.spine.examples.pingh.mentions.command.UnpinMention
 import io.spine.examples.pingh.mentions.event.MentionArchived
+import io.spine.examples.pingh.mentions.event.MentionPinned
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
+import io.spine.examples.pingh.mentions.event.MentionUnpinned
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.MentionIsAlreadyRead
@@ -108,6 +112,24 @@ internal class MentionProcess :
     }
 
     /**
+     * Pins the mention at the top of the mentions list.
+     */
+    @Assign
+    internal fun handle(command: PinMention): MentionPinned {
+        builder().pinned = true
+        return MentionPinned::class.with(command.id)
+    }
+
+    /**
+     * Unpins the mention from the top of the mentions list.
+     */
+    @Assign
+    internal fun handle(command: UnpinMention): MentionUnpinned {
+        builder().pinned = false
+        return MentionUnpinned::class.with(command.id)
+    }
+
+    /**
      * Updates the status of the mention based on the current time:
      *
      * 1. If the mention is snoozed and the snooze time has [expired][isSnoozeTimePassed],
@@ -158,9 +180,14 @@ internal class MentionProcess :
      *
      * - It has not been read,
      *   and the [lifetime of the unread mention][lifetimeOfUnreadMention] has expired.
+     *
+     * Pinned mentions never become obsolete.
      */
-    private fun isObsolete(time: Timestamp): Boolean =
-        when (state().status) {
+    private fun isObsolete(time: Timestamp): Boolean {
+        if (state().pinned) {
+            return false
+        }
+        return when (state().status) {
             MentionStatus.READ ->
                 time.isAfter(state().whenRead.add(lifetimeOfReadMention))
 
@@ -169,6 +196,7 @@ internal class MentionProcess :
 
             else -> false
         }
+    }
 
     /**
      * Archives this mention.

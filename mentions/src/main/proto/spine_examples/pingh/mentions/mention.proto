@@ -75,6 +75,15 @@ message Mention {
     // If the mention is not read, this field is empty.
     //
     google.protobuf.Timestamp when_read = 8;
+
+    // Whether the mention is pinned for the user.
+    //
+    // Pinned mentions are positioned at the top of the user's list,
+    // followed by all other mentions.
+    //
+    // Pinned mentions never become obsolete.
+    //
+    bool pinned = 9;
 }
 
 // Information about all mentions of the user.
@@ -114,6 +123,13 @@ message MentionView {
 
     // The repository where the user was mentioned.
     spine_examples.pingh.github.Repo where_mentioned = 7 [(required) = true];
+
+    // Whether the mention is pinned for the user.
+    //
+    // Pinned mentions are positioned at the top of the user's list,
+    // followed by all other mentions.
+    //
+    bool pinned = 8;
 }
 
 // The read status of mention.

@@ -82,7 +82,8 @@ internal fun KClass<Mention>.buildBy(
     id: MentionId,
     status: MentionStatus,
     event: UserMentioned,
-    snoozedUntilWhen: Timestamp? = null
+    snoozedUntilWhen: Timestamp? = null,
+    pinned: Boolean? = null
 ): Mention =
     with(Mention.newBuilder()) {
         this.id = id
@@ -93,6 +94,9 @@ internal fun KClass<Mention>.buildBy(
         whereMentioned = event.whereMentioned
         if (!Objects.equals(snoozedUntilWhen, null)) {
             this.snoozeUntilWhen = snoozedUntilWhen
+        }
+        if (!Objects.equals(pinned, null)) {
+            this.pinned = pinned!!
         }
         vBuild()
     }

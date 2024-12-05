@@ -33,10 +33,14 @@ import io.spine.core.UserId
 import io.spine.examples.pingh.clock.buildBy
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
+import io.spine.examples.pingh.mentions.command.PinMention
 import io.spine.examples.pingh.mentions.command.SnoozeMention
+import io.spine.examples.pingh.mentions.command.UnpinMention
 import io.spine.examples.pingh.mentions.event.MentionArchived
+import io.spine.examples.pingh.mentions.event.MentionPinned
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
+import io.spine.examples.pingh.mentions.event.MentionUnpinned
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.given.buildBy
@@ -129,6 +133,56 @@ internal class MentionSpec : ContextAwareTest() {
     }
 
     @Nested internal inner class
+    `Handle 'PinMention' command, and` {
+
+        @BeforeEach
+        internal fun send() {
+            val command = PinMention::class.with(id)
+            context().receivesCommand(command)
+        }
+
+        @Test
+        internal fun `emit 'MentionPinned' event`() {
+            val expected = MentionPinned::class.with(id)
+            context().assertEvent(expected)
+        }
+
+        @Test
+        internal fun `mark mention as pinned`() {
+            val expected = Mention::class.buildBy(
+                id, MentionStatus.UNREAD, userMentioned, pinned = true
+            )
+            context().assertState(id, expected)
+        }
+    }
+
+    @Nested internal inner class
+    `Handle 'UnpinMention' command, and` {
+
+        @BeforeEach
+        internal fun send() {
+            context().receivesCommands(
+                PinMention::class.with(id),
+                UnpinMention::class.with(id)
+            )
+        }
+
+        @Test
+        internal fun `emit 'MentionUnpinned' event`() {
+            val expected = MentionUnpinned::class.with(id)
+            context().assertEvent(expected)
+        }
+
+        @Test
+        internal fun `mark mention as unpinned`() {
+            val expected = Mention::class.buildBy(
+                id, MentionStatus.UNREAD, userMentioned, pinned = false
+            )
+            context().assertState(id, expected)
+        }
+    }
+
+    @Nested internal inner class
     `React on 'TimePassed' event, and` {
 
         @Nested internal inner class
@@ -136,6 +190,17 @@ internal class MentionSpec : ContextAwareTest() {
 
             @Test
             internal fun `do nothing if mention is not obsolete`() {
+                emitTimePassedEvent()
+                context().assertEvents()
+                    .withType(MentionArchived::class.java)
+                    .hasSize(0)
+                val expected = Mention::class.buildBy(id, MentionStatus.UNREAD, userMentioned)
+                context().assertState(id, expected)
+            }
+
+            @Test
+            internal fun `do nothing if mention is obsolete and pinned`() {
+                context().receivesCommand(PinMention::class.with(id))
                 emitTimePassedEvent()
                 context().assertEvents()
                     .withType(MentionArchived::class.java)
@@ -175,6 +240,17 @@ internal class MentionSpec : ContextAwareTest() {
 
             @Test
             internal fun `do nothing if mention is not obsolete`() {
+                emitTimePassedEvent()
+                context().assertEvents()
+                    .withType(MentionArchived::class.java)
+                    .hasSize(0)
+                val expected = Mention::class.buildBy(id, MentionStatus.READ, userMentioned)
+                context().assertState(id, expected)
+            }
+
+            @Test
+            internal fun `do nothing if mention is obsolete and pinned`() {
+                context().receivesCommand(PinMention::class.with(id))
                 emitTimePassedEvent()
                 context().assertEvents()
                     .withType(MentionArchived::class.java)

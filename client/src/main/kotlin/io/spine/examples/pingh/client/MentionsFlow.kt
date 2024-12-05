@@ -39,8 +39,11 @@ import io.spine.examples.pingh.mentions.UserMentionsId
 import io.spine.examples.pingh.mentions.buildBy
 import io.spine.examples.pingh.mentions.of
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
+import io.spine.examples.pingh.mentions.command.PinMention
 import io.spine.examples.pingh.mentions.command.SnoozeMention
+import io.spine.examples.pingh.mentions.command.UnpinMention
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
+import io.spine.examples.pingh.mentions.with
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
@@ -57,6 +60,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * @property session Manages the session with Pingh server.
  * @property settings Manages the application settings configured by a user.
  */
+@Suppress("TooManyFunctions" /* Managing mentions requires numerous functions. */)
 public class MentionsFlow internal constructor(
     private val client: DesktopClient,
     private val session: Session,
@@ -157,6 +161,28 @@ public class MentionsFlow internal constructor(
     }
 
     /**
+     * Marks the mention as pinned.
+     *
+     * @param id The identifier of the mention that is marked as pinned.
+     */
+    public fun pin(id: MentionId) {
+        ensureLoggedIn()
+        val command = PinMention::class.with(id)
+        client.send(command)
+    }
+
+    /**
+     * Marks the mention as unpinned.
+     *
+     * @param id The identifier of the mention that is marked as unpinned.
+     */
+    public fun unpin(id: MentionId) {
+        ensureLoggedIn()
+        val command = UnpinMention::class.with(id)
+        client.send(command)
+    }
+
+    /**
      * Updates the flow state by applying the current application settings.
      */
     internal fun applySettings() {
@@ -177,13 +203,18 @@ public class MentionsFlow internal constructor(
 public typealias MentionsList = List<MentionView>
 
 /**
- * Returns a `MentionsList` sorted such that unread mentions come first,
- * followed by snoozed mentions, and read mentions last.
+ * Returns a `MentionsList` sorted in the following order:
+ * unread mentions first, followed by snoozed mentions, and then read mentions.
  *
- * Within each group, mentions are sorted by the time they were made.
+ * Pinned mentions are placed before unpinned ones.
+ *
+ * Within each category, mentions are arranged chronologically by their creation time.
  */
 public fun MentionsList.sorted(): MentionsList =
     this.sortedWith { firstMentions, secondMentions ->
+        if (firstMentions.pinned xor secondMentions.pinned) {
+            return@sortedWith compareValues(secondMentions.pinned, firstMentions.pinned)
+        }
         val statusComparison = firstMentions.status.compareTo(secondMentions.status)
         if (statusComparison != 0) {
             statusComparison

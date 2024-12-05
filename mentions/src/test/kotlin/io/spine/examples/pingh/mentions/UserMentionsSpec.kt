@@ -29,8 +29,10 @@ package io.spine.examples.pingh.mentions
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.event.MentionArchived
+import io.spine.examples.pingh.mentions.event.MentionPinned
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
+import io.spine.examples.pingh.mentions.event.MentionUnpinned
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.given.buildBy
@@ -92,6 +94,29 @@ internal class UserMentionsSpec : ContextAwareTest() {
 
     private fun assertMentionStatus(status: MentionStatus) {
         val mention = MentionView::class.buildBy(userMentioned, status)
+        val expected = UserMentions::class.buildBy(id, mention)
+        context().assertState(id, expected)
+    }
+
+    @Test
+    internal fun `react on 'MentionPinned' event, and mark the target mention as pinned`() {
+        context().receivesEvent(
+            MentionPinned::class.with(userMentioned.id),
+        )
+        assertMentionPinned(true)
+    }
+
+    @Test
+    internal fun `react on 'MentionUnpinned' event, and mark the target mention as unpinned`() {
+        context().receivesEvents(
+            MentionPinned::class.with(userMentioned.id),
+            MentionUnpinned::class.with(userMentioned.id)
+        )
+        assertMentionPinned(false)
+    }
+
+    private fun assertMentionPinned(pinned: Boolean) {
+        val mention = MentionView::class.buildBy(userMentioned, MentionStatus.UNREAD, pinned)
         val expected = UserMentions::class.buildBy(id, mention)
         context().assertState(id, expected)
     }

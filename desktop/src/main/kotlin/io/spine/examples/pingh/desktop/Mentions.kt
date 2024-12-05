@@ -27,11 +27,13 @@
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,6 +44,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -55,15 +58,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.spine.example.pingh.desktop.generated.resources.Res
+import io.spine.example.pingh.desktop.generated.resources.pin
 import io.spine.example.pingh.desktop.generated.resources.pingh
+import io.spine.example.pingh.desktop.generated.resources.pinned
 import io.spine.example.pingh.desktop.generated.resources.refresh
 import io.spine.example.pingh.desktop.generated.resources.snooze
 import io.spine.examples.pingh.client.MentionsFlow
@@ -125,7 +132,7 @@ private fun ToolBar(
                     strokeWidth = 1.dp.toPx()
                 )
             }
-            .padding(start = 27.dp),
+            .padding(start = 27.dp, end = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
@@ -139,7 +146,7 @@ private fun ToolBar(
         Spacer(Modifier.width(7.dp))
         Text(
             text = "Recent mentions",
-            modifier = Modifier.width(250.dp),
+            modifier = Modifier.weight(1f),
             fontSize = 20.sp,
             color = contentColor,
             style = MaterialTheme.typography.displayLarge
@@ -172,19 +179,16 @@ private fun MentionCards(
     val mentions by flow.mentions.collectAsState()
     val scrollState = rememberScrollState()
     Column(
-        Modifier
+        modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 10.dp)
+            .padding(10.dp)
             .verticalScroll(scrollState)
             .background(MaterialTheme.colorScheme.background)
             .testTag("mention-cards"),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         mentions.sorted()
-            .forEach { mention ->
-                Spacer(Modifier.height(10.dp))
-                MentionCard(flow, mention)
-            }
-        Spacer(Modifier.height(10.dp))
+            .forEach { mention -> MentionCard(flow, mention) }
     }
 }
 
@@ -233,18 +237,22 @@ private fun MentionCard(
         )
     ) {
         Row(
-            modifier = Modifier
-                .padding(horizontal = 20.dp),
+            modifier = Modifier.padding(start = 20.dp, end = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Avatar(
                 url = mention.whoMentioned.avatarUrl,
                 modifier = Modifier.size(50.dp)
             )
-            Spacer(Modifier.width(10.dp))
             MentionCardText(mention, isHovered)
-            Spacer(Modifier.width(10.dp))
-            SnoozeButton(flow, mention, isHovered.value)
+            Row(
+                modifier = Modifier.fillMaxHeight(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SnoozeButton(flow, mention, isHovered.value)
+                PinButton(flow, mention, isHovered.value)
+            }
         }
     }
 }
@@ -257,22 +265,15 @@ private fun MentionCard(
  * @param isHovered Indicates whether the mouse is over the mention card.
  */
 @Composable
-private fun MentionCardText(
+private fun RowScope.MentionCardText(
     mention: MentionView,
     isHovered: State<Boolean>
 ) {
     val time = mention.whenMentioned.run {
         if (isHovered.value) toDatetime() else howMuchTimeHasPassed()
     }
-    val textWidth = if (isHovered.value || mention.status == MentionStatus.SNOOZED) {
-        240.dp
-    } else {
-        300.dp
-    }
     Column(
-        modifier = Modifier
-            .fillMaxHeight()
-            .width(textWidth),
+        modifier = Modifier.fillMaxHeight().weight(1f),
         verticalArrangement = Arrangement.Center
     ) {
         Text(
@@ -309,15 +310,10 @@ private fun SnoozeButton(
 ) {
     when {
         isParentHovered && mention.status == MentionStatus.UNREAD ->
-            IconButton(
+            MentionIconButton(
                 icon = painterResource(Res.drawable.snooze),
-                onClick = {
-                    flow.snooze(mention.id)
-                },
-                modifier = Modifier.size(50.dp).testTag("snooze-button"),
-                colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onSecondary
-                )
+                onClick = { flow.snooze(mention.id) },
+                modifier = Modifier.testTag("snooze-button")
             )
 
         mention.status == MentionStatus.SNOOZED ->
@@ -328,4 +324,73 @@ private fun SnoozeButton(
                 style = MaterialTheme.typography.bodySmall
             )
     }
+}
+
+/**
+ * Displays the pin icon for a mention when it is not pinned,
+ * and the mention card is hovered. If the mention is pinned,
+ * the unpin icon is displayed instead.
+ *
+ * @param flow The flow for managing the lifecycle of mentions.
+ * @param mention The mention whose information is displayed.
+ * @param isParentHovered Whether the parent mention card is being hovered.
+ * @param sizeMultiplier The proportion of the button's size that the icon occupies.
+ */
+@Composable
+private fun PinButton(
+    flow: MentionsFlow,
+    mention: MentionView,
+    isParentHovered: Boolean,
+    sizeMultiplier: Float = 0.6f
+) {
+    val (iconRes, onClick) = when {
+        isParentHovered && !mention.pinned -> Res.drawable.pin to { flow.pin(mention.id) }
+        mention.pinned -> Res.drawable.pinned to { flow.unpin(mention.id) }
+        else -> null to null
+    }
+    if (iconRes != null && onClick != null) {
+        MentionIconButton(
+            icon = painterResource(iconRes),
+            onClick = onClick,
+            modifier = Modifier.testTag("pin-button"),
+            sizeMultiplier = sizeMultiplier
+        )
+    }
+}
+
+/**
+ * Displays the icon button on the mention card.
+ *
+ * @param icon The painter to draw icon.
+ * @param onClick Called when this icon button is clicked.
+ * @param modifier The modifier to be applied to this icon button.
+ * @param sizeMultiplier The proportion of the button's size that the icon occupies.
+ */
+@Composable
+private fun MentionIconButton(
+    icon: Painter,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    sizeMultiplier: Float = 0.85f
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val color = if (isHovered) {
+        MaterialTheme.colorScheme.onSecondary
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
+    IconButton(
+        icon = icon,
+        onClick = onClick,
+        modifier = Modifier.size(30.dp)
+            .clip(CircleShape)
+            .hoverable(interactionSource)
+            .then(modifier),
+        shape = CircleShape,
+        colors = IconButtonDefaults.iconButtonColors(
+            contentColor = color
+        ),
+        sizeMultiplier = sizeMultiplier
+    )
 }
