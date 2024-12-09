@@ -85,7 +85,7 @@ internal fun ApplicationScope.Tray(state: AppState) {
 
     var tray: TrayIcon? = null
 
-    val awtIcon = rememberIcon(state.app)
+    val icon = rememberIcon(state.app)
 
     val menu = remember {
         Menu {
@@ -98,14 +98,14 @@ internal fun ApplicationScope.Tray(state: AppState) {
     val onClick by rememberUpdatedState(mouseEventHandler(state, menu))
 
     tray = remember {
-        TrayIcon(awtIcon, state.window.title).apply {
+        TrayIcon(icon, state.window.title).apply {
             isImageAutoSize = true
             addMouseListener(onClick)
         }
     }
 
     SideEffect {
-        if (tray.image != awtIcon) tray.image = awtIcon
+        if (tray.image != icon) tray.image = icon
     }
 
     val coroutineScope = rememberCoroutineScope()
@@ -128,7 +128,7 @@ internal fun ApplicationScope.Tray(state: AppState) {
  * Returns the system tray icon of the application.
  *
  * If the user is logged in and there are unread mentions,
- * a badge showing the number of unread mentions appears on top of the icon.
+ * a badge showing the number of unread mentions appears on the icon.
  */
 @Composable
 private fun rememberIcon(state: PinghApplication): Image {
@@ -184,7 +184,7 @@ private fun Graphics.drawBadge(style: TrayStyle) {
 /**
  * Draws the number of unread mentions.
  *
- * If the number exceeds 100, only the last two digits are shown,
+ * If the number exceeds 99, only the last two digits are shown,
  * with an ellipsis preceding them.
  */
 private fun Graphics.drawBadgeContent(text: String, style: TrayStyle) {
@@ -261,7 +261,7 @@ private fun mouseEventHandler(state: AppState, menu: Menu) =
     }
 
 /**
- * Default data for styling the tray icon,
+ * Default data for styling the tray icon.
  *
  * Dimensions and coordinates are specified in pixels and adjusted for screen [density].
  */

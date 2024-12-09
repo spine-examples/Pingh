@@ -196,7 +196,7 @@ public class PinghApplication private constructor(
     public fun startMentionsFlow(): MentionsFlow {
         if (mentionsFlow == null) {
             mentionsFlow = MentionsFlow(client, session, settings)
-            observeMention()
+            observeMentions()
         } else {
             mentionsFlow!!.applySettings()
         }
@@ -207,7 +207,7 @@ public class PinghApplication private constructor(
      * Observes the state of a user's mentions
      * and updates the unread mention count whenever changes occur.
      */
-    private fun observeMention() {
+    private fun observeMentions() {
         mentionsObserver = CoroutineScope(Dispatchers.Default).launch {
             mentionsFlow!!.mentions.collect { mentions ->
                 _unreadMentionCount.value = mentions.count { it.status == MentionStatus.UNREAD }
