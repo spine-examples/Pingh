@@ -113,9 +113,6 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageVersion = pinghVersion.extractSemanticVersion().value
             macOS {
-                // Changes tray the icon color depending on the screen theme.
-                // See: https://bugs.openjdk.org/browse/JDK-8255597.
-                jvmArgs += "-Dapple.awt.enableTemplateImages=true"
                 iconFile = iconForMacOs()
                 infoPlist {
                     allowBackgroundExecution()
