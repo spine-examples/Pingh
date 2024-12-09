@@ -29,8 +29,15 @@ package io.spine.examples.pingh.client
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import io.spine.core.UserId
+import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.sessions.SessionId
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 /**
  * Manages the logic for the Pingh app.
@@ -107,6 +114,20 @@ public class PinghApplication private constructor(
      */
     private var mentionsFlow: MentionsFlow? = null
 
+    private val _unreadMentionCount: MutableStateFlow<Int?> = MutableStateFlow(null)
+
+    /**
+     * The count of unread mentions for the user,
+     * or `null` if the user is not logged in.
+     */
+    public val unreadMentionCount: StateFlow<Int?> = _unreadMentionCount
+
+    /**
+     * A job that updates the unread mention count
+     * whenever the state of a user's mentions changes.
+     */
+    private var mentionsObserver: Job? = null
+
     /**
      * The application settings control flow.
      */
@@ -147,6 +168,8 @@ public class PinghApplication private constructor(
         session.resetToGuest()
         client = DesktopClient(channel)
         mentionsFlow = null
+        _unreadMentionCount.value = null
+        mentionsObserver?.cancel()
         settingsFlow = null
     }
 
@@ -173,10 +196,23 @@ public class PinghApplication private constructor(
     public fun startMentionsFlow(): MentionsFlow {
         if (mentionsFlow == null) {
             mentionsFlow = MentionsFlow(client, session, settings)
+            observeMention()
         } else {
             mentionsFlow!!.applySettings()
         }
         return mentionsFlow!!
+    }
+
+    /**
+     * Observes the state of a user's mentions
+     * and updates the unread mention count whenever changes occur.
+     */
+    private fun observeMention() {
+        mentionsObserver = CoroutineScope(Dispatchers.Default).launch {
+            mentionsFlow!!.mentions.collect { mentions ->
+                _unreadMentionCount.value = mentions.count { it.status == MentionStatus.UNREAD }
+            }
+        }
     }
 
     /**
@@ -195,6 +231,7 @@ public class PinghApplication private constructor(
      * Closes the client.
      */
     public fun close() {
+        mentionsObserver?.cancel()
         loginFlow?.close()
         settingsFlow?.saveSettings()
         client.close()
