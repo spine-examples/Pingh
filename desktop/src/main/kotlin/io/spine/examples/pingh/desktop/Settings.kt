@@ -35,6 +35,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Arrangement.Center
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -53,10 +54,11 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonDefaults.outlinedButtonColors
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.CardDefaults.cardColors
+import androidx.compose.material3.IconButtonDefaults.filledIconButtonColors
+import androidx.compose.material3.IconButtonDefaults.iconButtonColors
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -73,6 +75,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.CenterStart
+import androidx.compose.ui.Alignment.Companion.CenterVertically
+import androidx.compose.ui.Alignment.Companion.End
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
@@ -82,12 +88,12 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.Role.Companion.RadioButton
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -159,13 +165,13 @@ private fun SettingsHeader(
             .fillMaxWidth()
             .height(60.dp)
             .padding(horizontal = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = CenterVertically
     ) {
         IconButton(
             icon = painterResource(Res.drawable.back),
             onClick = onExit,
             modifier = Modifier.size(35.dp),
-            colors = IconButtonDefaults.iconButtonColors(
+            colors = iconButtonColors(
                 contentColor = MaterialTheme.colorScheme.onSecondary
             )
         )
@@ -196,7 +202,7 @@ private fun SettingsBox(
     ) {
         Card(
             modifier = Modifier.fillMaxSize(),
-            colors = CardDefaults.cardColors(
+            colors = cardColors(
                 containerColor = MaterialTheme.colorScheme.secondary,
                 contentColor = MaterialTheme.colorScheme.onSecondary
             )
@@ -229,7 +235,7 @@ private fun Profile(
             .fillMaxWidth()
             .height(60.dp)
             .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = CenterVertically
     ) {
         Avatar(
             name = username,
@@ -257,11 +263,11 @@ private fun ProfileControl(
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 4.dp),
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Center
     ) {
         Text(
             text = username.value,
-            overflow = TextOverflow.Ellipsis,
+            overflow = Ellipsis,
             maxLines = 1,
             style = MaterialTheme.typography.bodyLarge
         )
@@ -315,12 +321,12 @@ private fun SettingsButton(
     usePrimaryColors: Boolean = false
 ) {
     val colors = if (usePrimaryColors) {
-        ButtonDefaults.outlinedButtonColors(
+        outlinedButtonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
         )
     } else {
-        ButtonDefaults.outlinedButtonColors(
+        outlinedButtonColors(
             containerColor = MaterialTheme.colorScheme.secondary,
             contentColor = MaterialTheme.colorScheme.onSecondary
         )
@@ -421,7 +427,7 @@ private fun Option(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = CenterVertically
         ) {
             Text(
                 text = title,
@@ -452,7 +458,7 @@ private fun SnoozeTimeSegmentedButtonRow(state: SettingsState) {
     Row(
         modifier = Modifier.selectableGroup(),
         horizontalArrangement = Arrangement.spacedBy((-1).dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = CenterVertically
     ) {
         snoozeTimeOptions.forEachIndexed { index, snoozeTime ->
             SegmentedButton(
@@ -504,7 +510,7 @@ private fun SegmentedButton(
         modifier = Modifier
             .width(70.dp)
             .height(20.dp)
-            .semantics { role = Role.RadioButton }
+            .semantics { role = RadioButton }
             .background(containerColor, shape)
             .border(border, shape)
             .clip(shape)
@@ -653,7 +659,7 @@ private fun IgnoredSourcesControl(
  * @param onClick Called when this icon button is clicked.
  * @param tooltip The text to be displayed in the tooltip.
  * @param enabled Controls the enabled state of this icon button.
- * @param sizeMultiplier The proportion of the button's size that the icon occupies.
+ * @param sizeFraction The proportion of the button's size that the icon occupies.
  */
 @Composable
 private fun SettingsIconButton(
@@ -661,7 +667,7 @@ private fun SettingsIconButton(
     onClick: () -> Unit,
     tooltip: String,
     enabled: Boolean = true,
-    sizeMultiplier: Float = 0.85f
+    sizeFraction: Float = 0.85f
 ) {
     val contentColor = if (enabled) {
         MaterialTheme.colorScheme.onSecondary
@@ -674,13 +680,13 @@ private fun SettingsIconButton(
         modifier = Modifier.size(26.dp),
         enabled = enabled,
         shape = MaterialTheme.shapes.small,
-        colors = IconButtonDefaults.filledIconButtonColors(
+        colors = filledIconButtonColors(
             containerColor = MaterialTheme.colorScheme.secondary,
             contentColor = contentColor,
             disabledContainerColor = MaterialTheme.colorScheme.secondary
         ),
         tooltip = tooltip,
-        sizeMultiplier = sizeMultiplier
+        sizeFraction = sizeFraction
     )
 }
 
@@ -733,10 +739,10 @@ private fun IgnoredSourceItem(
         modifier = Modifier.fillMaxWidth()
             .height(30.dp)
             .background(containerColor)
-            .semantics { role = Role.RadioButton }
+            .semantics { role = RadioButton }
             .clickable { selected.value = if (!isSelected) source else null }
             .padding(start = 5.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = CenterVertically
     ) {
         Text(
             text = annotationString,
@@ -770,8 +776,8 @@ private fun AddIgnoredSourceDialog(state: SettingsState, onExit: () -> Unit) {
                     shape = MaterialTheme.shapes.medium
                 )
                 .padding(horizontal = 30.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(15.dp, Alignment.CenterVertically)
+            horizontalAlignment = CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(15.dp, CenterVertically)
         ) {
             OutlinedTextField(
                 value = org,
@@ -909,13 +915,13 @@ private fun OutlinedTextFieldContainer(
                 shape = MaterialTheme.shapes.extraSmall
             )
             .padding(horizontal = 10.dp, vertical = 3.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = CenterVertically
     ) {
         Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
-            contentAlignment = Alignment.CenterStart,
+            contentAlignment = CenterStart,
         ) {
             textField()
         }
@@ -936,7 +942,7 @@ private fun AllReposSwitch(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         Switch(
@@ -1004,7 +1010,7 @@ private fun DialogControl(
     isAddTriggered.value = false
     Row(
         modifier = Modifier.fillMaxWidth().height(30.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End)
+        horizontalArrangement = Arrangement.spacedBy(10.dp, End)
     ) {
         SettingsButton(
             onClick = onCancel,

@@ -30,6 +30,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import io.spine.examples.pingh.client.PinghApplication
+import io.spine.examples.pingh.desktop.Page.LOGIN
+import io.spine.examples.pingh.desktop.Page.MENTIONS
+import io.spine.examples.pingh.desktop.Page.SETTINGS
 
 /**
  * Displays the current page of the application.
@@ -40,31 +43,31 @@ import io.spine.examples.pingh.client.PinghApplication
 internal fun CurrentPage(application: PinghApplication) {
     val currentPage = remember {
         mutableStateOf(
-            if (application.isLoggedIn()) Page.MENTIONS else Page.LOGIN
+            if (application.isLoggedIn()) MENTIONS else LOGIN
         )
     }
     when (currentPage.value) {
-        Page.LOGIN -> LoginPage(
+        LOGIN -> LoginPage(
             flow = application.startLoginFlow(),
             toMentionsPage = {
-                currentPage.value = Page.MENTIONS
+                currentPage.value = MENTIONS
             }
         )
 
-        Page.MENTIONS -> MentionsPage(
+        MENTIONS -> MentionsPage(
             flow = application.startMentionsFlow(),
             toSettingsPage = {
-                currentPage.value = Page.SETTINGS
+                currentPage.value = SETTINGS
             }
         )
 
-        Page.SETTINGS -> SettingsPage(
+        SETTINGS -> SettingsPage(
             flow = application.startSettingsFlow(),
             toMentionsPage = {
-                currentPage.value = Page.MENTIONS
+                currentPage.value = MENTIONS
             },
             toLoginPage = {
-                currentPage.value = Page.LOGIN
+                currentPage.value = LOGIN
             }
         )
     }

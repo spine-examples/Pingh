@@ -26,7 +26,8 @@
 
 package io.spine.examples.pingh.desktop
 
-import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.Spring.DampingRatioMediumBouncy
+import androidx.compose.animation.core.Spring.StiffnessLow
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
@@ -51,26 +52,27 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.CardDefaults.cardColors
+import androidx.compose.material3.IconButtonDefaults.iconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Center
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.PointerIcon.Companion.Hand
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -85,7 +87,6 @@ import io.spine.examples.pingh.client.howMuchTimeHasPassed
 import io.spine.examples.pingh.client.sorted
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
-import java.awt.Cursor
 import org.jetbrains.compose.resources.painterResource
 
 /**
@@ -119,13 +120,13 @@ internal fun MentionsPage(
  *
  * @param flow The flow for managing the lifecycle of mentions.
  * @param toSettingsPage The navigation to the 'Settings' page.
- * @param appIconMultiplier The proportion of the button's size that the app icon occupies.
+ * @param appIconFraction The proportion of the button's size that the app icon occupies.
  */
 @Composable
 private fun ToolBar(
     flow: MentionsFlow,
     toSettingsPage: () -> Unit,
-    appIconMultiplier: Float = 0.8f
+    appIconFraction: Float = 0.8f
 ) {
     val contentColor = MaterialTheme.colorScheme.onSecondary
     val borderColor = MaterialTheme.colorScheme.onBackground
@@ -143,16 +144,16 @@ private fun ToolBar(
                 )
             }
             .padding(start = 20.dp, end = 13.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = CenterVertically
     ) {
         IconButton(
             icon = painterResource(Res.drawable.pingh),
             onClick = toSettingsPage,
             modifier = Modifier.size(50.dp).testTag("settings-button"),
-            colors = IconButtonDefaults.iconButtonColors(
+            colors = iconButtonColors(
                 contentColor = contentColor
             ),
-            sizeMultiplier = appIconMultiplier
+            sizeFraction = appIconFraction
         )
         Spacer(Modifier.width(5.dp))
         Text(
@@ -168,7 +169,7 @@ private fun ToolBar(
                 flow.updateMentions()
             },
             modifier = Modifier.size(44.dp),
-            colors = IconButtonDefaults.iconButtonColors(
+            colors = iconButtonColors(
                 contentColor = contentColor
             )
         )
@@ -241,13 +242,13 @@ private fun LazyItemScope.MentionCard(
             .hoverable(interactionSource)
             .animateItem(
                 placementSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessLow,
+                    dampingRatio = DampingRatioMediumBouncy,
+                    stiffness = StiffnessLow,
                     visibilityThreshold = IntOffset.VisibilityThreshold
                 )
             ),
         shape = shape,
-        colors = CardDefaults.elevatedCardColors(
+        colors = cardColors(
             containerColor = containerColor,
             contentColor = MaterialTheme.colorScheme.onSecondary
         )
@@ -255,7 +256,7 @@ private fun LazyItemScope.MentionCard(
         Row(
             modifier = Modifier.padding(start = 15.dp, end = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = CenterVertically
         ) {
             Avatar(
                 url = mention.whoMentioned.avatarUrl,
@@ -264,7 +265,7 @@ private fun LazyItemScope.MentionCard(
             MentionCardText(flow, mention, isHovered)
             Row(
                 modifier = Modifier.fillMaxHeight(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = CenterVertically
             ) {
                 SnoozeButton(flow, mention, isHovered)
                 PinButton(flow, mention, isHovered)
@@ -292,12 +293,12 @@ private fun RowScope.MentionCardText(
     }
     Column(
         modifier = Modifier.fillMaxHeight().weight(1f),
-        verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
+        verticalArrangement = Arrangement.spacedBy(4.dp, CenterVertically)
     ) {
         MentionTitle(flow, mention, isParentHovered)
         Text(
             text = "$time, by ${mention.whoMentioned.username.value}",
-            overflow = TextOverflow.Ellipsis,
+            overflow = Ellipsis,
             maxLines = 1,
             style = MaterialTheme.typography.bodySmall
         )
@@ -352,7 +353,7 @@ private fun MentionTitle(
                     this
                 }
             }
-            .pointerHoverIcon(PointerIcon(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)))
+            .pointerHoverIcon(Hand)
             .hoverable(interactionSource)
             .clickable(
                 interactionSource = interactionSource,
@@ -361,7 +362,7 @@ private fun MentionTitle(
             )
             .testTag("mention-title"),
         color = color,
-        overflow = TextOverflow.Ellipsis,
+        overflow = Ellipsis,
         maxLines = 1,
         style = MaterialTheme.typography.bodyLarge
     )
@@ -394,8 +395,7 @@ private fun SnoozeButton(
         mention.status == MentionStatus.SNOOZED ->
             Text(
                 text = "Snoozed",
-                modifier = Modifier.size(50.dp)
-                    .wrapContentSize(Alignment.Center),
+                modifier = Modifier.size(50.dp).wrapContentSize(Center),
                 style = MaterialTheme.typography.bodySmall
             )
     }
@@ -409,14 +409,14 @@ private fun SnoozeButton(
  * @param flow The flow for managing the lifecycle of mentions.
  * @param mention The mention whose information is displayed.
  * @param isParentHovered Whether the parent mention card is being hovered.
- * @param sizeMultiplier The proportion of the button's size that the icon occupies.
+ * @param sizeFraction The proportion of the button's size that the icon occupies.
  */
 @Composable
 private fun PinButton(
     flow: MentionsFlow,
     mention: MentionView,
     isParentHovered: Boolean,
-    sizeMultiplier: Float = 0.6f
+    sizeFraction: Float = 0.6f
 ) {
     val (iconRes, onClick) = when {
         isParentHovered && !mention.pinned -> Res.drawable.pin to { flow.pin(mention.id) }
@@ -428,7 +428,7 @@ private fun PinButton(
             icon = painterResource(iconRes),
             onClick = onClick,
             modifier = Modifier.testTag("pin-button"),
-            sizeMultiplier = sizeMultiplier
+            sizeFraction = sizeFraction
         )
     }
 }
@@ -439,14 +439,14 @@ private fun PinButton(
  * @param icon The painter to draw icon.
  * @param onClick Called when this icon button is clicked.
  * @param modifier The modifier to be applied to this icon button.
- * @param sizeMultiplier The proportion of the button's size that the icon occupies.
+ * @param sizeFraction The proportion of the button's size that the icon occupies.
  */
 @Composable
 private fun MentionIconButton(
     icon: Painter,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    sizeMultiplier: Float = 0.85f
+    sizeFraction: Float = 0.85f
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -463,9 +463,9 @@ private fun MentionIconButton(
             .hoverable(interactionSource)
             .then(modifier),
         shape = CircleShape,
-        colors = IconButtonDefaults.iconButtonColors(
+        colors = iconButtonColors(
             contentColor = color
         ),
-        sizeMultiplier = sizeMultiplier
+        sizeFraction = sizeFraction
     )
 }

@@ -34,6 +34,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Arrangement.Center
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,9 +49,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.IconButtonDefaults.iconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -60,7 +61,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.CenterStart
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
@@ -74,7 +77,8 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextDecoration.Companion.None
+import androidx.compose.ui.text.style.TextDecoration.Companion.Underline
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -150,8 +154,8 @@ private fun UsernameEnteringPage(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.secondary),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement = Center,
+        horizontalAlignment = CenterHorizontally
     ) {
         ApplicationInfo()
         Spacer(Modifier.height(35.dp))
@@ -184,12 +188,12 @@ private fun UsernameEnteringPage(
 private fun ApplicationInfo() {
     Column(
         modifier = Modifier.padding(horizontal = 30.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = CenterHorizontally
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement = Center,
+            verticalAlignment = CenterVertically
         ) {
             Icon(
                 painter = painterResource(Res.drawable.pingh),
@@ -302,13 +306,13 @@ private fun InputContainer(
                 shape = MaterialTheme.shapes.medium
             )
             .padding(horizontal = 10.dp, vertical = 3.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = CenterVertically
     ) {
         Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
-            contentAlignment = Alignment.CenterStart,
+            contentAlignment = CenterStart,
         ) {
             Placeholder(value.isEmpty())
             textField()
@@ -397,7 +401,7 @@ private fun LoginButton(
             .testTag("login-button"),
         enabled = enabled,
         shape = MaterialTheme.shapes.medium,
-        colors = ButtonDefaults.buttonColors(
+        colors = buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
         )
@@ -438,8 +442,8 @@ private fun VerificationPage(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.secondary),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement = Center,
+        horizontalAlignment = CenterHorizontally
     ) {
         VerificationTitle()
         Spacer(Modifier.height(25.dp))
@@ -505,8 +509,8 @@ private fun UserCodeField(
             }
             .padding(horizontal = 15.dp)
             .testTag("user-code"),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+        horizontalArrangement = Center,
+        verticalAlignment = CenterVertically
     ) {
         SelectionContainer {
             Text(
@@ -541,7 +545,7 @@ private fun CopyToClipboardIcon(
             clipboardManager.setText(AnnotatedString(userCode.value))
         },
         modifier = Modifier.size(30.dp),
-        colors = IconButtonDefaults.iconButtonColors(
+        colors = iconButtonColors(
             contentColor = MaterialTheme.colorScheme.onSecondaryContainer
         )
     )
@@ -575,7 +579,7 @@ private fun VerifyLoginSection(
 ) {
     Row(
         modifier = Modifier.width(280.dp).height(55.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         CountdownTimer(
@@ -605,10 +609,10 @@ private fun VerificationText(url: Url) {
                 styles = TextLinkStyles(
                     style = SpanStyle(
                         color = MaterialTheme.colorScheme.primary,
-                        textDecoration = TextDecoration.None
+                        textDecoration = None
                     ),
                     hoveredStyle = SpanStyle(
-                        textDecoration = TextDecoration.Underline
+                        textDecoration = Underline
                     )
                 )
             )
@@ -654,10 +658,10 @@ private fun ClickableErrorMessage(
                 styles = TextLinkStyles(
                     style = SpanStyle(
                         color = MaterialTheme.colorScheme.primary,
-                        textDecoration = TextDecoration.None
+                        textDecoration = None
                     ),
                     hoveredStyle = SpanStyle(
-                        textDecoration = TextDecoration.Underline
+                        textDecoration = Underline
                     )
                 ),
                 linkInteractionListener = { onClick() }
@@ -690,8 +694,8 @@ private fun FailedPage(flow: LoginFailed) {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.secondary),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement = Center,
+        horizontalAlignment = CenterHorizontally
     ) {
         Text(
             text = flow.errorMessage.value,
@@ -717,7 +721,7 @@ private fun RestartButton(flow: LoginFailed) {
             .width(240.dp)
             .height(40.dp),
         shape = MaterialTheme.shapes.medium,
-        colors = ButtonDefaults.buttonColors(
+        colors = buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
         )
