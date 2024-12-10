@@ -30,6 +30,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -49,13 +50,12 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -63,8 +63,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
@@ -82,6 +85,7 @@ import io.spine.examples.pingh.client.howMuchTimeHasPassed
 import io.spine.examples.pingh.client.sorted
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
+import java.awt.Cursor
 import org.jetbrains.compose.resources.painterResource
 
 /**
@@ -213,33 +217,33 @@ private fun LazyItemScope.MentionCard(
     flow: MentionsFlow,
     mention: MentionView
 ) {
-    val uriHandler = LocalUriHandler.current
     val interactionSource = remember { MutableInteractionSource() }
-    val isHovered = interactionSource.collectIsHoveredAsState()
+    val isHovered by interactionSource.collectIsHoveredAsState()
     val mentionIsRead = mention.status == MentionStatus.READ
     val containerColor = if (mentionIsRead) {
         MaterialTheme.colorScheme.onBackground
     } else {
         MaterialTheme.colorScheme.secondary
     }
-    val onClick = {
-        uriHandler.openUri(mention.url.spec)
-        if (!mentionIsRead) {
-            flow.markAsRead(mention.id)
-        }
-    }
-    ElevatedCard(
-        onClick = onClick,
+    val shape = MaterialTheme.shapes.medium
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("mention-card-${mention.id}")
             .height(60.dp)
-            .animateItem(placementSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessLow,
-                visibilityThreshold = IntOffset.VisibilityThreshold
-            )),
-        interactionSource = interactionSource,
+            .shadow(
+                elevation = if (isHovered) 10.dp else 1.dp,
+                shape = shape
+            )
+            .hoverable(interactionSource)
+            .animateItem(
+                placementSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow,
+                    visibilityThreshold = IntOffset.VisibilityThreshold
+                )
+            ),
+        shape = shape,
         colors = CardDefaults.elevatedCardColors(
             containerColor = containerColor,
             contentColor = MaterialTheme.colorScheme.onSecondary
@@ -254,13 +258,13 @@ private fun LazyItemScope.MentionCard(
                 url = mention.whoMentioned.avatarUrl,
                 modifier = Modifier.size(50.dp)
             )
-            MentionCardText(mention, isHovered)
+            MentionCardText(flow, mention, isHovered)
             Row(
                 modifier = Modifier.fillMaxHeight(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                SnoozeButton(flow, mention, isHovered.value)
-                PinButton(flow, mention, isHovered.value)
+                SnoozeButton(flow, mention, isHovered)
+                PinButton(flow, mention, isHovered)
             }
         }
     }
@@ -270,28 +274,24 @@ private fun LazyItemScope.MentionCard(
  * Displays textual information about the mention,
  * including details about who mentioned the user, where, and when.
  *
+ * @param flow The flow for managing the lifecycle of mentions.
  * @param mention The mention whose information is displayed.
- * @param isHovered Indicates whether the mouse is over the mention card.
+ * @param isParentHovered Indicates whether the mouse is over the mention card.
  */
 @Composable
 private fun RowScope.MentionCardText(
+    flow: MentionsFlow,
     mention: MentionView,
-    isHovered: State<Boolean>
+    isParentHovered: Boolean
 ) {
     val time = mention.whenMentioned.run {
-        if (isHovered.value) toDatetime() else howMuchTimeHasPassed()
+        if (isParentHovered) toDatetime() else howMuchTimeHasPassed()
     }
     Column(
         modifier = Modifier.fillMaxHeight().weight(1f),
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
     ) {
-        Text(
-            text = mention.title,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 1,
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Spacer(Modifier.height(4.dp))
+        MentionTitle(flow, mention, isParentHovered)
         Text(
             text = "$time, by ${mention.whoMentioned.username.value}",
             overflow = TextOverflow.Ellipsis,
@@ -299,6 +299,69 @@ private fun RowScope.MentionCardText(
             style = MaterialTheme.typography.bodySmall
         )
     }
+}
+
+/**
+ * Displays a mention header.
+ *
+ * Clicking the title navigates to the web page where user was mentioned.
+ *
+ * @param flow The flow for managing the lifecycle of mentions.
+ * @param mention The mention whose information is displayed.
+ * @param isParentHovered Indicates whether the mouse is over the mention card.
+ */
+@Composable
+private fun MentionTitle(
+    flow: MentionsFlow,
+    mention: MentionView,
+    isParentHovered: Boolean
+) {
+    val uriHandler = LocalUriHandler.current
+    val readMention = {
+        uriHandler.openUri(mention.url.spec)
+        if (mention.status != MentionStatus.READ) {
+            flow.markAsRead(mention.id)
+        }
+    }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val color = if (isHovered) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSecondary
+    }
+    Text(
+        text = mention.title,
+        modifier = Modifier
+            .run {
+                if (isParentHovered) {
+                    drawBehind {
+                        val strokeWidthPx = 1.dp.toPx()
+                        val verticalOffset = size.height - 1.sp.toPx()
+                        drawLine(
+                            color = color,
+                            strokeWidth = strokeWidthPx,
+                            start = Offset(0f, verticalOffset),
+                            end = Offset(size.width, verticalOffset)
+                        )
+                    }
+                } else {
+                    this
+                }
+            }
+            .pointerHoverIcon(PointerIcon(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)))
+            .hoverable(interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = readMention
+            )
+            .testTag("mention-title"),
+        color = color,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = 1,
+        style = MaterialTheme.typography.bodyLarge
+    )
 }
 
 /**
