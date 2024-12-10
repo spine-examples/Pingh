@@ -119,11 +119,13 @@ internal fun MentionsPage(
  *
  * @param flow The flow for managing the lifecycle of mentions.
  * @param toSettingsPage The navigation to the 'Settings' page.
+ * @param appIconMultiplier The proportion of the button's size that the app icon occupies.
  */
 @Composable
 private fun ToolBar(
     flow: MentionsFlow,
-    toSettingsPage: () -> Unit
+    toSettingsPage: () -> Unit,
+    appIconMultiplier: Float = 0.8f
 ) {
     val contentColor = MaterialTheme.colorScheme.onSecondary
     val borderColor = MaterialTheme.colorScheme.onBackground
@@ -140,18 +142,19 @@ private fun ToolBar(
                     strokeWidth = 1.dp.toPx()
                 )
             }
-            .padding(start = 27.dp, end = 10.dp),
+            .padding(start = 20.dp, end = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
             icon = painterResource(Res.drawable.pingh),
             onClick = toSettingsPage,
-            modifier = Modifier.size(56.dp).testTag("settings-button"),
+            modifier = Modifier.size(50.dp).testTag("settings-button"),
             colors = IconButtonDefaults.iconButtonColors(
                 contentColor = contentColor
-            )
+            ),
+            sizeMultiplier = appIconMultiplier
         )
-        Spacer(Modifier.width(7.dp))
+        Spacer(Modifier.width(5.dp))
         Text(
             text = "Recent mentions",
             modifier = Modifier.weight(1f),
@@ -230,7 +233,7 @@ private fun LazyItemScope.MentionCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("mention-card-${mention.id}")
-            .height(60.dp)
+            .height(58.dp)
             .shadow(
                 elevation = if (isHovered) 10.dp else 1.dp,
                 shape = shape
@@ -250,13 +253,13 @@ private fun LazyItemScope.MentionCard(
         )
     ) {
         Row(
-            modifier = Modifier.padding(start = 20.dp, end = 10.dp),
+            modifier = Modifier.padding(start = 15.dp, end = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Avatar(
                 url = mention.whoMentioned.avatarUrl,
-                modifier = Modifier.size(50.dp)
+                modifier = Modifier.size(40.dp)
             )
             MentionCardText(flow, mention, isHovered)
             Row(
