@@ -134,8 +134,8 @@ internal fun ApplicationScope.Tray(state: AppState) {
 private fun rememberIcon(state: PinghApplication): Image {
     val unread by state.unreadMentionCount.collectAsState()
 
-    // We shouldn't use `LocalDensity` here because tray's density doesn't equal it. It
-    // equals to the density of the screen on which it shows.
+    // Using `LocalDensity` here is not appropriate because the tray's density does not match it.
+    // The tray's density corresponds to the density of the screen where it is displayed.
     val density = GlobalDensity
     val layoutDirection = GlobalLayoutDirection
 
@@ -286,6 +286,11 @@ private class TrayStyle(private val density: Density) {
 
 /**
  * Holds a 2D integer size.
+ *
+ * Java AWT relies exclusively on integer values for specifying dimensions,
+ * unlike other libraries that support floating-point values.
+ *
+ * Use to store integer dimensions for creating components with Java AWT.
  */
 private data class AwtSize(val width: Int, val height: Int) {
     /**
