@@ -142,7 +142,7 @@ private fun ToolBar(
                     strokeWidth = 1.dp.toPx()
                 )
             }
-            .padding(start = 20.dp, end = 10.dp),
+            .padding(start = 20.dp, end = 13.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
@@ -167,7 +167,7 @@ private fun ToolBar(
             onClick = {
                 flow.updateMentions()
             },
-            modifier = Modifier.size(50.dp),
+            modifier = Modifier.size(44.dp),
             colors = IconButtonDefaults.iconButtonColors(
                 contentColor = contentColor
             )
