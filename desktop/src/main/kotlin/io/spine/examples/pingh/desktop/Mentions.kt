@@ -26,6 +26,9 @@
 
 package io.spine.examples.pingh.desktop
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -43,9 +46,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.IconButtonDefaults
@@ -65,6 +68,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.spine.example.pingh.desktop.generated.resources.Res
@@ -177,18 +181,18 @@ private fun MentionCards(
     flow: MentionsFlow
 ) {
     val mentions by flow.mentions.collectAsState()
-    val scrollState = rememberScrollState()
-    Column(
+    val list = remember(mentions) { mentions.sorted() }
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(10.dp)
-            .verticalScroll(scrollState)
             .background(MaterialTheme.colorScheme.background)
             .testTag("mention-cards"),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        mentions.sorted()
-            .forEach { mention -> MentionCard(flow, mention) }
+        items(list.size, key = { index -> list[index].id }) { index ->
+            MentionCard(flow, list[index])
+        }
     }
 }
 
@@ -205,7 +209,7 @@ private fun MentionCards(
  * @param mention The mention whose information is displayed.
  */
 @Composable
-private fun MentionCard(
+private fun LazyItemScope.MentionCard(
     flow: MentionsFlow,
     mention: MentionView
 ) {
@@ -229,7 +233,12 @@ private fun MentionCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("mention-card-${mention.id}")
-            .height(60.dp),
+            .height(60.dp)
+            .animateItem(placementSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow,
+                visibilityThreshold = IntOffset.VisibilityThreshold
+            )),
         interactionSource = interactionSource,
         colors = CardDefaults.elevatedCardColors(
             containerColor = containerColor,
