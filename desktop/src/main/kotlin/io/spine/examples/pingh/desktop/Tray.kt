@@ -27,19 +27,28 @@
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.toAwtImage
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Notification
 import io.spine.example.pingh.desktop.generated.resources.Res
 import io.spine.example.pingh.desktop.generated.resources.tray
+import io.spine.examples.pingh.client.PinghApplication
+import java.awt.Color
+import java.awt.Font
 import java.awt.Frame
+import java.awt.Graphics
+import java.awt.Image
 import java.awt.MenuItem
+import java.awt.Point
 import java.awt.PopupMenu
 import java.awt.SystemTray
 import java.awt.TrayIcon
@@ -47,6 +56,9 @@ import java.awt.TrayIcon.MessageType
 import java.awt.Window
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import java.awt.image.BufferedImage
+import kotlin.math.min
+import kotlin.math.round
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.jetbrains.compose.resources.painterResource
@@ -73,12 +85,7 @@ internal fun ApplicationScope.Tray(state: AppState) {
 
     var tray: TrayIcon? = null
 
-    val destiny = LocalDensity.current
-    val layoutDirection = LocalLayoutDirection.current
-    val icon = painterResource(Res.drawable.tray)
-    val awtIcon = remember(icon) {
-        icon.toAwtImage(destiny, layoutDirection)
-    }
+    val icon = rememberIcon(state.app)
 
     val menu = remember {
         Menu {
@@ -91,19 +98,109 @@ internal fun ApplicationScope.Tray(state: AppState) {
     val onClick by rememberUpdatedState(mouseEventHandler(state, menu))
 
     tray = remember {
-        TrayIcon(awtIcon, state.window.title).apply {
+        TrayIcon(icon, state.window.title).apply {
             isImageAutoSize = true
             addMouseListener(onClick)
         }
     }
 
-    SystemTray.getSystemTray().add(tray)
+    SideEffect {
+        if (tray.image != icon) tray.image = icon
+    }
 
     val coroutineScope = rememberCoroutineScope()
-    state.tray
-        .notificationFlow
-        .onEach { tray.displayMessage(it) }
-        .launchIn(coroutineScope)
+
+    DisposableEffect(Unit) {
+        SystemTray.getSystemTray().add(tray)
+
+        state.tray
+            .notificationFlow
+            .onEach { tray.displayMessage(it) }
+            .launchIn(coroutineScope)
+
+        onDispose {
+            SystemTray.getSystemTray().remove(tray)
+        }
+    }
+}
+
+/**
+ * Returns the system tray icon of the application.
+ *
+ * If the user is logged in and there are unread mentions,
+ * a badge showing the number of unread mentions appears on the icon.
+ */
+@Composable
+private fun rememberIcon(state: PinghApplication): Image {
+    val unread by state.unreadMentionCount.collectAsState()
+
+    // Using `LocalDensity` here is not appropriate because the tray's density does not match it.
+    // The tray's density corresponds to the density of the screen where it is displayed.
+    val density = GlobalDensity
+    val layoutDirection = GlobalLayoutDirection
+
+    val icon = painterResource(Res.drawable.tray)
+    val style = remember { TrayStyle(density) }
+
+    return remember(unread) {
+        val awtIcon = icon.toAwtImage(density, layoutDirection, style.iconSize.toCompose())
+        val buffer = BufferedImage(
+            style.boxSize.width,
+            style.boxSize.height,
+            BufferedImage.TYPE_INT_ARGB
+        )
+        buffer.createGraphics().apply {
+            drawImage(
+                awtIcon,
+                style.iconPosition.x,
+                style.iconPosition.y,
+                null
+            )
+            if (unread != null && unread!! > 0) {
+                drawBadge(style)
+                drawBadgeContent(unread.toString(), style)
+            }
+            dispose()
+        }
+        return@remember buffer
+    }
+}
+
+/**
+ * Draws red badge for number of unread mentions.
+ */
+private fun Graphics.drawBadge(style: TrayStyle) {
+    color = style.badgeColor
+    val arc = min(style.badgeSize.width, style.badgeSize.height)
+    fillRoundRect(
+        style.badgePosition.x,
+        style.badgePosition.y,
+        style.badgeSize.width,
+        style.badgeSize.height,
+        arc, arc
+    )
+}
+
+/**
+ * Draws the number of unread mentions.
+ *
+ * If the number exceeds 99, only the last two digits are shown,
+ * with an ellipsis preceding them.
+ */
+private fun Graphics.drawBadgeContent(text: String, style: TrayStyle) {
+    val content = if (text.length <= 2) text else ".." + text.takeLast(2)
+    font = Font(style.fontName, Font.PLAIN, style.fontSize)
+    color = style.fontColor
+    val metrics = getFontMetrics(font)
+    val textWidth = metrics.stringWidth(content)
+    val textHeight = metrics.height
+    val x = (style.badgeSize.width - textWidth) / 2
+    val y = (style.badgeSize.height - textHeight) / 2 + metrics.ascent
+    drawString(
+        content,
+        x + style.badgePosition.x,
+        y + style.badgePosition.y
+    )
 }
 
 /**
@@ -162,6 +259,45 @@ private fun mouseEventHandler(state: AppState, menu: Menu) =
             }
         }
     }
+
+/**
+ * Default data for styling the tray icon.
+ *
+ * Dimensions and coordinates are specified in pixels and adjusted for screen [density].
+ */
+@Suppress("MagicNumber" /* Colors are defined using RGB components. */)
+private class TrayStyle(private val density: Density) {
+    val boxSize = AwtSize(22.adjusted, 22.adjusted)
+    val iconSize = AwtSize(16.adjusted, 16.adjusted)
+    val iconPosition = Point(3.adjusted, 3.adjusted)
+    val badgeSize = AwtSize(17.adjusted, 12.adjusted)
+    val badgePosition = Point(3.adjusted, 10.adjusted)
+    val badgeColor = Color(240, 77, 63)
+    val fontSize = 8.adjusted
+    val fontName = "San Francisco"
+    val fontColor = Color.WHITE!!
+
+    /**
+     * Adapts standard pixel value to fit the screen density.
+     */
+    private val Int.adjusted: Int
+        get() = round(this * density.density).toInt()
+}
+
+/**
+ * Holds a 2D integer size.
+ *
+ * Java AWT relies exclusively on integer values for specifying dimensions,
+ * unlike other libraries that support floating-point values.
+ *
+ * Use to store integer dimensions for creating components with Java AWT.
+ */
+private data class AwtSize(val width: Int, val height: Int) {
+    /**
+     * Converts the size to floating-point size.
+     */
+    fun toCompose(): Size = Size(width.toFloat(), height.toFloat())
+}
 
 /**
  * Displays a popup message near the tray icon.
