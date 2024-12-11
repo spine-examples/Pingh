@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -47,8 +48,10 @@ import androidx.compose.ui.window.Window as ComposeWindow
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
 import io.spine.examples.pingh.client.PinghApplication
+import java.awt.Desktop
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
+import javax.swing.SwingUtilities
 
 /**
  * Displays Pingh platform window.
@@ -101,17 +104,35 @@ private fun PlatformWindow(
     ) {
         content()
 
-        // Hides the window if you focus from it.
         DisposableEffect(window) {
+            // Focuses on the window and brings it to the front when displayed.
             val listener = object : WindowAdapter() {
+                override fun windowActivated(e: WindowEvent?) {
+                    SwingUtilities.invokeLater {
+                        window.requestFocus()
+                    }
+                }
+            }
+            window.addWindowListener(listener)
+
+            // Hides the window if you focus from it.
+            val focusListener = object : WindowAdapter() {
                 override fun windowLostFocus(e: WindowEvent?) {
                     state.isShown = false
                 }
             }
-            window.addWindowFocusListener(listener)
+            window.addWindowFocusListener(focusListener)
+
             onDispose {
-                window.removeWindowFocusListener(listener)
+                window.removeWindowListener(listener)
+                window.removeWindowFocusListener(focusListener)
             }
+        }
+    }
+
+    LaunchedEffect(state.isShown) {
+        if (state.isShown) {
+            Desktop.getDesktop().requestForeground(true)
         }
     }
 }
