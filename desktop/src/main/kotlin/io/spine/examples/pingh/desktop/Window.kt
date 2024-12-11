@@ -115,7 +115,7 @@ private fun PlatformWindow(
             }
             window.addWindowListener(listener)
 
-            // Hides the window if you focus from it.
+            // Hides the window when it loses focus.
             val focusListener = object : WindowAdapter() {
                 override fun windowLostFocus(e: WindowEvent?) {
                     state.isShown = false
