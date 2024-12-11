@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -46,6 +47,8 @@ import androidx.compose.ui.window.Window as ComposeWindow
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
 import io.spine.examples.pingh.client.PinghApplication
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
 
 /**
  * Displays Pingh platform window.
@@ -57,8 +60,7 @@ import io.spine.examples.pingh.client.PinghApplication
 @Composable
 internal fun Window(state: WindowState, app: PinghApplication) {
     PlatformWindow(
-        title = state.title,
-        isShown = state.isShown,
+        state = state,
         onClose = state::hide
     ) {
         WindowContent(app)
@@ -72,12 +74,13 @@ internal fun Window(state: WindowState, app: PinghApplication) {
  * due to the current lack of API support in Compose, the window is placed
  * near the general area of the tray icons.
  *
+ * If a click outside the window occurs, the window is hidden.
+ *
  * @see <a href="https://github.com/JetBrains/compose-multiplatform/issues/289">Issue #289</a>
  */
 @Composable
 private fun PlatformWindow(
-    title: String,
-    isShown: Boolean,
+    state: WindowState,
     onClose: () -> Unit,
     content: @Composable FrameWindowScope.() -> Unit
 ) {
@@ -89,14 +92,28 @@ private fun PlatformWindow(
     ComposeWindow(
         onCloseRequest = onClose,
         state = windowState,
-        visible = isShown,
-        title = title,
+        visible = state.isShown,
+        title = state.title,
         undecorated = true,
         transparent = true,
         resizable = false,
-        alwaysOnTop = true,
-        content = content
-    )
+        focusable = true
+    ) {
+        content()
+
+        // Hides the window if you focus from it.
+        DisposableEffect(window) {
+            val listener = object : WindowAdapter() {
+                override fun windowLostFocus(e: WindowEvent?) {
+                    state.isShown = false
+                }
+            }
+            window.addWindowFocusListener(listener)
+            onDispose {
+                window.removeWindowFocusListener(listener)
+            }
+        }
+    }
 }
 
 /**
