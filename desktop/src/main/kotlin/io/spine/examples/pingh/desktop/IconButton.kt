@@ -35,7 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonColors
-import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.IconButtonDefaults.filledIconButtonColors
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.rememberTooltipState
@@ -45,7 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.PointerIcon.Companion.Hand
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
@@ -55,14 +55,13 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupPositionProvider
-import java.awt.Cursor
 
 /**
  * The proportion of the button's size that the icon occupies.
  * Since the button is circular, the icon should be scaled down
  * to avoid truncation at the edges.
  */
-private const val circularIconSizeMultiplier = 0.75f
+private const val circularIconSizeFraction = 0.75f
 
 /**
  * Displays a round button that contains icon.
@@ -75,7 +74,7 @@ private const val circularIconSizeMultiplier = 0.75f
  * @param colors The `IconButtonColors` that is used to resolve the colors used for this icon button
  *   in different states.
  * @param tooltip The text to be displayed in the tooltip. If `null`, no tooltip is shown.
- * @param sizeMultiplier The proportion of the button's size that the icon occupies.
+ * @param sizeFraction The proportion of the button's size that the icon occupies.
  */
 @Composable
 @Suppress("LongParameterList" /* For detailed customization. */)
@@ -85,9 +84,9 @@ internal fun IconButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     shape: Shape = CircleShape,
-    colors: IconButtonColors = IconButtonDefaults.filledIconButtonColors(),
+    colors: IconButtonColors = filledIconButtonColors(),
     tooltip: String? = null,
-    sizeMultiplier: Float = circularIconSizeMultiplier
+    sizeFraction: Float = circularIconSizeFraction
 ) {
     val wrapper = if (tooltip != null) wrapInTooltipBox(tooltip) else noWrap()
     wrapper {
@@ -95,7 +94,7 @@ internal fun IconButton(
             onClick = onClick,
             modifier = modifier
                 .padding(0.dp)
-                .pointerHoverIcon(PointerIcon(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))),
+                .pointerHoverIcon(Hand),
             enabled = enabled,
             shape = shape,
             colors = colors
@@ -103,7 +102,7 @@ internal fun IconButton(
             Icon(
                 painter = icon,
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize(sizeMultiplier),
+                modifier = Modifier.fillMaxSize(sizeFraction),
                 tint = colors.contentColor
             )
         }

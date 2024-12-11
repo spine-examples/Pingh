@@ -30,13 +30,12 @@ import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
-import androidx.compose.ui.test.filter
 import androidx.compose.ui.test.filterToOne
-import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import io.kotest.matchers.floats.shouldBeGreaterThan
 import io.kotest.matchers.floats.shouldBeLessThan
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
@@ -57,9 +56,9 @@ internal class MentionsPageUiTest : UiTest() {
             logIn()
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
             val tag = mentionCards().random().testTag
-            onNodeWithTag(tag).performClick()
+            onTitleWithParentTag(tag).performClick()
             awaitFact { openedUrlCount() shouldBe 1 }
-            onNodeWithTag(tag).performClick()
+            onTitleWithParentTag(tag).performClick()
             awaitFact { openedUrlCount() shouldBe 2 }
         }
 
@@ -84,7 +83,7 @@ internal class MentionsPageUiTest : UiTest() {
             logIn()
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
             val tag = mentionCards().random().testTag
-            onNodeWithTag(tag).performClick()
+            onTitleWithParentTag(tag).performClick()
             awaitFact {
                 onNodeWithTag(tag).performHover()
                 onSnoozeButtonWithParentTag(tag).assertDoesNotExist()
@@ -102,7 +101,7 @@ internal class MentionsPageUiTest : UiTest() {
             onNodeWithTag(snoozedMentionTag).performHover()
             awaitFact { onSnoozeButtonWithParentTag(snoozedMentionTag).assertExists() }
             onSnoozeButtonWithParentTag(snoozedMentionTag).performClick()
-            onNodeWithTag(readMentionTag).performClick()
+            onTitleWithParentTag(readMentionTag).performClick()
             awaitFact {
                 val mentions = mentionCards()
                 val readMention = mentions.first { it.testTag == readMentionTag }
@@ -156,9 +155,15 @@ internal class MentionsPageUiTest : UiTest() {
 
     private fun SemanticsNodeInteractionsProvider.mentionCards(): List<SemanticsNode> =
         onNodeWithTag("mention-cards")
+            .performScrollToIndex(0)
             .onChildren()
-            .filter(hasClickAction())
             .fetchSemanticsNodes()
+
+    private fun SemanticsNodeInteractionsProvider.onTitleWithParentTag(tag: String):
+            SemanticsNodeInteraction =
+        onNodeWithTag(tag)
+            .onChildren()
+            .filterToOne(hasTestTag("mention-title"))
 
     private fun SemanticsNodeInteractionsProvider.onSnoozeButtonWithParentTag(tag: String):
             SemanticsNodeInteraction =

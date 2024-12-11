@@ -27,4 +27,4 @@
 /**
  * The version of the `Pingh` to publish.
  */
-val pinghVersion: String by extra("1.0.0-SNAPSHOT.31")
+val pinghVersion: String by extra("1.0.0-SNAPSHOT.32")
