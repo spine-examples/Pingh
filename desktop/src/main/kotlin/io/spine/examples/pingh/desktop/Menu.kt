@@ -181,12 +181,12 @@ private class MenuScopeImpl : MenuScope {
     override fun MenuItem(text: String, leadingIcon: Painter, onClick: () -> Unit) {
         val interactionSource = remember { MutableInteractionSource() }
         val isHovered by interactionSource.collectIsHoveredAsState()
-        val content = if (isHovered) {
+        val contentColor = if (isHovered) {
             MaterialTheme.colorScheme.onPrimary
         } else {
             MaterialTheme.colorScheme.onSecondary
         }
-        val container = if (isHovered) {
+        val containerColor = if (isHovered) {
             MaterialTheme.colorScheme.primary
         } else {
             MaterialTheme.colorScheme.secondary
@@ -195,7 +195,7 @@ private class MenuScopeImpl : MenuScope {
         Row(
             modifier = Modifier.fillMaxWidth()
                 .background(
-                    color = container,
+                    color = containerColor,
                     shape = shape
                 )
                 .hoverable(interactionSource)
@@ -216,11 +216,11 @@ private class MenuScopeImpl : MenuScope {
                 painter = leadingIcon,
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
-                tint = content
+                tint = contentColor
             )
             Text(
                 text = text,
-                color = content,
+                color = contentColor,
                 style = MaterialTheme.typography.bodyMedium
             )
         }
