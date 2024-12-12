@@ -54,6 +54,8 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.pointer.PointerIcon.Companion.Hand
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -67,10 +69,20 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * Displays an icon button that displays the menu when clicked.
+ *
+ * The menu is located at the bottom of the icon, shifting to the left.
+ *
+ * @param icon The painter to draw icon.
+ * @param tooltip The text to be displayed in the tooltip.
+ *   If `null`, no tooltip is shown.
+ * @param iconFraction The proportion of the button's size that the icon occupies.
+ * @param items Menu items displayed inside the menu.
+ */
 @Composable
 internal fun Menu(
     icon: Painter,
-    iconSize: Dp = 30.dp,
     tooltip: String? = null,
     iconFraction: Float = 0.85f,
     items: @Composable MenuScope.() -> Unit
@@ -87,7 +99,7 @@ internal fun Menu(
                     isShown = !isShown
                 }
             },
-            modifier = Modifier.size(iconSize),
+            modifier = Modifier.size(30.dp),
             colors = iconButtonColors(
                 contentColor = MaterialTheme.colorScheme.onSecondary
             ),
@@ -105,29 +117,49 @@ internal fun Menu(
                         isTogglingAllowed = true
                     }
                 },
-            ) {
-                Surface(
-                    modifier = Modifier.shadow(
-                        elevation = 4.dp,
-                        shape = MaterialTheme.shapes.small
-                    ),
-                    color = MaterialTheme.colorScheme.secondary,
-                    shape = MaterialTheme.shapes.small
-                ) {
-                    Column(
-                        modifier = Modifier.padding(5.dp).width(150.dp),
-                        verticalArrangement = Arrangement.spacedBy(3.dp)
-                    ) {
-                        items(scope)
-                    }
-                }
-            }
+                content = { MenuContent(scope, items) }
+            )
         }
     }
 }
 
+/**
+ * Displays the menu items.
+ */
+@Composable
+private fun MenuContent(scope: MenuScope, items: @Composable MenuScope.() -> Unit) {
+    val shape = MaterialTheme.shapes.small
+    Surface(
+        modifier = Modifier.shadow(
+            elevation = 4.dp,
+            shape = shape
+        ),
+        color = MaterialTheme.colorScheme.secondary,
+        shape = shape
+    ) {
+        Column(
+            modifier = Modifier.padding(5.dp).width(150.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            items(scope)
+        }
+    }
+}
+
+/**
+ * Scope for [Menu] items.
+ */
 internal interface MenuScope {
 
+    /**
+     * Adds an item to the menu.
+     *
+     * Clicking on this item closes the menu before executing [onClick] action.
+     *
+     * @param text The text describing this item.
+     * @param leadingIcon The icon that is placed in front of the text.
+     * @param onClick Called when the item is clicked.
+     */
     @Composable
     fun MenuItem(
         text: String,
@@ -137,9 +169,14 @@ internal interface MenuScope {
 }
 
 private class MenuScopeImpl : MenuScope {
-
+    /**
+     * Whether the menu is displayed.
+     */
     val isShown = mutableStateOf(false)
 
+    /**
+     * @see [MenuScope.MenuItem]
+     */
     @Composable
     override fun MenuItem(text: String, leadingIcon: Painter, onClick: () -> Unit) {
         val interactionSource = remember { MutableInteractionSource() }
@@ -170,6 +207,7 @@ private class MenuScopeImpl : MenuScope {
                         onClick()
                     }
                 )
+                .pointerHoverIcon(Hand)
                 .padding(5.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = CenterVertically
@@ -189,6 +227,14 @@ private class MenuScopeImpl : MenuScope {
     }
 }
 
+/**
+ * Creates a `PopupPositionProvider` to calculate the menu's coordinates
+ * based on the anchor data.
+ *
+ * The menu is positioned below the anchor, shifting to the left.
+ *
+ * @param menuAnchorSpacing The spacing between the menu and the anchor content.
+ */
 @Composable
 private fun rememberPositionProvider(menuAnchorSpacing: Dp): PopupPositionProvider {
     val menuAnchorSpacingPx = with(LocalDensity.current) {
