@@ -87,6 +87,12 @@ internal abstract class UiTest : IntegrationTest() {
     protected fun openedUrlCount(): Int = uriHandler.urlCount
 
     /**
+     * Returns the count of unread mentions for the user
+     * or -1 if the [state] is not specified.
+     */
+    protected fun unreadMentionCount(): Int = state?.app?.unreadMentionCount?.value ?: -1
+
+    /**
      * Logs the user in the application with the specified username and
      * navigates to the Mentions page.
      */

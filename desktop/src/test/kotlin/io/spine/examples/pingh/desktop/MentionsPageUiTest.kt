@@ -50,6 +50,12 @@ import org.junit.jupiter.api.DisplayName
 @OptIn(ExperimentalTestApi::class)
 internal class MentionsPageUiTest : UiTest() {
 
+    private val SemanticsNodeInteractionsProvider.menuButton
+        get() = onNodeWithTag("menu-button")
+
+    private val SemanticsNodeInteractionsProvider.markAllAsReadButton
+        get() = onNodeWithTag("mark-all-as-read-button")
+
     @Test
     internal fun `allow users to open a mentions URL even after it has been read`() =
         runPinghUiTest {
@@ -151,6 +157,16 @@ internal class MentionsPageUiTest : UiTest() {
             onPinButtonWithParentTag(pinnedTag).performClick()
             onNodeWithTag(anotherTag).performHover()
             awaitFact { onPinButtonWithParentTag(pinnedTag).assertExists() }
+        }
+
+    @Test
+    internal fun `have all mentions read when 'Mark all as read' button is clicked`() =
+        runPinghUiTest {
+            logIn()
+            menuButton.performClick()
+            awaitFact { markAllAsReadButton.assertExists() }
+            markAllAsReadButton.performClick()
+            awaitFact { unreadMentionCount() shouldBe 0 }
         }
 
     private fun SemanticsNodeInteractionsProvider.mentionCards(): List<SemanticsNode> =
