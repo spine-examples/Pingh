@@ -206,18 +206,28 @@ private fun Menu(
 ) {
     Menu(
         icon = painterResource(Res.drawable.more),
+        modifier = Modifier.size(30.dp).testTag("menu-button"),
         tooltip = "More"
     ) {
-        MenuItem("Mark all as read", painterResource(Res.drawable.mark_all_as_read)) {
-            flow.markAllAsRead()
-        }
-        MenuItem("Settings", painterResource(Res.drawable.settings)) {
-            toSettingsPage()
-        }
+        MenuItem(
+            text = "Mark all as read",
+            leadingIcon = painterResource(Res.drawable.mark_all_as_read),
+            modifier = Modifier.testTag("mark-all-as-read-button"),
+            onClick = flow::markAllAsRead
+        )
+        MenuItem(
+            text = "Settings",
+            leadingIcon = painterResource(Res.drawable.settings),
+            modifier = Modifier.testTag("settings-button"),
+            onClick = toSettingsPage
+        )
         Divider(color = MaterialTheme.colorScheme.background)
-        MenuItem("Quit", painterResource(Res.drawable.quit)) {
-            exitApp()
-        }
+        MenuItem(
+            text = "Quit",
+            leadingIcon = painterResource(Res.drawable.quit),
+            modifier = Modifier.testTag("quit-button"),
+            onClick = exitApp
+        )
     }
 }
 

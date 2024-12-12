@@ -75,6 +75,7 @@ import kotlinx.coroutines.launch
  * The menu is located at the bottom of the icon, shifting to the left.
  *
  * @param icon The painter to draw icon.
+ * @param modifier The modifier to be applied to icon button.
  * @param tooltip The text to be displayed in the tooltip.
  *   If `null`, no tooltip is shown.
  * @param iconFraction The proportion of the button's size that the icon occupies.
@@ -83,6 +84,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun Menu(
     icon: Painter,
+    modifier: Modifier = Modifier,
     tooltip: String? = null,
     iconFraction: Float = 0.85f,
     items: @Composable MenuScope.() -> Unit
@@ -99,7 +101,7 @@ internal fun Menu(
                     isShown = !isShown
                 }
             },
-            modifier = Modifier.size(30.dp),
+            modifier = modifier,
             colors = iconButtonColors(
                 contentColor = MaterialTheme.colorScheme.onSecondary
             ),
@@ -157,12 +159,14 @@ internal interface MenuScope {
      * Clicking on this item closes the menu before executing [onClick] action.
      *
      * @param text The text describing this item.
+     * @param modifier The modifier to be applied to this item.
      * @param leadingIcon The icon that is placed in front of the text.
      * @param onClick Called when the item is clicked.
      */
     @Composable
     fun MenuItem(
         text: String,
+        modifier: Modifier,
         leadingIcon: Painter,
         onClick: () -> Unit
     )
@@ -178,7 +182,12 @@ private class MenuScopeImpl : MenuScope {
      * @see [MenuScope.MenuItem]
      */
     @Composable
-    override fun MenuItem(text: String, leadingIcon: Painter, onClick: () -> Unit) {
+    override fun MenuItem(
+        text: String,
+        modifier: Modifier,
+        leadingIcon: Painter,
+        onClick: () -> Unit
+    ) {
         val interactionSource = remember { MutableInteractionSource() }
         val isHovered by interactionSource.collectIsHoveredAsState()
         val contentColor = if (isHovered) {
@@ -193,7 +202,7 @@ private class MenuScopeImpl : MenuScope {
         }
         val shape = MaterialTheme.shapes.small
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = modifier.fillMaxWidth()
                 .background(
                     color = containerColor,
                     shape = shape
