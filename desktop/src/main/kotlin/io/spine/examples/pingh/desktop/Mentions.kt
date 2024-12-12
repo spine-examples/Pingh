@@ -51,8 +51,10 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Divider
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults.cardColors
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults.iconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -77,10 +79,14 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.spine.example.pingh.desktop.generated.resources.Res
+import io.spine.example.pingh.desktop.generated.resources.mark_all_as_read
+import io.spine.example.pingh.desktop.generated.resources.more
 import io.spine.example.pingh.desktop.generated.resources.pin
 import io.spine.example.pingh.desktop.generated.resources.pingh
 import io.spine.example.pingh.desktop.generated.resources.pinned
+import io.spine.example.pingh.desktop.generated.resources.quit
 import io.spine.example.pingh.desktop.generated.resources.refresh
+import io.spine.example.pingh.desktop.generated.resources.settings
 import io.spine.example.pingh.desktop.generated.resources.snooze
 import io.spine.examples.pingh.client.MentionsFlow
 import io.spine.examples.pingh.client.howMuchTimeHasPassed
@@ -120,13 +126,14 @@ internal fun MentionsPage(
  *
  * @param flow The flow for managing the lifecycle of mentions.
  * @param toSettingsPage The navigation to the 'Settings' page.
- * @param appIconFraction The proportion of the button's size that the app icon occupies.
+ * @param iconSizeFraction The proportion of the button's size
+ *   occupied by the icon on the toolbar.
  */
 @Composable
 private fun ToolBar(
     flow: MentionsFlow,
     toSettingsPage: () -> Unit,
-    appIconFraction: Float = 0.8f
+    iconSizeFraction: Float = 0.85f
 ) {
     val contentColor = MaterialTheme.colorScheme.onSecondary
     val borderColor = MaterialTheme.colorScheme.onBackground
@@ -143,19 +150,16 @@ private fun ToolBar(
                     strokeWidth = 1.dp.toPx()
                 )
             }
-            .padding(start = 20.dp, end = 13.dp),
+            .padding(start = 25.dp, end = 15.dp),
         verticalAlignment = CenterVertically
     ) {
-        IconButton(
-            icon = painterResource(Res.drawable.pingh),
-            onClick = toSettingsPage,
-            modifier = Modifier.size(50.dp).testTag("settings-button"),
-            colors = iconButtonColors(
-                contentColor = contentColor
-            ),
-            sizeFraction = appIconFraction
+        Icon(
+            painter = painterResource(Res.drawable.pingh),
+            contentDescription = null,
+            modifier = Modifier.size(40.dp),
+            tint = contentColor
         )
-        Spacer(Modifier.width(5.dp))
+        Spacer(Modifier.width(10.dp))
         Text(
             text = "Recent mentions",
             modifier = Modifier.weight(1f),
@@ -168,11 +172,45 @@ private fun ToolBar(
             onClick = {
                 flow.updateMentions()
             },
-            modifier = Modifier.size(44.dp),
+            modifier = Modifier.size(30.dp),
             colors = iconButtonColors(
                 contentColor = contentColor
-            )
+            ),
+            tooltip = "Refresh",
+            sizeFraction = iconSizeFraction
         )
+        Menu(
+            flow = flow,
+            toSettingsPage = toSettingsPage
+        )
+    }
+}
+
+/**
+ * Displays the menu of the mentions page.
+ *
+ * @param flow The flow for managing the lifecycle of mentions.
+ * @param toSettingsPage The navigation to the 'Settings' page.
+ */
+@Composable
+private fun Menu(
+    flow: MentionsFlow,
+    toSettingsPage: () -> Unit
+) {
+    Menu(
+        icon = painterResource(Res.drawable.more),
+        tooltip = "More"
+    ) {
+        MenuItem("Mark all as read", painterResource(Res.drawable.mark_all_as_read)) {
+            flow.markAllAsRead()
+        }
+        MenuItem("Settings", painterResource(Res.drawable.settings)) {
+            toSettingsPage()
+        }
+        Divider(color = MaterialTheme.colorScheme.background)
+        MenuItem("Quit", painterResource(Res.drawable.quit)) {
+
+        }
     }
 }
 
