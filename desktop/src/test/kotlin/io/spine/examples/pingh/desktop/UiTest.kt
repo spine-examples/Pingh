@@ -71,7 +71,7 @@ internal abstract class UiTest : IntegrationTest() {
                 Theme {
                     state = remember { AppState(serverEndpoint) }
                     CompositionLocalProvider(LocalUriHandler provides uriHandler) {
-                        CurrentPage(state!!.app)
+                        CurrentPage(state!!.app, state!!::close)
                     }
                 }
             }

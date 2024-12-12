@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.desktop
 
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
 import androidx.compose.ui.test.assertIsOn
@@ -39,6 +40,9 @@ import org.junit.jupiter.api.DisplayName
 @OptIn(ExperimentalTestApi::class)
 internal class SettingsPageUiTest : UiTest() {
 
+    private val SemanticsNodeInteractionsProvider.menuButton
+        get() = onNodeWithTag("menu-button")
+
     private val SemanticsNodeInteractionsProvider.settingsButton
         get() = onNodeWithTag("settings-button")
 
@@ -51,17 +55,21 @@ internal class SettingsPageUiTest : UiTest() {
     @Test
     internal fun `have settings retained after the user logs in again`() =
         runPinghUiTest {
-            logIn()
-            awaitFact { settingsButton.assertExists() }
-            settingsButton.performClick()
+            toSettingsPage()
             awaitFact { dndOption.assertExists() }
             dndOption.performClick()
             awaitFact { dndOption.assertIsOn() }
             logoutButton.performClick()
             awaitFact { logoutButton.assertDoesNotExist() }
-            logIn()
-            awaitFact { settingsButton.assertExists() }
-            settingsButton.performClick()
+            toSettingsPage()
             awaitFact { dndOption.assertIsOn() }
         }
+
+    private fun ComposeUiTest.toSettingsPage() {
+        logIn()
+        awaitFact { menuButton.assertExists() }
+        menuButton.performClick()
+        awaitFact { settingsButton.assertExists() }
+        settingsButton.performClick()
+    }
 }
