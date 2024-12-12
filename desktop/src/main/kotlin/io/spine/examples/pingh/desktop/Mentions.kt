@@ -104,17 +104,19 @@ import org.jetbrains.compose.resources.painterResource
  *
  * @param flow The flow for managing the lifecycle of mentions.
  * @param toSettingsPage The navigation to the 'Settings' page.
+ * @param exitApp Closes applications and aborts any tasks it is performing.
  */
 @Composable
 internal fun MentionsPage(
     flow: MentionsFlow,
-    toSettingsPage: () -> Unit
+    toSettingsPage: () -> Unit,
+    exitApp: () -> Unit
 ) {
     Column(
         Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        ToolBar(flow, toSettingsPage)
+        ToolBar(flow, toSettingsPage, exitApp)
         Spacer(Modifier.height(0.5.dp))
         MentionCards(flow)
     }
@@ -126,6 +128,7 @@ internal fun MentionsPage(
  *
  * @param flow The flow for managing the lifecycle of mentions.
  * @param toSettingsPage The navigation to the 'Settings' page.
+ * @param exitApp Closes applications and aborts any tasks it is performing.
  * @param iconSizeFraction The proportion of the button's size
  *   occupied by the icon on the toolbar.
  */
@@ -133,6 +136,7 @@ internal fun MentionsPage(
 private fun ToolBar(
     flow: MentionsFlow,
     toSettingsPage: () -> Unit,
+    exitApp: () -> Unit,
     iconSizeFraction: Float = 0.85f
 ) {
     val contentColor = MaterialTheme.colorScheme.onSecondary
@@ -181,7 +185,8 @@ private fun ToolBar(
         )
         Menu(
             flow = flow,
-            toSettingsPage = toSettingsPage
+            toSettingsPage = toSettingsPage,
+            exitApp = exitApp
         )
     }
 }
@@ -191,11 +196,13 @@ private fun ToolBar(
  *
  * @param flow The flow for managing the lifecycle of mentions.
  * @param toSettingsPage The navigation to the 'Settings' page.
+ * @param exitApp Closes applications and aborts any tasks it is performing.
  */
 @Composable
 private fun Menu(
     flow: MentionsFlow,
-    toSettingsPage: () -> Unit
+    toSettingsPage: () -> Unit,
+    exitApp: () -> Unit
 ) {
     Menu(
         icon = painterResource(Res.drawable.more),
@@ -209,7 +216,7 @@ private fun Menu(
         }
         Divider(color = MaterialTheme.colorScheme.background)
         MenuItem("Quit", painterResource(Res.drawable.quit)) {
-
+            exitApp()
         }
     }
 }

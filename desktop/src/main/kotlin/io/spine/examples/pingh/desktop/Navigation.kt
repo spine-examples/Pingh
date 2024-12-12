@@ -38,9 +38,10 @@ import io.spine.examples.pingh.desktop.Page.SETTINGS
  * Displays the current page of the application.
  *
  * @param application Manages the logic for the Pingh app.
+ * @param exitApp Closes applications and aborts any tasks it is performing.
  */
 @Composable
-internal fun CurrentPage(application: PinghApplication) {
+internal fun CurrentPage(application: PinghApplication, exitApp: () -> Unit) {
     val currentPage = remember {
         mutableStateOf(
             if (application.isLoggedIn()) MENTIONS else LOGIN
@@ -58,7 +59,8 @@ internal fun CurrentPage(application: PinghApplication) {
             flow = application.startMentionsFlow(),
             toSettingsPage = {
                 currentPage.value = SETTINGS
-            }
+            },
+            exitApp = exitApp
         )
 
         SETTINGS -> SettingsPage(

@@ -66,10 +66,40 @@ internal class AppState(serverEndpoint: ServerEndpoint) {
     }
 
     /**
+     * Actions that are performed when the application is [closed][close].
+     */
+    internal val closureActions = mutableListOf<() -> Unit>()
+
+    init {
+        addClosureAction(app::close)
+    }
+
+    /**
      * Switches the window visibility.
      */
     internal fun toggleWindowVisibility() {
         window.isShown = !window.isShown
+    }
+
+    /**
+     * Adds an action to be executed upon application closure,
+     * following the order in which actions were added.
+     */
+    internal fun addClosureAction(onClose: () -> Unit) {
+        closureActions.add(onClose)
+    }
+
+    /**
+     * Closes the application.
+     *
+     * When the application is closed, all actions added
+     * using [addClosureAction()][addClosureAction] method are executed sequentially.
+     *
+     * By default, the client connection to
+     * the Pingh server is [closed][PinghApplication.close] first.
+     */
+    internal fun close() {
+        closureActions.forEach { it() }
     }
 }
 

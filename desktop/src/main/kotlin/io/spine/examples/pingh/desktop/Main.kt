@@ -37,7 +37,8 @@ public fun main() {
     application {
         Theme {
             val state = remember { AppState(serverEndpoint) }
-            Window(state.window, state.app)
+            state.addCloseAction { exitApplication() }
+            Window(state)
             Tray(state)
         }
     }
