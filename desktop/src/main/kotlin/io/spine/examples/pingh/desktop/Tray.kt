@@ -107,7 +107,7 @@ internal fun Tray(state: AppState) {
             .onEach { tray.displayMessage(it) }
             .launchIn(coroutineScope)
 
-        state.addCloseAction {
+        state.addClosureAction {
             SystemTray.getSystemTray().remove(tray)
         }
 
