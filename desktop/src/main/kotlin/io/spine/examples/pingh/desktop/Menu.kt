@@ -48,6 +48,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -62,6 +63,9 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun Menu(
@@ -73,10 +77,16 @@ internal fun Menu(
 ) {
     val scope = remember { MenuScopeImpl() }
     var isShown by scope.isShown
+    var isTogglingAllowed by remember { mutableStateOf(true) }
+    val coroutineScope = rememberCoroutineScope()
     Box {
         IconButton(
             icon = icon,
-            onClick = { isShown = !isShown },
+            onClick = {
+                if (isTogglingAllowed) {
+                    isShown = !isShown
+                }
+            },
             modifier = Modifier.size(iconSize),
             colors = iconButtonColors(
                 contentColor = MaterialTheme.colorScheme.onSecondary
@@ -88,17 +98,21 @@ internal fun Menu(
             Popup(
                 popupPositionProvider = rememberPositionProvider(4.dp),
                 onDismissRequest = {
+                    isTogglingAllowed = false
                     isShown = false
+                    coroutineScope.launch {
+                        delay(200.milliseconds)
+                        isTogglingAllowed = true
+                    }
                 },
             ) {
-                val shape = MaterialTheme.shapes.small
                 Surface(
                     modifier = Modifier.shadow(
                         elevation = 4.dp,
-                        shape = shape
+                        shape = MaterialTheme.shapes.small
                     ),
                     color = MaterialTheme.colorScheme.secondary,
-                    shape = shape
+                    shape = MaterialTheme.shapes.small
                 ) {
                     Column(
                         modifier = Modifier.padding(5.dp).width(150.dp),
