@@ -1,5 +1,9 @@
 # Pingh
 
+[![license][license-badge]](https://www.apache.org/licenses/LICENSE-2.0)
+
+[license-badge]: https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat
+
 A [GitHub App](https://github.com/apps/pingh-tracker-of-github-mentions) that notifies users 
 of new GitHub `@mention`s. It also runs as a system tray application on macOS.
 
@@ -234,6 +238,14 @@ This project includes several types of testing.
 
 A Docker environment is required for end-to-end and UI testing, 
 as the Datastore emulator is automatically started in a Docker container.
+
+## Third-party resources
+
+This project is licensed under 
+the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
+The project includes icons from [Google Material Symbols and Icons](https://fonts.google.com/icons),
+available under the Apache License 2.0.
 
 ## Feedback
 
