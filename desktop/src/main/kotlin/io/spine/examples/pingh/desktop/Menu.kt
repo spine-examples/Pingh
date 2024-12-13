@@ -70,7 +70,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * Displays an icon button that displays the menu when clicked.
+ * Displays an icon button and opens a menu when the button is clicked.
  *
  * The menu is located at the bottom of the icon, shifting to the left.
  *
@@ -118,9 +118,10 @@ internal fun Menu(
                         delay(200.milliseconds)
                         isTogglingAllowed = true
                     }
-                },
-                content = { MenuContent(scope, items) }
-            )
+                }
+            ) {
+                MenuContent(scope, items)
+            }
         }
     }
 }

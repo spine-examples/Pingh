@@ -192,7 +192,7 @@ private fun ToolBar(
 }
 
 /**
- * Displays the menu of the mentions page.
+ * Displays the menu of the Mentions page.
  *
  * @param flow The flow for managing the lifecycle of mentions.
  * @param toSettingsPage The navigation to the 'Settings' page.
