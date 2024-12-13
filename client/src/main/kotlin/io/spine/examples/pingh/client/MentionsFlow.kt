@@ -33,6 +33,7 @@ import io.spine.examples.pingh.client.settings.isIgnored
 import io.spine.examples.pingh.client.settings.value
 import io.spine.examples.pingh.mentions.GitHubClientId
 import io.spine.examples.pingh.mentions.MentionId
+import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
 import io.spine.examples.pingh.mentions.UserMentions
 import io.spine.examples.pingh.mentions.UserMentionsId
@@ -158,6 +159,16 @@ public class MentionsFlow internal constructor(
         ensureLoggedIn()
         val command = MarkMentionAsRead::class.buildBy(id)
         client.send(command)
+    }
+
+    /**
+     * Marks all unread and snoozed mentions as read.
+     */
+    public fun markAllAsRead() {
+        ensureLoggedIn()
+        mentions.value
+            .filter { it.status != MentionStatus.READ }
+            .forEach { markAsRead(it.id) }
     }
 
     /**

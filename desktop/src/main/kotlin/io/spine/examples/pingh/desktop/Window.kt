@@ -56,17 +56,16 @@ import javax.swing.SwingUtilities
 /**
  * Displays Pingh platform window.
  *
- * @param state The state of the application window.
- * @param app Manages the logic for the Pingh app.
+ * @param state The top-level application state.
  * @see [PlatformWindow]
  */
 @Composable
-internal fun Window(state: WindowState, app: PinghApplication) {
+internal fun Window(state: AppState) {
     PlatformWindow(
-        state = state,
-        onClose = state::hide
+        state = state.window,
+        onClose = state.window::hide
     ) {
-        WindowContent(app)
+        WindowContent(state)
     }
 }
 
@@ -141,7 +140,7 @@ private fun PlatformWindow(
  * Displays a content in the Pingh window.
  */
 @Composable
-private fun WindowContent(app: PinghApplication) {
+private fun WindowContent(state: AppState) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter
@@ -161,7 +160,7 @@ private fun WindowContent(app: PinghApplication) {
                 )
                 .clip(MaterialTheme.shapes.small)
         ) {
-            CurrentPage(app)
+            CurrentPage(state.app, state::close)
         }
     }
 }

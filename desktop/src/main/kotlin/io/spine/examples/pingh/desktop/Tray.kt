@@ -37,7 +37,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Notification
 import io.spine.example.pingh.desktop.generated.resources.Res
 import io.spine.example.pingh.desktop.generated.resources.tray
@@ -80,24 +79,14 @@ import org.jetbrains.compose.resources.painterResource
  * @throws IllegalStateException if the system tray is not supported on the current platform.
  */
 @Composable
-internal fun ApplicationScope.Tray(state: AppState) {
+internal fun Tray(state: AppState) {
     check(SystemTray.isSupported()) { "The platform does not support tray applications." }
 
-    var tray: TrayIcon? = null
-
     val icon = rememberIcon(state.app)
-
-    val menu = remember {
-        Menu {
-            state.app.close()
-            exitApplication()
-            SystemTray.getSystemTray().remove(tray)
-        }
-    }
-
+    val menu = remember { Menu(state::close) }
     val onClick by rememberUpdatedState(mouseEventHandler(state, menu))
 
-    tray = remember {
+    val tray = remember {
         TrayIcon(icon, state.window.title).apply {
             isImageAutoSize = true
             addMouseListener(onClick)
