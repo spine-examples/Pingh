@@ -234,9 +234,11 @@ This project includes several types of testing.
 A Docker environment is required for end-to-end and UI testing, 
 as the Datastore emulator is automatically started in a Docker container.
 
-## Third-party resources
+## License
 
 This project is licensed under the [Apache License 2.0][apache-license].
+
+## Third-party resources
 
 The project includes icons from [Google Material Symbols and Icons][google-icons],
 available under the Apache License 2.0.
