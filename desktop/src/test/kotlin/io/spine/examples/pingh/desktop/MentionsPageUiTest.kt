@@ -30,7 +30,7 @@ import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
-import androidx.compose.ui.test.filterToOne
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
@@ -177,19 +177,13 @@ internal class MentionsPageUiTest : UiTest() {
 
     private fun SemanticsNodeInteractionsProvider.onTitleWithParentTag(tag: String):
             SemanticsNodeInteraction =
-        onNodeWithTag(tag)
-            .onChildren()
-            .filterToOne(hasTestTag("mention-title"))
+        onNode(hasTestTag("mention-title").and(hasAnyAncestor(hasTestTag(tag))))
 
     private fun SemanticsNodeInteractionsProvider.onSnoozeButtonWithParentTag(tag: String):
             SemanticsNodeInteraction =
-        onNodeWithTag(tag)
-            .onChildren()
-            .filterToOne(hasTestTag("snooze-button"))
+        onNode(hasTestTag("snooze-button").and(hasAnyAncestor(hasTestTag(tag))))
 
     private fun SemanticsNodeInteractionsProvider.onPinButtonWithParentTag(tag: String):
             SemanticsNodeInteraction =
-        onNodeWithTag(tag)
-            .onChildren()
-            .filterToOne(hasTestTag("pin-button"))
+        onNode(hasTestTag("pin-button").and(hasAnyAncestor(hasTestTag(tag))))
 }
