@@ -32,4 +32,5 @@ public object JUnit {
     private const val group = "org.junit.jupiter"
 
     public const val engine: String = "$group:junit-jupiter-engine:${version}"
+    public const val params: String = "$group:junit-jupiter-params:${version}"
 }
