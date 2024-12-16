@@ -30,12 +30,14 @@ import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.filterToOne
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performTextInput
 import io.kotest.matchers.floats.shouldBeGreaterThan
 import io.kotest.matchers.floats.shouldBeLessThan
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
@@ -167,6 +169,33 @@ internal class MentionsPageUiTest : UiTest() {
             awaitFact { markAllAsReadButton.assertExists() }
             markAllAsReadButton.performClick()
             awaitFact { unreadMentionCount() shouldBe 0 }
+        }
+
+    @Test
+    internal fun `have not mentions from ignored sources displayed`() =
+        runPinghUiTest {
+            logIn()
+            awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 4 }
+            val tags = mentionCards().map { it.testTag }
+            awaitFact { menuButton.assertExists() }
+            menuButton.performClick()
+            awaitFact { onNodeWithTag("settings-button").assertExists() }
+            onNodeWithTag("settings-button").performClick()
+            awaitFact { onNodeWithTag("logout-button").assertExists() }
+            onNodeWithTag("add-button").performClick()
+            awaitFact { onNodeWithTag("org-field").assertExists() }
+            onNodeWithTag("org-field").performTextInput("spine-examples")
+            onNodeWithTag("repos-field").performTextInput("Pingh")
+            awaitFact { onNodeWithTag("add-button-in-dialog").assertIsEnabled() }
+            onNodeWithTag("add-button-in-dialog").performClick()
+            awaitFact { onNodeWithTag("add-button-in-dialog").assertDoesNotExist() }
+            onNodeWithTag("back-button").performClick()
+            awaitFact {
+                menuButton.assertExists()
+                tags.forEach { tag ->
+                    onNodeWithTag(tag).assertDoesNotExist()
+                }
+            }
         }
 
     private fun SemanticsNodeInteractionsProvider.mentionCards(): List<SemanticsNode> =

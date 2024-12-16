@@ -170,7 +170,7 @@ private fun SettingsHeader(
         IconButton(
             icon = painterResource(Res.drawable.back),
             onClick = onExit,
-            modifier = Modifier.size(35.dp),
+            modifier = Modifier.size(35.dp).testTag("back-button"),
             colors = iconButtonColors(
                 contentColor = MaterialTheme.colorScheme.onSecondary
             )
