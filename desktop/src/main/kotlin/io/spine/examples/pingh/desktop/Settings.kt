@@ -638,6 +638,7 @@ private fun IgnoredSourcesControl(
         SettingsIconButton(
             icon = painterResource(Res.drawable.add),
             onClick = onAdd,
+            modifier = Modifier.testTag("add-button"),
             tooltip = "Add new to ignored"
         )
         SettingsIconButton(
@@ -646,6 +647,7 @@ private fun IgnoredSourcesControl(
                 onRemove()
                 sourceSelected.value = null
             },
+            modifier = Modifier.testTag("remove-button"),
             tooltip = "Remove selected from ignored",
             enabled = sourceSelected.value != null,
         )
@@ -658,6 +660,7 @@ private fun IgnoredSourcesControl(
  * @param icon The painter to draw icon.
  * @param onClick Called when this icon button is clicked.
  * @param tooltip The text to be displayed in the tooltip.
+ * @param modifier The modifier to be applied to this icon button.
  * @param enabled Controls the enabled state of this icon button.
  * @param sizeFraction The proportion of the button's size that the icon occupies.
  */
@@ -666,6 +669,7 @@ private fun SettingsIconButton(
     icon: Painter,
     onClick: () -> Unit,
     tooltip: String,
+    modifier: Modifier = Modifier,
     enabled: Boolean = true,
     sizeFraction: Float = 0.85f
 ) {
@@ -677,7 +681,7 @@ private fun SettingsIconButton(
     IconButton(
         icon = icon,
         onClick = onClick,
-        modifier = Modifier.size(26.dp),
+        modifier = modifier.size(26.dp),
         enabled = enabled,
         shape = MaterialTheme.shapes.small,
         colors = filledIconButtonColors(
@@ -741,7 +745,8 @@ private fun IgnoredSourceItem(
             .background(containerColor)
             .semantics { role = RadioButton }
             .clickable { selected.value = if (!isSelected) source else null }
-            .padding(start = 5.dp),
+            .padding(start = 5.dp)
+            .testTag("ignored-sources"),
         verticalAlignment = CenterVertically
     ) {
         Text(
@@ -786,6 +791,7 @@ private fun AddIgnoredSourceDialog(state: SettingsState, onExit: () -> Unit) {
                     org = value
                 },
                 label = "Organization:",
+                modifier = Modifier.testTag("org-field"),
                 isError = !isOrgValid,
                 onEnterPressed = { if (isAddButtonEnabled) isAddButtonTriggered.value = true }
             )
@@ -798,6 +804,7 @@ private fun AddIgnoredSourceDialog(state: SettingsState, onExit: () -> Unit) {
                     repos = value
                 },
                 label = "or specified repositories (comma-separated):",
+                modifier = Modifier.testTag("repos-field"),
                 enabled = !allRepos.value,
                 isError = !isReposValid,
                 onEnterPressed = { if (isAddButtonEnabled) isAddButtonTriggered.value = true }
@@ -821,6 +828,7 @@ private fun AddIgnoredSourceDialog(state: SettingsState, onExit: () -> Unit) {
  * @param value The input text to be shown in the text field.
  * @param onValueChange Called when the input service updates the text.
  * @param label The text of the label displayed above the text field.
+ * @param modifier The modifier to be applied to this text field.
  * @param enabled Controls the enabled state of this text field.
  *   If `false`, the field value cannot be changed.
  * @param isError Whether the input's current value is in error.
@@ -832,6 +840,7 @@ private fun OutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
+    modifier: Modifier = Modifier,
     enabled: Boolean = true,
     isError: Boolean = false,
     onEnterPressed: () -> Unit = {}
@@ -866,7 +875,7 @@ private fun OutlinedTextField(
                 wasChanged = true
                 onValueChange(value)
             },
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .height(30.dp)
                 .onKeyEvent { event ->
@@ -951,7 +960,8 @@ private fun AllReposSwitch(
             modifier = Modifier
                 .scale(switchScale)
                 .width(30.dp)
-                .height(16.dp),
+                .height(16.dp)
+                .testTag("all-repos-switch"),
             colors = SwitchDefaults.colors(
                 checkedThumbColor = MaterialTheme.colorScheme.secondary,
                 checkedTrackColor = MaterialTheme.colorScheme.primary,
@@ -1015,12 +1025,12 @@ private fun DialogControl(
         SettingsButton(
             onClick = onCancel,
             text = "Cancel",
-            modifier = Modifier.fillMaxHeight()
+            modifier = Modifier.fillMaxHeight().testTag("cancel-button-in-dialog")
         )
         SettingsButton(
             onClick = onAdd,
             text = "Add to ignored",
-            modifier = Modifier.fillMaxHeight(),
+            modifier = Modifier.fillMaxHeight().testTag("add-button-in-dialog"),
             enabled = addEnabled,
             contentPadding = PaddingValues(horizontal = 7.dp, vertical = 0.dp),
             usePrimaryColors = true
