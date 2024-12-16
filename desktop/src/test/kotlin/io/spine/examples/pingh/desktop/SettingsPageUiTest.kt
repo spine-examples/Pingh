@@ -32,9 +32,14 @@ import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.onChildAt
+import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
 import io.spine.examples.pingh.desktop.given.DelayedFactAssertion.Companion.awaitFact
 import kotlin.test.Test
 import org.junit.jupiter.api.DisplayName
@@ -140,11 +145,138 @@ internal class SettingsPageUiTest : UiTest() {
         }
     }
 
+    @Test
+    internal fun `have ignored source in the list when it was added`() =
+        runPinghUiTest {
+            toSettingsPage()
+            awaitFact {
+                ignoredSources.onChildren().fetchSemanticsNodes().shouldBeEmpty()
+            }
+            addToIgnored("spine-examples", "Pingh")
+            awaitFact {
+                ignoredSources.onChildren().fetchSemanticsNodes() shouldHaveSize 1
+                ignoredSources.onChildAt(0).assertTextContains("spine-examples/Pingh")
+            }
+        }
+
+    @Test
+    internal fun `have several ignored sources in list when repos were added by one action`() =
+        runPinghUiTest {
+            val repos = listOf("Pingh", "HelloWorld", "CoolProject")
+            toSettingsPage()
+            awaitFact {
+                ignoredSources.onChildren().fetchSemanticsNodes().shouldBeEmpty()
+            }
+            addToIgnored("spine-examples", repos.joinToString(", "))
+            awaitFact {
+                ignoredSources.onChildren().fetchSemanticsNodes() shouldHaveSize repos.size
+                repos.sorted().forEachIndexed { index, repo ->
+                    ignoredSources.onChildAt(index).assertTextContains("spine-examples/$repo")
+                }
+            }
+        }
+
+    @Test
+    internal fun `have several ignored sources in list when repos were added by several actions`() =
+        runPinghUiTest {
+            val repos = listOf("Pingh", "HelloWorld", "CoolProject")
+            toSettingsPage()
+            awaitFact {
+                ignoredSources.onChildren().fetchSemanticsNodes().shouldBeEmpty()
+            }
+            repos.forEach { repo ->
+                addToIgnored("spine-examples", repo)
+            }
+            awaitFact {
+                ignoredSources.onChildren().fetchSemanticsNodes() shouldHaveSize repos.size
+                repos.sorted().forEachIndexed { index, repo ->
+                    ignoredSources.onChildAt(index).assertTextContains("spine-examples/$repo")
+                }
+            }
+        }
+
+    @Test
+    internal fun `have 'Remove' button disable if no ignore sources are selected`() =
+        runPinghUiTest {
+            toSettingsPage()
+            addToIgnored("spine-examples", "Pingh")
+            awaitFact {
+                ignoredSources.onChildren().fetchSemanticsNodes() shouldHaveSize 1
+                removeButton.assertIsNotEnabled()
+            }
+        }
+
+    @Test
+    internal fun `have 'Remove' button enables if any ignore source is selected`() =
+        runPinghUiTest {
+            toSettingsPage()
+            addToIgnored("spine-examples", "Pingh")
+            awaitFact {
+                ignoredSources.onChildren().fetchSemanticsNodes() shouldHaveSize 1
+            }
+            ignoredSources.onChildAt(0).performClick()
+            awaitFact { removeButton.assertIsEnabled() }
+        }
+
+    @Test
+    internal fun `have empty list when all ignored sources were removed`() =
+        runPinghUiTest {
+            toSettingsPage()
+            awaitFact {
+                ignoredSources.onChildren().fetchSemanticsNodes().shouldBeEmpty()
+            }
+            addToIgnored("spine-examples", "Pingh")
+            awaitFact {
+                ignoredSources.onChildren().fetchSemanticsNodes() shouldHaveSize 1
+            }
+            ignoredSources.onChildAt(0).performClick()
+            awaitFact { removeButton.assertIsEnabled() }
+            removeButton.performClick()
+            awaitFact {
+                ignoredSources.onChildren().fetchSemanticsNodes().shouldBeEmpty()
+            }
+        }
+
+    @Test
+    internal fun `have ignored repository removed if its organization is added to the list`() =
+        runPinghUiTest {
+            toSettingsPage()
+            addToIgnored("spine-examples", "Pingh")
+            awaitFact {
+                ignoredSources.onChildren().fetchSemanticsNodes() shouldHaveSize 1
+            }
+            addToIgnored("spine-examples")
+            awaitFact {
+                ignoredSources.onChildren().fetchSemanticsNodes() shouldHaveSize 1
+                ignoredSources.onChildAt(0).assertTextContains("spine-examples [All repos]")
+            }
+        }
+
     private fun ComposeUiTest.toSettingsPage() {
         logIn()
         awaitFact { menuButton.assertExists() }
         menuButton.performClick()
         awaitFact { settingsButton.assertExists() }
         settingsButton.performClick()
+        awaitFact { logoutButton.assertExists() }
+    }
+
+    /**
+     * Adds specified repositories to the list of ignored sources.
+     * If no repositories are specified, all repositories within the given organization
+     * are added to the ignored list.
+     */
+    private fun ComposeUiTest.addToIgnored(org: String, repos: String? = null) {
+        addButton.performClick()
+        awaitFact { orgField.assertExists() }
+        orgField.performTextInput(org)
+        if (repos == null) {
+            allReposSwitch.performClick()
+        } else {
+            reposField.performTextInput(repos)
+        }
+        awaitFact { addButtonInDialog.assertIsEnabled() }
+        addButtonInDialog.performClick()
+        awaitFact { addButtonInDialog.assertDoesNotExist() }
     }
 }

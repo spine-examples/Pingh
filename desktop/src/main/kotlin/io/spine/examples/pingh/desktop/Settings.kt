@@ -611,7 +611,8 @@ private fun IgnoredSourceItemBox(
     Column(
         modifier = Modifier.fillMaxWidth()
             .height(150.dp)
-            .verticalScroll(scrollState),
+            .verticalScroll(scrollState)
+            .testTag("ignored-sources"),
         content = content
     )
 }
@@ -745,8 +746,7 @@ private fun IgnoredSourceItem(
             .background(containerColor)
             .semantics { role = RadioButton }
             .clickable { selected.value = if (!isSelected) source else null }
-            .padding(start = 5.dp)
-            .testTag("ignored-sources"),
+            .padding(start = 5.dp),
         verticalAlignment = CenterVertically
     ) {
         Text(
