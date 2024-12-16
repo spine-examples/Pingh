@@ -50,6 +50,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
@@ -456,7 +457,7 @@ private fun SnoozeTimeSegmentedButtonRow(state: SettingsState) {
     val snoozeTimeOptions = SnoozeTime::class.supported
     val currentSnoozeTime by state.snoozeTime.collectAsState()
     Row(
-        modifier = Modifier.selectableGroup(),
+        modifier = Modifier.selectableGroup().testTag("snooze-time-option"),
         horizontalArrangement = Arrangement.spacedBy((-1).dp),
         verticalAlignment = CenterVertically
     ) {
@@ -510,11 +511,14 @@ private fun SegmentedButton(
         modifier = Modifier
             .width(70.dp)
             .height(20.dp)
-            .semantics { role = RadioButton }
             .background(containerColor, shape)
             .border(border, shape)
             .clip(shape)
-            .clickable { onClick() }
+            .selectable(
+                selected = selected,
+                role = RadioButton,
+                onClick = onClick
+            )
     ) {
         CompositionLocalProvider(LocalContentColor provides contentColor) {
             Box(

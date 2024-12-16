@@ -31,7 +31,10 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertIsSelectable
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onChildren
@@ -62,6 +65,9 @@ internal class SettingsPageUiTest : UiTest() {
 
     private val SemanticsNodeInteractionsProvider.dndOption
         get() = onNodeWithTag("dnd-option")
+
+    private val SemanticsNodeInteractionsProvider.snoozeTimeOption
+        get() = onNodeWithTag("snooze-time-option")
 
     private val SemanticsNodeInteractionsProvider.addButton
         get() = onNodeWithTag("add-button")
@@ -95,6 +101,24 @@ internal class SettingsPageUiTest : UiTest() {
             awaitFact { logoutButton.assertDoesNotExist() }
             toSettingsPage()
             awaitFact { dndOption.assertIsOn() }
+        }
+
+    @Test
+    internal fun `store settings separately for each user`() =
+        runPinghUiTest {
+            toSettingsPage()
+            snoozeTimeOption.onChildAt(0).performClick()
+            awaitFact { snoozeTimeOption.onChildAt(0).assertIsSelected() }
+            logoutButton.performClick()
+            awaitFact { logoutButton.assertDoesNotExist() }
+            toSettingsPage("User")
+            awaitFact { snoozeTimeOption.onChildAt(0).assertIsNotSelected() }
+            snoozeTimeOption.onChildAt(2).performClick()
+            awaitFact { snoozeTimeOption.onChildAt(2).assertIsSelected() }
+            logoutButton.performClick()
+            awaitFact { logoutButton.assertDoesNotExist() }
+            toSettingsPage()
+            awaitFact { snoozeTimeOption.onChildAt(0).assertIsSelected() }
         }
 
     @Nested internal inner class
@@ -252,8 +276,8 @@ internal class SettingsPageUiTest : UiTest() {
             }
         }
 
-    private fun ComposeUiTest.toSettingsPage() {
-        logIn()
+    private fun ComposeUiTest.toSettingsPage(user: String = username) {
+        logIn(user)
         awaitFact { menuButton.assertExists() }
         menuButton.performClick()
         awaitFact { settingsButton.assertExists() }
