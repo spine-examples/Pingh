@@ -29,12 +29,18 @@ package io.spine.examples.pingh.desktop
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import io.spine.examples.pingh.desktop.given.DelayedFactAssertion.Companion.awaitFact
 import kotlin.test.Test
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 
 @DisplayName("Settings page should")
 @OptIn(ExperimentalTestApi::class)
@@ -52,6 +58,27 @@ internal class SettingsPageUiTest : UiTest() {
     private val SemanticsNodeInteractionsProvider.dndOption
         get() = onNodeWithTag("dnd-option")
 
+    private val SemanticsNodeInteractionsProvider.addButton
+        get() = onNodeWithTag("add-button")
+
+    private val SemanticsNodeInteractionsProvider.removeButton
+        get() = onNodeWithTag("remove-button")
+
+    private val SemanticsNodeInteractionsProvider.ignoredSources
+        get() = onNodeWithTag("ignored-sources")
+
+    private val SemanticsNodeInteractionsProvider.orgField
+        get() = onNodeWithTag("org-field")
+
+    private val SemanticsNodeInteractionsProvider.reposField
+        get() = onNodeWithTag("repos-field")
+
+    private val SemanticsNodeInteractionsProvider.allReposSwitch
+        get() = onNodeWithTag("all-repos-switch")
+
+    private val SemanticsNodeInteractionsProvider.addButtonInDialog
+        get() = onNodeWithTag("add-button-in-dialog")
+
     @Test
     internal fun `have settings retained after the user logs in again`() =
         runPinghUiTest {
@@ -64,6 +91,54 @@ internal class SettingsPageUiTest : UiTest() {
             toSettingsPage()
             awaitFact { dndOption.assertIsOn() }
         }
+
+    @Nested internal inner class
+    `Have opened dialog for adding a new ignores source, and` {
+
+        @Test
+        internal fun `have 'Add' button disabled if organization name is entered incorrectly`() =
+            runPinghUiTest {
+                openDialog()
+                orgField.performTextInput("illegal@name")
+                awaitFact { addButtonInDialog.assertIsNotEnabled() }
+            }
+
+        @ParameterizedTest
+        @ValueSource(strings = ["illegal@name", "wrong|separator", "trailing, comma,"])
+        internal fun `have 'Add' button disable if repositories names are entered incorrectly`(
+            repos: String
+        ) = runPinghUiTest {
+            openDialog()
+            orgField.performTextInput("spine-examples")
+            reposField.performTextInput(repos)
+            awaitFact { addButtonInDialog.assertIsNotEnabled() }
+        }
+
+        @Test
+        internal fun `have 'Add' button enabled if org and repo names entered correctly`() =
+            runPinghUiTest {
+                openDialog()
+                orgField.performTextInput("spine-examples")
+                reposField.performTextInput("Pingh")
+                awaitFact { addButtonInDialog.assertIsEnabled() }
+            }
+
+        @Test
+        internal fun `have 'Add' button enabled if org name is correct and 'All Repos' selected`() =
+            runPinghUiTest {
+                openDialog()
+                orgField.performTextInput("spine-examples")
+                reposField.performTextInput("illegal@name")
+                allReposSwitch.performClick()
+                awaitFact { addButtonInDialog.assertIsEnabled() }
+            }
+
+        private fun ComposeUiTest.openDialog() {
+            toSettingsPage()
+            addButton.performClick()
+            awaitFact { orgField.assertExists() }
+        }
+    }
 
     private fun ComposeUiTest.toSettingsPage() {
         logIn()
