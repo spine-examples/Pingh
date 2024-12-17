@@ -39,6 +39,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextInput
+import io.kotest.matchers.collections.shouldBeSorted
+import io.kotest.matchers.collections.shouldBeSortedDescending
 import io.kotest.matchers.floats.shouldBeGreaterThan
 import io.kotest.matchers.floats.shouldBeLessThan
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
@@ -107,18 +109,7 @@ internal class MentionsPageUiTest : UiTest() {
             val snoozedMentionTag = mentionsCards[1].testTag
             clickSnoozeButton(snoozedMentionTag)
             onTitleWithParentTag(readMentionTag).performClick()
-            awaitFact {
-                val mentions = mentionCards()
-                val readMention = mentions.first { it.testTag == readMentionTag }
-                val snoozedMention = mentions.first { it.testTag == snoozedMentionTag }
-                snoozedMention.positionInRoot.y shouldBeLessThan readMention.positionInRoot.y
-                mentions.forEach { mention ->
-                    if (mention != readMention && mention != snoozedMention) {
-                        mention.positionInRoot.y shouldBeLessThan readMention.positionInRoot.y
-                        mention.positionInRoot.y shouldBeLessThan snoozedMention.positionInRoot.y
-                    }
-                }
-            }
+            awaitFact { assertOrder(readMentionTag, snoozedMentionTag, desc = true) }
         }
 
     @Test
@@ -128,15 +119,7 @@ internal class MentionsPageUiTest : UiTest() {
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
             val tag = mentionCards().random().testTag
             clickPinButton(tag)
-            awaitFact {
-                val mentions = mentionCards()
-                val pinnedMention = mentions.first { it.testTag == tag }
-                mentions.forEach { mention ->
-                    if (mention != pinnedMention) {
-                        mention.positionInRoot.y shouldBeGreaterThan pinnedMention.positionInRoot.y
-                    }
-                }
-            }
+            awaitFact { assertOrder(tag) }
         }
 
     @Test
@@ -177,23 +160,13 @@ internal class MentionsPageUiTest : UiTest() {
         runPinghUiTest {
             logIn()
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 3 }
-            var mentions = mentionCards().sortedByDescending { it.positionInRoot.y }
+            val mentions = mentionCards().sortedByDescending { it.positionInRoot.y }
             val pinnedTag = mentions[0].testTag
             val readPinnedTag = mentions[1].testTag
             clickPinButton(pinnedTag)
             clickPinButton(readPinnedTag)
             onTitleWithParentTag(readPinnedTag).performClick()
-            awaitFact {
-                mentions = mentionCards()
-                val pinned = mentions.first { it.testTag == pinnedTag }
-                val readPinned = mentions.first { it.testTag == readPinnedTag }
-                readPinned.positionInRoot.y shouldBeGreaterThan pinned.positionInRoot.y
-                mentions.forEach { mention ->
-                    if (mention != pinned && mention != readPinned) {
-                        mention.positionInRoot.y shouldBeGreaterThan readPinned.positionInRoot.y
-                    }
-                }
-            }
+            awaitFact { assertOrder(pinnedTag, readPinnedTag) }
         }
 
     @Test
@@ -204,6 +177,40 @@ internal class MentionsPageUiTest : UiTest() {
             awaitFact { markAllAsReadButton.assertExists() }
             markAllAsReadButton.performClick()
             awaitFact { unreadMentionCount() shouldBe 0 }
+        }
+
+    @Test
+    internal fun `have snoozed mentions also read when 'Mark all as read' button is clicked`() =
+        runPinghUiTest {
+            logIn()
+            awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
+            val tag = mentionCards().random().testTag
+            clickSnoozeButton(tag)
+            awaitFact {
+                onNodeWithTag(tag).performHover()
+                onSnoozeButtonWithParentTag(tag).assertDoesNotExist()
+            }
+            menuButton.performClick()
+            awaitFact { markAllAsReadButton.assertExists() }
+            markAllAsReadButton.performClick()
+            awaitFact { unreadMentionCount() shouldBe 0 }
+        }
+
+    @Test
+    internal fun `haven't mentions' pin status changed if 'Mark all as read' button is clicked`() =
+        runPinghUiTest {
+            logIn()
+            awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
+            val tag = mentionCards().random().testTag
+            clickPinButton(tag)
+            awaitFact { assertOrder(tag) }
+            menuButton.performClick()
+            awaitFact { markAllAsReadButton.assertExists() }
+            markAllAsReadButton.performClick()
+            awaitFact {
+                unreadMentionCount() shouldBe 0
+                assertOrder(tag)
+            }
         }
 
     @Test
@@ -233,6 +240,12 @@ internal class MentionsPageUiTest : UiTest() {
             }
         }
 
+    private fun SemanticsNodeInteractionsProvider.mentionCards(): List<SemanticsNode> =
+        onNodeWithTag("mention-cards")
+            .performScrollToIndex(0)
+            .onChildren()
+            .fetchSemanticsNodes()
+
     private fun ComposeUiTest.clickSnoozeButton(tag: String) {
         onNodeWithTag(tag).performHover()
         awaitFact { onSnoozeButtonWithParentTag(tag).assertExists() }
@@ -245,12 +258,6 @@ internal class MentionsPageUiTest : UiTest() {
         onPinButtonWithParentTag(tag).performClick()
     }
 
-    private fun SemanticsNodeInteractionsProvider.mentionCards(): List<SemanticsNode> =
-        onNodeWithTag("mention-cards")
-            .performScrollToIndex(0)
-            .onChildren()
-            .fetchSemanticsNodes()
-
     private fun SemanticsNodeInteractionsProvider.onTitleWithParentTag(tag: String):
             SemanticsNodeInteraction =
         onNode(hasTestTag("mention-title").and(hasAnyAncestor(hasTestTag(tag))))
@@ -262,4 +269,35 @@ internal class MentionsPageUiTest : UiTest() {
     private fun SemanticsNodeInteractionsProvider.onPinButtonWithParentTag(tag: String):
             SemanticsNodeInteraction =
         onNode(hasTestTag("pin-button").and(hasAnyAncestor(hasTestTag(tag))))
+
+    /**
+     * Checks the order of mentions on the page.
+     *
+     * If [desc] is `false`, the specified mentions with [tags] appear at the top of the list
+     * in the given order, from top to bottom.
+     *
+     * If `desc` is `true`, the specified mentions with `tags` appear at the bottom of the list
+     * in reverse order, from bottom to top.
+     */
+    private fun ComposeUiTest.assertOrder(vararg tags: String, desc: Boolean = false) {
+        val mentions = mentionCards()
+        val checkOrder = { node1: SemanticsNode, node2: SemanticsNode ->
+            if (desc) {
+                node1.positionInRoot.y shouldBeLessThan node2.positionInRoot.y
+            } else {
+                node1.positionInRoot.y shouldBeGreaterThan node2.positionInRoot.y
+            }
+        }
+        val ordered = tags.map { tag -> mentions.first { it.testTag == tag } }
+        ordered.map { it.positionInRoot.y }.run {
+            if (desc) shouldBeSortedDescending()
+            else shouldBeSorted()
+        }
+        val lastOrdered = ordered.last()
+        mentions.forEach { mention ->
+            if (!ordered.contains(mention)) {
+                checkOrder(mention, lastOrdered)
+            }
+        }
+    }
 }
