@@ -670,6 +670,7 @@ private fun IgnoredSourcesControl(
  * @param sizeFraction The proportion of the button's size that the icon occupies.
  */
 @Composable
+@Suppress("LongParameterList" /* For detailed customization. */)
 private fun SettingsIconButton(
     icon: Painter,
     onClick: () -> Unit,
