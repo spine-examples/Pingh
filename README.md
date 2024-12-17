@@ -1,7 +1,9 @@
 # Pingh
 
-A [GitHub App](https://github.com/apps/pingh-tracker-of-github-mentions) that notifies users 
-of new GitHub `@mention`s. It also runs as a system tray application on macOS.
+[![license][license-badge]][apache-license]
+
+A [GitHub App][github-app] that notifies users of new GitHub `@mention`s.
+It also runs as a system tray application on macOS.
 
 - Displays a list of recent `@mention`s for a logged-in GitHub user.
 - Marks mentions as “read” or snooze them for later.
@@ -60,8 +62,7 @@ refer to the [#EventStorming documentation](./EventStorming.md).
 The application tracks user's mentions in all public GitHub repositories.
 
 The mentions in the private repositories are tracked if the user has access to the repository and 
-the [GitHub app](https://github.com/apps/pingh-tracker-of-github-mentions) is installed 
-on the repository or the organization that owns it.
+the [GitHub app][github-app] is installed on the repository or the organization that owns it.
 
 ## Authentication
 
@@ -168,21 +169,20 @@ This argument must specify the Google Cloud project ID.
 
 ### Compute Engine
 
-The [Compute Engine](https://cloud.google.com/products/compute) offers the capability to create 
-virtual machines. The Pingh server is deployed and running on a Compute Engine instance.
+The [Compute Engine][gcloud-compute-engine] offers the capability to create virtual machines.
+The Pingh server is deployed and running on a Compute Engine instance.
 
 Hosting the application in Compute Engine also enables access 
 to other Google Cloud services.
 
-To allow external requests, 
-a [firewall rule](https://cloud.google.com/firewall/docs/firewalls) must be configured, 
+To allow external requests, a [firewall rule][gcloud-firewall] must be configured, 
 and ports `50051` (for the Pingh RPC server) and `8080` (for the HTTP server handling requests 
 from the Google Cloud [Scheduler](#scheduler)) must be open.
 
 ### Datastore
 
-The Google Cloud [Datastore](https://cloud.google.com/products/datastore?hl) is used 
-for data storage as a highly scalable NoSQL database.
+The Google Cloud [Datastore][gcloud-datastore] is used for data storage
+as a highly scalable NoSQL database.
 
 To allow a server running on a Compute Engine instance to read from and write to Datastore, 
 the server's service account must be granted the `Cloud Datastore User` role, 
@@ -191,13 +191,12 @@ and the `datastore` OAuth scope must be enabled.
 Datastore requires initial configuration, including setting up indexes 
 for Spine's internal record types. The configuration file can be found 
 in the server's resources directory at `datastore/config/index.yaml`.
-For more information, see the Google Cloud Platform 
-[documentation](https://cloud.google.com/datastore/docs/tools/indexconfig).
+For more information, see the Google Cloud Platform [documentation][gcloud-datastore-indexconfig].
 
 ### Scheduler
 
-The Google Cloud [Scheduler](https://cloud.google.com/scheduler/docs/overview) allows for
-configuring multiple scheduled tasks that deliver messages to specific targets.
+The Google Cloud [Scheduler][gcloud-scheduler] allows for configuring multiple scheduled tasks
+that deliver messages to specific targets.
 
 For the Pingh application, a `cron` task is set up to send a POST request with an empty body 
 to the Pingh server every minute. This request includes an authentication token to ensure 
@@ -205,8 +204,8 @@ it will be accepted by the Pingh server.
 
 ### Secret Manager
 
-The [Secret Manager](https://cloud.google.com/security/products/secret-manager) service 
-is used to securely store and manage application secrets.
+The [Secret Manager][gcloud-secret-manager] service is used to securely store
+and manage application secrets.
 
 To allow a server running on a Compute Engine instance to access data from Secret Manager,
 the server's service account must be granted the `Secret Manager Secret Accessor` role,
@@ -235,7 +234,28 @@ This project includes several types of testing.
 A Docker environment is required for end-to-end and UI testing, 
 as the Datastore emulator is automatically started in a Docker container.
 
+## License
+
+This project is licensed under the [Apache License 2.0][apache-license].
+
+## Third-party resources
+
+The project includes icons from [Google Material Symbols and Icons][google-icons],
+available under the Apache License 2.0.
+
 ## Feedback
 
 We accept the questions and suggestions via the corresponding 
-[GitHub Discussions section](https://github.com/orgs/SpineEventEngine/discussions).
+[GitHub Discussions section][feedback].
+
+[license-badge]: https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat
+[apache-license]: https://www.apache.org/licenses/LICENSE-2.0
+[github-app]: https://github.com/apps/pingh-tracker-of-github-mentions
+[gcloud-compute-engine]: https://cloud.google.com/products/compute
+[gcloud-firewall]: https://cloud.google.com/firewall/docs/firewalls
+[gcloud-datastore]: https://cloud.google.com/products/datastore
+[gcloud-datastore-indexconfig]: https://cloud.google.com/datastore/docs/tools/indexconfig
+[gcloud-scheduler]: https://cloud.google.com/scheduler/docs/overview
+[gcloud-secret-manager]: https://cloud.google.com/security/products/secret-manager
+[google-icons]: https://fonts.google.com/icons
+[feedback]: https://github.com/orgs/SpineEventEngine/discussions
