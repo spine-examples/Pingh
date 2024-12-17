@@ -444,7 +444,8 @@ private fun SnoozeButton(
             MentionIconButton(
                 icon = painterResource(Res.drawable.snooze),
                 onClick = { flow.snooze(mention.id) },
-                modifier = Modifier.testTag("snooze-button")
+                modifier = Modifier.testTag("snooze-button"),
+                tooltip = "Snooze the mention"
             )
 
         mention.status == MentionStatus.SNOOZED ->
@@ -464,27 +465,32 @@ private fun SnoozeButton(
  * @param flow The flow for managing the lifecycle of mentions.
  * @param mention The mention whose information is displayed.
  * @param isParentHovered Whether the parent mention card is being hovered.
- * @param sizeFraction The proportion of the button's size that the icon occupies.
  */
 @Composable
 private fun PinButton(
     flow: MentionsFlow,
     mention: MentionView,
-    isParentHovered: Boolean,
-    sizeFraction: Float = 0.6f
+    isParentHovered: Boolean
 ) {
-    val (iconRes, onClick) = when {
-        isParentHovered && !mention.pinned -> Res.drawable.pin to { flow.pin(mention.id) }
-        mention.pinned -> Res.drawable.pinned to { flow.unpin(mention.id) }
-        else -> null to null
-    }
-    if (iconRes != null && onClick != null) {
-        MentionIconButton(
-            icon = painterResource(iconRes),
-            onClick = onClick,
-            modifier = Modifier.testTag("pin-button"),
-            sizeFraction = sizeFraction
-        )
+    val tag = "pin-button"
+    when {
+        isParentHovered && !mention.pinned -> {
+            MentionIconButton(
+                icon = painterResource(Res.drawable.pin),
+                onClick = { flow.pin(mention.id) },
+                modifier = Modifier.testTag(tag),
+                tooltip = "Pin the mention"
+            )
+        }
+
+        mention.pinned -> {
+            MentionIconButton(
+                icon = painterResource(Res.drawable.pinned),
+                onClick = { flow.unpin(mention.id) },
+                modifier = Modifier.testTag(tag),
+                tooltip = "Unpin the mention"
+            )
+        }
     }
 }
 
@@ -494,14 +500,15 @@ private fun PinButton(
  * @param icon The painter to draw icon.
  * @param onClick Called when this icon button is clicked.
  * @param modifier The modifier to be applied to this icon button.
- * @param sizeFraction The proportion of the button's size that the icon occupies.
+ * @param tooltip The text to be displayed in the tooltip.
+ *   If `null`, no tooltip is shown.
  */
 @Composable
 private fun MentionIconButton(
     icon: Painter,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    sizeFraction: Float = 0.85f
+    tooltip: String? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -521,6 +528,6 @@ private fun MentionIconButton(
         colors = iconButtonColors(
             contentColor = color
         ),
-        sizeFraction = sizeFraction
+        tooltip = tooltip
     )
 }
