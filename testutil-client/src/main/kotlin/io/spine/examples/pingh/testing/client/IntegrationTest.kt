@@ -30,6 +30,8 @@ import io.spine.environment.Tests
 import io.spine.examples.pingh.client.VerifyLogin
 import io.spine.examples.pingh.client.PinghApplication
 import io.spine.examples.pingh.client.clearAppDir
+import io.spine.examples.pingh.github.Username
+import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.newMentionsContext
 import io.spine.examples.pingh.server.datastore.DatastoreStorageFactory
 import io.spine.examples.pingh.sessions.newSessionsContext
@@ -130,8 +132,9 @@ public abstract class IntegrationTest {
      * which will allow to use login to the application after calling
      * the [VerifyLogin.confirm] method.
      */
-    protected fun enterUserCode() {
+    protected fun enterUserCode(user: String = "MykytaPimonovTD") {
         auth.enterUserCode()
+        users.username = Username::class.of(user)
     }
 
     /**

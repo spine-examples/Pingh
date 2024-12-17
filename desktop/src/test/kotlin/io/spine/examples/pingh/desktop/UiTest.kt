@@ -97,9 +97,9 @@ internal abstract class UiTest : IntegrationTest() {
      * navigates to the Mentions page.
      */
     @OptIn(ExperimentalTestApi::class)
-    protected fun ComposeUiTest.logIn() {
-        enterUserCode()
-        onNodeWithTag("username-input").performTextInput(username)
+    protected fun ComposeUiTest.logIn(user: String = username) {
+        enterUserCode(user)
+        onNodeWithTag("username-input").performTextInput(user)
         awaitFact { onNodeWithTag("login-button").assertIsEnabled() }
         onNodeWithTag("login-button").performClick()
     }

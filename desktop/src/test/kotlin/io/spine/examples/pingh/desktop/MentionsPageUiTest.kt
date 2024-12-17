@@ -27,15 +27,20 @@
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.ui.semantics.SemanticsNode
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performTextInput
+import io.kotest.matchers.collections.shouldBeSorted
+import io.kotest.matchers.collections.shouldBeSortedDescending
 import io.kotest.matchers.floats.shouldBeGreaterThan
 import io.kotest.matchers.floats.shouldBeLessThan
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
@@ -74,9 +79,7 @@ internal class MentionsPageUiTest : UiTest() {
             logIn()
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
             val tag = mentionCards().random().testTag
-            onNodeWithTag(tag).performHover()
-            awaitFact { onSnoozeButtonWithParentTag(tag).assertExists() }
-            onSnoozeButtonWithParentTag(tag).performClick()
+            clickSnoozeButton(tag)
             awaitFact {
                 onNodeWithTag(tag).performHover()
                 onSnoozeButtonWithParentTag(tag).assertDoesNotExist()
@@ -104,22 +107,9 @@ internal class MentionsPageUiTest : UiTest() {
             val mentionsCards = mentionCards().sortedBy { it.positionInRoot.y }
             val readMentionTag = mentionsCards[0].testTag
             val snoozedMentionTag = mentionsCards[1].testTag
-            onNodeWithTag(snoozedMentionTag).performHover()
-            awaitFact { onSnoozeButtonWithParentTag(snoozedMentionTag).assertExists() }
-            onSnoozeButtonWithParentTag(snoozedMentionTag).performClick()
+            clickSnoozeButton(snoozedMentionTag)
             onTitleWithParentTag(readMentionTag).performClick()
-            awaitFact {
-                val mentions = mentionCards()
-                val readMention = mentions.first { it.testTag == readMentionTag }
-                val snoozedMention = mentions.first { it.testTag == snoozedMentionTag }
-                snoozedMention.positionInRoot.y shouldBeLessThan readMention.positionInRoot.y
-                mentions.forEach { mention ->
-                    if (mention != readMention && mention != snoozedMention) {
-                        mention.positionInRoot.y shouldBeLessThan readMention.positionInRoot.y
-                        mention.positionInRoot.y shouldBeLessThan snoozedMention.positionInRoot.y
-                    }
-                }
-            }
+            awaitFact { assertOrder(readMentionTag, snoozedMentionTag, desc = true) }
         }
 
     @Test
@@ -127,19 +117,9 @@ internal class MentionsPageUiTest : UiTest() {
         runPinghUiTest {
             logIn()
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
-            val pinnedTag = mentionCards().random().testTag
-            onNodeWithTag(pinnedTag).performHover()
-            awaitFact { onPinButtonWithParentTag(pinnedTag).assertExists() }
-            onPinButtonWithParentTag(pinnedTag).performClick()
-            awaitFact {
-                val mentions = mentionCards()
-                val pinnedMention = mentions.first { it.testTag == pinnedTag }
-                mentions.forEach { mention ->
-                    if (mention != pinnedMention) {
-                        mention.positionInRoot.y shouldBeGreaterThan pinnedMention.positionInRoot.y
-                    }
-                }
-            }
+            val tag = mentionCards().random().testTag
+            clickPinButton(tag)
+            awaitFact { assertOrder(tag) }
         }
 
     @Test
@@ -150,13 +130,43 @@ internal class MentionsPageUiTest : UiTest() {
             val mentions = mentionCards().shuffled()
             val pinnedTag = mentions[0].testTag
             val anotherTag = mentions[1].testTag
-            onNodeWithTag(anotherTag).performHover()
-            awaitFact { onPinButtonWithParentTag(pinnedTag).assertDoesNotExist() }
-            onNodeWithTag(pinnedTag).performHover()
-            awaitFact { onPinButtonWithParentTag(pinnedTag).assertExists() }
-            onPinButtonWithParentTag(pinnedTag).performClick()
+            clickPinButton(pinnedTag)
             onNodeWithTag(anotherTag).performHover()
             awaitFact { onPinButtonWithParentTag(pinnedTag).assertExists() }
+        }
+
+    @Test
+    internal fun `have unpinned mentions returned to their original position`() =
+        runPinghUiTest {
+            logIn()
+            awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 2 }
+            val (tag, initPosition) = mentionCards()
+                .sortedByDescending { it.positionInRoot.y }[0]
+                .run { testTag to positionInRoot }
+            clickPinButton(tag)
+            awaitFact {
+                onNodeWithTag(tag).fetchSemanticsNode()
+                    .positionInRoot.y shouldBeLessThan initPosition.y
+            }
+            clickPinButton(tag)
+            awaitFact {
+                onNodeWithTag(tag).fetchSemanticsNode()
+                    .positionInRoot.y shouldBe initPosition.y
+            }
+        }
+
+    @Test
+    internal fun `have pinned mentions sorted separately from unpinned ones`() =
+        runPinghUiTest {
+            logIn()
+            awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 3 }
+            val mentions = mentionCards().sortedByDescending { it.positionInRoot.y }
+            val pinnedTag = mentions[0].testTag
+            val readPinnedTag = mentions[1].testTag
+            clickPinButton(pinnedTag)
+            clickPinButton(readPinnedTag)
+            onTitleWithParentTag(readPinnedTag).performClick()
+            awaitFact { assertOrder(pinnedTag, readPinnedTag) }
         }
 
     @Test
@@ -169,11 +179,84 @@ internal class MentionsPageUiTest : UiTest() {
             awaitFact { unreadMentionCount() shouldBe 0 }
         }
 
+    @Test
+    internal fun `have snoozed mentions also read when 'Mark all as read' button is clicked`() =
+        runPinghUiTest {
+            logIn()
+            awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
+            val tag = mentionCards().random().testTag
+            clickSnoozeButton(tag)
+            awaitFact {
+                onNodeWithTag(tag).performHover()
+                onSnoozeButtonWithParentTag(tag).assertDoesNotExist()
+            }
+            menuButton.performClick()
+            awaitFact { markAllAsReadButton.assertExists() }
+            markAllAsReadButton.performClick()
+            awaitFact { unreadMentionCount() shouldBe 0 }
+        }
+
+    @Test
+    internal fun `retain the mention pin status when 'Mark All as Read' button is clicked`() =
+        runPinghUiTest {
+            logIn()
+            awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
+            val tag = mentionCards().random().testTag
+            clickPinButton(tag)
+            awaitFact { assertOrder(tag) }
+            menuButton.performClick()
+            awaitFact { markAllAsReadButton.assertExists() }
+            markAllAsReadButton.performClick()
+            awaitFact {
+                unreadMentionCount() shouldBe 0
+                assertOrder(tag)
+            }
+        }
+
+    @Test
+    internal fun `have no mentions from ignored sources displayed`() =
+        runPinghUiTest {
+            logIn()
+            awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 4 }
+            val tags = mentionCards().map { it.testTag }
+            awaitFact { menuButton.assertExists() }
+            menuButton.performClick()
+            awaitFact { onNodeWithTag("settings-button").assertExists() }
+            onNodeWithTag("settings-button").performClick()
+            awaitFact { onNodeWithTag("logout-button").assertExists() }
+            onNodeWithTag("add-button").performClick()
+            awaitFact { onNodeWithTag("org-field").assertExists() }
+            onNodeWithTag("org-field").performTextInput("spine-examples")
+            onNodeWithTag("repos-field").performTextInput("Pingh")
+            awaitFact { onNodeWithTag("add-button-in-dialog").assertIsEnabled() }
+            onNodeWithTag("add-button-in-dialog").performClick()
+            awaitFact { onNodeWithTag("add-button-in-dialog").assertDoesNotExist() }
+            onNodeWithTag("back-button").performClick()
+            awaitFact {
+                menuButton.assertExists()
+                tags.forEach { tag ->
+                    onNodeWithTag(tag).assertDoesNotExist()
+                }
+            }
+        }
+
     private fun SemanticsNodeInteractionsProvider.mentionCards(): List<SemanticsNode> =
         onNodeWithTag("mention-cards")
             .performScrollToIndex(0)
             .onChildren()
             .fetchSemanticsNodes()
+
+    private fun ComposeUiTest.clickSnoozeButton(tag: String) {
+        onNodeWithTag(tag).performHover()
+        awaitFact { onSnoozeButtonWithParentTag(tag).assertExists() }
+        onSnoozeButtonWithParentTag(tag).performClick()
+    }
+
+    private fun ComposeUiTest.clickPinButton(tag: String) {
+        onNodeWithTag(tag).performHover()
+        awaitFact { onPinButtonWithParentTag(tag).assertExists() }
+        onPinButtonWithParentTag(tag).performClick()
+    }
 
     private fun SemanticsNodeInteractionsProvider.onTitleWithParentTag(tag: String):
             SemanticsNodeInteraction =
@@ -186,4 +269,35 @@ internal class MentionsPageUiTest : UiTest() {
     private fun SemanticsNodeInteractionsProvider.onPinButtonWithParentTag(tag: String):
             SemanticsNodeInteraction =
         onNode(hasTestTag("pin-button").and(hasAnyAncestor(hasTestTag(tag))))
+
+    /**
+     * Checks the order of mentions on the page.
+     *
+     * If [desc] is `false`, the specified mentions with [tags] must be placed
+     * at the top of the list in the given order, from top to bottom.
+     *
+     * If `desc` is `true`, the specified mentions with `tags` must be placed
+     * at the bottom of the list in reverse order, from bottom to top.
+     */
+    private fun ComposeUiTest.assertOrder(vararg tags: String, desc: Boolean = false) {
+        val mentions = mentionCards()
+        val checkOrder = { node1: SemanticsNode, node2: SemanticsNode ->
+            if (desc) {
+                node1.positionInRoot.y shouldBeLessThan node2.positionInRoot.y
+            } else {
+                node1.positionInRoot.y shouldBeGreaterThan node2.positionInRoot.y
+            }
+        }
+        val ordered = tags.map { tag -> mentions.first { it.testTag == tag } }
+        ordered.map { it.positionInRoot.y }.run {
+            if (desc) shouldBeSortedDescending()
+            else shouldBeSorted()
+        }
+        val lastOrdered = ordered.last()
+        mentions.forEach { mention ->
+            if (!ordered.contains(mention)) {
+                checkOrder(mention, lastOrdered)
+            }
+        }
+    }
 }
