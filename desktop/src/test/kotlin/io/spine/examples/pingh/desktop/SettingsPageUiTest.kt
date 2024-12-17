@@ -33,7 +33,6 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsOn
-import androidx.compose.ui.test.assertIsSelectable
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.onChildAt
@@ -111,7 +110,7 @@ internal class SettingsPageUiTest : UiTest() {
             awaitFact { snoozeTimeOption.onChildAt(0).assertIsSelected() }
             logoutButton.performClick()
             awaitFact { logoutButton.assertDoesNotExist() }
-            toSettingsPage("User")
+            toSettingsPage("AnotherUser")
             awaitFact { snoozeTimeOption.onChildAt(0).assertIsNotSelected() }
             snoozeTimeOption.onChildAt(2).performClick()
             awaitFact { snoozeTimeOption.onChildAt(2).assertIsSelected() }
@@ -134,7 +133,7 @@ internal class SettingsPageUiTest : UiTest() {
 
         @ParameterizedTest
         @ValueSource(strings = ["illegal@name", "wrong|separator", "trailing, comma,"])
-        internal fun `have 'Add' button disable if repositories names are entered incorrectly`(
+        internal fun `have 'Add' button disabled if repositories names are entered incorrectly`(
             repos: String
         ) = runPinghUiTest {
             openDialog()

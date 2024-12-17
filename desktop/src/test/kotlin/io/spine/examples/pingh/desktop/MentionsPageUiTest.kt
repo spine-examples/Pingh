@@ -197,7 +197,7 @@ internal class MentionsPageUiTest : UiTest() {
         }
 
     @Test
-    internal fun `haven't mentions' pin status changed if 'Mark all as read' button is clicked`() =
+    internal fun `retain the mention pin status when 'Mark All as Read' button is clicked`() =
         runPinghUiTest {
             logIn()
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 1 }
@@ -214,7 +214,7 @@ internal class MentionsPageUiTest : UiTest() {
         }
 
     @Test
-    internal fun `have not mentions from ignored sources displayed`() =
+    internal fun `have no mentions from ignored sources displayed`() =
         runPinghUiTest {
             logIn()
             awaitFact { mentionCards().size shouldBeGreaterThanOrEqual 4 }
@@ -273,11 +273,11 @@ internal class MentionsPageUiTest : UiTest() {
     /**
      * Checks the order of mentions on the page.
      *
-     * If [desc] is `false`, the specified mentions with [tags] appear at the top of the list
-     * in the given order, from top to bottom.
+     * If [desc] is `false`, the specified mentions with [tags] must be placed
+     * at the top of the list in the given order, from top to bottom.
      *
-     * If `desc` is `true`, the specified mentions with `tags` appear at the bottom of the list
-     * in reverse order, from bottom to top.
+     * If `desc` is `true`, the specified mentions with `tags` must be placed
+     * at the bottom of the list in reverse order, from bottom to top.
      */
     private fun ComposeUiTest.assertOrder(vararg tags: String, desc: Boolean = false) {
         val mentions = mentionCards()
