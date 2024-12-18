@@ -263,11 +263,11 @@ message TeamFragment {
 }
 
 // A response from the GitHub REST API to a request for teams the user belongs to.
-message TeamResponse {
+message TeamsResponse {
 
     // GitHub teams.
     //
     // If the user is not a member of an team, the list is empty.
     //
-    repeated TeamResponse item = 1 [(validate) = true];
+    repeated TeamFragment item = 1 [(validate) = true];
 }
