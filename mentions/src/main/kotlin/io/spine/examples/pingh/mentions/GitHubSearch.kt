@@ -29,6 +29,7 @@ package io.spine.examples.pingh.mentions
 import com.google.protobuf.Timestamp
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.Team
 import io.spine.examples.pingh.github.Username
 import kotlin.jvm.Throws
 
@@ -53,6 +54,23 @@ public interface GitHubSearch {
     @Throws(CannotObtainMentionsException::class)
     public fun searchMentions(
         username: Username,
+        token: PersonalAccessToken,
+        updatedAfter: Timestamp = Timestamp.getDefaultInstance(),
+        limit: Int? = null
+    ): Set<Mention>
+
+    /**
+     * Searches for `Mention`s of the team on GitHub.
+     *
+     * @param team The team whose mention is being searched for.
+     * @param token The `PersonalAccessToken` to access team mentions.
+     * @param updatedAfter The time after which GitHub items containing the searched mentions
+     *   should have been updated.
+     * @param limit The maximum number of recent mentions to return.
+     */
+    @Throws(CannotObtainMentionsException::class)
+    public fun searchMentions(
+        team: Team,
         token: PersonalAccessToken,
         updatedAfter: Timestamp = Timestamp.getDefaultInstance(),
         limit: Int? = null
