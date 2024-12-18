@@ -274,6 +274,20 @@ public fun KClass<Organization>.loggedAs(login: String): Organization =
         .vBuild()
 
 /**
+ * The full name of the team, composed of the organization's login and the team's slug,
+ * separated by a slash (`'/'`).
+ */
+public val Team.fullName: String
+    get() = "${org.login.value}/$slug"
+
+/**
+ * The GitHub tag of the team, composed of the `'@'` character followed
+ * by the [full name][fullName] of the team.
+ */
+public val Team.tag: String
+    get() = "@$fullName"
+
+/**
  * Creates a new `GitHubApp` with the passed GitHub App client ID and secret.
  */
 public fun KClass<GitHubApp>.of(id: ClientId, secret: ClientSecret): GitHubApp =
