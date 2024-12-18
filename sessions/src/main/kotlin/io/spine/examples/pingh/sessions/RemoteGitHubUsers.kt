@@ -33,9 +33,11 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
 import io.spine.examples.pingh.github.Organization
 import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.Team
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.from
 import io.spine.examples.pingh.github.rest.OrganizationsResponse
+import io.spine.examples.pingh.github.rest.TeamsResponse
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -88,6 +90,31 @@ public class RemoteGitHubUsers(engine: HttpClientEngine) : GitHubUsers {
             OrganizationsResponse::class.parseJson("{ item: $json }")
                 .itemList
                 .map {fragment -> Organization::class.from(fragment) }
+                .toSet()
+        }
+
+    /**
+     * Returns the teams of which the user owning the provided access token is a member.
+     *
+     * Obtains only teams from organizations where
+     * the [Pingh GitHub App](https://github.com/apps/pingh-tracker-of-github-mentions)
+     * is installed.
+     *
+     * @param token The access token used to access teams where the user is a member.
+     * @see <a href="https://shorturl.at/Dnjpq">List teams for the authenticated user</a>
+     */
+    override fun teamMemberships(token: PersonalAccessToken): Set<Team> =
+        runBlocking {
+            val response = client.get("https://api.github.com/user/teams") {
+                configureHeaders(token)
+            }
+            val json = response.body<String>()
+            // The received JSON contains only an array, but Protobuf JSON Parser
+            // cannot process it. So the array is converted to JSON, where the result
+            // is just the value of the `item` field.
+            TeamsResponse::class.parseJson("{ item: $json }")
+                .itemList
+                .map { fragment -> Team::class.from(fragment) }
                 .toSet()
         }
 }
