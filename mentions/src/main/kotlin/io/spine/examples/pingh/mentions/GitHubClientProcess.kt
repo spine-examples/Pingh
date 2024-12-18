@@ -44,6 +44,7 @@ import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
 import io.spine.examples.pingh.mentions.event.RequestMentionsFromGitHubFailed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.MentionsUpdateIsAlreadyInProgress
+import io.spine.examples.pingh.sessions.GitHubUsers
 import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.protobuf.Durations2.minutes
@@ -84,6 +85,14 @@ internal class GitHubClientProcess :
      * right after the instance creation.
      */
     private lateinit var search: GitHubSearch
+
+    /**
+     * Service for obtaining user's information via GitHub.
+     *
+     * It is expected this field is set by calling [inject]
+     * right after the instance creation.
+     */
+    private lateinit var users: GitHubUsers
 
     /**
      * Updates the user's [PersonalAccessToken] each time the user logs in.
@@ -199,13 +208,18 @@ internal class GitHubClientProcess :
     }
 
     /**
-     * Supplies this instance of the process with a service allowing to access GitHub.
+     * Supplies this instance with a service for allows to access GitHub Search API,
+     * as well as a service for retrieving user information from GitHub.
      *
      * It is expected this method is called right after the creation of the process instance.
      * Otherwise, the process will not be able to function properly.
+     *
+     * @param search The service that allows to access GitHub Search API.
+     * @param users The service that allows to retrieve user information using the GitHub API.
      */
-    internal fun inject(search: GitHubSearch) {
+    internal fun inject(search: GitHubSearch, users: GitHubUsers) {
         this.search = search
+        this.users = users
     }
 
     private companion object {

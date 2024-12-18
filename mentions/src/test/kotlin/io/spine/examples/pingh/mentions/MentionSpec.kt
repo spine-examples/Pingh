@@ -48,6 +48,7 @@ import io.spine.examples.pingh.mentions.given.generate
 import io.spine.examples.pingh.mentions.given.onlyWithId
 import io.spine.examples.pingh.mentions.rejection.Rejections.MentionIsAlreadyRead
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
+import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubUsersResponses
 import io.spine.protobuf.Durations2.seconds
 import io.spine.server.BoundedContextBuilder
 import io.spine.server.integration.ThirdPartyContext
@@ -63,8 +64,10 @@ internal class MentionSpec : ContextAwareTest() {
     private lateinit var id: MentionId
     private lateinit var userMentioned: UserMentioned
 
-    override fun contextBuilder(): BoundedContextBuilder =
-        newMentionsContext(PredefinedGitHubSearchResponses())
+    override fun contextBuilder(): BoundedContextBuilder = newMentionsContext(
+        PredefinedGitHubSearchResponses(),
+        PredefinedGitHubUsersResponses()
+    )
 
     @BeforeEach
     internal fun emitUserMentionedEvent() {

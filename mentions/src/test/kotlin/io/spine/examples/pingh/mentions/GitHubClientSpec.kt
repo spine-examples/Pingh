@@ -74,17 +74,19 @@ import org.junit.jupiter.api.Test
 internal class GitHubClientSpec : ContextAwareTest() {
 
     private val search = PredefinedGitHubSearchResponses()
+    private val users = PredefinedGitHubUsersResponses()
     private lateinit var sessionContext: BlackBoxContext
     private lateinit var gitHubClientId: GitHubClientId
     private lateinit var sessionId: SessionId
     private lateinit var token: PersonalAccessToken
 
     override fun contextBuilder(): BoundedContextBuilder =
-        newMentionsContext(search)
+        newMentionsContext(search, users)
 
     @BeforeEach
     internal fun prepareSessionsContextAndEmitEvent() {
         search.reset()
+        users.reset()
         sessionContext = BlackBoxContext
             .from(
                 newSessionsContext(
