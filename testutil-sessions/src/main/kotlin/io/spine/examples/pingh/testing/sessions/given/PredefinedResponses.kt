@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.testing.sessions.given
 
+import com.google.common.annotations.VisibleForTesting
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.OrganizationsResponse
 import io.spine.examples.pingh.github.rest.TeamsResponse
@@ -36,6 +37,7 @@ import io.spine.examples.pingh.sessions.parseJson
  * Returns the response provided by [PredefinedGitHubAuthenticationResponses]
  * upon successful execution of the request for generate verification codes.
  */
+@VisibleForTesting
 public fun loadVerificationCodes(): VerificationCodesResponse {
     val jsonFile = PredefinedGitHubAuthenticationResponses::class.java
         .getResource("/github-responses/authentication-codes-response.json")
@@ -48,6 +50,7 @@ public fun loadVerificationCodes(): VerificationCodesResponse {
  * Returns the response provided by [PredefinedGitHubAuthenticationResponses]
  * upon successful execution of the request for generate access token.
  */
+@VisibleForTesting
 public fun loadAccessToken(): AccessTokenResponse {
     val jsonFile = PredefinedGitHubAuthenticationResponses::class.java
         .getResource("/github-responses/access-token-response.json")
@@ -60,6 +63,7 @@ public fun loadAccessToken(): AccessTokenResponse {
  * Returns the response provided by [PredefinedGitHubAuthenticationResponses]
  * upon successful execution of the request for refresh access token.
  */
+@VisibleForTesting
 public fun loadRefreshedAccessToken(): AccessTokenResponse {
     val jsonFile = PredefinedGitHubAuthenticationResponses::class.java
         .getResource("/github-responses/refreshed-access-token-response.json")
@@ -72,6 +76,7 @@ public fun loadRefreshedAccessToken(): AccessTokenResponse {
  * Returns the response provided by [PredefinedGitHubUsersResponses]
  * upon successful execution of the request for organizations in which the user is a member.
  */
+@VisibleForTesting
 public fun loadOrganizations(): OrganizationsResponse {
     val jsonFile = PredefinedGitHubUsersResponses::class.java
         .getResource("/github-responses/organizations-response.json")
@@ -84,6 +89,7 @@ public fun loadOrganizations(): OrganizationsResponse {
  * Returns the response provided by [PredefinedGitHubUsersResponses]
  * upon successful execution of the request for teams in which the user is a member.
  */
+@VisibleForTesting
 public fun loadTeams(): TeamsResponse {
     val jsonFile = PredefinedGitHubUsersResponses::class.java
         .getResource("/github-responses/teams-response.json")

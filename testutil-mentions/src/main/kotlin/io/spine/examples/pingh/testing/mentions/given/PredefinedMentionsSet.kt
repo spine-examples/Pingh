@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.testing.mentions.given
 
+import com.google.common.annotations.VisibleForTesting
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.from
 import io.spine.examples.pingh.github.rest.CommentsResponse
@@ -36,6 +37,7 @@ import io.spine.examples.pingh.mentions.parseJson
  * Returns the set of mentions that [PredefinedGitHubSearchResponses] returns
  * on successful execution.
  */
+@VisibleForTesting
 public fun predefinedMentionsSet(): Set<Mention> =
     loadMentionsInPr() + loadMentionsInCommentsUnderPr()
 
