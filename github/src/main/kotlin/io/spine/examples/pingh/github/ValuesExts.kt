@@ -53,11 +53,11 @@ public fun KClass<Username>.of(value: String): Username =
         .vBuild()
 
 /**
- * Returns the GitHub tag of the user.
- *
- * The tag consists of the `'@'` character followed by the `Username`.
+ * The GitHub tag of the user,
+ * composed of the `'@'` character followed by the `Username`.
  */
-public fun Username.tag(): String = "@${this.value}"
+public val Username.tag: String
+    get() = "@$value"
 
 /**
  * Creates a new `PersonalAccessToken` with the specified string value.

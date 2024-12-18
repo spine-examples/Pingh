@@ -180,7 +180,7 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
                 .by(updatedAfter)
                 .setTitle(item.title)
                 .get()
-            item.takeIf { it.body.contains(user.tag()) }
+            item.takeIf { it.body.contains(user.tag) }
                 ?.let { Mention::class.from(it) }
                 ?.takeIf { it.whenMentioned > updatedAfter }
                 ?.let { mentions + it }
@@ -419,7 +419,7 @@ private class MentionsOnIssueOrPullRequestsBuilder(
     private fun comments(url: String): Set<Mention> =
         obtainByUrl(url, CommentsResponse::class::parseJson)
             .itemList
-            .filter { comment -> comment.body.contains(user!!.tag()) }
+            .filter { comment -> comment.body.contains(user!!.tag) }
             .map { comment -> Mention::class.from(comment, title!!) }
             .filter { comments -> comments.whenMentioned > updatedAfter!! }
             .toSet()
@@ -432,7 +432,7 @@ private class MentionsOnIssueOrPullRequestsBuilder(
     private fun reviews(): Set<Mention> =
         obtainByUrl(reviewsUrl, ReviewsResponse::class::parseJson)
             .itemList
-            .filter { review -> review.body.contains(user!!.tag()) }
+            .filter { review -> review.body.contains(user!!.tag) }
             .map { review -> Mention::class.from(review, title!!) }
             .filter { review -> review.whenMentioned > updatedAfter!! }
             .toSet()
