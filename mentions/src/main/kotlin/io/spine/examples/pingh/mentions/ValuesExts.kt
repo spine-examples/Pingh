@@ -47,4 +47,5 @@ public fun KClass<MentionView>.buildBy(
         .setStatus(status)
         .setWhereMentioned(event.whereMentioned)
         .setPinned(pinned)
+        .setViaTeam(event.viaTeam)
         .vBuild()
