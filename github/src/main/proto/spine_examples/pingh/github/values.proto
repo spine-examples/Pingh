@@ -70,6 +70,9 @@ message User {
 }
 
 // The mention of a user on GitHub.
+//
+// A user can be mentioned by their name or through a team they are a member of.
+//
 message Mention {
 
     // The global ID of the GitHub item in which this mention is created.
@@ -89,6 +92,12 @@ message Mention {
 
     // The repository where the user was mentioned.
     Repo where_mentioned = 6 [(required) = true];
+
+    // The team mentioned that the user is a member of.
+    //
+    // If the user was mentioned by their username, this field is empty.
+    //
+    Team via_team = 7;
 }
 
 // The verification code that displays so that the user can enter the code in a browser.

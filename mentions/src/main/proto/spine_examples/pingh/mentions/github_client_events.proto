@@ -89,6 +89,12 @@ message UserMentioned {
 
     // The repository where the user was mentioned.
     spine_examples.pingh.github.Repo where_mentioned = 6 [(required) = true];
+
+    // The team mentioned that the user is a member of.
+    //
+    // If the user was mentioned by their username, this field is empty.
+    //
+    spine_examples.pingh.github.Team via_team = 7;
 }
 
 // Fetching user mentions from GitHub failed.
