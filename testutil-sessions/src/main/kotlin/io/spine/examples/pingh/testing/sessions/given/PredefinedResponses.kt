@@ -28,6 +28,7 @@ package io.spine.examples.pingh.testing.sessions.given
 
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.OrganizationsResponse
+import io.spine.examples.pingh.github.rest.TeamsResponse
 import io.spine.examples.pingh.github.rest.VerificationCodesResponse
 import io.spine.examples.pingh.sessions.parseJson
 
@@ -77,4 +78,16 @@ public fun loadOrganizations(): OrganizationsResponse {
     checkNotNull(jsonFile)
     val json = jsonFile.readText()
     return OrganizationsResponse::class.parseJson(" { item: $json } ")
+}
+
+/**
+ * Returns the response provided by [PredefinedGitHubUsersResponses]
+ * upon successful execution of the request for teams in which the user is a member.
+ */
+public fun loadTeams(): TeamsResponse {
+    val jsonFile = PredefinedGitHubUsersResponses::class.java
+        .getResource("/github-responses/teams-response.json")
+    checkNotNull(jsonFile)
+    val json = jsonFile.readText()
+    return TeamsResponse::class.parseJson(" { item: $json } ")
 }
