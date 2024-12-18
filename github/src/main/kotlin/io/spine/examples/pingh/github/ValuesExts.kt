@@ -37,6 +37,7 @@ import io.spine.examples.pingh.github.rest.CommentFragment
 import io.spine.examples.pingh.github.rest.IssueOrPullRequestFragment
 import io.spine.examples.pingh.github.rest.OrganizationFragment
 import io.spine.examples.pingh.github.rest.ReviewFragment
+import io.spine.examples.pingh.github.rest.TeamFragment
 import io.spine.examples.pingh.github.rest.UserFragment
 import io.spine.examples.pingh.github.rest.VerificationCodesFragment
 import io.spine.examples.pingh.github.rest.VerificationCodesResponse
@@ -286,6 +287,17 @@ public val Team.fullName: String
  */
 public val Team.tag: String
     get() = "@$fullName"
+
+/**
+ * Creates a new `Team` with the data specified in the `TeamFragment`.
+ */
+public fun KClass<Team>.from(fragment: TeamFragment): Team =
+    with(Team.newBuilder()) {
+        name = fragment.name
+        slug = fragment.slug
+        org = Organization::class.from(fragment.organization)
+        vBuild()
+    }
 
 /**
  * Creates a new `GitHubApp` with the passed GitHub App client ID and secret.
