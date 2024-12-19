@@ -33,8 +33,10 @@ import io.spine.base.Field
 import io.spine.client.EventFilter.eq
 import io.spine.examples.pingh.client.settings.isIgnored
 import io.spine.examples.pingh.github.Repo
+import io.spine.examples.pingh.github.Team
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
+import io.spine.examples.pingh.github.tag
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import kotlin.reflect.KClass
@@ -84,7 +86,12 @@ internal class NotificationsFlow(
                 "Pingh",
                 whereMentioned = { it.whereMentioned },
                 content = { event ->
-                    content(event.whenMentioned, event.whoMentioned, event.title)
+                    content(
+                        event.whenMentioned,
+                        event.whoMentioned,
+                        event.title,
+                        if (event.hasViaTeam()) event.viaTeam else null
+                    )
                 }
             ),
             NotificationInfo(
@@ -92,14 +99,28 @@ internal class NotificationsFlow(
                 "Pingh",
                 whereMentioned = { it.whereMentioned },
                 content = { event ->
-                    content(event.whenMentioned, event.whoMentioned, event.title)
+                    content(
+                        event.whenMentioned,
+                        event.whoMentioned,
+                        event.title,
+                        if (event.hasViaTeam()) event.viaTeam else null
+                    )
                 }
             )
         )
 
-        private fun content(whenMentioned: Timestamp, whoMentioned: User, title: String): String =
-            "${whenMentioned.howMuchTimeHasPassed().uppercase()} " +
-                    "${whoMentioned.username.value} mentioned you in '${title}'."
+        private fun content(
+            whenMentioned: Timestamp,
+            whoMentioned: User,
+            title: String,
+            viaTeam: Team? = null
+        ): String {
+            val teamDetails = if (viaTeam != null) {
+                " via ${viaTeam.tag}"
+            } else ""
+            return "${whenMentioned.howMuchTimeHasPassed().uppercase()} " +
+                    "${whoMentioned.username.value} mentioned you$teamDetails in '${title}'."
+        }
     }
 
     /**
