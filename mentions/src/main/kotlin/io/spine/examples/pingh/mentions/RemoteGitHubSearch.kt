@@ -151,6 +151,13 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
         }
         return ItemType.entries
             .flatMap { type -> findMentions(target, token, updatedAfter, limit, type) }
+            .run {
+                if (limit != null) {
+                    sortedByDescending { Timestamps.toNanos(it.whenMentioned) }.take(limit)
+                } else {
+                    this
+                }
+            }
             .map {
                 with(it.toBuilder()) {
                     mentionModifier()
@@ -314,10 +321,10 @@ private fun HttpClient.search(url: String): SearchRequestBuilder =
  * A builder for creating and sending requests to search for issues and pull requests
  * where the user is involved or team is mentioned on GitHub.
  *
- * If [target] is user then created search request will find issues and pull requests
- * that were either created by a certain user, assigned to that user, mention that user,
- * or were commented on by that user. Searching for mentions
- * using [mentions:username](https://shorturl.at/zQzGL) is insufficient,
+ * If [target] is [user][MentionType.PERSON] then created search request
+ * will find issues and pull requests that were either created by a certain user,
+ * assigned to that user, mention that user, or were commented on by that user.
+ * Searching for mentions using [mentions:username](https://shorturl.at/zQzGL) is insufficient,
  * as it only captures mentions in issue comments, missing those in pull request reviews
  * and review comments. Instead, all issues and pull requests where the user was involved
  * are retrieved. Among them, mentions will then need to be selected.
