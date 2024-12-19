@@ -73,7 +73,7 @@ message MentionUnsnoozed {
     // The repository where the user was mentioned.
     spine_examples.pingh.github.Repo where_mentioned = 5 [(required) = true];
 
-    // The team mentioned that the user is a member of.
+    // The mentioned team that the user is a member of.
     //
     // If the user was mentioned by their username, this field is empty.
     //

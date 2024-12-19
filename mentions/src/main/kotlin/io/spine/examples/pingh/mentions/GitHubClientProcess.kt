@@ -213,7 +213,7 @@ internal class GitHubClientProcess :
      * 2. Excludes mentions created by the user,
      *   including those of themselves or any teams to which they belong.
      *
-     * 3. If a [limit] is specified, only the most recent mentions are selected,
+     * 3. If a [limit] is not `null`, only the most recent mentions are selected,
      *   up to the `limit`.
      */
     private fun searchMentions(
