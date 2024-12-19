@@ -349,8 +349,8 @@ internal class GitHubClientSpec : ContextAwareTest() {
             .clearUser()
             .setTeam(team)
             .vBuild()
-        search.injectUserMentions(userMention)
-        search.injectTeamMentions(teamMention)
+        search.injectUserMention(userMention)
+        search.injectTeamMention(teamMention)
         val mentionId = MentionId::class.of(userMention.id, gitHubClientId.username)
         emitUserLoggedInEvent()
         userMentioned(mentionId) shouldHaveSize 1
@@ -363,7 +363,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
             author = User::class.of(gitHubClientId.username, Url::class.generate())
             user = gitHubClientId.username
         }
-        search.injectUserMentions(mention)
+        search.injectUserMention(mention)
         val mentionId = MentionId::class.of(mention.id, gitHubClientId.username)
         emitUserLoggedInEvent()
         userMentioned(mentionId).shouldBeEmpty()
@@ -377,7 +377,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
             author = User::class.of(gitHubClientId.username, Url::class.generate())
             this.team = team
         }
-        search.injectTeamMentions(mention)
+        search.injectTeamMention(mention)
         val mentionId = MentionId::class.of(mention.id, gitHubClientId.username)
         emitUserLoggedInEvent()
         userMentioned(mentionId).shouldBeEmpty()
@@ -400,7 +400,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
                 user = gitHubClientId.username
                 whenMentioned = time
             }
-            search.injectUserMentions(mention)
+            search.injectUserMention(mention)
             mentions.add(mention)
             time = time.add(minutes(1))
         }

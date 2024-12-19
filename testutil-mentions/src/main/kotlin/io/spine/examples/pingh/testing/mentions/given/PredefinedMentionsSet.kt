@@ -41,7 +41,7 @@ import io.spine.examples.pingh.mentions.parseJson
  * on successful execution.
  */
 @VisibleForTesting
-public fun userMentions(): Set<Mention> =
+public fun loadUserMentions(): Set<Mention> =
     loadMentionsInPr() + loadMentionsInCommentsUnderPr()
 
 /**
@@ -86,7 +86,7 @@ private fun loadMentionsInCommentsUnderPr(): Set<Mention> {
  * on successful execution.
  */
 @VisibleForTesting
-public fun teamMentions(): Set<Mention> {
+public fun loadTeamMentions(): Set<Mention> {
     val jsonFile = PredefinedGitHubSearchResponses::class.java
         .getResource("/github-responses/team-mentions-in-issues.json")
     checkNotNull(jsonFile)

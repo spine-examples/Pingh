@@ -91,7 +91,7 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
     /**
      * The user mentions returned when [searchMentions()][searchMentions] method is called.
      *
-     * To add new mentions, use [injectUserMentions()][injectUserMentions] method,
+     * To add new mentions, use [injectUserMention()][injectUserMention] method,
      * and to clear them, use [reset()][reset] method.
      *
      * Note that the list is cleared after [fetching][searchMentions].
@@ -101,7 +101,7 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
     /**
      * The team mentions returned when [searchMentions()][searchMentions] method is called.
      *
-     * To add new mentions, use [injectTeamMentions()][injectTeamMentions] method,
+     * To add new mentions, use [injectTeamMention()][injectTeamMention] method,
      * and to clear them, use [reset()][reset] method.
      *
      * Note that the list is cleared after [fetching][searchMentions].
@@ -109,7 +109,7 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
     private val teamMentions = mutableListOf<Mention>()
 
     /**
-     * Returns set of [Mention]s retrieved from a JSON file in the resource folder,
+     * Returns set of `Mention`s retrieved from a JSON file in the resource folder,
      * or empty set if mentions have already been fetched.
      */
     @Throws(CannotObtainMentionsException::class)
@@ -129,7 +129,7 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
             throw CannotObtainMentionsException(responseStatusCode.value)
 
         !areUserMentionsFetched -> {
-            val mentions = userMentions()
+            val mentions = loadUserMentions()
             waitWhileServiceIsFrozen()
             areUserMentionsFetched = true
             mentions
@@ -139,7 +139,7 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
     }
 
     /**
-     * Returns set of team [Mention]s retrieved from a JSON file in the resource folder,
+     * Returns set of team `Mention`s retrieved from a JSON file in the resource folder,
      * or empty set if mentions have already been fetched.
      */
     @Throws(CannotObtainMentionsException::class)
@@ -159,7 +159,7 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
             throw CannotObtainMentionsException(responseStatusCode.value)
 
         !areTeamMentionsFetched -> {
-            val mentions = teamMentions()
+            val mentions = loadTeamMentions()
             waitWhileServiceIsFrozen()
             areTeamMentionsFetched = true
             mentions
@@ -181,9 +181,9 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
      * Adds user mentions to be returned when
      * [searchMentions()][searchMentions] method is called.
      *
-     * @see [userMentions]
+     * @see [loadUserMentions]
      */
-    public fun injectUserMentions(mention: Mention) {
+    public fun injectUserMention(mention: Mention) {
         userMentions.add(mention)
     }
 
@@ -191,9 +191,9 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
      * Adds team mentions to be returned when
      * [searchMentions()][searchMentions] method is called.
      *
-     * @see [teamMentions]
+     * @see [loadTeamMentions]
      */
-    public fun injectTeamMentions(mention: Mention) {
+    public fun injectTeamMention(mention: Mention) {
         teamMentions.add(mention)
     }
 
