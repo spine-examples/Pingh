@@ -31,6 +31,7 @@ import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
 import io.spine.examples.pingh.mentions.of
+import io.spine.examples.pingh.testing.mentions.given.teamMentions
 import io.spine.examples.pingh.testing.mentions.given.userMentions
 
 /**
@@ -39,7 +40,7 @@ import io.spine.examples.pingh.testing.mentions.given.userMentions
  * @return List of mentions in order by descending time of mention creation.
  */
 internal fun expectedMentionsList(whoWasMentioned: Username): List<MentionView> =
-    userMentions()
+    (userMentions() + teamMentions())
         .map { mention ->
             with(MentionView.newBuilder()) {
                 id = MentionId::class.of(mention.id, whoWasMentioned)
@@ -49,6 +50,9 @@ internal fun expectedMentionsList(whoWasMentioned: Username): List<MentionView> 
                 url = mention.url
                 status = MentionStatus.UNREAD
                 whereMentioned = mention.whereMentioned
+                if (mention.hasTeam()) {
+                    viaTeam = mention.team
+                }
                 vBuild()
             }
         }

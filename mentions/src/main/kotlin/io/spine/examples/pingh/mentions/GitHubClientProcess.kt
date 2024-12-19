@@ -184,28 +184,56 @@ internal class GitHubClientProcess :
         val username = state().id.username
         val token = state().token
         val updatedAfter = state().whenLastSuccessfullyUpdated.thisOrLastWorkday()
+        val limit = if (state().whenLastSuccessfullyUpdated.isDefault()) {
+            limitOnFirstLaunch
+        } else null
+        builder().clearWhenStarted()
         val mentions = try {
-            if (state().whenLastSuccessfullyUpdated.isDefault()) {
-                search.searchMentions(username, token, updatedAfter, limitOnFirstLaunch)
-            } else {
-                search.searchMentions(username, token, updatedAfter)
-            }
+            searchMentions(username, token, updatedAfter, limit)
         } catch (exception: CannotObtainMentionsException) {
-            builder().clearWhenStarted()
             return listOf(
                 RequestMentionsFromGitHubFailed::class.buildBy(event.id, exception.statusCode())
             )
         }
-        val userMentionedEvents = toEvents(mentions, state().id.username)
-        val mentionsUpdateFromGitHubCompleted =
-            MentionsUpdateFromGitHubCompleted::class.buildBy(event.id)
-        builder()
-            .setWhenLastSuccessfullyUpdated(state().whenStarted)
-            .clearWhenStarted()
-        return userMentionedEvents
+        val userMentioned = toEvents(mentions, state().id.username)
+        val completed = MentionsUpdateFromGitHubCompleted::class.buildBy(event.id)
+        builder().setWhenLastSuccessfullyUpdated(state().whenStarted)
+        return userMentioned
             .toList<EventMessage>()
-            .plus(mentionsUpdateFromGitHubCompleted)
+            .plus(completed)
     }
+
+    /**
+     * Finds mentions of the user and all teams they belong to, applying the following filters:
+     *
+     * 1. Removes duplicate mentions on the same GitHub item. For instance,
+     *   if both a user and their associated team(s) are mentioned on the same item,
+     *   only one mention is kept.
+     *
+     * 2. Excludes mentions created by the user,
+     *   including those of themselves or any teams to which they belong.
+     *
+     * 3. If a [limit] is specified, only the most recent mentions are selected,
+     *   up to the `limit`.
+     */
+    private fun searchMentions(
+        username: Username,
+        token: PersonalAccessToken,
+        updatedAfter: Timestamp,
+        limit: Int?
+    ): Set<Mention> = users.teamMemberships(token)
+        .flatMap { team -> search.searchMentions(team, token, updatedAfter, limit) }
+        .union(search.searchMentions(username, token, updatedAfter, limit))
+        .distinctBy { it.id }
+        .filter { !it.author.username.equals(username) }
+        .run {
+            if (limit != null) {
+                sortedByDescending { Timestamps.toNanos(it.whenMentioned) }.take(limit)
+            } else {
+                this
+            }
+        }
+        .toSet()
 
     /**
      * Supplies this instance with a service for allows to access GitHub Search API,
@@ -227,9 +255,9 @@ internal class GitHubClientProcess :
          * Converts the set of `Mention`s to the set of `UserMentioned` events
          * with the specified name of the mentioned user.
          */
-        private fun toEvents(gitHubMentions: Set<Mention>, whoWasMentioned: Username):
+        private fun toEvents(mentions: Set<Mention>, whoWasMentioned: Username):
                 Set<UserMentioned> =
-            gitHubMentions
+            mentions
                 .map { mention -> UserMentioned::class.buildBy(mention, whoWasMentioned) }
                 .toSet()
     }
