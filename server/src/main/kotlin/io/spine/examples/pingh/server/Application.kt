@@ -135,15 +135,21 @@ internal class Application {
      */
     private fun createServer(): Server {
         val httpEngine = CIO.create()
+        val users = RemoteGitHubUsers(httpEngine)
         return Server
             .atPort(pinghPort)
             .add(
                 newSessionsContext(
                     RemoteGitHubAuthentication(gitHubApp(), httpEngine),
-                    RemoteGitHubUsers(httpEngine)
+                    users
                 )
             )
-            .add(newMentionsContext(RemoteGitHubSearch(httpEngine)))
+            .add(
+                newMentionsContext(
+                    RemoteGitHubSearch(httpEngine),
+                    users
+                )
+            )
             .build()
     }
 }

@@ -91,6 +91,7 @@ import io.spine.example.pingh.desktop.generated.resources.snooze
 import io.spine.examples.pingh.client.MentionsFlow
 import io.spine.examples.pingh.client.howMuchTimeHasPassed
 import io.spine.examples.pingh.client.sorted
+import io.spine.examples.pingh.github.tag
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
 import org.jetbrains.compose.resources.painterResource
@@ -346,13 +347,14 @@ private fun RowScope.MentionCardText(
     val time = mention.whenMentioned.run {
         if (isParentHovered) toDatetime() else howMuchTimeHasPassed()
     }
+    val team = if (mention.hasViaTeam()) ", via ${mention.viaTeam.tag}" else ""
     Column(
         modifier = Modifier.fillMaxHeight().weight(1f),
         verticalArrangement = Arrangement.spacedBy(4.dp, CenterVertically)
     ) {
         MentionTitle(flow, mention, isParentHovered)
         Text(
-            text = "$time, by ${mention.whoMentioned.username.value}",
+            text = "$time, by ${mention.whoMentioned.username.value}$team",
             overflow = Ellipsis,
             maxLines = 1,
             style = MaterialTheme.typography.bodySmall

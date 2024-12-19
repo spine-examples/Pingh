@@ -28,6 +28,7 @@ package io.spine.examples.pingh.testing.sessions.given
 
 import io.spine.examples.pingh.github.Organization
 import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.Team
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.from
@@ -71,6 +72,15 @@ public class PredefinedGitHubUsersResponses : GitHubUsers {
         } else {
             setOf()
         }
+
+    /**
+     * Returns the set of teams retrieved from a JSON file in the resource folder.
+     */
+    override fun teamMemberships(token: PersonalAccessToken): Set<Team> =
+        loadTeams()
+            .itemList
+            .map { fragment -> Team::class.from(fragment) }
+            .toSet()
 
     /**
      * Resets the instance to its initial state.

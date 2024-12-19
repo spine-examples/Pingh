@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.mentions
 
+import io.spine.examples.pingh.sessions.GitHubUsers
 import io.spine.server.BoundedContext
 import io.spine.server.BoundedContextBuilder
 
@@ -46,9 +47,13 @@ public const val NAME: String = "Mentions"
  * as a parameter.
  *
  * @param search Allows to access GitHub Search API.
+ * @param users Allows to retrieve user information using the GitHub API.
  */
-public fun newMentionsContext(search: GitHubSearch): BoundedContextBuilder =
+public fun newMentionsContext(
+    search: GitHubSearch,
+    users: GitHubUsers
+): BoundedContextBuilder =
     BoundedContext.singleTenant(NAME)
-        .add(GitHubClientRepository(search))
+        .add(GitHubClientRepository(search, users))
         .add(MentionRepository())
         .add(UserMentionsRepository())

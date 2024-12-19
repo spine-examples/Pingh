@@ -28,6 +28,7 @@ package io.spine.examples.pingh.mentions
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
 import io.spine.examples.pingh.clock.event.TimePassed
+import io.spine.examples.pingh.sessions.GitHubUsers
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
@@ -36,9 +37,13 @@ import io.spine.server.route.EventRouting
 
 /**
  * Manages instances of [GitHubClientProcess].
+ *
+ * @property search The service that allows to access GitHub Search API.
+ * @property users The service that allows to retrieve user information using the GitHub API.
  */
 internal class GitHubClientRepository(
     private val search: GitHubSearch,
+    private val users: GitHubUsers
 ) : ProcessManagerRepository<GitHubClientId, GitHubClientProcess, GitHubClient>() {
 
     @OverridingMethodsMustInvokeSuper
@@ -57,7 +62,7 @@ internal class GitHubClientRepository(
     @OverridingMethodsMustInvokeSuper
     override fun configure(processManager: GitHubClientProcess) {
         super.configure(processManager)
-        processManager.inject(search)
+        processManager.inject(search, users)
     }
 
     /**
