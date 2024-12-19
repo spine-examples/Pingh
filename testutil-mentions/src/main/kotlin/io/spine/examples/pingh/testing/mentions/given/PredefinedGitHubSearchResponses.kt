@@ -30,6 +30,7 @@ import com.google.protobuf.Timestamp
 import io.ktor.http.HttpStatusCode
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.Team
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.CannotObtainMentionsException
 import io.spine.examples.pingh.mentions.GitHubSearch
@@ -75,7 +76,17 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
      *
      * This variable helps prevent duplicate mentions when [fetching][searchMentions] them again.
      */
-    private var areMentionsFetched = false
+    private var areUserMentionsFetched = false
+
+    /**
+     * Whether team mentions from this service have been successfully obtained.
+     *
+     * Once mentions are successfully fetched, this value is set to `true`. To reset the value,
+     * use the [mentionsAreNotFetched] method.
+     *
+     * This variable helps prevent duplicate mentions when [fetching][searchMentions] them again.
+     */
+    private var areTeamMentionsFetched = false
 
     /**
      * Returns set of [Mention]s retrieved from a JSON file in the resource folder,
@@ -91,12 +102,32 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
         if (responseStatusCode != HttpStatusCode.OK) {
             throw CannotObtainMentionsException(responseStatusCode.value)
         }
-        if (areMentionsFetched) {
+        if (areUserMentionsFetched) {
             return emptySet()
         }
-        val mentions = predefinedMentionsSet()
+        val mentions = userMentions()
         waitWhileServiceIsFrozen()
-        areMentionsFetched = true
+        areUserMentionsFetched = true
+        return mentions
+    }
+
+    /**
+     * Returns set of team [Mention]s retrieved from a JSON file in the resource folder,
+     * or empty set if mentions have already been fetched.
+     */
+    @Throws(CannotObtainMentionsException::class)
+    override fun searchMentions(
+        team: Team,
+        token: PersonalAccessToken,
+        updatedAfter: Timestamp,
+        limit: Int?
+    ): Set<Mention> {
+        if (areTeamMentionsFetched) {
+            return emptySet()
+        }
+        val mentions = teamMentions()
+        waitWhileServiceIsFrozen()
+        areTeamMentionsFetched = true
         return mentions
     }
 
@@ -149,7 +180,8 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
      * Indicates that mentions have not yet been fetched.
      */
     public fun mentionsAreNotFetched() {
-        areMentionsFetched = false
+        areUserMentionsFetched = false
+        areTeamMentionsFetched = false
     }
 
     /**

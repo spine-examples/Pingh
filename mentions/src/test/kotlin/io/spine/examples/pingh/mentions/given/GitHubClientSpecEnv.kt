@@ -38,7 +38,7 @@ import io.spine.examples.pingh.mentions.of
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
-import io.spine.examples.pingh.testing.mentions.given.predefinedMentionsSet
+import io.spine.examples.pingh.testing.mentions.given.userMentions
 import kotlin.reflect.KClass
 
 /**
@@ -101,7 +101,7 @@ internal fun KClass<MentionsUpdateIsAlreadyInProgress>.buildBy(id: GitHubClientI
  * and returns their set.
  */
 internal fun expectedUserMentionedSet(whoWasMentioned: Username): Set<UserMentioned> =
-    predefinedMentionsSet()
+    userMentions()
         .map { mention ->
             with(UserMentioned.newBuilder()) {
                 id = MentionId::class.of(
