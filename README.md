@@ -5,7 +5,8 @@
 A [GitHub App][github-app] that notifies users of new GitHub `@mention`s.
 It also runs as a system tray application on macOS.
 
-- Displays a list of recent `@mention`s for a logged-in GitHub user.
+- Displays a list of recent `@mention`s for the logged-in GitHub user
+  and the [teams][github-team] they hold membership in.
 - Marks mentions as “read” or snooze them for later.
 - Notifies upon receiving new mentions or when the snooze time for a mention has expired.
 - Supports Do Not Disturb mode.
@@ -14,6 +15,8 @@ It also runs as a system tray application on macOS.
 The application stores the current settings and session data in the application folder 
 within the user data directory. The app settings are linked to the user who configured them, 
 and they update accordingly when the account changes.
+
+The application does not track mentions created by the user themselves.
 
 ## Tech
 
@@ -63,6 +66,10 @@ The application tracks user's mentions in all public GitHub repositories.
 
 The mentions in the private repositories are tracked if the user has access to the repository and 
 the [GitHub app][github-app] is installed on the repository or the organization that owns it.
+
+The application also tracks mentions of teams the user belongs to, 
+including both visible and secret teams. To display these mentions, 
+the organization owning the team must have the [GitHub app][github-app] installed.
 
 ## Authentication
 
@@ -251,6 +258,7 @@ We accept the questions and suggestions via the corresponding
 [license-badge]: https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat
 [apache-license]: https://www.apache.org/licenses/LICENSE-2.0
 [github-app]: https://github.com/apps/pingh-tracker-of-github-mentions
+[github-team]: https://docs.github.com/en/organizations/organizing-members-into-teams/about-teams
 [gcloud-compute-engine]: https://cloud.google.com/products/compute
 [gcloud-firewall]: https://cloud.google.com/firewall/docs/firewalls
 [gcloud-datastore]: https://cloud.google.com/products/datastore
