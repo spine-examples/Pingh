@@ -70,7 +70,7 @@ internal val mentionsUpdateInterval: Duration = minutes(1)
 /**
  * The limit the number of mentions loaded on the first launch.
  */
-private const val limitOnFirstLaunch: Int = 20
+internal const val limitOnFirstLaunch: Int = 20
 
 /**
  * A process of reading user's mentions from GitHub.
