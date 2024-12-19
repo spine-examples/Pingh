@@ -120,15 +120,18 @@ public fun KClass<RequestMentionsFromGitHubFailed>.buildBy(id: GitHubClientId, s
  */
 public fun KClass<UserMentioned>.buildBy(mention: Mention, whoWasMentioned: Username):
         UserMentioned =
-    UserMentioned.newBuilder()
-        .setId(MentionId::class.of(mention.id, whoWasMentioned))
-        .setWhoMentioned(mention.author)
-        .setTitle(mention.title)
-        .setWhenMentioned(mention.whenMentioned)
-        .setUrl(mention.url)
-        .setWhereMentioned(mention.whereMentioned)
-        .setViaTeam(mention.viaTeam)
-        .vBuild()
+    with(UserMentioned.newBuilder()) {
+        id = MentionId::class.of(mention.id, whoWasMentioned)
+        whoMentioned = mention.author
+        title = mention.title
+        whenMentioned = mention.whenMentioned
+        url = mention.url
+        whereMentioned = mention.whereMentioned
+        if (mention.hasTeam()) {
+            viaTeam = mention.team
+        }
+        vBuild()
+    }
 
 /**
  * Creates a new `MentionPinned` event with the passed ID of the mention.

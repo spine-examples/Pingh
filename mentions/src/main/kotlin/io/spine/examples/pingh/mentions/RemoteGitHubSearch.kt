@@ -95,7 +95,12 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
         token: PersonalAccessToken,
         updatedAfter: Timestamp,
         limit: Int?
-    ): Set<Mention> = searchMentions(MentionTarget.of(username), token, updatedAfter, limit)
+    ): Set<Mention> = searchMentions(
+        MentionTarget.of(username),
+        token,
+        updatedAfter,
+        limit
+    ) { setUser(username) }
 
     /**
      * Searches for team mentions on GitHub in issues and pull requests,
@@ -121,13 +126,12 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
         token: PersonalAccessToken,
         updatedAfter: Timestamp,
         limit: Int?
-    ): Set<Mention> = searchMentions(MentionTarget.of(team), token, updatedAfter, limit)
-        .map {
-            it.toBuilder()
-                .setViaTeam(team)
-                .vBuild()
-        }
-        .toSet()
+    ): Set<Mention> = searchMentions(
+        MentionTarget.of(team),
+        token,
+        updatedAfter,
+        limit
+    ) { setTeam(team) }
 
     /**
      * Searches for mentions of [target] on GitHub in issues and pull requests,
@@ -138,14 +142,22 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
         target: MentionTarget,
         token: PersonalAccessToken,
         updatedAfter: Timestamp,
-        limit: Int?
+        limit: Int?,
+        mentionModifier: Mention.Builder.() -> Unit = {}
     ): Set<Mention> {
         require(limit == null || limit > 0) {
             "The maximum number of recent mentions must be `null` or positive value, " +
                     "but $limit was passed."
         }
-        return findMentions(target, token, updatedAfter, limit, ItemType.ISSUE) +
-                findMentions(target, token, updatedAfter, limit, ItemType.PULL_REQUEST)
+        return ItemType.entries
+            .flatMap { type -> findMentions(target, token, updatedAfter, limit, type) }
+            .map {
+                with(it.toBuilder()) {
+                    mentionModifier()
+                    vBuild()
+                }
+            }
+            .toSet()
     }
 
     /**
