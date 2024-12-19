@@ -164,16 +164,7 @@ internal class MentionProcess :
             status = MentionStatus.UNREAD
             clearSnoozeUntilWhen()
         }
-        return MentionUnsnoozed::class.buildWith {
-            id = state().id
-            whoMentioned = state().whoMentioned
-            title = state().title
-            whenMentioned = state().whenMentioned
-            whereMentioned = state().whereMentioned
-            if (state().hasViaTeam()) {
-                viaTeam = state().viaTeam
-            }
-        }
+        return MentionUnsnoozed::class.from(state())
     }
 
     /**
