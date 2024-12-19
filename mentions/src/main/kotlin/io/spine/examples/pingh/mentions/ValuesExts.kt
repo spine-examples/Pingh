@@ -38,14 +38,17 @@ public fun KClass<MentionView>.buildBy(
     status: MentionStatus,
     pinned: Boolean = false
 ): MentionView =
-    MentionView.newBuilder()
-        .setId(event.id)
-        .setWhoMentioned(event.whoMentioned)
-        .setTitle(event.title)
-        .setWhenMentioned(event.whenMentioned)
-        .setUrl(event.url)
-        .setStatus(status)
-        .setWhereMentioned(event.whereMentioned)
-        .setPinned(pinned)
-        .setViaTeam(event.viaTeam)
-        .vBuild()
+    with(MentionView.newBuilder()) {
+        id = event.id
+        whoMentioned = event.whoMentioned
+        title = event.title
+        whenMentioned = event.whenMentioned
+        url = event.url
+        this.status = status
+        whereMentioned = event.whereMentioned
+        this.pinned = pinned
+        if (event.hasViaTeam()) {
+            viaTeam = event.viaTeam
+        }
+        vBuild()
+    }

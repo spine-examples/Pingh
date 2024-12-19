@@ -71,7 +71,9 @@ internal class MentionProcess :
             whenMentioned = event.whenMentioned
             whereMentioned = event.whereMentioned
             status = MentionStatus.UNREAD
-            viaTeam = event.viaTeam
+            if (event.hasViaTeam()) {
+                viaTeam = event.viaTeam
+            }
         }
         return nothing()
     }
@@ -168,7 +170,9 @@ internal class MentionProcess :
             title = state().title
             whenMentioned = state().whenMentioned
             whereMentioned = state().whereMentioned
-            viaTeam = state().viaTeam
+            if (state().hasViaTeam()) {
+                viaTeam = state().viaTeam
+            }
         }
     }
 
