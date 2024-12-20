@@ -84,7 +84,9 @@ public class MentionsFlow internal constructor(
         ensureLoggedIn()
         val id = UserMentionsId::class.of(session.username)
         client.observeEntity(id, UserMentions::class) { entity ->
-            mentions.value = entity.mentionList.notIgnored()
+            mentions.value = entity.mentionList
+                .notIgnored()
+                .distinctBy { it.id }
         }
     }
 
@@ -117,6 +119,7 @@ public class MentionsFlow internal constructor(
         return userMentions
             ?.mentionList
             ?.notIgnored()
+            ?.distinctBy { it.id }
             ?: emptyList()
     }
 

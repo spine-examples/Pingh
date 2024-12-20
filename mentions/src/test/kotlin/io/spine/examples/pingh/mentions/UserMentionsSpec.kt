@@ -72,6 +72,12 @@ internal class UserMentionsSpec : ContextAwareTest() {
     }
 
     @Test
+    internal fun `ignore 'UserMentioned' event if mention with this ID already exists`() {
+        context().receivesEvent(userMentioned)
+        assertMentionStatus(MentionStatus.UNREAD)
+    }
+
+    @Test
     internal fun `react on 'MentionSnoozed' event, and mark the target mention as snoozed`() {
         val event = MentionSnoozed::class.buildBy(userMentioned.id)
         context().receivesEvent(event)
