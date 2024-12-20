@@ -90,9 +90,9 @@ message UserMentioned {
     // The repository where the user was mentioned.
     spine_examples.pingh.github.Repo where_mentioned = 6 [(required) = true];
 
-    // The mentioned team that the user is a member of.
+    // The team through which the user was mentioned due to their membership.
     //
-    // If the user was mentioned by their username, this field is empty.
+    // If the user was mentioned by their username, the field is empty.
     //
     spine_examples.pingh.github.Team via_team = 7;
 }

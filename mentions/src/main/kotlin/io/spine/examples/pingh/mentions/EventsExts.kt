@@ -93,18 +93,18 @@ public fun KClass<MentionSnoozed>.buildBy(id: MentionId, untilWhen: Timestamp): 
         .vBuild()
 
 /**
- * Creates a new MentionUnsnoozed event using [entity] data.
+ * Creates a new `MentionUnsnoozed` event using [mention] data.
  */
-public fun KClass<MentionUnsnoozed>.from(entity: io.spine.examples.pingh.mentions.Mention):
+public fun KClass<MentionUnsnoozed>.from(mention: io.spine.examples.pingh.mentions.Mention):
         MentionUnsnoozed =
     with(MentionUnsnoozed.newBuilder()) {
-        id = entity.id
-        whoMentioned = entity.whoMentioned
-        title = entity.title
-        whenMentioned = entity.whenMentioned
-        whereMentioned = entity.whereMentioned
-        if (entity.hasViaTeam()) {
-            viaTeam = entity.viaTeam
+        id = mention.id
+        whoMentioned = mention.whoMentioned
+        title = mention.title
+        whenMentioned = mention.whenMentioned
+        whereMentioned = mention.whereMentioned
+        if (mention.hasViaTeam()) {
+            viaTeam = mention.viaTeam
         }
         vBuild()
     }

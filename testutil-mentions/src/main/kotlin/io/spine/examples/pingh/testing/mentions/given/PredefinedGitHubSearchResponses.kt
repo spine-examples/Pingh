@@ -69,7 +69,7 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
     private var responseStatusCode = HttpStatusCode.OK
 
     /**
-     * Indicates whether mentions from this service have been successfully obtained.
+     * Whether mentions from this service have been successfully obtained.
      *
      * Once mentions are successfully fetched, this value is set to `true`. To reset the value,
      * use the [reset()][reset] method.
@@ -109,7 +109,7 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
     private val teamMentions = mutableListOf<Mention>()
 
     /**
-     * Returns set of `Mention`s retrieved from a JSON file in the resource folder,
+     * Returns set of user `Mention`s retrieved from a JSON file in the resource folder,
      * or empty set if mentions have already been fetched.
      */
     @Throws(CannotObtainMentionsException::class)
@@ -181,7 +181,7 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
      * Adds user mentions to be returned when
      * [searchMentions()][searchMentions] method is called.
      *
-     * @see [loadUserMentions]
+     * @see [userMentions]
      */
     public fun injectUserMention(mention: Mention) {
         userMentions.add(mention)
@@ -191,7 +191,7 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
      * Adds team mentions to be returned when
      * [searchMentions()][searchMentions] method is called.
      *
-     * @see [loadTeamMentions]
+     * @see [teamMentions]
      */
     public fun injectTeamMention(mention: Mention) {
         teamMentions.add(mention)
