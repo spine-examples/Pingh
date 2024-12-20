@@ -187,17 +187,19 @@ internal class GitHubClientProcess :
         val limit = if (state().whenLastSuccessfullyUpdated.isDefault()) {
             limitOnFirstLaunch
         } else null
-        builder().clearWhenStarted()
         val mentions = try {
             searchMentions(username, token, updatedAfter, limit)
         } catch (exception: CannotObtainMentionsException) {
+            builder().clearWhenStarted()
             return listOf(
                 RequestMentionsFromGitHubFailed::class.buildBy(event.id, exception.statusCode())
             )
         }
         val userMentioned = toEvents(mentions, state().id.username)
         val completed = MentionsUpdateFromGitHubCompleted::class.buildBy(event.id)
-        builder().setWhenLastSuccessfullyUpdated(state().whenStarted)
+        builder()
+            .setWhenLastSuccessfullyUpdated(state().whenStarted)
+            .clearWhenStarted()
         return userMentioned
             .toList<EventMessage>()
             .plus(completed)
