@@ -96,7 +96,7 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
         updatedAfter: Timestamp,
         limit: Int?
     ): Set<Mention> = searchMentions(
-        MentionTarget.of(username),
+        MentionTarget(username),
         token,
         updatedAfter,
         limit
@@ -127,7 +127,7 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
         updatedAfter: Timestamp,
         limit: Int?
     ): Set<Mention> = searchMentions(
-        MentionTarget.of(team),
+        MentionTarget(team),
         token,
         updatedAfter,
         limit
@@ -281,19 +281,8 @@ private class MentionTarget private constructor(
     val tag: String,
     val type: MentionType
 ) {
-    companion object {
-        /**
-         * Creates a new `MentionTarget` for searching mentions of the passed user.
-         */
-        fun of(user: Username): MentionTarget =
-            MentionTarget(user.value, user.tag, MentionType.PERSON)
-
-        /**
-         * Creates a new `MentionTarget` for searching mentions of the passed team.
-         */
-        fun of(team: Team): MentionTarget =
-            MentionTarget(team.fullName, team.tag, MentionType.TEAM)
-    }
+    constructor(user: Username) : this(user.value, user.tag, MentionType.PERSON)
+    constructor(team: Team) : this(team.fullName, team.tag, MentionType.TEAM)
 }
 
 /**

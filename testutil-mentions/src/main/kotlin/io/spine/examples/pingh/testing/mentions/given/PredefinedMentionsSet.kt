@@ -98,11 +98,11 @@ public fun loadTeamMentions(): Set<Mention> {
         .vBuild()
     return IssuesAndPullRequestsSearchResponse::class.parseJson(json)
         .itemList
-        .map {
-            fragment -> Mention::class.from(fragment)
-            .toBuilder()
-            .setTeam(team)
-            .vBuild()
+        .map { fragment ->
+            Mention::class.from(fragment)
+                .toBuilder()
+                .setTeam(team)
+                .vBuild()
         }
         .toSet()
 }
