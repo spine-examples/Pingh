@@ -26,8 +26,12 @@
 
 package io.spine.examples.pingh.testing.mentions.given
 
+import com.google.common.annotations.VisibleForTesting
 import io.spine.examples.pingh.github.Mention
+import io.spine.examples.pingh.github.Organization
+import io.spine.examples.pingh.github.Team
 import io.spine.examples.pingh.github.from
+import io.spine.examples.pingh.github.loggedAs
 import io.spine.examples.pingh.github.rest.CommentsResponse
 import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResponse
 import io.spine.examples.pingh.mentions.parseJson
@@ -36,7 +40,8 @@ import io.spine.examples.pingh.mentions.parseJson
  * Returns the set of mentions that [PredefinedGitHubSearchResponses] returns
  * on successful execution.
  */
-public fun predefinedMentionsSet(): Set<Mention> =
+@VisibleForTesting
+public fun loadUserMentions(): Set<Mention> =
     loadMentionsInPr() + loadMentionsInCommentsUnderPr()
 
 /**
@@ -73,5 +78,31 @@ private fun loadMentionsInCommentsUnderPr(): Set<Mention> {
     return CommentsResponse::class.parseJson("{ item: $json }")
         .itemList
         .map { fragment -> Mention::class.from(fragment, "Comment") }
+        .toSet()
+}
+
+/**
+ * Returns the set of team mentions that [PredefinedGitHubSearchResponses] returns
+ * on successful execution.
+ */
+@VisibleForTesting
+public fun loadTeamMentions(): Set<Mention> {
+    val jsonFile = PredefinedGitHubSearchResponses::class.java
+        .getResource("/github-responses/team-mentions-in-issues.json")
+    checkNotNull(jsonFile)
+    val json = jsonFile.readText(Charsets.UTF_8)
+    val team = Team.newBuilder()
+        .setName("Pingh-users")
+        .setSlug("pingh-users")
+        .setOrg(Organization::class.loggedAs("spine-examples"))
+        .vBuild()
+    return IssuesAndPullRequestsSearchResponse::class.parseJson(json)
+        .itemList
+        .map { fragment ->
+            Mention::class.from(fragment)
+                .toBuilder()
+                .setTeam(team)
+                .vBuild()
+        }
         .toSet()
 }

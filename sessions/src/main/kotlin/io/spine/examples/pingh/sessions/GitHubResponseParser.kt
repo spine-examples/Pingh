@@ -34,6 +34,7 @@ import io.spine.examples.pingh.github.from
 import io.spine.examples.pingh.github.rest.AccessTokenFragment
 import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.OrganizationsResponse
+import io.spine.examples.pingh.github.rest.TeamsResponse
 import io.spine.examples.pingh.github.rest.UserFragment
 import io.spine.examples.pingh.github.rest.VerificationCodesFragment
 import io.spine.examples.pingh.github.rest.VerificationCodesResponse
@@ -77,3 +78,11 @@ public fun KClass<User>.parseJson(json: String): User =
  */
 public fun KClass<OrganizationsResponse>.parseJson(json: String): OrganizationsResponse =
     Json.fromJson(json, OrganizationsResponse::class.java)
+
+/**
+ * Parses `TeamsResponse` from the JSON.
+ *
+ * @param json The string containing JSON with the `TeamsResponse`.
+ */
+public fun KClass<TeamsResponse>.parseJson(json: String): TeamsResponse =
+    Json.fromJson(json, TeamsResponse::class.java)

@@ -72,6 +72,12 @@ message MentionUnsnoozed {
 
     // The repository where the user was mentioned.
     spine_examples.pingh.github.Repo where_mentioned = 5 [(required) = true];
+
+    // The team through which the user was mentioned due to their membership.
+    //
+    // If the user was mentioned by their username, the field is empty.
+    //
+    spine_examples.pingh.github.Team via_team = 6;
 }
 
 // The mention was pinned at the top of the mentions list.

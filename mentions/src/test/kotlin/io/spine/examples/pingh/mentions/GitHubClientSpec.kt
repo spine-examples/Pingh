@@ -29,13 +29,17 @@ package io.spine.examples.pingh.mentions
 import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Timestamps
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.ktor.http.HttpStatusCode
 import io.spine.base.Time.currentTime
 import io.spine.core.UserId
 import io.spine.examples.pingh.clock.buildBy
 import io.spine.examples.pingh.clock.event.TimePassed
+import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.Team
+import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
@@ -58,6 +62,8 @@ import io.spine.examples.pingh.sessions.with
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubUsersResponses
+import io.spine.net.Url
+import io.spine.protobuf.Durations2.minutes
 import io.spine.protobuf.Durations2.seconds
 import io.spine.server.BoundedContextBuilder
 import io.spine.server.integration.ThirdPartyContext
@@ -74,17 +80,19 @@ import org.junit.jupiter.api.Test
 internal class GitHubClientSpec : ContextAwareTest() {
 
     private val search = PredefinedGitHubSearchResponses()
+    private val users = PredefinedGitHubUsersResponses()
     private lateinit var sessionContext: BlackBoxContext
     private lateinit var gitHubClientId: GitHubClientId
     private lateinit var sessionId: SessionId
     private lateinit var token: PersonalAccessToken
 
     override fun contextBuilder(): BoundedContextBuilder =
-        newMentionsContext(search)
+        newMentionsContext(search, users)
 
     @BeforeEach
     internal fun prepareSessionsContextAndEmitEvent() {
         search.reset()
+        users.reset()
         sessionContext = BlackBoxContext
             .from(
                 newSessionsContext(
@@ -330,5 +338,85 @@ internal class GitHubClientSpec : ContextAwareTest() {
         context().assertEvents()
             .withType(MentionsUpdateFromGitHubRequested::class.java)
             .hasSize(3)
+    }
+
+    @Test
+    internal fun `do not duplicate mentions made on the same item`() {
+        gitHubClientId = GitHubClientId::class.of(Username::class.of(randomString()))
+        val team = Team::class.generate()
+        val userMention = Mention::class.generate { user = gitHubClientId.username }
+        val teamMention = userMention.toBuilder()
+            .clearUser()
+            .setTeam(team)
+            .vBuild()
+        search.injectUserMention(userMention)
+        search.injectTeamMention(teamMention)
+        val mentionId = MentionId::class.of(userMention.id, gitHubClientId.username)
+        emitUserLoggedInEvent()
+        userMentioned(mentionId) shouldHaveSize 1
+    }
+
+    @Test
+    internal fun `ignore self-mention`() {
+        gitHubClientId = GitHubClientId::class.of(Username::class.of(randomString()))
+        val mention = Mention::class.generate {
+            author = User::class.of(gitHubClientId.username, Url::class.generate())
+            user = gitHubClientId.username
+        }
+        search.injectUserMention(mention)
+        val mentionId = MentionId::class.of(mention.id, gitHubClientId.username)
+        emitUserLoggedInEvent()
+        userMentioned(mentionId).shouldBeEmpty()
+    }
+
+    @Test
+    internal fun `ignore team mention if the user made it themselves`() {
+        gitHubClientId = GitHubClientId::class.of(Username::class.of(randomString()))
+        val team = Team::class.generate()
+        val mention = Mention::class.generate {
+            author = User::class.of(gitHubClientId.username, Url::class.generate())
+            this.team = team
+        }
+        search.injectTeamMention(mention)
+        val mentionId = MentionId::class.of(mention.id, gitHubClientId.username)
+        emitUserLoggedInEvent()
+        userMentioned(mentionId).shouldBeEmpty()
+    }
+
+    private fun userMentioned(id: MentionId): List<UserMentioned> =
+        context().assertEvents()
+            .withType(UserMentioned::class.java)
+            .actual()
+            .map { it.message.unpack<UserMentioned>() }
+            .filter { it.id.equals(id) }
+
+    @Test
+    internal fun `limit number of mentions received on the first request`() {
+        gitHubClientId = GitHubClientId::class.of(Username::class.of(randomString()))
+        var time = currentTime()
+        val mentions = mutableListOf<Mention>()
+        for (i in 1..(limitOnFirstLaunch * 2)) {
+            val mention = Mention::class.generate {
+                user = gitHubClientId.username
+                whenMentioned = time
+            }
+            search.injectUserMention(mention)
+            mentions.add(mention)
+            time = time.add(minutes(1))
+        }
+        val expected = mentions
+            .sortedByDescending { Timestamps.toNanos(it.whenMentioned) }
+            .map { mention -> UserMentioned::class.buildBy(mention, gitHubClientId.username) }
+            .take(limitOnFirstLaunch)
+            .toSet()
+        emitUserLoggedInEvent()
+        val actual = context().assertEvents()
+            .withType(UserMentioned::class.java)
+            .actual()
+            .map { it.message.unpack<UserMentioned>() }
+            .filter { it.id.user.equals(gitHubClientId.username) }
+            .toSet()
+        actual shouldHaveSize limitOnFirstLaunch
+        actual shouldBe expected
     }
 }

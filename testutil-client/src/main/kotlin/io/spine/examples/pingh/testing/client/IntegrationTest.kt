@@ -87,7 +87,7 @@ public abstract class IntegrationTest {
         private fun createServer(): Server =
             Server.atPort(port)
                 .add(newSessionsContext(auth, users))
-                .add(newMentionsContext(search))
+                .add(newMentionsContext(search, users))
                 .build()
 
         @AfterAll
@@ -117,6 +117,7 @@ public abstract class IntegrationTest {
         application.close()
         auth.reset()
         search.reset()
+        users.reset()
         storageFactory.clear()
     }
 

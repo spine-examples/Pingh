@@ -37,6 +37,7 @@ import io.spine.examples.pingh.github.rest.CommentFragment
 import io.spine.examples.pingh.github.rest.IssueOrPullRequestFragment
 import io.spine.examples.pingh.github.rest.OrganizationFragment
 import io.spine.examples.pingh.github.rest.ReviewFragment
+import io.spine.examples.pingh.github.rest.TeamFragment
 import io.spine.examples.pingh.github.rest.UserFragment
 import io.spine.examples.pingh.github.rest.VerificationCodesFragment
 import io.spine.examples.pingh.github.rest.VerificationCodesResponse
@@ -53,11 +54,11 @@ public fun KClass<Username>.of(value: String): Username =
         .vBuild()
 
 /**
- * Returns the GitHub tag of the user.
- *
- * The tag consists of the `'@'` character followed by the `Username`.
+ * The GitHub tag of the user,
+ * composed of the `'@'` character followed by the `Username`.
  */
-public fun Username.tag(): String = "@${this.value}"
+public val Username.tag: String
+    get() = "@$value"
 
 /**
  * Creates a new `PersonalAccessToken` with the specified string value.
@@ -272,6 +273,31 @@ public fun KClass<Organization>.loggedAs(login: String): Organization =
     Organization.newBuilder()
         .setLogin(OrganizationLogin::class.of(login))
         .vBuild()
+
+/**
+ * The full name of the team, composed of the organization's login and the team's slug,
+ * separated by a slash (`'/'`).
+ */
+public val Team.fullName: String
+    get() = "${org.login.value}/$slug"
+
+/**
+ * The GitHub tag of the team, composed of the `'@'` character followed
+ * by the [full name][fullName] of the team.
+ */
+public val Team.tag: String
+    get() = "@$fullName"
+
+/**
+ * Creates a new `Team` with the data specified in the `TeamFragment`.
+ */
+public fun KClass<Team>.from(fragment: TeamFragment): Team =
+    with(Team.newBuilder()) {
+        name = fragment.name
+        slug = fragment.slug
+        org = Organization::class.from(fragment.organization)
+        vBuild()
+    }
 
 /**
  * Creates a new `GitHubApp` with the passed GitHub App client ID and secret.

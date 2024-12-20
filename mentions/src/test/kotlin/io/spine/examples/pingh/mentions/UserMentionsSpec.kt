@@ -39,6 +39,7 @@ import io.spine.examples.pingh.mentions.given.buildBy
 import io.spine.examples.pingh.mentions.given.from
 import io.spine.examples.pingh.mentions.given.generateWith
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
+import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubUsersResponses
 import io.spine.server.BoundedContextBuilder
 import io.spine.testing.TestValues.randomString
 import io.spine.testing.server.blackbox.ContextAwareTest
@@ -52,8 +53,10 @@ internal class UserMentionsSpec : ContextAwareTest() {
     private lateinit var id: UserMentionsId
     private lateinit var userMentioned: UserMentioned
 
-    override fun contextBuilder(): BoundedContextBuilder =
-        newMentionsContext(PredefinedGitHubSearchResponses())
+    override fun contextBuilder(): BoundedContextBuilder = newMentionsContext(
+        PredefinedGitHubSearchResponses(),
+        PredefinedGitHubUsersResponses()
+    )
 
     @BeforeEach
     internal fun emitUserMentionedEvent() {

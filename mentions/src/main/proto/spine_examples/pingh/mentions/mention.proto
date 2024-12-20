@@ -84,6 +84,12 @@ message Mention {
     // Pinned mentions never become obsolete.
     //
     bool pinned = 9;
+
+    // The team through which the user was mentioned due to their membership.
+    //
+    // If the user was mentioned by their username, the field is empty.
+    //
+    spine_examples.pingh.github.Team via_team = 10;
 }
 
 // Information about all mentions of the user.
@@ -130,6 +136,12 @@ message MentionView {
     // followed by all other mentions.
     //
     bool pinned = 8;
+
+    // The team through which the user was mentioned due to their membership.
+    //
+    // If the user was mentioned by their username, the field is empty.
+    //
+    spine_examples.pingh.github.Team via_team = 9;
 }
 
 // The read status of mention.

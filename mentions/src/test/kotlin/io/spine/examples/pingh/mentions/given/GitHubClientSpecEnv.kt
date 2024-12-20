@@ -29,8 +29,17 @@
 package io.spine.examples.pingh.mentions.given
 
 import com.google.protobuf.Timestamp
+import io.spine.base.Time.currentTime
+import io.spine.examples.pingh.github.Mention
+import io.spine.examples.pingh.github.NodeId
+import io.spine.examples.pingh.github.Organization
 import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.Repo
+import io.spine.examples.pingh.github.Team
+import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
+import io.spine.examples.pingh.github.loggedAs
+import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.GitHubClient
 import io.spine.examples.pingh.mentions.GitHubClientId
 import io.spine.examples.pingh.mentions.MentionId
@@ -38,7 +47,10 @@ import io.spine.examples.pingh.mentions.of
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
-import io.spine.examples.pingh.testing.mentions.given.predefinedMentionsSet
+import io.spine.examples.pingh.testing.mentions.given.loadTeamMentions
+import io.spine.examples.pingh.testing.mentions.given.loadUserMentions
+import io.spine.net.Url
+import io.spine.testing.TestValues.randomString
 import kotlin.reflect.KClass
 
 /**
@@ -101,7 +113,7 @@ internal fun KClass<MentionsUpdateIsAlreadyInProgress>.buildBy(id: GitHubClientI
  * and returns their set.
  */
 internal fun expectedUserMentionedSet(whoWasMentioned: Username): Set<UserMentioned> =
-    predefinedMentionsSet()
+    (loadUserMentions() + loadTeamMentions())
         .map { mention ->
             with(UserMentioned.newBuilder()) {
                 id = MentionId::class.of(
@@ -113,7 +125,51 @@ internal fun expectedUserMentionedSet(whoWasMentioned: Username): Set<UserMentio
                 whenMentioned = mention.whenMentioned
                 url = mention.url
                 whereMentioned = mention.whereMentioned
+                if (mention.hasTeam()) {
+                    viaTeam = mention.team
+                }
                 vBuild()
             }
         }
         .toSet()
+
+/**
+ * Returns a new `Url` with randomly generated value.
+ */
+internal fun KClass<Url>.generate(): Url =
+    Url::class.of("https://example.org/${randomString()}")
+
+/**
+ * Returns a new `Organization` with randomly generated login value.
+ */
+internal fun KClass<Organization>.generate(): Organization =
+    Organization::class.loggedAs(randomString())
+
+/**
+ * Returns a new `Team` with randomly generated data.
+ */
+internal fun KClass<Team>.generate(): Team {
+    val slug = randomString()
+    return Team.newBuilder()
+        .setName(slug)
+        .setSlug(slug)
+        .setOrg(Organization::class.generate())
+        .vBuild()
+}
+
+/**
+ * Returns a new `Mention` with randomly generated data.
+ *
+ * The mention can be modified using [modifier].
+ */
+internal fun KClass<Mention>.generate(modifier: Mention.Builder.() -> Unit = {}): Mention =
+    with(Mention.newBuilder()) {
+        id = NodeId::class.of(randomString())
+        author = User::class.of(randomString(), randomString())
+        title = randomString()
+        whenMentioned = currentTime()
+        url = Url::class.generate()
+        whereMentioned = Repo::class.of(randomString(), randomString())
+        modifier()
+        vBuild()
+    }

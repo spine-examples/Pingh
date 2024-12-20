@@ -31,7 +31,8 @@ import io.spine.examples.pingh.mentions.MentionId
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
 import io.spine.examples.pingh.mentions.of
-import io.spine.examples.pingh.testing.mentions.given.predefinedMentionsSet
+import io.spine.examples.pingh.testing.mentions.given.loadTeamMentions
+import io.spine.examples.pingh.testing.mentions.given.loadUserMentions
 
 /**
  * Returns the predefined list of user mentions that occurred on GitHub.
@@ -39,7 +40,7 @@ import io.spine.examples.pingh.testing.mentions.given.predefinedMentionsSet
  * @return List of mentions in order by descending time of mention creation.
  */
 internal fun expectedMentionsList(whoWasMentioned: Username): List<MentionView> =
-    predefinedMentionsSet()
+    (loadUserMentions() + loadTeamMentions())
         .map { mention ->
             with(MentionView.newBuilder()) {
                 id = MentionId::class.of(mention.id, whoWasMentioned)
@@ -49,6 +50,9 @@ internal fun expectedMentionsList(whoWasMentioned: Username): List<MentionView> 
                 url = mention.url
                 status = MentionStatus.UNREAD
                 whereMentioned = mention.whereMentioned
+                if (mention.hasTeam()) {
+                    viaTeam = mention.team
+                }
                 vBuild()
             }
         }

@@ -30,6 +30,7 @@ import com.google.protobuf.Timestamp
 import io.ktor.http.HttpStatusCode
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.github.Team
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.CannotObtainMentionsException
 import io.spine.examples.pingh.mentions.GitHubSearch
@@ -68,17 +69,47 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
     private var responseStatusCode = HttpStatusCode.OK
 
     /**
-     * Indicates whether mentions from this service have been successfully obtained.
+     * Whether mentions from this service have been successfully obtained.
      *
      * Once mentions are successfully fetched, this value is set to `true`. To reset the value,
-     * use the [mentionsAreNotFetched] method.
+     * use the [reset()][reset] method.
      *
      * This variable helps prevent duplicate mentions when [fetching][searchMentions] them again.
      */
-    private var areMentionsFetched = false
+    private var areUserMentionsFetched = false
 
     /**
-     * Returns set of [Mention]s retrieved from a JSON file in the resource folder,
+     * Whether team mentions from this service have been successfully obtained.
+     *
+     * Once mentions are successfully fetched, this value is set to `true`. To reset the value,
+     * use the [reset()][reset] method.
+     *
+     * This variable helps prevent duplicate mentions when [fetching][searchMentions] them again.
+     */
+    private var areTeamMentionsFetched = false
+
+    /**
+     * The user mentions returned when [searchMentions()][searchMentions] method is called.
+     *
+     * To add new mentions, use [injectUserMention()][injectUserMention] method,
+     * and to clear them, use [reset()][reset] method.
+     *
+     * Note that the list is cleared after [fetching][searchMentions].
+     */
+    private val userMentions = mutableListOf<Mention>()
+
+    /**
+     * The team mentions returned when [searchMentions()][searchMentions] method is called.
+     *
+     * To add new mentions, use [injectTeamMention()][injectTeamMention] method,
+     * and to clear them, use [reset()][reset] method.
+     *
+     * Note that the list is cleared after [fetching][searchMentions].
+     */
+    private val teamMentions = mutableListOf<Mention>()
+
+    /**
+     * Returns set of user `Mention`s retrieved from a JSON file in the resource folder,
      * or empty set if mentions have already been fetched.
      */
     @Throws(CannotObtainMentionsException::class)
@@ -87,17 +118,54 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
         token: PersonalAccessToken,
         updatedAfter: Timestamp,
         limit: Int?
-    ): Set<Mention> {
-        if (responseStatusCode != HttpStatusCode.OK) {
+    ): Set<Mention> = when {
+        userMentions.isNotEmpty() -> {
+            val mentions = userMentions.toSet()
+            userMentions.clear()
+            mentions
+        }
+
+        responseStatusCode != HttpStatusCode.OK ->
             throw CannotObtainMentionsException(responseStatusCode.value)
+
+        !areUserMentionsFetched -> {
+            val mentions = loadUserMentions()
+            waitWhileServiceIsFrozen()
+            areUserMentionsFetched = true
+            mentions
         }
-        if (areMentionsFetched) {
-            return emptySet()
+
+        else -> emptySet()
+    }
+
+    /**
+     * Returns set of team `Mention`s retrieved from a JSON file in the resource folder,
+     * or empty set if mentions have already been fetched.
+     */
+    @Throws(CannotObtainMentionsException::class)
+    override fun searchMentions(
+        team: Team,
+        token: PersonalAccessToken,
+        updatedAfter: Timestamp,
+        limit: Int?
+    ): Set<Mention> = when {
+        teamMentions.isNotEmpty() -> {
+            val mentions = teamMentions.toSet()
+            teamMentions.clear()
+            mentions
         }
-        val mentions = predefinedMentionsSet()
-        waitWhileServiceIsFrozen()
-        areMentionsFetched = true
-        return mentions
+
+        responseStatusCode != HttpStatusCode.OK ->
+            throw CannotObtainMentionsException(responseStatusCode.value)
+
+        !areTeamMentionsFetched -> {
+            val mentions = loadTeamMentions()
+            waitWhileServiceIsFrozen()
+            areTeamMentionsFetched = true
+            mentions
+        }
+
+        else -> emptySet()
     }
 
     /**
@@ -107,6 +175,26 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
         while (isFrozen) {
             sleep(timeBetweenExecutionAttempts)
         }
+    }
+
+    /**
+     * Adds user mentions to be returned when
+     * [searchMentions()][searchMentions] method is called.
+     *
+     * @see [userMentions]
+     */
+    public fun injectUserMention(mention: Mention) {
+        userMentions.add(mention)
+    }
+
+    /**
+     * Adds team mentions to be returned when
+     * [searchMentions()][searchMentions] method is called.
+     *
+     * @see [teamMentions]
+     */
+    public fun injectTeamMention(mention: Mention) {
+        teamMentions.add(mention)
     }
 
     /**
@@ -146,13 +234,6 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
     }
 
     /**
-     * Indicates that mentions have not yet been fetched.
-     */
-    public fun mentionsAreNotFetched() {
-        areMentionsFetched = false
-    }
-
-    /**
      * Resets the instance to its initial state.
      *
      * Once the instance is reset, it is no longer frozen
@@ -161,6 +242,9 @@ public class PredefinedGitHubSearchResponses : GitHubSearch {
     public fun reset() {
         unfreeze()
         setDefaultResponseStatusCode()
-        mentionsAreNotFetched()
+        areUserMentionsFetched = false
+        areTeamMentionsFetched = false
+        userMentions.clear()
+        teamMentions.clear()
     }
 }

@@ -31,8 +31,6 @@ package io.spine.examples.pingh.mentions
 import com.google.protobuf.Timestamp
 import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
-import io.spine.examples.pingh.github.Repo
-import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
 import io.spine.examples.pingh.mentions.event.MentionArchived
@@ -95,28 +93,21 @@ public fun KClass<MentionSnoozed>.buildBy(id: MentionId, untilWhen: Timestamp): 
         .vBuild()
 
 /**
- * Creates a new `MentionUnsnoozed` event with the passed data.
- *
- * @param id The ID of the mention.
- * @param whoMentioned The user who created the mention.
- * @param title The mention's title.
- * @param whenMentioned The time when the user was mentioned.
- * @param whereMentioned The repository where the user was mentioned.
+ * Creates a new `MentionUnsnoozed` event using [mention] data.
  */
-public fun KClass<MentionUnsnoozed>.with(
-    id: MentionId,
-    whoMentioned: User,
-    title: String,
-    whenMentioned: Timestamp,
-    whereMentioned: Repo
-): MentionUnsnoozed =
-    MentionUnsnoozed.newBuilder()
-        .setId(id)
-        .setWhoMentioned(whoMentioned)
-        .setTitle(title)
-        .setWhenMentioned(whenMentioned)
-        .setWhereMentioned(whereMentioned)
-        .vBuild()
+public fun KClass<MentionUnsnoozed>.from(mention: io.spine.examples.pingh.mentions.Mention):
+        MentionUnsnoozed =
+    with(MentionUnsnoozed.newBuilder()) {
+        id = mention.id
+        whoMentioned = mention.whoMentioned
+        title = mention.title
+        whenMentioned = mention.whenMentioned
+        whereMentioned = mention.whereMentioned
+        if (mention.hasViaTeam()) {
+            viaTeam = mention.viaTeam
+        }
+        vBuild()
+    }
 
 /**
  * Creates a new `RequestMentionsFromGitHubFailed` event with the specified `GitHubClientId`
@@ -135,14 +126,18 @@ public fun KClass<RequestMentionsFromGitHubFailed>.buildBy(id: GitHubClientId, s
  */
 public fun KClass<UserMentioned>.buildBy(mention: Mention, whoWasMentioned: Username):
         UserMentioned =
-    UserMentioned.newBuilder()
-        .setId(MentionId::class.of(mention.id, whoWasMentioned))
-        .setWhoMentioned(mention.author)
-        .setTitle(mention.title)
-        .setWhenMentioned(mention.whenMentioned)
-        .setUrl(mention.url)
-        .setWhereMentioned(mention.whereMentioned)
-        .vBuild()
+    with(UserMentioned.newBuilder()) {
+        id = MentionId::class.of(mention.id, whoWasMentioned)
+        whoMentioned = mention.author
+        title = mention.title
+        whenMentioned = mention.whenMentioned
+        url = mention.url
+        whereMentioned = mention.whereMentioned
+        if (mention.hasTeam()) {
+            viaTeam = mention.team
+        }
+        vBuild()
+    }
 
 /**
  * Creates a new `MentionPinned` event with the passed ID of the mention.

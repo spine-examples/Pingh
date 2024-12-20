@@ -37,6 +37,7 @@ import io.spine.examples.pingh.github.NodeId
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Repo
 import io.spine.examples.pingh.github.User
+import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
 import io.spine.net.Url
@@ -108,6 +109,7 @@ internal fun expectedMentions(): Set<Mention> =
             .setWhenMentioned("2024-05-23T17:38:40Z")
             .setUrl("https://github.com/spine-examples/Pingh/pull/8#issuecomment-2127713519")
             .setWhereMentioned("spine-examples", "Pingh")
+            .setUser("MykytaPimonovTD")
             .vBuild(),
         Mention.newBuilder()
             .setId("IC_kwDOL2L5hc5-0lTv")
@@ -116,14 +118,16 @@ internal fun expectedMentions(): Set<Mention> =
             .setWhenMentioned("2024-05-23T17:38:40Z")
             .setUrl("https://github.com/spine-examples/Pingh/pull/8#issuecomment-2127713519")
             .setWhereMentioned("spine-examples", "Pingh")
+            .setUser("MykytaPimonovTD")
             .vBuild(),
         Mention.newBuilder()
             .setId("PR_kwDOL2L5hc5vY_JP")
-            .setAuthor("MykytaPimonovTD", "https://avatars.githubusercontent.com/u/160486193?v=4")
+            .setAuthor("armiol", "https://avatars.githubusercontent.com/u/82468?v=4")
             .setTitle("Implement user session flow")
             .setWhenMentioned("2024-05-14T12:12:02Z")
             .setUrl("https://github.com/spine-examples/Pingh/pull/3")
             .setWhereMentioned("spine-examples", "Pingh")
+            .setUser("MykytaPimonovTD")
             .vBuild(),
         Mention.newBuilder()
             .setId("PRRC_kwDOL2L5hc5fXf9M")
@@ -132,6 +136,7 @@ internal fun expectedMentions(): Set<Mention> =
             .setWhenMentioned("2024-05-14T13:04:02Z")
             .setUrl("https://github.com/spine-examples/Pingh/pull/3#discussion_r1599995724")
             .setWhereMentioned("spine-examples", "Pingh")
+            .setUser("MykytaPimonovTD")
             .vBuild(),
         Mention.newBuilder()
             .setId("PRR_kwDOL2L5hc56gXMN")
@@ -140,6 +145,7 @@ internal fun expectedMentions(): Set<Mention> =
             .setWhenMentioned("2024-05-14T14:56:11Z")
             .setUrl("https://github.com/spine-examples/Pingh/pull/3#pullrequestreview-2055303949")
             .setWhereMentioned("spine-examples", "Pingh")
+            .setUser("MykytaPimonovTD")
             .vBuild(),
         Mention.newBuilder()
             .setId("PRR_kwDOL2L5hc56zimz")
@@ -148,6 +154,7 @@ internal fun expectedMentions(): Set<Mention> =
             .setWhenMentioned("2024-05-16T10:35:04Z")
             .setUrl("https://github.com/spine-examples/Pingh/pull/3#pullrequestreview-2060331443")
             .setWhereMentioned("spine-examples", "Pingh")
+            .setUser("MykytaPimonovTD")
             .vBuild(),
     )
 
@@ -165,6 +172,9 @@ private fun Mention.Builder.setUrl(value: String): Mention.Builder =
 
 private fun Mention.Builder.setWhereMentioned(owner: String, name: String): Mention.Builder =
     this.setWhereMentioned(Repo::class.of(owner, name))
+
+private fun Mention.Builder.setUser(name: String): Mention.Builder =
+    this.setUser(Username::class.of(name))
 
 /**
  * Intercepts requests to GitHub and returns an error response

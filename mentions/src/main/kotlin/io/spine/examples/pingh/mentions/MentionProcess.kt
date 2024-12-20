@@ -71,6 +71,9 @@ internal class MentionProcess :
             whenMentioned = event.whenMentioned
             whereMentioned = event.whereMentioned
             status = MentionStatus.UNREAD
+            if (event.hasViaTeam()) {
+                viaTeam = event.viaTeam
+            }
         }
         return nothing()
     }
@@ -161,13 +164,7 @@ internal class MentionProcess :
             status = MentionStatus.UNREAD
             clearSnoozeUntilWhen()
         }
-        return MentionUnsnoozed::class.with(
-            state().id,
-            state().whoMentioned,
-            state().title,
-            state().whenMentioned,
-            state().whereMentioned
-        )
+        return MentionUnsnoozed::class.from(state())
     }
 
     /**

@@ -44,6 +44,7 @@ import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubRequested
 import io.spine.examples.pingh.mentions.event.RequestMentionsFromGitHubFailed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.MentionsUpdateIsAlreadyInProgress
+import io.spine.examples.pingh.sessions.GitHubUsers
 import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.protobuf.Durations2.minutes
@@ -69,7 +70,7 @@ internal val mentionsUpdateInterval: Duration = minutes(1)
 /**
  * The limit the number of mentions loaded on the first launch.
  */
-private const val limitOnFirstLaunch: Int = 20
+internal const val limitOnFirstLaunch: Int = 20
 
 /**
  * A process of reading user's mentions from GitHub.
@@ -84,6 +85,14 @@ internal class GitHubClientProcess :
      * right after the instance creation.
      */
     private lateinit var search: GitHubSearch
+
+    /**
+     * Service for obtaining user's information via GitHub.
+     *
+     * It is expected this field is set by calling [inject]
+     * right after the instance creation.
+     */
+    private lateinit var users: GitHubUsers
 
     /**
      * Updates the user's [PersonalAccessToken] each time the user logs in.
@@ -175,37 +184,72 @@ internal class GitHubClientProcess :
         val username = state().id.username
         val token = state().token
         val updatedAfter = state().whenLastSuccessfullyUpdated.thisOrLastWorkday()
+        val limit = if (state().whenLastSuccessfullyUpdated.isDefault()) {
+            limitOnFirstLaunch
+        } else null
         val mentions = try {
-            if (state().whenLastSuccessfullyUpdated.isDefault()) {
-                search.searchMentions(username, token, updatedAfter, limitOnFirstLaunch)
-            } else {
-                search.searchMentions(username, token, updatedAfter)
-            }
+            searchMentions(username, token, updatedAfter, limit)
         } catch (exception: CannotObtainMentionsException) {
             builder().clearWhenStarted()
             return listOf(
                 RequestMentionsFromGitHubFailed::class.buildBy(event.id, exception.statusCode())
             )
         }
-        val userMentionedEvents = toEvents(mentions, state().id.username)
-        val mentionsUpdateFromGitHubCompleted =
-            MentionsUpdateFromGitHubCompleted::class.buildBy(event.id)
+        val userMentioned = toEvents(mentions, state().id.username)
+        val completed = MentionsUpdateFromGitHubCompleted::class.buildBy(event.id)
         builder()
             .setWhenLastSuccessfullyUpdated(state().whenStarted)
             .clearWhenStarted()
-        return userMentionedEvents
+        return userMentioned
             .toList<EventMessage>()
-            .plus(mentionsUpdateFromGitHubCompleted)
+            .plus(completed)
     }
 
     /**
-     * Supplies this instance of the process with a service allowing to access GitHub.
+     * Finds mentions of the user and all teams they belong to, applying the following filters:
+     *
+     * 1. Removes duplicate mentions on the same GitHub item. For instance,
+     *   if both a user and their associated team(s) are mentioned on the same item,
+     *   only one mention is kept.
+     *
+     * 2. Excludes mentions created by the user,
+     *   including those of themselves or any teams to which they belong.
+     *
+     * 3. If a [limit] is not `null`, only the most recent mentions are selected,
+     *   up to the `limit`.
+     */
+    private fun searchMentions(
+        username: Username,
+        token: PersonalAccessToken,
+        updatedAfter: Timestamp,
+        limit: Int?
+    ): Set<Mention> = users.teamMemberships(token)
+        .flatMap { team -> search.searchMentions(team, token, updatedAfter, limit) }
+        .union(search.searchMentions(username, token, updatedAfter, limit))
+        .distinctBy { it.id }
+        .filter { !it.author.username.equals(username) }
+        .run {
+            if (limit != null) {
+                sortedByDescending { Timestamps.toNanos(it.whenMentioned) }.take(limit)
+            } else {
+                this
+            }
+        }
+        .toSet()
+
+    /**
+     * Supplies this instance with a service for allows to access GitHub Search API,
+     * as well as a service for retrieving user information from GitHub.
      *
      * It is expected this method is called right after the creation of the process instance.
      * Otherwise, the process will not be able to function properly.
+     *
+     * @param search The service that allows to access GitHub Search API.
+     * @param users The service that allows to retrieve user information using the GitHub API.
      */
-    internal fun inject(search: GitHubSearch) {
+    internal fun inject(search: GitHubSearch, users: GitHubUsers) {
         this.search = search
+        this.users = users
     }
 
     private companion object {
@@ -213,9 +257,9 @@ internal class GitHubClientProcess :
          * Converts the set of `Mention`s to the set of `UserMentioned` events
          * with the specified name of the mentioned user.
          */
-        private fun toEvents(gitHubMentions: Set<Mention>, whoWasMentioned: Username):
+        private fun toEvents(mentions: Set<Mention>, whoWasMentioned: Username):
                 Set<UserMentioned> =
-            gitHubMentions
+            mentions
                 .map { mention -> UserMentioned::class.buildBy(mention, whoWasMentioned) }
                 .toSet()
     }
