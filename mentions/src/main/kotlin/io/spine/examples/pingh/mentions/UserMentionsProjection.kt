@@ -49,6 +49,9 @@ internal class UserMentionsProjection :
      */
     @Subscribe
     internal fun on(event: UserMentioned) {
+        if (state().mentionList.any { it.id.equals(event.id) }) {
+            return
+        }
         builder()
             .addMention(
                 MentionView::class.buildBy(event, MentionStatus.UNREAD)
