@@ -106,6 +106,6 @@ public class PublicationHandler(
         val javaComponent = project.components.findByName("java")
         javaComponent?.let { from(it) }
         project.addSourcesJar()
-        artifact(project.dokkaKotlinJar())
+        //artifact(project.dokkaKotlinJar())
     }
 }
