@@ -33,7 +33,7 @@ import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.command.UpdateToken
 import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
-import io.spine.examples.pingh.sessions.event.VerifySession
+import io.spine.examples.pingh.sessions.command.VerifySession
 import kotlin.reflect.KClass
 
 /**

@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.sessions
 
+import io.spine.examples.pingh.sessions.command.VerifySession
 import io.spine.examples.pingh.sessions.event.ActiveSessionAdded
 import io.spine.examples.pingh.sessions.event.InactiveSessionRemoved
 import io.spine.examples.pingh.sessions.event.SessionExpired
@@ -33,7 +34,6 @@ import io.spine.examples.pingh.sessions.event.SessionVerificationFailed
 import io.spine.examples.pingh.sessions.event.SessionVerified
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
-import io.spine.examples.pingh.sessions.event.VerifySession
 import io.spine.examples.pingh.sessions.given.generate
 import io.spine.examples.pingh.sessions.given.generateWith
 import io.spine.examples.pingh.sessions.given.with

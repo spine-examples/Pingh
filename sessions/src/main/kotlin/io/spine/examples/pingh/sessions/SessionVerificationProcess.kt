@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.sessions
 
+import io.spine.examples.pingh.sessions.command.VerifySession
 import io.spine.examples.pingh.sessions.event.ActiveSessionAdded
 import io.spine.examples.pingh.sessions.event.InactiveSessionRemoved
 import io.spine.examples.pingh.sessions.event.SessionExpired
@@ -33,7 +34,6 @@ import io.spine.examples.pingh.sessions.event.SessionVerificationFailed
 import io.spine.examples.pingh.sessions.event.SessionVerified
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
-import io.spine.examples.pingh.sessions.event.VerifySession
 import io.spine.server.command.Assign
 import io.spine.server.event.React
 import io.spine.server.procman.ProcessManager
@@ -50,8 +50,8 @@ internal class SessionVerificationProcess :
     /**
      * Verifies whether the session is active.
      *
-     * If the session is active, event `SessionVerified` is emitted;
-     * if it is inactive, event `SessionVerificationFailed` is emitted.
+     * If the session is active, `SessionVerified` event is emitted;
+     * if it is inactive, `SessionVerificationFailed` event is emitted.
      */
     @Assign
     internal fun handle(
@@ -84,7 +84,7 @@ internal class SessionVerificationProcess :
 
     /**
      * Remove a session from the list of active user sessions
-     * when the session ahs expired.
+     * when the session has expired.
      */
     @React
     internal fun on(event: SessionExpired): InactiveSessionRemoved = remove(event.id)

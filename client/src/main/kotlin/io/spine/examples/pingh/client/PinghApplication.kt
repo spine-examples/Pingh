@@ -32,10 +32,10 @@ import io.spine.core.UserId
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.SessionVerificationId
+import io.spine.examples.pingh.sessions.command.VerifySession
 import io.spine.examples.pingh.sessions.event.SessionExpired
 import io.spine.examples.pingh.sessions.event.SessionVerificationFailed
 import io.spine.examples.pingh.sessions.event.SessionVerified
-import io.spine.examples.pingh.sessions.event.VerifySession
 import io.spine.examples.pingh.sessions.of
 import io.spine.examples.pingh.sessions.with
 import java.util.concurrent.CompletableFuture
@@ -186,7 +186,9 @@ public class PinghApplication private constructor(
     private fun subscribeToSessionExpiration(id: SessionId) {
         client.observeEvent(id, SessionExpired::class) {
             closeSession()
-            notificationsFlow.send("Pingh", "Your session has expired. Log in again.")
+            notificationsFlow.send(
+                "Pingh",
+                "Your session has expired.${System.lineSeparator()}Log in again.")
         }
     }
 
@@ -336,23 +338,23 @@ private fun SessionId.asUserId(): UserId =
 /**
  * Returns `true` if session is active.
  *
- * @throws IllegalStateException if the server's not responding
+ * @throws IllegalStateException if the server is not responding.
  */
 private fun DesktopClient.verifySession(session: SessionId): Boolean {
     val id = SessionVerificationId::class.of(session.username)
-    val result = CompletableFuture<Boolean>()
+    val future = CompletableFuture<Boolean>()
     observeEither(
         EventObserver(id, SessionVerified::class) {
-            result.complete(true)
+            future.complete(true)
         },
         EventObserver(id, SessionVerificationFailed::class) {
-            result.complete(false)
+            future.complete(false)
         }
     )
     send(VerifySession::class.with(id, session))
     return try {
-        result.get(2, TimeUnit.SECONDS)
+        future.get(2, TimeUnit.SECONDS)
     } catch (ignore: TimeoutException) {
-        throw IllegalStateException("The Pingh server's not responding.")
+        throw IllegalStateException("The Pingh server is not responding.")
     }
 }
