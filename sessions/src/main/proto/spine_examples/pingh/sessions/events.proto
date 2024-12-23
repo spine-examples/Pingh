@@ -110,3 +110,10 @@ message SessionClosed {
     // The ID of user session.
     SessionId id = 1;
 }
+
+// The lifetime of the session has expired and it is no longer active.
+message SessionExpired {
+
+    // The ID of the user session.
+    SessionId id = 1;
+}
