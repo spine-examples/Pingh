@@ -23,6 +23,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 syntax = "proto3";
 
 package spine_examples.pingh.sessions;
@@ -31,35 +32,31 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.pingh.spine.io";
 option java_package = "io.spine.examples.pingh.sessions";
-option java_outer_classname = "IdentifiersProto";
+option java_outer_classname = "SessionVerificationProto";
 option java_multiple_files = true;
 
-import "spine_examples/pingh/github/values.proto";
+import "spine_examples/pingh/sessions/identifiers.proto";
 import "google/protobuf/timestamp.proto";
 
-// Identifies a user session.
+// The process of verifying whether a session is active.
 //
-// A single user can have multiple sessions created at different times.
+// The process involves maintaining
+// a list of all currently active user sessions for verification.
 //
-message SessionId {
+// To verify a session, a `VerifySession` command is sent.
+// If a `SessionVerified` event is emitted, the session is confirmed as active.
+// Alternatively, if the `SessionVerificationFailed` event is emitted,
+// the session is deemed inactive and cannot be used.
+//
+message SessionVerification {
+    option (entity) = { kind: PROCESS_MANAGER };
 
-    // The name of GitHub user that created session.
-    spine_examples.pingh.github.Username username = 1 [(required) = true];
+    // The identifier of the session verification process.
+    SessionVerificationId id = 1;
 
-    // The time when the session was created.
-    google.protobuf.Timestamp when_created = 2 [(required) = true];
-}
-
-// The identifier of the token expiration monitoring process.
-message TokenMonitorId {
-
-    // The identifier of the session whose token is being monitored.
-    SessionId session = 1 [(required) = true];
-}
-
-// The identifier of the session verification process.
-message SessionVerificationId {
-
-    // The name of GitHub user whose session verifies.
-    spine_examples.pingh.github.Username username = 1 [(required) = true];
+    // The list of currently active user sessions.
+    //
+    // If the user has no active sessions, the list is empty.
+    //
+    repeated SessionId active_sessions = 2;
 }

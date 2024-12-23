@@ -23,6 +23,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 syntax = "proto3";
 
 package spine_examples.pingh.sessions;
@@ -30,36 +31,24 @@ package spine_examples.pingh.sessions;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.pingh.spine.io";
-option java_package = "io.spine.examples.pingh.sessions";
-option java_outer_classname = "IdentifiersProto";
+option java_package = "io.spine.examples.pingh.sessions.event";
+option java_outer_classname = "SessionVerificationEventsProto";
 option java_multiple_files = true;
 
-import "spine_examples/pingh/github/values.proto";
-import "google/protobuf/timestamp.proto";
+import "spine_examples/pingh/sessions/identifiers.proto";
 
-// Identifies a user session.
+// The session check was completed successfully,
+// which means that the session is active.
 //
-// A single user can have multiple sessions created at different times.
-//
-message SessionId {
+message SessionVerified {
 
-    // The name of GitHub user that created session.
-    spine_examples.pingh.github.Username username = 1 [(required) = true];
-
-    // The time when the session was created.
-    google.protobuf.Timestamp when_created = 2 [(required) = true];
+    // The identifier of the session verification process.
+    SessionVerificationId id = 1;
 }
 
-// The identifier of the token expiration monitoring process.
-message TokenMonitorId {
+// A session verification failed, which means that the session is not active.
+message SessionVerificationFailed {
 
-    // The identifier of the session whose token is being monitored.
-    SessionId session = 1 [(required) = true];
-}
-
-// The identifier of the session verification process.
-message SessionVerificationId {
-
-    // The name of GitHub user whose session verifies.
-    spine_examples.pingh.github.Username username = 1 [(required) = true];
+    // The identifier of the session verification process.
+    SessionVerificationId id = 1;
 }
