@@ -29,6 +29,7 @@ package io.spine.examples.pingh.sessions
 import io.spine.core.External
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.sessions.command.UpdateToken
+import io.spine.examples.pingh.sessions.event.SessionExpired
 import io.spine.examples.pingh.sessions.event.TokenExpirationTimeUpdated
 import io.spine.examples.pingh.sessions.event.TokenMonitoringFinished
 import io.spine.examples.pingh.sessions.event.TokenMonitoringStarted
@@ -93,10 +94,21 @@ internal class TokenMonitorProcess :
     }
 
     /**
-     * Finishes the process of monitoring token expiration.
+     * Finishes the process of monitoring token expiration when user logged out.
      */
     @React
     internal fun on(event: UserLoggedOut): TokenMonitoringFinished {
+        deleted = true
+        return TokenMonitoringFinished::class.with(
+            TokenMonitorId::class.of(event.id)
+        )
+    }
+
+    /**
+     * Finishes the process of monitoring token expiration when monitored session expired.
+     */
+    @React
+    internal fun on(event: SessionExpired): TokenMonitoringFinished {
         deleted = true
         return TokenMonitoringFinished::class.with(
             TokenMonitorId::class.of(event.id)
