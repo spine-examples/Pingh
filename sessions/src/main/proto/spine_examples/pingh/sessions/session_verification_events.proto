@@ -52,3 +52,19 @@ message SessionVerificationFailed {
     // The identifier of the session verification process.
     SessionVerificationId id = 1;
 }
+
+// A new session was added to the list of active user sessions.
+message ActiveSessionAdded {
+
+    // The identifier of the session verification process.
+    SessionVerificationId id = 1;
+}
+
+// A session that is no longer active was removed
+// from the list of active user sessions.
+//
+message InactiveSessionRemoved {
+
+    // The identifier of the session verification process.
+    SessionVerificationId id = 1;
+}
