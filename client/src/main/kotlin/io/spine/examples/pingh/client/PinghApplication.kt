@@ -186,6 +186,7 @@ public class PinghApplication private constructor(
     private fun subscribeToSessionExpiration(id: SessionId) {
         client.observeEvent(id, SessionExpired::class) {
             closeSession()
+            notificationsFlow.send("Pingh", "Your session has expired. Log in again.")
         }
     }
 

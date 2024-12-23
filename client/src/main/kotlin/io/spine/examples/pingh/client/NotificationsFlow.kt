@@ -124,6 +124,16 @@ internal class NotificationsFlow(
     }
 
     /**
+     * Sends a notification with the specified [title] and [content]
+     * if 'Do Not Disturb' mode is disabled.
+     */
+    internal fun send(title: String, content: String) {
+        if (!settings.current.dndEnabled) {
+            sender.send(title, content)
+        }
+    }
+
+    /**
      * Enables the sending of notifications for the provided client with the given username.
      *
      * @param client Enables subscription to events emitted by the Pingh server.
