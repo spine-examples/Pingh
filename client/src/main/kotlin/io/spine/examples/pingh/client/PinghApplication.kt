@@ -31,6 +31,7 @@ import io.grpc.ManagedChannelBuilder
 import io.spine.core.UserId
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.sessions.SessionId
+import io.spine.examples.pingh.sessions.event.SessionExpired
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -122,6 +123,15 @@ public class PinghApplication private constructor(
      */
     public val unreadMentionCount: StateFlow<Int?> = _unreadMentionCount
 
+    private val _loggedIn: MutableStateFlow<Boolean> = MutableStateFlow(session.isActive)
+
+    /**
+     * Whether the user is logged into the application.
+     *
+     * If `true`, the user has an active session.
+     */
+    public val loggedIn: StateFlow<Boolean> = _loggedIn
+
     /**
      * A job that updates the unread mention count
      * whenever the state of a user's mentions changes.
@@ -155,6 +165,17 @@ public class PinghApplication private constructor(
         session.establish(id)
         client = DesktopClient(channel, id.asUserId())
         notificationsFlow.enableNotifications(client, id.username)
+        subscribeToSessionExpiration(id)
+        _loggedIn.value = true
+    }
+
+    /**
+     * Updates the application state if the session in use has expired.
+     */
+    private fun subscribeToSessionExpiration(id: SessionId) {
+        client.observeEvent(id, SessionExpired::class) {
+            closeSession()
+        }
     }
 
     /**
@@ -164,6 +185,7 @@ public class PinghApplication private constructor(
      * - the [mentions flow][mentionsFlow] for previous session is deleted.
      */
     private fun closeSession() {
+        _loggedIn.value = false
         client.close()
         session.resetToGuest()
         client = DesktopClient(channel)
@@ -172,11 +194,6 @@ public class PinghApplication private constructor(
         mentionsObserver?.cancel()
         settingsFlow = null
     }
-
-    /**
-     * Returns `true` if the user is logged in to the application.
-     */
-    public fun isLoggedIn(): Boolean = session.isActive
 
     /**
      * Initiates the login flow and terminates any previous flow, if it exists.
