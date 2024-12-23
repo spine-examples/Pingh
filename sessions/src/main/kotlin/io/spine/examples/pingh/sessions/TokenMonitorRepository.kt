@@ -28,6 +28,7 @@ package io.spine.examples.pingh.sessions
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
 import io.spine.examples.pingh.clock.event.TimePassed
+import io.spine.examples.pingh.sessions.event.SessionExpired
 import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
@@ -47,6 +48,7 @@ internal class TokenMonitorRepository :
             .route(UserLoggedIn::class.java) { event, _ -> toTokenMonitor(event.id) }
             .route(TokenUpdated::class.java) { event, _ -> toTokenMonitor(event.id) }
             .route(UserLoggedOut::class.java) { event, _ -> toTokenMonitor(event.id) }
+            .route(SessionExpired::class.java) { event, _ -> toTokenMonitor(event.id) }
             .route(TimePassed::class.java) { _, _ -> toAll() }
     }
 
