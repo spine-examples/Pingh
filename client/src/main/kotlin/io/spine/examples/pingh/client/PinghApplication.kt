@@ -31,8 +31,16 @@ import io.grpc.ManagedChannelBuilder
 import io.spine.core.UserId
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.sessions.SessionId
+import io.spine.examples.pingh.sessions.SessionVerificationId
 import io.spine.examples.pingh.sessions.event.SessionExpired
+import io.spine.examples.pingh.sessions.event.SessionVerificationFailed
+import io.spine.examples.pingh.sessions.event.SessionVerified
+import io.spine.examples.pingh.sessions.event.VerifySession
+import io.spine.examples.pingh.sessions.of
+import io.spine.examples.pingh.sessions.with
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -76,6 +84,12 @@ public class PinghApplication private constructor(
         .build()
 
     /**
+     * Enables interaction with the Pingh server.
+     */
+    internal var client: DesktopClient = DesktopClient(channel)
+        private set
+
+    /**
      * Manages the session with Pingh server.
      */
     private val session: Session
@@ -89,19 +103,16 @@ public class PinghApplication private constructor(
         val storage = UserDataStorage()
         session = Session(storage)
         settings = Settings(storage)
-    }
 
-    /**
-     * Enables interaction with the Pingh server.
-     */
-    internal var client: DesktopClient
-        private set
+        // Resets a locally saved session if it is no longer active.
+        if (session.isActive) {
+            if (!client.verifySession(session.id)) {
+                session.resetToGuest()
+            }
+        }
 
-    init {
-        client = if (session.isActive) {
-            DesktopClient(channel, session.id.asUserId())
-        } else {
-            DesktopClient(channel)
+        if (session.isActive) {
+            client = DesktopClient(channel, session.id.asUserId())
         }
     }
 
@@ -320,3 +331,27 @@ private fun SessionId.asUserId(): UserId =
     UserId.newBuilder()
         .setValue(username.value)
         .vBuild()
+
+/**
+ * Returns `true` if session is active.
+ *
+ * @throws IllegalStateException if the server's not responding
+ */
+private fun DesktopClient.verifySession(session: SessionId): Boolean {
+    val id = SessionVerificationId::class.of(session.username)
+    val result = CompletableFuture<Boolean>()
+    observeEither(
+        EventObserver(id, SessionVerified::class) {
+            result.complete(true)
+        },
+        EventObserver(id, SessionVerificationFailed::class) {
+            result.complete(false)
+        }
+    )
+    send(VerifySession::class.with(id, session))
+    return try {
+        result.get(2, TimeUnit.SECONDS)
+    } catch (ignore: TimeoutException) {
+        throw IllegalStateException("The Pingh server's not responding.")
+    }
+}
