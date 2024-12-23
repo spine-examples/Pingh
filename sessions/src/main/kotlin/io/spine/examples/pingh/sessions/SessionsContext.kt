@@ -54,3 +54,4 @@ public fun newSessionsContext(
     BoundedContext.singleTenant(NAME)
         .add(UserSessionRepository(auth, users))
         .add(TokenMonitorRepository())
+        .add(SessionVerificationRepository())
