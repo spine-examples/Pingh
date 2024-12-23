@@ -105,7 +105,7 @@ internal class TokenMonitorProcess :
     }
 
     /**
-     * Finishes the process of monitoring token expiration when monitored session expired.
+     * Finishes the process of monitoring token expiration when monitored session has expired.
      */
     @React
     internal fun on(event: SessionExpired): TokenMonitoringFinished {

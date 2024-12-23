@@ -45,7 +45,7 @@ internal fun KClass<UserLoggedIn>.generateWith(id: SessionId): UserLoggedIn =
 
 /**
  * Creates a new `SessionVerification` with the specified process ID
- * and the ist of active sessions.
+ * and the list of active sessions.
  */
 internal fun KClass<SessionVerification>.with(
     id: SessionVerificationId,

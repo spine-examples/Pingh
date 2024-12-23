@@ -213,7 +213,7 @@ internal class UserSessionProcess :
     }
 
     /**
-     * Closes a session if the login is incomplete and the specified time has passed,
+     * Closes the session if the login is not complete and the specified time has passed,
      * or if the session is active but has exceeded its expiration time.
      */
     @React
@@ -256,7 +256,7 @@ internal class UserSessionProcess :
         internal val maxLoginTime = minutes(3)
 
         /**
-         * The time a session is active after it is created.
+         * The duration for which a session remains active after its creation.
          */
         internal val lifetime = Durations.fromDays(30)
     }

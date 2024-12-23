@@ -276,7 +276,7 @@ internal class UserSessionSpec : ContextAwareTest() {
         }
 
         @Test
-        internal fun `mark fun as deleted if session has expired`() {
+        internal fun `mark state as deleted if session has expired`() {
             finishLogin()
             val time = currentTime().add(lifetime).add(seconds(1))
             emitTimePassedEvent(time)
@@ -288,7 +288,7 @@ internal class UserSessionSpec : ContextAwareTest() {
         @Test
         internal fun `do nothing if session has not expired`() {
             finishLogin()
-            val time = currentTime().add(lifetime).add(seconds(-11))
+            val time = currentTime().add(lifetime).add(seconds(-1))
             emitTimePassedEvent(time)
             assertThatNothingHappened()
         }
