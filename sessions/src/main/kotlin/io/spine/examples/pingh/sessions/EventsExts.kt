@@ -34,6 +34,8 @@ import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.sessions.event.SessionClosed
 import io.spine.examples.pingh.sessions.event.SessionExpired
+import io.spine.examples.pingh.sessions.event.SessionVerificationFailed
+import io.spine.examples.pingh.sessions.event.SessionVerified
 import io.spine.examples.pingh.sessions.event.TokenExpirationTimeUpdated
 import io.spine.examples.pingh.sessions.event.TokenMonitoringFinished
 import io.spine.examples.pingh.sessions.event.TokenMonitoringStarted
@@ -157,5 +159,25 @@ public fun KClass<TokenMonitoringFinished>.with(id: TokenMonitorId): TokenMonito
  */
 public fun KClass<TokenExpirationTimeUpdated>.with(id: TokenMonitorId): TokenExpirationTimeUpdated =
     TokenExpirationTimeUpdated.newBuilder()
+        .setId(id)
+        .vBuild()
+
+/**
+ * Creates a new `SessionVerified` event
+ * with the passed ID of the session verification process.
+ */
+public fun KClass<SessionVerified>.with(id: SessionVerificationId): SessionVerified =
+    SessionVerified.newBuilder()
+        .setId(id)
+        .vBuild()
+
+/**
+ * Creates a new `SessionVerificationFailed` event
+ * with the passed ID of the session verification process.
+ */
+public fun KClass<SessionVerificationFailed>.with(
+    id: SessionVerificationId
+): SessionVerificationFailed =
+    SessionVerificationFailed.newBuilder()
         .setId(id)
         .vBuild()

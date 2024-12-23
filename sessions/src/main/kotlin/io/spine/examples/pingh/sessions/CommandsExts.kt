@@ -33,6 +33,7 @@ import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.command.UpdateToken
 import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
+import io.spine.examples.pingh.sessions.event.VerifySession
 import kotlin.reflect.KClass
 
 /**
@@ -70,4 +71,17 @@ public fun KClass<UpdateToken>.with(
 public fun KClass<LogUserOut>.withSession(id: SessionId): LogUserOut =
     LogUserOut.newBuilder()
         .setId(id)
+        .vBuild()
+
+/**
+ * Creates a new `VerifySession` command with the specified ID of the session verification process
+ * and the session to be verified.
+ */
+public fun KClass<VerifySession>.with(
+    id: SessionVerificationId,
+    session: SessionId
+): VerifySession =
+    VerifySession.newBuilder()
+        .setId(id)
+        .setSession(session)
         .vBuild()
