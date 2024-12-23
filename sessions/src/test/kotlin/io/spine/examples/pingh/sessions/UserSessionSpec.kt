@@ -34,11 +34,13 @@ import io.spine.examples.pingh.clock.buildBy
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
+import io.spine.examples.pingh.sessions.UserSessionProcess.Companion.lifetime
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.command.UpdateToken
 import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
 import io.spine.examples.pingh.sessions.event.SessionClosed
+import io.spine.examples.pingh.sessions.event.SessionExpired
 import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
@@ -57,6 +59,7 @@ import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthentica
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubUsersResponses
 import io.spine.protobuf.AnyPacker
 import io.spine.protobuf.Durations2.minutes
+import io.spine.protobuf.Durations2.seconds
 import io.spine.server.BoundedContextBuilder
 import io.spine.server.integration.ThirdPartyContext
 import io.spine.testing.core.given.GivenUserId
@@ -263,9 +266,45 @@ internal class UserSessionSpec : ContextAwareTest() {
                 .isTrue()
         }
 
+        @Test
+        internal fun `emit 'SessionExpired' event if session has expired`() {
+            finishLogin()
+            val time = currentTime().add(lifetime).add(seconds(1))
+            emitTimePassedEvent(time)
+            val expected = SessionExpired::class.with(session)
+            context().assertEvent(expected)
+        }
+
+        @Test
+        internal fun `mark fun as deleted if session has expired`() {
+            finishLogin()
+            val time = currentTime().add(lifetime).add(seconds(1))
+            emitTimePassedEvent(time)
+            context().assertEntity(session, UserSessionProcess::class.java)
+                .deletedFlag()
+                .isTrue()
+        }
+
+        @Test
+        internal fun `do nothing if session has not expired`() {
+            finishLogin()
+            val time = currentTime().add(lifetime).add(seconds(-11))
+            emitTimePassedEvent(time)
+            assertThatNothingHappened()
+        }
+
+        private fun finishLogin() {
+            auth.enterUserCode()
+            users.username = session.username
+            context().receivesCommand(VerifyUserLoginToGitHub::class.withSession(session))
+        }
+
         private fun assertThatNothingHappened() {
             context().assertEvents()
                 .withType(SessionClosed::class.java)
+                .hasSize(0)
+            context().assertEvents()
+                .withType(SessionExpired::class.java)
                 .hasSize(0)
             context().assertEntity(session, UserSessionProcess::class.java)
                 .deletedFlag()
