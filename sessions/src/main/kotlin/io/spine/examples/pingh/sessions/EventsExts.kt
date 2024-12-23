@@ -33,6 +33,7 @@ import com.google.protobuf.Timestamp
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.UserCode
 import io.spine.examples.pingh.sessions.event.SessionClosed
+import io.spine.examples.pingh.sessions.event.SessionExpired
 import io.spine.examples.pingh.sessions.event.TokenExpirationTimeUpdated
 import io.spine.examples.pingh.sessions.event.TokenMonitoringFinished
 import io.spine.examples.pingh.sessions.event.TokenMonitoringStarted
@@ -121,6 +122,14 @@ public fun KClass<UserLoggedOut>.with(id: SessionId): UserLoggedOut =
  */
 public fun KClass<SessionClosed>.with(id: SessionId): SessionClosed =
     SessionClosed.newBuilder()
+        .setId(id)
+        .vBuild()
+
+/**
+ * Creates a new `SessionExpired` event with the passed ID of the session.
+ */
+public fun KClass<SessionExpired>.with(id: SessionId): SessionExpired =
+    SessionExpired.newBuilder()
         .setId(id)
         .vBuild()
 
