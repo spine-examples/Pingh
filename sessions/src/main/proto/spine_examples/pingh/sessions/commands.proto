@@ -68,3 +68,10 @@ message LogUserOut {
     // The ID of user session.
     SessionId id = 1;
 }
+
+// Tells to determine whether the session is active.
+message VerifySession {
+
+    // The ID of user session.
+    SessionId id = 1;
+}
