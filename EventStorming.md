@@ -9,8 +9,6 @@ in the identification of two bounded contexts.
 <img src="./img/event-storming/sessions-bc-1.jpg" width="900px" alt="Sessions bounded context 1">
 <br>
 <img src="./img/event-storming/sessions-bc-2.jpg" width="500px" alt="Sessions bounded context 2">
-<br>
-<img src="./img/event-storming/sessions-bc-3.jpg" width="500px" alt="Sessions bounded context 3">
 
 - **Mentions**, meticulously following all cases of someone mentioning end-users 
   of Pingh at GitHub.
