@@ -110,7 +110,7 @@ compose.desktop {
         mainClass = "io.spine.examples.pingh.desktop.MainKt"
         nativeDistributions {
             packageName = "Pingh"
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(TargetFormat.Dmg)
             packageVersion = pinghVersion.extractSemanticVersion().value
             macOS {
                 iconFile = iconForMacOs()
