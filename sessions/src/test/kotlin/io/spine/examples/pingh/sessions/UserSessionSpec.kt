@@ -353,7 +353,7 @@ internal class UserSessionSpec : ContextAwareTest() {
         }
 
         @Test
-        internal fun `emit 'SessionVerified' if active session verifies`() {
+        internal fun `emit 'SessionVerified' if active session is verified`() {
             logIn(id)
             val command = VerifySession::class.with(id)
             context().receivesCommand(command)
@@ -362,7 +362,7 @@ internal class UserSessionSpec : ContextAwareTest() {
         }
 
         @Test
-        internal fun `emit 'SessionVerificationFailed' if non-existent session is checked`() {
+        internal fun `emit 'SessionVerificationFailed' if non-existent session is verified`() {
             assertThatVerificationFailed()
         }
 

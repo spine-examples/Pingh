@@ -217,7 +217,7 @@ internal class UserSessionProcess :
     }
 
     /**
-     * Closes the session if the login is not complete and the specified time has passed,
+     * Closes the session if the login is not completed and the specified time has passed,
      * or if the session is active but has exceeded its expiration time.
      */
     @React
