@@ -32,6 +32,7 @@ import io.spine.examples.pingh.clock.buildBy
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.sessions.command.UpdateToken
+import io.spine.examples.pingh.sessions.event.SessionExpired
 import io.spine.examples.pingh.sessions.event.TokenExpirationTimeUpdated
 import io.spine.examples.pingh.sessions.event.TokenMonitoringFinished
 import io.spine.examples.pingh.sessions.event.TokenMonitoringStarted
@@ -167,6 +168,29 @@ internal class TokenMonitorSpec : ContextAwareTest() {
         @BeforeEach
         internal fun emit() {
             val event = UserLoggedOut::class.with(session)
+            context().receivesEvent(event)
+        }
+
+        @Test
+        internal fun `delete process state`() {
+            context().assertEntity(id, TokenMonitorProcess::class.java)
+                .deletedFlag()
+                .isTrue()
+        }
+
+        @Test
+        internal fun `emit 'TokenMonitoringFinished' event`() {
+            val event = TokenMonitoringFinished::class.with(id)
+            context().assertEvent(event)
+        }
+    }
+
+    @Nested internal inner class
+    `React on 'SessionExpired' event, and` {
+
+        @BeforeEach
+        internal fun emit() {
+            val event = SessionExpired::class.with(session)
             context().receivesEvent(event)
         }
 

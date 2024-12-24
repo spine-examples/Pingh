@@ -71,6 +71,13 @@ message UserSession {
     //
     google.protobuf.Timestamp login_deadline = 5;
 
+    // The time at which the session expires and is considered inactive.
+    //
+    // The field is set upon successful login;
+    // otherwise, the field remains empty.
+    //
+    google.protobuf.Timestamp when_expires = 6;
+
     reserved 3;
     reserved "when_access_token_expires";
 }

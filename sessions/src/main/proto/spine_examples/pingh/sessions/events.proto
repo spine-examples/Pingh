@@ -110,3 +110,26 @@ message SessionClosed {
     // The ID of user session.
     SessionId id = 1;
 }
+
+// The lifetime of the session has expired and it is no longer active.
+message SessionExpired {
+
+    // The ID of the user session.
+    SessionId id = 1;
+}
+
+// The session check was completed successfully,
+// which means that the session is active.
+//
+message SessionVerified {
+
+    // The ID of the user session.
+    SessionId id = 1;
+}
+
+// A session verification failed, which means that the session is not active.
+message SessionVerificationFailed {
+
+    // The ID of the user session.
+    SessionId id = 1;
+}

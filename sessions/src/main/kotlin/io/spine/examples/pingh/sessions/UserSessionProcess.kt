@@ -35,8 +35,12 @@ import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.command.UpdateToken
+import io.spine.examples.pingh.sessions.command.VerifySession
 import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
 import io.spine.examples.pingh.sessions.event.SessionClosed
+import io.spine.examples.pingh.sessions.event.SessionExpired
+import io.spine.examples.pingh.sessions.event.SessionVerificationFailed
+import io.spine.examples.pingh.sessions.event.SessionVerified
 import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
@@ -48,14 +52,16 @@ import io.spine.examples.pingh.sessions.rejection.UsernameMismatch
 import io.spine.protobuf.Durations2.minutes
 import io.spine.server.command.Assign
 import io.spine.server.event.React
+import io.spine.server.model.Nothing
 import io.spine.server.procman.ProcessManager
 import io.spine.server.tuple.EitherOf2
-import java.util.Optional
+import io.spine.server.tuple.EitherOf3
 import kotlin.jvm.Throws
 
 /**
  * Coordinates session management, that is, user login and logout.
  */
+@Suppress("TooManyFunctions" /* Managing sessions requires numerous functions. */)
 internal class UserSessionProcess :
     ProcessManager<SessionId, UserSession, UserSession.Builder>() {
 
@@ -124,6 +130,7 @@ internal class UserSessionProcess :
         ensureMembershipInPermittedOrgs(tokens.accessToken)
         with(builder()) {
             refreshToken = tokens.refreshToken
+            whenExpires = currentTime().add(lifetime)
             clearDeviceCode()
             clearLoginDeadline()
         }
@@ -210,15 +217,41 @@ internal class UserSessionProcess :
     }
 
     /**
-     * Closes the session if the login is not completed and the specified time has expired.
+     * Closes the session if the login is not completed and the specified time has passed,
+     * or if the session is active but has exceeded its expiration time.
      */
     @React
-    internal fun on(@External event: TimePassed): Optional<SessionClosed> =
-        if (state().hasLoginDeadline() && state().loginDeadline <= event.time) {
-            deleted = true
-            Optional.of(SessionClosed::class.with(state().id))
+    internal fun on(
+        @External event: TimePassed
+    ): EitherOf3<SessionClosed, SessionExpired, Nothing> =
+        when {
+            state().hasLoginDeadline() && state().loginDeadline <= event.time -> {
+                deleted = true
+                EitherOf3.withA(SessionClosed::class.with(state().id))
+            }
+
+            state().hasWhenExpires() && state().whenExpires <= event.time -> {
+                deleted = true
+                EitherOf3.withB(SessionExpired::class.with(state().id))
+            }
+
+            else -> EitherOf3.withC(nothing())
+        }
+
+    /**
+     * Verifies whether the session is active.
+     *
+     * If the session is active, `SessionVerified` event is emitted;
+     * if it is inactive, `SessionVerificationFailed` event is emitted.
+     */
+    @Assign
+    internal fun handle(
+        command: VerifySession
+    ): EitherOf2<SessionVerified, SessionVerificationFailed> =
+        if (isActive && state().hasRefreshToken()) {
+            EitherOf2.withA(SessionVerified::class.with(command.id))
         } else {
-            Optional.empty()
+            EitherOf2.withB(SessionVerificationFailed::class.with(command.id))
         }
 
     /**
@@ -241,6 +274,11 @@ internal class UserSessionProcess :
          * Maximum duration of the login process.
          */
         internal val maxLoginTime = minutes(3)
+
+        /**
+         * The duration for which a session remains active after its creation.
+         */
+        internal val lifetime = Durations.fromDays(30)
     }
 }
 

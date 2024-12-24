@@ -27,6 +27,8 @@
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import io.spine.examples.pingh.client.PinghApplication
@@ -42,9 +44,10 @@ import io.spine.examples.pingh.desktop.Page.SETTINGS
  */
 @Composable
 internal fun CurrentPage(application: PinghApplication, exitApp: () -> Unit) {
-    val currentPage = remember {
+    val loggedIn by application.loggedIn.collectAsState()
+    val currentPage = remember(loggedIn) {
         mutableStateOf(
-            if (application.isLoggedIn()) MENTIONS else LOGIN
+            if (loggedIn) MENTIONS else LOGIN
         )
     }
     when (currentPage.value) {

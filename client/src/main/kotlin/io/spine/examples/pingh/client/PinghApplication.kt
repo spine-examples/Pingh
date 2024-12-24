@@ -31,7 +31,14 @@ import io.grpc.ManagedChannelBuilder
 import io.spine.core.UserId
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.sessions.SessionId
+import io.spine.examples.pingh.sessions.command.VerifySession
+import io.spine.examples.pingh.sessions.event.SessionExpired
+import io.spine.examples.pingh.sessions.event.SessionVerificationFailed
+import io.spine.examples.pingh.sessions.event.SessionVerified
+import io.spine.examples.pingh.sessions.with
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -75,6 +82,12 @@ public class PinghApplication private constructor(
         .build()
 
     /**
+     * Enables interaction with the Pingh server.
+     */
+    internal var client: DesktopClient = DesktopClient(channel)
+        private set
+
+    /**
      * Manages the session with Pingh server.
      */
     private val session: Session
@@ -88,19 +101,16 @@ public class PinghApplication private constructor(
         val storage = UserDataStorage()
         session = Session(storage)
         settings = Settings(storage)
-    }
 
-    /**
-     * Enables interaction with the Pingh server.
-     */
-    internal var client: DesktopClient
-        private set
+        // Resets a locally saved session if it is no longer active.
+        if (session.isActive) {
+            if (!client.verifySession(session.id)) {
+                session.resetToGuest()
+            }
+        }
 
-    init {
-        client = if (session.isActive) {
-            DesktopClient(channel, session.id.asUserId())
-        } else {
-            DesktopClient(channel)
+        if (session.isActive) {
+            client = DesktopClient(channel, session.id.asUserId())
         }
     }
 
@@ -121,6 +131,15 @@ public class PinghApplication private constructor(
      * or `null` if the user is not logged in.
      */
     public val unreadMentionCount: StateFlow<Int?> = _unreadMentionCount
+
+    private val _loggedIn: MutableStateFlow<Boolean> = MutableStateFlow(session.isActive)
+
+    /**
+     * Whether the user is logged into the application.
+     *
+     * If `true`, the user has an active session.
+     */
+    public val loggedIn: StateFlow<Boolean> = _loggedIn
 
     /**
      * A job that updates the unread mention count
@@ -155,6 +174,21 @@ public class PinghApplication private constructor(
         session.establish(id)
         client = DesktopClient(channel, id.asUserId())
         notificationsFlow.enableNotifications(client, id.username)
+        subscribeToSessionExpiration(id)
+        _loggedIn.value = true
+    }
+
+    /**
+     * Updates the application state if the session in use has expired.
+     */
+    private fun subscribeToSessionExpiration(id: SessionId) {
+        client.observeEvent(id, SessionExpired::class) {
+            closeSession()
+            notificationsFlow.send(
+                "Pingh",
+                "Your session has expired.${System.lineSeparator()}Please log in again."
+            )
+        }
     }
 
     /**
@@ -164,6 +198,7 @@ public class PinghApplication private constructor(
      * - the [mentions flow][mentionsFlow] for previous session is deleted.
      */
     private fun closeSession() {
+        _loggedIn.value = false
         client.close()
         session.resetToGuest()
         client = DesktopClient(channel)
@@ -172,11 +207,6 @@ public class PinghApplication private constructor(
         mentionsObserver?.cancel()
         settingsFlow = null
     }
-
-    /**
-     * Returns `true` if the user is logged in to the application.
-     */
-    public fun isLoggedIn(): Boolean = session.isActive
 
     /**
      * Initiates the login flow and terminates any previous flow, if it exists.
@@ -303,3 +333,24 @@ private fun SessionId.asUserId(): UserId =
     UserId.newBuilder()
         .setValue(username.value)
         .vBuild()
+
+/**
+ * Returns `true` if session is active.
+ */
+private fun DesktopClient.verifySession(id: SessionId): Boolean {
+    val future = CompletableFuture<Boolean>()
+    observeEither(
+        EventObserver(id, SessionVerified::class) {
+            future.complete(true)
+        },
+        EventObserver(id, SessionVerificationFailed::class) {
+            future.complete(false)
+        }
+    )
+    send(VerifySession::class.with(id))
+    return try {
+        future.get(2, TimeUnit.SECONDS)
+    } catch (ignore: TimeoutException) {
+        false
+    }
+}
