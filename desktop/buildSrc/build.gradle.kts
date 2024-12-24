@@ -42,7 +42,7 @@ repositories {
  *
  * Please keep in sync. with [io.spine.internal.BuildSettings].
  */
-val jvmVersion = 17
+val jvmVersion = 21
 
 /**
  * The version of the Kotlin Gradle plugin and Kotlin binaries used by the build process.
