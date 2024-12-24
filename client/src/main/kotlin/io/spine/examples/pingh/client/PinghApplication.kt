@@ -186,7 +186,7 @@ public class PinghApplication private constructor(
             closeSession()
             notificationsFlow.send(
                 "Pingh",
-                "Your session has expired.${System.lineSeparator()}Log in again."
+                "Your session has expired.${System.lineSeparator()}Please log in again."
             )
         }
     }
