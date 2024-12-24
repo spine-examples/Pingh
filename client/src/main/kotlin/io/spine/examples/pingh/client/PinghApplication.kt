@@ -31,12 +31,10 @@ import io.grpc.ManagedChannelBuilder
 import io.spine.core.UserId
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.sessions.SessionId
-import io.spine.examples.pingh.sessions.SessionVerificationId
 import io.spine.examples.pingh.sessions.command.VerifySession
 import io.spine.examples.pingh.sessions.event.SessionExpired
 import io.spine.examples.pingh.sessions.event.SessionVerificationFailed
 import io.spine.examples.pingh.sessions.event.SessionVerified
-import io.spine.examples.pingh.sessions.of
 import io.spine.examples.pingh.sessions.with
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
@@ -337,11 +335,8 @@ private fun SessionId.asUserId(): UserId =
 
 /**
  * Returns `true` if session is active.
- *
- * @throws IllegalStateException if the server is not responding.
  */
-private fun DesktopClient.verifySession(session: SessionId): Boolean {
-    val id = SessionVerificationId::class.of(session.username)
+private fun DesktopClient.verifySession(id: SessionId): Boolean {
     val future = CompletableFuture<Boolean>()
     observeEither(
         EventObserver(id, SessionVerified::class) {
@@ -351,10 +346,10 @@ private fun DesktopClient.verifySession(session: SessionId): Boolean {
             future.complete(false)
         }
     )
-    send(VerifySession::class.with(id, session))
+    send(VerifySession::class.with(id))
     return try {
         future.get(2, TimeUnit.SECONDS)
     } catch (ignore: TimeoutException) {
-        throw IllegalStateException("The Pingh server is not responding.")
+        false
     }
 }
