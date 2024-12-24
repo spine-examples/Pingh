@@ -61,6 +61,7 @@ import kotlin.jvm.Throws
 /**
  * Coordinates session management, that is, user login and logout.
  */
+@Suppress("TooManyFunctions" /* Managing sessions requires numerous functions. */)
 internal class UserSessionProcess :
     ProcessManager<SessionId, UserSession, UserSession.Builder>() {
 
