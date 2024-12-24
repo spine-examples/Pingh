@@ -35,9 +35,12 @@ import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.command.UpdateToken
+import io.spine.examples.pingh.sessions.command.VerifySession
 import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
 import io.spine.examples.pingh.sessions.event.SessionClosed
 import io.spine.examples.pingh.sessions.event.SessionExpired
+import io.spine.examples.pingh.sessions.event.SessionVerificationFailed
+import io.spine.examples.pingh.sessions.event.SessionVerified
 import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
@@ -232,6 +235,22 @@ internal class UserSessionProcess :
             }
 
             else -> EitherOf3.withC(nothing())
+        }
+
+    /**
+     * Verifies whether the session is active.
+     *
+     * If the session is active, `SessionVerified` event is emitted;
+     * if it is inactive, `SessionVerificationFailed` event is emitted.
+     */
+    @Assign
+    internal fun handle(
+        command: VerifySession
+    ): EitherOf2<SessionVerified, SessionVerificationFailed> =
+        if (isActive && state().hasRefreshToken()) {
+            EitherOf2.withA(SessionVerified::class.with(command.id))
+        } else {
+            EitherOf2.withB(SessionVerificationFailed::class.with(command.id))
         }
 
     /**
