@@ -19,7 +19,7 @@ jobs:
           architecture: x64
           java-version: |
             11
-            17
+            21
 
       - name: Build server with JDK 11 and run tests
         run: ./gradlew build --stacktrace
@@ -34,5 +34,5 @@ jobs:
           cd desktop
           ./gradlew build --stacktrace
         env:
-          JAVA_HOME: ${{ env.JAVA_HOME_17_X64 }}
+          JAVA_HOME: ${{ env.JAVA_HOME_21_X64 }}
           DISPLAY: ":99"
