@@ -53,11 +53,3 @@ public fun KClass<TokenMonitorId>.of(session: SessionId): TokenMonitorId =
     TokenMonitorId.newBuilder()
         .setSession(session)
         .vBuild()
-
-/**
- * Create a new `SessionVerificationId` with the name of user whose session is being verifying.
- */
-public fun KClass<SessionVerificationId>.of(user: Username): SessionVerificationId =
-    SessionVerificationId.newBuilder()
-        .setUsername(user)
-        .vBuild()

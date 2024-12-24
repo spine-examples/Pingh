@@ -74,14 +74,9 @@ public fun KClass<LogUserOut>.withSession(id: SessionId): LogUserOut =
         .vBuild()
 
 /**
- * Creates a new `VerifySession` command with the specified ID of the session verification process
- * and the session to be verified.
+ * Creates a new `VerifySession` command with the specified ID of the session.
  */
-public fun KClass<VerifySession>.with(
-    id: SessionVerificationId,
-    session: SessionId
-): VerifySession =
+public fun KClass<VerifySession>.with(id: SessionId): VerifySession =
     VerifySession.newBuilder()
         .setId(id)
-        .setSession(session)
         .vBuild()

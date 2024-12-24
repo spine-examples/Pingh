@@ -32,8 +32,6 @@ import com.google.protobuf.Duration
 import com.google.protobuf.Timestamp
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.UserCode
-import io.spine.examples.pingh.sessions.event.ActiveSessionAdded
-import io.spine.examples.pingh.sessions.event.InactiveSessionRemoved
 import io.spine.examples.pingh.sessions.event.SessionClosed
 import io.spine.examples.pingh.sessions.event.SessionExpired
 import io.spine.examples.pingh.sessions.event.SessionVerificationFailed
@@ -138,6 +136,22 @@ public fun KClass<SessionExpired>.with(id: SessionId): SessionExpired =
         .vBuild()
 
 /**
+ * Creates a new `SessionVerified` event with the passed ID of the session.
+ */
+public fun KClass<SessionVerified>.with(id: SessionId): SessionVerified =
+    SessionVerified.newBuilder()
+        .setId(id)
+        .vBuild()
+
+/**
+ * Creates a new `SessionVerificationFailed` event with the passed ID of the session.
+ */
+public fun KClass<SessionVerificationFailed>.with(id: SessionId): SessionVerificationFailed =
+    SessionVerificationFailed.newBuilder()
+        .setId(id)
+        .vBuild()
+
+/**
  * Creates a new `TokenMonitoringStarted` event
  * with the passed ID of the token monitoring process.
  */
@@ -161,43 +175,5 @@ public fun KClass<TokenMonitoringFinished>.with(id: TokenMonitorId): TokenMonito
  */
 public fun KClass<TokenExpirationTimeUpdated>.with(id: TokenMonitorId): TokenExpirationTimeUpdated =
     TokenExpirationTimeUpdated.newBuilder()
-        .setId(id)
-        .vBuild()
-
-/**
- * Creates a new `SessionVerified` event
- * with the passed ID of the session verification process.
- */
-public fun KClass<SessionVerified>.with(id: SessionVerificationId): SessionVerified =
-    SessionVerified.newBuilder()
-        .setId(id)
-        .vBuild()
-
-/**
- * Creates a new `SessionVerificationFailed` event
- * with the passed ID of the session verification process.
- */
-public fun KClass<SessionVerificationFailed>.with(
-    id: SessionVerificationId
-): SessionVerificationFailed =
-    SessionVerificationFailed.newBuilder()
-        .setId(id)
-        .vBuild()
-
-/**
- * Creates a new `ActiveSessionAdded` event
- * with the passed ID of the session verification process.
- */
-public fun KClass<ActiveSessionAdded>.with(id: SessionVerificationId): ActiveSessionAdded =
-    ActiveSessionAdded.newBuilder()
-        .setId(id)
-        .vBuild()
-
-/**
- * Creates a new `InactiveSessionRemoved` event
- * with the passed ID of the session verification process.
- */
-public fun KClass<InactiveSessionRemoved>.with(id: SessionVerificationId): InactiveSessionRemoved =
-    InactiveSessionRemoved.newBuilder()
         .setId(id)
         .vBuild()
