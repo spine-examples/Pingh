@@ -68,7 +68,8 @@ subprojects {
 
     // Adds logging library.
     dependencies {
-        implementation(Flogger.lib)
+        implementation(Flogger.api)
+        runtimeOnly(Flogger.backend)
     }
 }
 

@@ -26,8 +26,11 @@
 
 package io.spine.internal.dependency
 
+// https://github.com/google/flogger
 public object Flogger {
     private const val group = "com.google.flogger"
     private const val version = "0.8"
-    public const val lib: String = "$group:flogger:$version"
+
+    public const val api: String = "$group:flogger:$version"
+    public const val backend: String = "$group:flogger-log4j2-backend:$version"
 }
