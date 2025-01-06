@@ -35,7 +35,7 @@ Client stack:
 
 - Kotlin 1.9.20.
 - Compose Multiplatform 1.7.0.
-- JDK 21.
+- JDK 17.
 
 Builds with Gradle 8.10.x. Runs locally.
 
