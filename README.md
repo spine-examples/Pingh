@@ -34,10 +34,14 @@ Builds with Gradle 6.9.x. Deploys onto Google Cloud.
 Client stack:
 
 - Kotlin 1.9.20.
-- Compose Multiplatform 1.6.11.
-- JDK 17.
+- Compose Multiplatform 1.7.0.
+- JDK 21.
 
 Builds with Gradle 8.10.x. Runs locally.
+
+The Amazon Corretto 21 JDK is recommended to build client application.
+Other versions and implementations of the JDK may cause errors 
+when running the client distribution on some versions of macOS.
 
 ## Project structure
 
