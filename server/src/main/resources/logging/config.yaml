@@ -1,5 +1,5 @@
 #
-# Copyright 2024, TeamDev. All rights reserved.
+# Copyright 2025, TeamDev. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,30 +29,38 @@ logging:
     # Loads logs from files in the project log folder.
     info_file:
       type: files
-      include_paths: [ /var/log/pingh/*.log ]
+      include_paths: [ /var/log/pingh/*-info.log ]
 
   processors:
-    # Converts a log string to JSON.
-    extract_structure:
+    # Identifies and parses the string corresponding to the informational log.
+    #
+    # Note that the regex keys correspond to the keys of the associated values
+    # in the target `jsonPayload`.
+    #
+    extract_info_line:
       type: parse_regex
-      regex: "^(?<time>[\d-]*T[\d:]*) (?<severity>[^ ]*) - (?<message>(.|\\n)*)$"
+      regex: "^\\[(?<severity>([^\\]]*))\\] (?<time>([\\d-]*T[\\d:.]*)) (?<class>([^ ]*)) - (?<message>[^\\n]*)$"
       field: message
       time_key: time
-      time_format: "%Y-%m-%dT%H:%M:%S"
+      time_format: "%Y-%m-%dT%H:%M:%S.%L"
 
-    # Specifies the severity that was extracted during the `extract_structure` process.
-    move_severity:
+    # Specifies the severity that was extracted during the `extract_info_line` process.
+    set_severity:
       type: modify_fields
       fields:
         severity:
           move_from: jsonPayload.severity
+          # Replace the WARN level used in Log4j
+          # with the WARNING level used in Google Cloud Logging.
+          map_values:
+            'WARN': WARNING
 
   service:
     pipelines:
       # Sends info logs, converting them each line to a JSON file and extracting severity.
       info_pipeline:
         receivers: [ info_file ]
-        processors: [ extract_structure, move_severity ]
+        processors: [ extract_info_line, set_severity ]
 
       # Removes the sending of default logs.
       default_pipeline:
