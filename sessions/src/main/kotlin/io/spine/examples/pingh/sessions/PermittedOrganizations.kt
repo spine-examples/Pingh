@@ -55,7 +55,7 @@ internal object PermittedOrganizations {
         val orgStr = properties.getProperty("permitted-organizations")
             ?: throw IllegalStateException(
                 "List of names of permitted organizations must be provided " +
-                        "in the configuration file located at \"resource$path\"."
+                        "in the configuration file located at \"resources$path\"."
             )
         return orgStr.split(""",\s*""".toRegex())
             .map { Organization::class.loggedAs(it.trim()) }

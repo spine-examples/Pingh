@@ -33,7 +33,7 @@ package io.spine.examples.pingh.sessions
  * @see <a href="https://shorturl.at/nsfby">Problems that can occur</a>
  */
 public class CannotObtainAccessToken(
-    errorName: String
+    public val errorName: String
 ) : Exception("Received an error from GitHub with name `$errorName`.") {
 
     public companion object {

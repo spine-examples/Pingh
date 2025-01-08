@@ -29,6 +29,7 @@
 package io.spine.examples.pingh.sessions
 
 import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Timestamps
 import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.github.Username
 import kotlin.reflect.KClass
@@ -53,3 +54,15 @@ public fun KClass<TokenMonitorId>.of(session: SessionId): TokenMonitorId =
     TokenMonitorId.newBuilder()
         .setSession(session)
         .vBuild()
+
+/**
+ * Converts `SessionId` into a readable string format for logging.
+ */
+internal fun SessionId.forLog(): String =
+    "SessionId{username=${username.value}, whenCreated=${Timestamps.toString(whenCreated)}}"
+
+/**
+ * Converts `TokenMonitorId` into a readable string format for logging.
+ */
+internal fun TokenMonitorId.forLog(): String =
+    "TokenMonitorId{session=${session.forLog()}}"

@@ -26,6 +26,8 @@
 
 package io.spine.examples.pingh.sessions
 
+import com.google.common.flogger.FluentLogger
+import com.google.protobuf.util.Timestamps
 import io.spine.core.External
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.sessions.command.UpdateToken
@@ -55,10 +57,11 @@ internal class TokenMonitorProcess :
      */
     @React
     internal fun on(event: UserLoggedIn): TokenMonitoringStarted {
+        val id = TokenMonitorId::class.of(event.id)
+        logger.atFine()
+            .log("${id.forLog()}: Token monitor process starts.")
         builder().setWhenExpires(event.whenTokenExpires)
-        return TokenMonitoringStarted::class.with(
-            TokenMonitorId::class.of(event.id)
-        )
+        return TokenMonitoringStarted::class.with(id)
     }
 
     /**
@@ -76,6 +79,12 @@ internal class TokenMonitorProcess :
         if (time < state().whenExpires || inProcess) {
             return Optional.empty()
         }
+        logger.atFine().log(
+            "${state().id.forLog()}: Update for the access token is requested because " +
+                    "the token has expired. The token's expiration time " +
+                    "is ${Timestamps.toString(state().whenExpires)}, " +
+                    "and the current time is ${Timestamps.toString(time)}."
+        )
         builder().setWhenUpdateRequested(time)
         return Optional.of(UpdateToken::class.with(state().id.session, time))
     }
@@ -86,6 +95,11 @@ internal class TokenMonitorProcess :
      */
     @React
     internal fun on(event: TokenUpdated): TokenExpirationTimeUpdated {
+        logger.atFine().log(
+            "${state().id.forLog()}: Sets the expiration time for the updated token. " +
+                    "The access token will expire " +
+                    "at ${Timestamps.toString(event.whenTokenExpires)}."
+        )
         with(builder()) {
             whenExpires = event.whenTokenExpires
             clearWhenUpdateRequested()
@@ -98,6 +112,10 @@ internal class TokenMonitorProcess :
      */
     @React
     internal fun on(event: UserLoggedOut): TokenMonitoringFinished {
+        logger.atFine().log(
+            "${state().id.forLog()}: Token monitoring process finishes " +
+                    "because user is logged out."
+        )
         deleted = true
         return TokenMonitoringFinished::class.with(
             TokenMonitorId::class.of(event.id)
@@ -109,6 +127,10 @@ internal class TokenMonitorProcess :
      */
     @React
     internal fun on(event: SessionExpired): TokenMonitoringFinished {
+        logger.atFine().log(
+            "${state().id.forLog()}: Token monitoring process finishes " +
+                    "because session has expired."
+        )
         deleted = true
         return TokenMonitoringFinished::class.with(
             TokenMonitorId::class.of(event.id)
@@ -121,5 +143,7 @@ internal class TokenMonitorProcess :
          * if no update occurs after the previous command.
          */
         private val updateRetryInterval = minutes(1)
+
+        private val logger = FluentLogger.forEnclosingClass()
     }
 }
