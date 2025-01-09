@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.client
 
+import com.google.common.flogger.FluentLogger
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.command.LogUserIn
@@ -62,7 +63,14 @@ public class EnterUsername internal constructor(
             result = event
             moveToNextStage()
             onSuccess(event)
+            logger.atFine().log("Verification code received.")
         }
         client.send(command)
+        logger.atFine()
+            .log("Command to start login was sent; awaiting the receipt of verification code.")
+    }
+
+    private companion object {
+        private val logger = FluentLogger.forEnclosingClass()
     }
 }

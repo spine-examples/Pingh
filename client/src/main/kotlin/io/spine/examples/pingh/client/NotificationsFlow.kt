@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.client
 
+import com.google.common.flogger.FluentLogger
 import com.google.protobuf.Timestamp
 import io.spine.base.EventMessage
 import io.spine.base.EventMessageField
@@ -109,6 +110,8 @@ internal class NotificationsFlow(
             )
         )
 
+        private val logger = FluentLogger.forEnclosingClass()
+
         private fun content(
             whenMentioned: Timestamp,
             whoMentioned: User,
@@ -130,6 +133,10 @@ internal class NotificationsFlow(
     internal fun send(title: String, content: String) {
         if (!settings.current.dndEnabled) {
             sender.send(title, content)
+            logger.atFine().log(
+                "A notification was sent with the title \"$title\" " +
+                        "and the content \"$content\"."
+            )
         }
     }
 
@@ -162,7 +169,12 @@ internal class NotificationsFlow(
                     !dndEnabled && !isIgnored(notification.whereMentioned(event))
                 }
             ) {
-                sender.send(notification.title, notification.content(event))
+                val content = notification.content(event)
+                sender.send(notification.title, content)
+                logger.atFine().log(
+                    "A notification was sent with the title \"${notification.title}\" " +
+                            "and the content \"$content\"."
+                )
             }
         }
     }

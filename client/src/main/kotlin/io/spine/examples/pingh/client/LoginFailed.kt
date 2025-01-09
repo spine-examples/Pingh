@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.client
 
+import com.google.common.flogger.FluentLogger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -56,5 +57,10 @@ public class LoginFailed internal constructor(
      */
     public fun restartLogin() {
         moveToNextStage()
+        logger.atFine().log("Restarting login.")
+    }
+
+    private companion object {
+        private val logger = FluentLogger.forEnclosingClass()
     }
 }

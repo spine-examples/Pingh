@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.client
 
+import com.google.common.flogger.FluentLogger
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import io.spine.core.UserId
@@ -71,6 +72,8 @@ public class PinghApplication private constructor(
          * Creates a new builder for Pingh application.
          */
         public fun builder(): Builder = Builder()
+
+        private val logger = FluentLogger.forEnclosingClass()
     }
 
     /**
@@ -101,11 +104,15 @@ public class PinghApplication private constructor(
         val storage = UserDataStorage()
         session = Session(storage)
         settings = Settings(storage)
+        logger.atFine().log("Session and settings data was loaded from local storage.")
 
         // Resets a locally saved session if it is no longer active.
         if (session.isActive) {
+            logger.atFine().log("Saved session was detected.")
             if (!client.verifySession(session.id)) {
                 session.resetToGuest()
+                logger.atFine()
+                    .log("The saved session has expired, so a new guest session was created.")
             }
         }
 
@@ -176,6 +183,7 @@ public class PinghApplication private constructor(
         notificationsFlow.enableNotifications(client, id.username)
         subscribeToSessionExpiration(id)
         _loggedIn.value = true
+        logger.atFine().log("A user session with the server was established.")
     }
 
     /**
@@ -187,6 +195,10 @@ public class PinghApplication private constructor(
             notificationsFlow.send(
                 "Pingh",
                 "Your session has expired.${System.lineSeparator()}Please log in again."
+            )
+            logger.atInfo().log(
+                "The current session has expired. " +
+                        "A new guest session was created and is now in use."
             )
         }
     }
@@ -206,6 +218,7 @@ public class PinghApplication private constructor(
         _unreadMentionCount.value = null
         mentionsObserver?.cancel()
         settingsFlow = null
+        logger.atFine().log("The current session was closed.")
     }
 
     /**
@@ -215,6 +228,7 @@ public class PinghApplication private constructor(
         if (loginFlow == null || loginFlow!!.isCompleted()) {
             loginFlow = LoginFlow(client, ::establishSession)
         }
+        logger.atFine().log("Login flow was started.")
         return loginFlow!!
     }
 
@@ -230,6 +244,7 @@ public class PinghApplication private constructor(
         } else {
             mentionsFlow!!.applySettings()
         }
+        logger.atFine().log("Mentions flow was started.")
         return mentionsFlow!!
     }
 
@@ -254,6 +269,7 @@ public class PinghApplication private constructor(
         if (settingsFlow == null) {
             settingsFlow = SettingsFlow(client, session, settings, ::closeSession)
         }
+        logger.atFine().log("Settings flow was started.")
         return settingsFlow!!
     }
 
@@ -267,6 +283,7 @@ public class PinghApplication private constructor(
         client.close()
         channel.shutdown()
             .awaitTermination(defaultShutdownTimeout, TimeUnit.SECONDS)
+        logger.atFine().log("Application was closed.")
     }
 
     /**

@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.client
 
+import com.google.common.flogger.FluentLogger
 import com.google.protobuf.Duration
 import io.spine.examples.pingh.client.ExponentialBackoffStrategy.ActionOutcome
 import io.spine.examples.pingh.github.UserCode
@@ -127,6 +128,7 @@ public class VerifyLogin internal constructor(
         isUserCodeExpired.value = false
         codeExpirationJob = invoke(expiresIn.value) {
             isUserCodeExpired.value = true
+            logger.atFine().log("User code expired.")
         }
     }
 
@@ -215,7 +217,9 @@ public class VerifyLogin internal constructor(
             codeExpirationJob.cancel()
             watchForCodeExpiration()
             onSuccess(event)
+            logger.atFine().log("Verification code received.")
         }
+        logger.atFine().log("Requested a new verification code; awaiting the server receipt.")
     }
 
     /**
@@ -224,6 +228,7 @@ public class VerifyLogin internal constructor(
     internal fun close() {
         codeExpirationJob.cancel()
         retryStrategy?.stop()
+        logger.atFine().log("Closed verification login flow.")
     }
 
     private companion object {
@@ -241,6 +246,8 @@ public class VerifyLogin internal constructor(
          * The maximum time to wait for a server response.
          */
         private val responseTimeout = seconds(5)
+
+        private val logger = FluentLogger.forEnclosingClass()
     }
 }
 

@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.client
 
+import com.google.common.flogger.FluentLogger
 import io.spine.examples.pingh.client.settings.IgnoredSource
 import io.spine.examples.pingh.client.settings.SnoozeTime
 import io.spine.examples.pingh.client.settings.UserSettings
@@ -80,8 +81,10 @@ public class SettingsFlow internal constructor(
         client.observeEvent(command.id, UserLoggedOut::class) { event ->
             closeSession()
             onSuccess(event)
+            logger.atFine().log("Logged out.")
         }
         client.send(command)
+        logger.atFine().log("Sent command to log out.")
     }
 
     /**
@@ -91,6 +94,11 @@ public class SettingsFlow internal constructor(
     public fun saveSettings() {
         val settings = mutableSettings.vBuild()
         localSettings.update(settings)
+        logger.atFine().log("Applied settings changes.")
+    }
+
+    private companion object {
+        private val logger = FluentLogger.forEnclosingClass()
     }
 }
 

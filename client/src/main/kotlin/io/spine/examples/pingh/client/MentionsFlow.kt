@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.client
 
+import com.google.common.flogger.FluentLogger
 import com.google.protobuf.Duration
 import com.google.protobuf.util.Timestamps
 import io.spine.base.Time.currentTime
@@ -87,7 +88,11 @@ public class MentionsFlow internal constructor(
             mentions.value = entity.mentionList
                 .notIgnored()
                 .distinctBy { it.id }
+            logger.atFine().log(
+                "An update to the mentions on the server was made. The changes were applied."
+            )
         }
+        logger.atFine().log("Subscribed to mentions updates.")
     }
 
     /**
@@ -103,6 +108,7 @@ public class MentionsFlow internal constructor(
             GitHubClientId::class.of(session.username)
         )
         client.send(command)
+        logger.atFine().log("Sent a command to update the mentions.")
     }
 
     /**
@@ -151,6 +157,7 @@ public class MentionsFlow internal constructor(
         ensureLoggedIn()
         val command = SnoozeMention::class.buildBy(id, currentTime().add(snoozeTime))
         client.send(command)
+        logger.atFine().log("Sent a command to snooze the mention.")
     }
 
     /**
@@ -162,6 +169,7 @@ public class MentionsFlow internal constructor(
         ensureLoggedIn()
         val command = MarkMentionAsRead::class.buildBy(id)
         client.send(command)
+        logger.atFine().log("Sent a command to mark the mention as read.")
     }
 
     /**
@@ -172,6 +180,7 @@ public class MentionsFlow internal constructor(
         mentions.value
             .filter { it.status != MentionStatus.READ }
             .forEach { markAsRead(it.id) }
+        logger.atFine().log("Sent a command to mark all mentions as read.")
     }
 
     /**
@@ -183,6 +192,7 @@ public class MentionsFlow internal constructor(
         ensureLoggedIn()
         val command = PinMention::class.with(id)
         client.send(command)
+        logger.atFine().log("Sent a command to pin the mention.")
     }
 
     /**
@@ -194,6 +204,7 @@ public class MentionsFlow internal constructor(
         ensureLoggedIn()
         val command = UnpinMention::class.with(id)
         client.send(command)
+        logger.atFine().log("Sent a command to unpin the mention.")
     }
 
     /**
@@ -208,6 +219,10 @@ public class MentionsFlow internal constructor(
      */
     private fun ensureLoggedIn() {
         check(session.isActive) { "The user is not logged in." }
+    }
+
+    private companion object {
+        private val logger = FluentLogger.forEnclosingClass()
     }
 }
 

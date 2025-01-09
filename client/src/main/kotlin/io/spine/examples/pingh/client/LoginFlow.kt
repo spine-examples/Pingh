@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.client
 
+import com.google.common.flogger.FluentLogger
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -73,6 +74,9 @@ public class LoginFlow internal constructor(
      */
     private val stage: MutableStateFlow<LoginStage<*>> =
         MutableStateFlow(EnterUsername(client, ::moveToNextStage))
+    init {
+        logger.atFine().log("Starting login flow. Current stage: ${stage.value::class.simpleName}")
+    }
 
     /**
      * Returns the immutable state of the current login stage.
@@ -121,6 +125,7 @@ public class LoginFlow internal constructor(
                 stage.value = EnterUsername(client, ::moveToNextStage)
             }
         }
+        logger.atFine().log("Login flow moved to the ${stage.value::class.simpleName} stage.")
     }
 
     /**
@@ -130,6 +135,11 @@ public class LoginFlow internal constructor(
         when (val screenStage = stage.value) {
             is VerifyLogin -> screenStage.close()
         }
+        logger.atFine().log("Logging flow closed.")
+    }
+
+    private companion object {
+        private val logger = FluentLogger.forEnclosingClass()
     }
 }
 
