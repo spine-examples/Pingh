@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.common.flogger.FluentLogger
 import io.spine.core.Subscribe
 import io.spine.examples.pingh.mentions.event.MentionArchived
 import io.spine.examples.pingh.mentions.event.MentionPinned
@@ -49,13 +50,21 @@ internal class UserMentionsProjection :
      */
     @Subscribe
     internal fun on(event: UserMentioned) {
+        val id = UserMentionsId::class.of(event.id.user)
         if (state().mentionList.any { it.id.equals(event.id) }) {
+            logger.atWarning().log(
+                "${id.forLog()}: A user mention occurred, but it has already been saved. " +
+                        "As duplicates are not allowed, this mention is ignored. " +
+                        "Mention ID: ${event.id.forLog()}."
+            )
             return
         }
         builder()
             .addMention(
                 MentionView::class.buildBy(event, MentionStatus.UNREAD)
             )
+        logger.atFine()
+            .log("${id.forLog()}: Mention with ID ${event.id.forLog()} is saved.")
     }
 
     /**
@@ -66,6 +75,8 @@ internal class UserMentionsProjection :
         modify(event.id) {
             status = MentionStatus.SNOOZED
         }
+        logger.atFine()
+            .log("${state().id.forLog()}: Mention with ID ${event.id.forLog()} snoozed.")
     }
 
     /**
@@ -76,6 +87,8 @@ internal class UserMentionsProjection :
         modify(event.id) {
             status = MentionStatus.READ
         }
+        logger.atFine()
+            .log("${state().id.forLog()}: Mention with ID ${event.id.forLog()} marked as read.")
     }
 
     /**
@@ -87,6 +100,8 @@ internal class UserMentionsProjection :
         modify(event.id) {
             status = MentionStatus.UNREAD
         }
+        logger.atFine()
+            .log("${state().id.forLog()}: Mention with ID ${event.id.forLog()} unsnoozed.")
     }
 
     /**
@@ -97,6 +112,8 @@ internal class UserMentionsProjection :
         modify(event.id) {
             pinned = true
         }
+        logger.atFine()
+            .log("${state().id.forLog()}: Mention with ID ${event.id.forLog()} pinned.")
     }
 
     /**
@@ -107,6 +124,8 @@ internal class UserMentionsProjection :
         modify(event.id) {
             pinned = false
         }
+        logger.atFine()
+            .log("${state().id.forLog()}: Mention with ID ${event.id.forLog()} unpinned.")
     }
 
     /**
@@ -133,11 +152,23 @@ internal class UserMentionsProjection :
     internal fun on(event: MentionArchived) {
         with(builder()) {
             val id = mentionList.indexOfFirst { it.id.equals(event.id) }
-            check(id != -1) {
-                "The mention is not in the user's list, but an attempt was made to remove it.\n" +
-                        "The ID of the mention that was attempted to be removed: `${event.id}`."
+            if (id == -1) {
+                val exception = IllegalStateException(
+                    "The mention is not in the user's list, but an attempt was made to remove it." +
+                            "The ID of the mention that was attempted to be removed: `${event.id}`."
+                )
+                logger.atSevere().withCause(exception).log()
+                throw exception
             }
             removeMention(id)
+            logger.atFine().log(
+                "${state().id.forLog()}: Mention with ID ${event.id.forLog()} is deleted " +
+                        "from projection because the mention is obsolete."
+            )
         }
+    }
+
+    private companion object {
+        private val logger = FluentLogger.forEnclosingClass()
     }
 }

@@ -27,8 +27,10 @@
 package io.spine.examples.pingh.mentions
 
 import com.google.common.annotations.VisibleForTesting
+import com.google.common.flogger.FluentLogger
 import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Durations
+import com.google.protobuf.util.Timestamps
 import io.spine.base.Time.currentTime
 import io.spine.core.External
 import io.spine.examples.pingh.clock.event.TimePassed
@@ -75,6 +77,8 @@ internal class MentionProcess :
                 viaTeam = event.viaTeam
             }
         }
+        logger.atFine()
+            .log("${event.id.forLog()}: The process for managing the mention's lifecycle started.")
         return nothing()
     }
 
@@ -85,12 +89,19 @@ internal class MentionProcess :
     @Throws(MentionIsAlreadyRead::class)
     internal fun handle(command: SnoozeMention): MentionSnoozed {
         if (state().status == MentionStatus.READ) {
+            logger.atWarning().log(
+                "${command.id.forLog()}: Trying to snooze the mention that has already been read."
+            )
             throw MentionIsAlreadyRead::class.buildBy(command.id)
         }
         with(builder()) {
             status = MentionStatus.SNOOZED
             snoozeUntilWhen = command.untilWhen
         }
+        logger.atFine().log(
+            "${command.id.forLog()}: Mention snoozed " +
+                    "until ${Timestamps.toString(command.untilWhen)}."
+        )
         return MentionSnoozed::class.buildBy(
             command.id,
             command.untilWhen
@@ -104,6 +115,9 @@ internal class MentionProcess :
     @Throws(MentionIsAlreadyRead::class)
     internal fun handle(command: MarkMentionAsRead): MentionRead {
         if (state().status == MentionStatus.READ) {
+            logger.atWarning().log(
+                "${command.id.forLog()}: Trying to read the mention that has already been read."
+            )
             throw MentionIsAlreadyRead::class.buildBy(command.id)
         }
         with(builder()) {
@@ -111,6 +125,7 @@ internal class MentionProcess :
             whenRead = currentTime()
             clearSnoozeUntilWhen()
         }
+        logger.atFine().log("${command.id.forLog()}: Mention read.")
         return MentionRead::class.buildBy(command.id)
     }
 
@@ -120,6 +135,7 @@ internal class MentionProcess :
     @Assign
     internal fun handle(command: PinMention): MentionPinned {
         builder().pinned = true
+        logger.atFine().log("${command.id.forLog()}: Mention pinned.")
         return MentionPinned::class.with(command.id)
     }
 
@@ -129,6 +145,7 @@ internal class MentionProcess :
     @Assign
     internal fun handle(command: UnpinMention): MentionUnpinned {
         builder().pinned = false
+        logger.atFine().log("${command.id.forLog()}: Mention unpinned.")
         return MentionUnpinned::class.with(command.id)
     }
 
@@ -145,8 +162,18 @@ internal class MentionProcess :
         @External event: TimePassed
     ): EitherOf3<MentionUnsnoozed, MentionArchived, Nothing> =
         when {
-            isSnoozeTimePassed(event.time) -> EitherOf3.withA(unsnooze())
-            isObsolete(event.time) -> EitherOf3.withB(archive())
+            isSnoozeTimePassed(event.time) -> {
+                logger.atFine().log(
+                    "${state().id.forLog()}: Mentioning unsnoozed because snooze time is out."
+                )
+                EitherOf3.withA(unsnooze())
+            }
+
+            isObsolete(event.time) -> {
+                logger.atFine().log("${state().id.forLog()}: Mention archived as it is obsolete.")
+                EitherOf3.withB(archive())
+            }
+
             else -> EitherOf3.withC(nothing())
         }
 
@@ -215,5 +242,7 @@ internal class MentionProcess :
          */
         @VisibleForTesting
         internal val lifetimeOfUnreadMention = Durations.fromDays(7)
+
+        private val logger = FluentLogger.forEnclosingClass()
     }
 }

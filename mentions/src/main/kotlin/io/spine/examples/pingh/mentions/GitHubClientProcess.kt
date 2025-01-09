@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.common.flogger.FluentLogger
 import com.google.protobuf.Duration
 import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Timestamps
@@ -63,16 +64,6 @@ import kotlin.jvm.Throws
 import kotlin.reflect.KClass
 
 /**
- * The time interval between automatic requests to update mentions.
- */
-internal val mentionsUpdateInterval: Duration = minutes(1)
-
-/**
- * The limit the number of mentions loaded on the first launch.
- */
-internal const val limitOnFirstLaunch: Int = 20
-
-/**
  * A process of reading user's mentions from GitHub.
  */
 internal class GitHubClientProcess :
@@ -99,11 +90,13 @@ internal class GitHubClientProcess :
      */
     @React
     internal fun on(@External event: UserLoggedIn): GitHubTokenUpdated {
+        val id = GitHubClientId::class.of(event.id.username)
         builder().setToken(event.token)
-        return GitHubTokenUpdated::class.buildBy(
-            GitHubClientId::class.of(event.id.username),
-            event.token
+        logger.atFine().log(
+            "${id.forLog()}: Process started that will periodically initiate " +
+                    "a process to fetch mentions from GitHub for the logged-in user."
         )
+        return GitHubTokenUpdated::class.buildBy(id, event.token)
     }
 
     /**
@@ -112,6 +105,10 @@ internal class GitHubClientProcess :
     @React
     internal fun on(@External event: TokenUpdated): GitHubTokenUpdated {
         builder().setToken(event.token)
+        logger.atFine().log(
+            "${state().id.forLog()}: GitHub API access token was updated " +
+                    "due to the user's token refresh."
+        )
         return GitHubTokenUpdated::class.buildBy(
             GitHubClientId::class.of(event.id.username),
             event.token
@@ -129,6 +126,10 @@ internal class GitHubClientProcess :
     @Command
     internal fun on(event: GitHubTokenUpdated): Optional<UpdateMentionsFromGitHub> {
         if (!state().hasWhenLastSuccessfullyUpdated() && !state().hasWhenStarted()) {
+            logger.atFine().log(
+                "${state().id.forLog()}: The first process of fetching mentions from GitHub " +
+                        "was requested because because the user only logged in."
+            )
             return Optional.of(UpdateMentionsFromGitHub::class.buildBy(event.id, currentTime()))
         }
         return Optional.empty()
@@ -145,6 +146,9 @@ internal class GitHubClientProcess :
         val currentTime = event.time
         val difference = between(state().whenLastSuccessfullyUpdated, currentTime)
         if (!state().hasWhenLastSuccessfullyUpdated() || difference >= mentionsUpdateInterval) {
+            logger.atFine().log(
+                "${state().id.forLog()}: Process of fetching mentions from GitHub was requested."
+            )
             return Optional.of(UpdateMentionsFromGitHub::class.buildBy(state().id, currentTime))
         }
         return Optional.empty()
@@ -161,9 +165,16 @@ internal class GitHubClientProcess :
     @Throws(MentionsUpdateIsAlreadyInProgress::class)
     internal fun handle(command: UpdateMentionsFromGitHub): MentionsUpdateFromGitHubRequested {
         if (state().hasWhenStarted()) {
+            logger.atFine().log(
+                "${state().id.forLog()}: The request to receive mentions is rejected " +
+                        "because the previous fetching has not yet completed."
+            )
             throw MentionsUpdateIsAlreadyInProgress::class.buildBy(command.id)
         }
         builder().setWhenStarted(command.whenRequested)
+        logger.atFine().log(
+            "${state().id.forLog()}: Process of fetching mentions from GitHub started."
+        )
         return MentionsUpdateFromGitHubRequested::class.buildBy(state().id)
     }
 
@@ -187,10 +198,19 @@ internal class GitHubClientProcess :
         val limit = if (state().whenLastSuccessfullyUpdated.isDefault()) {
             limitOnFirstLaunch
         } else null
+        logger.atFine().log(
+            "${state().id.forLog()}: Requesting mentions updated after " +
+                    "${Timestamps.toString(updatedAfter)} from GitHub."
+        )
         val mentions = try {
             searchMentions(username, token, updatedAfter, limit)
         } catch (exception: CannotObtainMentionsException) {
             builder().clearWhenStarted()
+            logger.atWarning().log(
+                "${state().id.forLog()}: Request to retrieve references " +
+                        "from GitHub failed with ${exception.statusCode()} status code " +
+                        "in the HTTP response. The process was interrupted."
+            )
             return listOf(
                 RequestMentionsFromGitHubFailed::class.buildBy(event.id, exception.statusCode())
             )
@@ -200,6 +220,10 @@ internal class GitHubClientProcess :
         builder()
             .setWhenLastSuccessfullyUpdated(state().whenStarted)
             .clearWhenStarted()
+        logger.atFine().log(
+            "${state().id.forLog()}: The fetching process completed successfully, " +
+                    "retrieving ${userMentioned.size} mentions."
+        )
         return userMentioned
             .toList<EventMessage>()
             .plus(completed)
@@ -252,7 +276,19 @@ internal class GitHubClientProcess :
         this.users = users
     }
 
-    private companion object {
+    internal companion object {
+        /**
+         * The time interval between automatic requests to update mentions.
+         */
+        internal val mentionsUpdateInterval: Duration = minutes(1)
+
+        /**
+         * The limit the number of mentions loaded on the first launch.
+         */
+        internal const val limitOnFirstLaunch: Int = 20
+
+        private val logger = FluentLogger.forEnclosingClass()
+
         /**
          * Converts the set of `Mention`s to the set of `UserMentioned` events
          * with the specified name of the mentioned user.
