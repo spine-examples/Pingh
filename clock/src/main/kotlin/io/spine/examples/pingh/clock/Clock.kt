@@ -26,35 +26,12 @@
 
 package io.spine.examples.pingh.clock
 
-import com.google.common.annotations.VisibleForTesting
 import io.spine.base.Time.currentTime
 import io.spine.core.UserId
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.server.ServerEnvironment
 import io.spine.server.integration.ThirdPartyContext
 import io.spine.server.transport.TransportFactory
-
-/**
- * The name of the Clock bounded context.
- */
-private const val contextName = "Clock"
-
-/**
- * The system actor notifying about the current time.
- */
-private val actor = UserId.newBuilder()
-    .setValue("System-Clock")
-    .vBuild()
-
-/**
- * Emits the `TimePassed` event that contains the current time.
- *
- * Use only for testing.
- */
-@VisibleForTesting
-public fun emitTimePassedEvent() {
-    Clock.default().triggerTimePassed()
-}
 
 /**
  * Allows to emit events with current time in the Clock bounded context.
@@ -66,24 +43,7 @@ public fun emitTimePassedEvent() {
  * Therefore, before emitting, ensure that the `transport` is set in
  * the server environment and matches the one used by the main server.
  */
-public class Clock {
-    internal companion object {
-        /**
-         * Clock for testing.
-         */
-        private var instance: Clock? = null
-
-        /**
-         * Returns test instance of the `Clock`.
-         */
-        internal fun default(): Clock {
-            if (instance == null) {
-                instance = Clock()
-            }
-            return instance!!
-        }
-    }
-
+public abstract class Clock {
     /**
      * The Clock bounded context that is designed to notify the system of the current time.
      */
@@ -92,11 +52,30 @@ public class Clock {
     /**
      * Emits the `TimePassed` event that contains the current time.
      */
-    public fun triggerTimePassed() {
+    protected fun triggerTimePassed() {
         if (context == null) {
             context = ThirdPartyContext.singleTenant(contextName)
         }
         val event = TimePassed::class.buildBy(currentTime())
         context!!.emittedEvent(event, actor)
+    }
+
+    /**
+     * Starts the clock.
+     */
+    public abstract fun start()
+
+    private companion object {
+        /**
+         * The name of the Clock bounded context.
+         */
+        private const val contextName = "Clock"
+
+        /**
+         * The system actor notifying about the current time.
+         */
+        private val actor = UserId.newBuilder()
+            .setValue("System-Clock")
+            .vBuild()
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,46 +26,37 @@
 
 package io.spine.examples.pingh.clock
 
-import java.lang.Thread.sleep
-import kotlin.time.Duration
+import com.google.common.annotations.VisibleForTesting
 
 /**
- * A clock that continuously emits `TimePassed` events at the specified interval.
+ * Emits the `TimePassed` event that contains the current time.
  *
- * @property pauseTime The time interval between emitting `TimePassed` events.
+ * Use only for testing.
  */
-public class IntervalClock(private val pauseTime: Duration) {
-    /**
-     * Whether the clock is currently running.
-     *
-     * Used to control the [clockThread].
-     */
-    private var isRunning = false
+@VisibleForTesting
+public fun emitTimePassedEvent() {
+    SingleTickClock.default().start()
+}
 
-    /**
-     * The clock thread emits a `TimePassed` event after passing each time interval.
-     */
-    private lateinit var clockThread: Thread
-
-    /**
-     * Starts the clock.
-     */
-    public fun start() {
-        isRunning = true
-        clockThread = Thread {
-            while (isRunning) {
-                sleep(pauseTime.inWholeMilliseconds)
-                emitTimePassedEvent()
-            }
-        }
-        clockThread.start()
+/**
+ * A clock that, upon [starting][start],
+ * emits a single event with the current time and then stops.
+ *
+ * For testing purposes only.
+ */
+private class SingleTickClock : Clock() {
+    override fun start() {
+        triggerTimePassed()
     }
 
-    /**
-     * Stops the clock and waits until [clock thread][clockThread] is shut down.
-     */
-    public fun stop() {
-        isRunning = false
-        clockThread.join()
+    companion object {
+        private var instance: SingleTickClock? = null
+
+        fun default(): SingleTickClock {
+            if (instance == null) {
+                instance = SingleTickClock()
+            }
+            return instance!!
+        }
     }
 }

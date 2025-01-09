@@ -30,7 +30,7 @@ import io.ktor.client.engine.cio.CIO
 import io.spine.environment.DefaultMode
 import io.spine.environment.Environment
 import io.spine.examples.pingh.clock.Clock
-import io.spine.examples.pingh.clock.IntervalClock
+import io.spine.examples.pingh.clock.LocalIntervalClock
 import io.spine.examples.pingh.github.ClientId
 import io.spine.examples.pingh.github.ClientSecret
 import io.spine.examples.pingh.github.GitHubApp
@@ -60,7 +60,7 @@ import kotlin.time.Duration.Companion.seconds
  * 1. Configures the server environment for production use,
  * including the interaction with GitHub API and Google Datastore.
  *
- * 2. Starts an [HTTP endpoint][startHeartbeatServer] receiving the current time values
+ * 2. Starts an [HTTP endpoint][HeartbeatServer] receiving the current time values
  * from an external clock or a system scheduler.
  *
  * In non-production mode, the following actions are performed during initialization:
@@ -68,27 +68,17 @@ import kotlin.time.Duration.Companion.seconds
  * 1. Configures the environment for local use, including loading
  * GitHub App secrets from the configuration file.
  *
- * 2. Initializes an [IntervalClock] to emit an event with the current time
+ * 2. Initializes an [LocalIntervalClock] to emit an event with the current time
  * to the server every second.
  */
 internal class Application {
 
-    internal companion object {
-        /**
-         * The port on which the Pingh server runs.
-         */
-        private const val pinghPort = 50051
-    }
-
-    /**
-     * The Pingh server.
-     */
-    internal val server: Server
-
+    private val server: Server
+    private val clock: Clock
     init {
         configureEnvironment()
-        startClock()
         server = createServer()
+        clock = createClock()
     }
 
     /**
@@ -107,20 +97,19 @@ internal class Application {
     }
 
     /**
-     * Starts emitting periodic events with the current time to the server.
+     * Creates a clock to send current time to the server.
      *
-     * In [Production] mode, starts a [server][startHeartbeatServer]
+     * In [Production] mode, creates a [server][HeartbeatServer]
      * to handle HTTP requests from an external clock or system scheduler.
-     * In non-production mode, starts a [clock][IntervalClock]
+     * In non-production mode, creates a [clock][LocalIntervalClock]
      * to emit an event to the server every second.
      */
-    private fun startClock() {
+    private fun createClock(): Clock =
         if (isProduction()) {
-            startHeartbeatServer(Clock())
+            HeartbeatServer()
         } else {
-            IntervalClock(1.seconds).start()
+            LocalIntervalClock(1.seconds)
         }
-    }
 
     /**
      * Return `true` if the application is running in [Production] mode.
@@ -128,7 +117,7 @@ internal class Application {
     private fun isProduction(): Boolean = Environment.instance().`is`(Production::class.java)
 
     /**
-     * Creates a new Spine `Server` instance at the [pinghPort].
+     * Creates a new Spine `Server` instance at the [port].
      *
      * The server includes bounded contexts of [Sessions][io.spine.examples.pingh.sessions]
      * and [Mentions][io.spine.examples.pingh.mentions].
@@ -137,7 +126,7 @@ internal class Application {
         val httpEngine = CIO.create()
         val users = RemoteGitHubUsers(httpEngine)
         return Server
-            .atPort(pinghPort)
+            .atPort(port)
             .add(
                 newSessionsContext(
                     RemoteGitHubAuthentication(gitHubApp(), httpEngine),
@@ -151,6 +140,28 @@ internal class Application {
                 )
             )
             .build()
+    }
+
+    /**
+     * Starts the Pingh server and clock.
+     */
+    internal fun start() {
+        clock.start()
+        server.start()
+    }
+
+    /**
+     * Waits for the server to become terminated.
+     */
+    internal fun awaitTermination() {
+        server.awaitTermination()
+    }
+
+    internal companion object {
+        /**
+         * The port on which the Pingh server runs.
+         */
+        private const val port = 50051
     }
 }
 
