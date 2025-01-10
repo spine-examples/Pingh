@@ -187,6 +187,7 @@ internal class GitHubClientProcess :
      * Otherwise, the list is one [RequestMentionsFromGitHubFailed] event.
      */
     @React
+    @Suppress("TooGenericExceptionCaught" /* For catching even unexpected. */)
     internal fun on(event: MentionsUpdateFromGitHubRequested): List<EventMessage> {
         val username = state().id.username
         val token = state().token
@@ -200,16 +201,9 @@ internal class GitHubClientProcess :
         )
         val mentions = try {
             searchMentions(username, token, updatedAfter, limit)
-        } catch (exception: CannotObtainMentionsException) {
+        } catch (exception: Exception) {
             builder().clearWhenStarted()
-            _warn().log(
-                "${state().id.forLog()}: Request to fetch mentions " +
-                        "from GitHub failed with a ${exception.statusCode()} status code " +
-                        "in the HTTP response. The process was interrupted."
-            )
-            return listOf(
-                RequestMentionsFromGitHubFailed::class.buildBy(event.id, exception.statusCode())
-            )
+            return listOf(failedEvent(event.id, exception))
         }
         val userMentioned = toEvents(mentions, state().id.username)
         val completed = MentionsUpdateFromGitHubCompleted::class.buildBy(event.id)
@@ -256,6 +250,29 @@ internal class GitHubClientProcess :
             }
         }
         .toSet()
+
+    /**
+     * Creates an event that reports the failure of receiving mentions
+     * depending on the exception that was received.
+     */
+    private fun failedEvent(
+        id: GitHubClientId,
+        exception: Exception
+    ): RequestMentionsFromGitHubFailed =
+        if (exception is CannotObtainMentionsException) {
+            _warn().log(
+                "${state().id.forLog()}: Request to fetch mentions " +
+                        "from GitHub failed with a ${exception.statusCode} status code " +
+                        "in the HTTP response. The process was interrupted."
+            )
+            RequestMentionsFromGitHubFailed::class.with(id, exception.statusCode)
+        } else {
+            _error().withCause(exception).log(
+                "${state().id.forLog()}: An unexpected error occurred " +
+                        "while fetching mentions from GitHub."
+            )
+            RequestMentionsFromGitHubFailed::class.with(id)
+        }
 
     /**
      * Supplies this instance with a service for allows to access GitHub Search API,

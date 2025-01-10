@@ -293,7 +293,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
                 Username::class.of(randomString())
             )
             emitUserLoggedInEvent()
-            val expected = RequestMentionsFromGitHubFailed::class.buildBy(
+            val expected = RequestMentionsFromGitHubFailed::class.with(
                 gitHubClientId,
                 responseStatusCode.value
             )
