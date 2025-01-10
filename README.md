@@ -133,8 +133,19 @@ github-app.client.secret=client_secret
 Replace `client_id` and `client_secret` with the values obtained from GitHub.
 
 2. Specify the names of permitted organizations. See: [Authentication](#authentication).
- 
-3. Start the Pingh server locally. The server always runs on port `50051`. 
+
+3. Specify the directory to store the application logs if needed. To do this, 
+  enter custom log directory in the `server/src/main/resources/log4j2.properties` as follows:
+
+```properties
+property.log.dir=/path/to/your/custom/directory
+```
+
+This step can be skipped. In that case, the server will try to write logs 
+to the `/var/log/pingh` directory. If this directory does not exist or is inaccessible, 
+the logs will not be saved, but this will not affect the server's performance.
+
+4. Start the Pingh server locally. The server always runs on port `50051`. 
   To launch it, run the following command in the root project directory:
 
 ```shell
@@ -144,7 +155,7 @@ Replace `client_id` and `client_secret` with the values obtained from GitHub.
 This will start the server on `localhost:50051` and publish the required JAR files 
 for the client application to the Maven Local repository.
 
-4. Configure the client's connection to the server by modifying
+5. Configure the client's connection to the server by modifying
   `desktop/src/main/resources/config/server.properties` as follows:
 
 ```properties
@@ -152,7 +163,7 @@ server.address=localhost
 server.port=50051
 ```
 
-5. Build and run the client application:
+6. Build and run the client application:
 
 ```shell
 cd ./desktop
@@ -228,6 +239,30 @@ The following secrets are configured for the Pingh app:
 - `github_client_secret`: The client secret of a GitHub App.
 - `auth_token`: The authentication token required for accessing the HTTP server running on the VM.
 
+### Google Logging
+
+The Cloud [Logging][gcloud-logging] is a fully managed, real-time log management service 
+that provides storage, search, analysis, and alerting capabilities.
+
+The application server runs on a [Compute Engine instance](#compute-engine) 
+and writes logs to local files on the virtual machine. The [Ops Agent][gcloud-ops-agent] is used 
+to send these logs to Cloud Logging.
+
+To configure the agent, follow these steps:
+
+1. [Install][gcloud-ops-agent-installation] the agent on the virtual machine.
+
+2. Grant the `Logs Writer` and `Monitoring Metric Writer` roles 
+  to the Compute Engine instance's service account, 
+  and ensure that the `cloud-platform` OAuth scope is enabled.
+  This is required to enable the Ops agent to write data to Cloud Logging.
+
+3. [Configure][gcloud-ops-agent-configuration] the agent. The configuration can be found 
+  in `server/src/main/resources/logging/config.yaml` file.
+
+The Ops agent also allows sending virtual machine metrics to Cloud Monitoring, 
+but this feature is disabled in the configuration file.
+
 ## Testing
 
 This project includes several types of testing.
@@ -269,5 +304,9 @@ We accept the questions and suggestions via the corresponding
 [gcloud-datastore-indexconfig]: https://cloud.google.com/datastore/docs/tools/indexconfig
 [gcloud-scheduler]: https://cloud.google.com/scheduler/docs/overview
 [gcloud-secret-manager]: https://cloud.google.com/security/products/secret-manager
+[gcloud-logging]: https://cloud.google.com/logging
+[gcloud-ops-agent]: https://cloud.google.com/stackdriver/docs/solutions/agents/ops-agent
+[gcloud-ops-agent-installation]: https://cloud.google.com/stackdriver/docs/solutions/agents/ops-agent/install-index
+[gcloud-ops-agent-configuration]: https://cloud.google.com/logging/docs/agent/ops-agent/configuration
 [google-icons]: https://fonts.google.com/icons
 [feedback]: https://github.com/orgs/SpineEventEngine/discussions
