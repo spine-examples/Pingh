@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.common.flogger.FluentLogger
 import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Timestamps
 import io.ktor.client.HttpClient
@@ -226,10 +227,16 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
                 .onPage(page)
                 .get()
 
+            val json = response.body<String>()
             if (response.status != HttpStatusCode.OK) {
+                logger.atSevere().log(
+                    "An error occurred while requesting mentions of ${target.tag}, " +
+                            "and GitHub responded with: " +
+                            "${json.replace("(\\r\\n|\\r|\\n)".toRegex(), "")}."
+                )
                 throw CannotObtainMentionsException(response.status.value)
             }
-            IssuesAndPullRequestsSearchResponse::class.parseJson(response.body())
+            IssuesAndPullRequestsSearchResponse::class.parseJson(json)
         }
 
     /**
@@ -256,6 +263,10 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
                 ?.let { mentions + it }
                 ?: mentions
         }.toSet()
+
+    private companion object {
+        private val logger = FluentLogger.forEnclosingClass()
+    }
 }
 
 /**
@@ -606,15 +617,23 @@ private class MentionsOnIssueOrPullRequestsBuilder(
             val response = client.get(url) {
                 configureHeaders(token!!)
             }
+            val json = response.body<String>()
             if (response.status != HttpStatusCode.OK) {
+                logger.atSevere().log(
+                    "An error occurred while retrieving GitHub items, and GitHub responded " +
+                            "with: ${json.replace("(\\r\\n|\\r|\\n)".toRegex(), "")}"
+                )
                 throw CannotObtainMentionsException(response.status.value)
             }
-            val json = response.body<String>()
             // The received JSON contains only an array, but Protobuf JSON Parser
             // cannot process it. So the array is converted to JSON, where the result
             // is just the value of the `item` field.
             parser("{ item: $json }")
         }
+
+    private companion object {
+        private val logger = FluentLogger.forEnclosingClass()
+    }
 }
 
 /**

@@ -58,9 +58,8 @@ internal class TokenMonitorProcess :
     @React
     internal fun on(event: UserLoggedIn): TokenMonitoringStarted {
         val id = TokenMonitorId::class.of(event.id)
-        logger.atFine()
-            .log("${id.forLog()}: Token monitor process starts.")
         builder().setWhenExpires(event.whenTokenExpires)
+        logger.atFine().log("${id.forLog()}: Started token monitor process.")
         return TokenMonitoringStarted::class.with(id)
     }
 
@@ -79,13 +78,13 @@ internal class TokenMonitorProcess :
         if (time < state().whenExpires || inProcess) {
             return Optional.empty()
         }
+        builder().setWhenUpdateRequested(time)
         logger.atFine().log(
-            "${state().id.forLog()}: Update for the access token is requested because " +
-                    "the token has expired. The token's expiration time " +
+            "${state().id.forLog()}: Requested an access token update because " +
+                    "the token expired. The token's expiration time " +
                     "is ${Timestamps.toString(state().whenExpires)}, " +
                     "and the current time is ${Timestamps.toString(time)}."
         )
-        builder().setWhenUpdateRequested(time)
         return Optional.of(UpdateToken::class.with(state().id.session, time))
     }
 
@@ -95,15 +94,15 @@ internal class TokenMonitorProcess :
      */
     @React
     internal fun on(event: TokenUpdated): TokenExpirationTimeUpdated {
-        logger.atFine().log(
-            "${state().id.forLog()}: Sets the expiration time for the updated token. " +
-                    "The access token will expire " +
-                    "at ${Timestamps.toString(event.whenTokenExpires)}."
-        )
         with(builder()) {
             whenExpires = event.whenTokenExpires
             clearWhenUpdateRequested()
         }
+        logger.atFine().log(
+            "${state().id.forLog()}: Set expiration time for the updated token. " +
+                    "The access token will expire " +
+                    "at ${Timestamps.toString(event.whenTokenExpires)}."
+        )
         return TokenExpirationTimeUpdated::class.with(state().id)
     }
 
@@ -112,11 +111,11 @@ internal class TokenMonitorProcess :
      */
     @React
     internal fun on(event: UserLoggedOut): TokenMonitoringFinished {
+        deleted = true
         logger.atFine().log(
-            "${state().id.forLog()}: Token monitoring process finishes " +
+            "${state().id.forLog()}: Finished token monitoring process  " +
                     "because user is logged out."
         )
-        deleted = true
         return TokenMonitoringFinished::class.with(
             TokenMonitorId::class.of(event.id)
         )
@@ -127,11 +126,11 @@ internal class TokenMonitorProcess :
      */
     @React
     internal fun on(event: SessionExpired): TokenMonitoringFinished {
-        logger.atFine().log(
-            "${state().id.forLog()}: Token monitoring process finishes " +
-                    "because session has expired."
-        )
         deleted = true
+        logger.atFine().log(
+            "${state().id.forLog()}: Finished token monitoring process " +
+                    "because session expired."
+        )
         return TokenMonitoringFinished::class.with(
             TokenMonitorId::class.of(event.id)
         )
