@@ -26,7 +26,7 @@
 
 package io.spine.examples.pingh.clock
 
-import com.google.common.flogger.FluentLogger
+import io.spine.logging.Logging
 import java.lang.Thread.sleep
 import kotlin.time.Duration
 
@@ -35,7 +35,7 @@ import kotlin.time.Duration
  *
  * @property pauseTime The time interval between emitting `TimePassed` events.
  */
-public class LocalIntervalClock(private val pauseTime: Duration) : Clock() {
+public class LocalIntervalClock(private val pauseTime: Duration) : Clock(), Logging {
     /**
      * Whether the clock is currently running.
      *
@@ -57,12 +57,13 @@ public class LocalIntervalClock(private val pauseTime: Duration) : Clock() {
             while (isRunning) {
                 sleep(pauseTime.inWholeMilliseconds)
                 triggerTimePassed()
-                logger.atFine().log("A event with the current time is emitted.")
+                _trace().log("An event with the current time was emitted.")
             }
         }
         clockThread.start()
-        logger.atInfo()
-            .log("The local clock started, sending the current time at $pauseTime intervals.")
+        _info().log(
+            "Local clock started and is sending the current time at $pauseTime intervals."
+        )
     }
 
     /**
@@ -71,10 +72,6 @@ public class LocalIntervalClock(private val pauseTime: Duration) : Clock() {
     public fun stop() {
         isRunning = false
         clockThread.join()
-        logger.atInfo().log("Local clock stopped.")
-    }
-
-    private companion object {
-        private val logger = FluentLogger.forEnclosingClass()
+        _info().log("Local clock stopped.")
     }
 }

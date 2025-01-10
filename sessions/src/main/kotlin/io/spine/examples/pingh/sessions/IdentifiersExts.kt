@@ -56,13 +56,13 @@ public fun KClass<TokenMonitorId>.of(session: SessionId): TokenMonitorId =
         .vBuild()
 
 /**
- * Converts a `SessionId` into a readable string format for logging.
+ * Converts a `SessionId` into a single-line string format for logging.
  */
 internal fun SessionId.forLog(): String =
     "SessionId{username=${username.value}, whenCreated=${Timestamps.toString(whenCreated)}}"
 
 /**
- * Converts a `TokenMonitorId` into a readable string format for logging.
+ * Converts a `TokenMonitorId` into a single-line string format for logging.
  */
 internal fun TokenMonitorId.forLog(): String =
     "TokenMonitorId{session=${session.forLog()}}"

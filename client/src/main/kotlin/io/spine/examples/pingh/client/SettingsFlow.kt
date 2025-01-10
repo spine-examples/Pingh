@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.client
 
-import com.google.common.flogger.FluentLogger
 import io.spine.examples.pingh.client.settings.IgnoredSource
 import io.spine.examples.pingh.client.settings.SnoozeTime
 import io.spine.examples.pingh.client.settings.UserSettings
@@ -36,6 +35,7 @@ import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.withSession
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
+import io.spine.logging.Logging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -57,7 +57,7 @@ public class SettingsFlow internal constructor(
     private val session: Session,
     private val localSettings: Settings,
     private val closeSession: () -> Unit
-) {
+) : Logging {
     private val mutableSettings = localSettings.current.toBuilder()
 
     /**
@@ -81,10 +81,10 @@ public class SettingsFlow internal constructor(
         client.observeEvent(command.id, UserLoggedOut::class) { event ->
             closeSession()
             onSuccess(event)
-            logger.atFine().log("Logged out.")
+            _debug().log("User logged out.")
         }
         client.send(command)
-        logger.atFine().log("Sent command to log out.")
+        _debug().log("Logout requested.")
     }
 
     /**
@@ -94,11 +94,7 @@ public class SettingsFlow internal constructor(
     public fun saveSettings() {
         val settings = mutableSettings.vBuild()
         localSettings.update(settings)
-        logger.atFine().log("Applied settings changes.")
-    }
-
-    private companion object {
-        private val logger = FluentLogger.forEnclosingClass()
+        _debug().log("Settings changed.")
     }
 }
 

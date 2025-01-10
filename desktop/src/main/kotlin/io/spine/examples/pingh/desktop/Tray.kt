@@ -104,7 +104,7 @@ internal fun Tray(state: AppState) {
 
     DisposableEffect(Unit) {
         SystemTray.getSystemTray().add(tray)
-        logger.atFine().log("Added icon to the system tray.")
+        logger.atFine().log("Icon added to the system tray.")
 
         state.tray
             .notificationFlow
@@ -113,7 +113,7 @@ internal fun Tray(state: AppState) {
 
         onDispose {
             SystemTray.getSystemTray().remove(tray)
-            logger.atFine().log("Removed icon from the system tray.")
+            logger.atFine().log("Icon removed from the system tray.")
         }
     }
 }

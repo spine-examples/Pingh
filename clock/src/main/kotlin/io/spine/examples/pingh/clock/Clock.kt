@@ -75,7 +75,7 @@ public abstract class Clock {
          * The system actor notifying about the current time.
          */
         private val actor = UserId.newBuilder()
-            .setValue("System-Clock")
+            .setValue("Pingh-Clock")
             .vBuild()
     }
 }

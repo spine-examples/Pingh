@@ -141,9 +141,9 @@ Replace `client_id` and `client_secret` with the values obtained from GitHub.
 property.log.dir=/path/to/your/custom/directory
 ```
 
-This step can be skipped. In that case, the server will try to write logs 
+This step can be skipped. If skipped, the server will attempt to write logs 
 to the `/var/log/pingh` directory. If this directory does not exist or is inaccessible, 
-the logs will not be saved, but this will not affect the server's performance.
+the logs will not be saved. However, this will not impact the server's performance.
 
 4. Start the Pingh server locally. The server always runs on port `50051`. 
   To launch it, run the following command in the root project directory:

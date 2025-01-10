@@ -26,9 +26,9 @@
 
 package io.spine.examples.pingh.client
 
-import com.google.common.flogger.FluentLogger
 import com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly
 import com.google.protobuf.util.Durations
+import io.spine.logging.Logging
 import java.util.concurrent.CompletableFuture
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
@@ -46,7 +46,7 @@ import kotlinx.coroutines.launch
  * @see <a href="https://en.wikipedia.org/wiki/Exponential_backoff">
  *     Exponential backoff algorithm</a>
  */
-internal class ExponentialBackoffStrategy private constructor(builder: Builder) {
+internal class ExponentialBackoffStrategy private constructor(builder: Builder) : Logging {
     /**
      * An action that must be repeated until it succeeds.
      */
@@ -99,7 +99,7 @@ internal class ExponentialBackoffStrategy private constructor(builder: Builder) 
      * @see [tryPerforming]
      */
     internal fun start() {
-        logger.atFine().log("Starting exponential backoff strategy.")
+        _debug().log("Starting the exponential backoff strategy.")
         currentDelay = minDelay
         countdown = CompletableFuture.supplyAsync { sleepUninterruptibly(limit.toJavaDuration()) }
         tryPerforming()
@@ -118,9 +118,9 @@ internal class ExponentialBackoffStrategy private constructor(builder: Builder) 
      */
     private fun tryPerforming() {
         if (countdown!!.isDone) {
-            logger.atFine().log(
-                "Exponential backoff strategy failed due to " +
-                        "the expiration of the allotted time."
+            _debug().log(
+                "The exponential backoff strategy failed " +
+                        "due to the expiration of the allotted time."
             )
             return
         }
@@ -128,13 +128,13 @@ internal class ExponentialBackoffStrategy private constructor(builder: Builder) 
         when (status) {
             ActionOutcome.Success -> {
                 onSuccess()
-                logger.atFine().log("Exponential backoff strategy completed successfully.")
+                _debug().log("The exponential backoff strategy completed successfully.")
             }
 
             ActionOutcome.Rejection -> {
-                logger.atFine().log(
-                    "Exponential backoff strategy failed because the retry action execution " +
-                            "ended with a rejected request."
+                _debug().log(
+                    "The exponential backoff strategy failed because " +
+                            "the retry action ended with a rejected request."
                 )
                 return
             }
@@ -143,9 +143,9 @@ internal class ExponentialBackoffStrategy private constructor(builder: Builder) 
                 val delay = currentDelay!!
                 currentDelay = min(currentDelay!! * factor, maxDelay)
                 retryJob = invoke(delay, ::tryPerforming)
-                logger.atFine().log(
-                    "Exponential backoff strategy ended unsuccessfully. " +
-                            "A retry will be attempted in ${delay}."
+                _debug().log(
+                    "The exponential backoff strategy finished unsuccessfully. " +
+                            "A retry will be attempted in $delay."
                 )
             }
         }
@@ -157,7 +157,7 @@ internal class ExponentialBackoffStrategy private constructor(builder: Builder) 
     internal fun stop() {
         countdown?.cancel(true)
         retryJob?.cancel()
-        logger.atFine().log("Exponential backoff strategy was manually stopped.")
+        _debug().log("Exponential backoff strategy stopped manually.")
     }
 
     /**
@@ -185,8 +185,6 @@ internal class ExponentialBackoffStrategy private constructor(builder: Builder) 
          * Creates a builder to customize the exponential backoff strategy.
          */
         internal fun builder(): Builder = Builder()
-
-        private val logger = FluentLogger.forEnclosingClass()
     }
 
     /**

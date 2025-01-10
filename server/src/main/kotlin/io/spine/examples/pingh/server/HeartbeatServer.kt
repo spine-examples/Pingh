@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.server
 
-import com.google.common.flogger.FluentLogger
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
@@ -38,12 +37,13 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import io.spine.examples.pingh.clock.Clock
+import io.spine.logging.Logging
 
 /**
  * Handles requests from external clocks and schedulers
  * to notify the Pingh server of the current time.
  */
-internal class HeartbeatServer : Clock() {
+internal class HeartbeatServer : Clock(), Logging {
 
     private val server: NettyApplicationEngine
     init {
@@ -70,12 +70,11 @@ internal class HeartbeatServer : Clock() {
             post("/time") {
                 val currentToken = call.request.authorization()
                 if (currentToken == null || currentToken != token) {
-                    logger.atFine()
-                        .log("The server received an unauthorized request. It's rejected.")
+                    _warn().log("Received an unauthorized request and rejected it.")
                     call.respond(HttpStatusCode.Unauthorized)
                 } else {
                     triggerTimePassed()
-                    logger.atFine().log("A event with the current time is emitted.")
+                    _trace().log("An event with the current time was emitted.")
                     call.respond(HttpStatusCode.OK)
                 }
             }
@@ -90,7 +89,7 @@ internal class HeartbeatServer : Clock() {
      */
     override fun start() {
         server.start(wait = false)
-        logger.atInfo().log("Heartbeat server started, listening to the port $port.")
+        _info().log("Heartbeat server started, listening to the port $port.")
     }
 
     private companion object {
@@ -98,7 +97,5 @@ internal class HeartbeatServer : Clock() {
          * The port for listening to HTTP requests.
          */
         private const val port = 8080
-
-        private val logger = FluentLogger.forEnclosingClass()
     }
 }

@@ -26,9 +26,9 @@
 
 package io.spine.examples.pingh.client
 
-import com.google.common.flogger.FluentLogger
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
+import io.spine.logging.Logging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -68,14 +68,14 @@ public abstract class LoginStage<T> {
 public class LoginFlow internal constructor(
     private val client: DesktopClient,
     private val establishSession: (SessionId) -> Unit,
-) {
+) : Logging {
     /**
      * Current stage of the GitHub login process.
      */
     private val stage: MutableStateFlow<LoginStage<*>> =
         MutableStateFlow(EnterUsername(client, ::moveToNextStage))
     init {
-        logger.atFine().log("Starting login flow. Current stage: ${stage.value::class.simpleName}")
+        _debug().log("Starting login flow. Current stage: \"${stage.value::class.simpleName}\".")
     }
 
     /**
@@ -125,7 +125,7 @@ public class LoginFlow internal constructor(
                 stage.value = EnterUsername(client, ::moveToNextStage)
             }
         }
-        logger.atFine().log("Login flow moved to the ${stage.value::class.simpleName} stage.")
+        _debug().log("Login flow moved to the \"${stage.value::class.simpleName}\" stage.")
     }
 
     /**
@@ -135,11 +135,7 @@ public class LoginFlow internal constructor(
         when (val screenStage = stage.value) {
             is VerifyLogin -> screenStage.close()
         }
-        logger.atFine().log("Logging flow closed.")
-    }
-
-    private companion object {
-        private val logger = FluentLogger.forEnclosingClass()
+        _debug().log("Login flow closed.")
     }
 }
 

@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.client
 
-import com.google.common.flogger.FluentLogger
 import com.google.protobuf.Timestamp
 import io.spine.base.EventMessage
 import io.spine.base.EventMessageField
@@ -40,6 +39,7 @@ import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.tag
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
+import io.spine.logging.Logging
 import kotlin.reflect.KClass
 
 /**
@@ -76,7 +76,7 @@ public interface NotificationSender {
 internal class NotificationsFlow(
     private val sender: NotificationSender,
     private val settings: Settings
-) {
+) : Logging {
     companion object {
         /**
          * List of information about available notifications.
@@ -110,8 +110,6 @@ internal class NotificationsFlow(
             )
         )
 
-        private val logger = FluentLogger.forEnclosingClass()
-
         private fun content(
             whenMentioned: Timestamp,
             whoMentioned: User,
@@ -133,7 +131,7 @@ internal class NotificationsFlow(
     internal fun send(title: String, content: String) {
         if (!settings.current.dndEnabled) {
             sender.send(title, content)
-            logger.atFine().log(
+            _debug().log(
                 "A notification was sent with the title \"$title\" " +
                         "and the content \"$content\"."
             )
@@ -171,7 +169,7 @@ internal class NotificationsFlow(
             ) {
                 val content = notification.content(event)
                 sender.send(notification.title, content)
-                logger.atFine().log(
+                _debug().log(
                     "A notification was sent with the title \"${notification.title}\" " +
                             "and the content \"$content\"."
                 )

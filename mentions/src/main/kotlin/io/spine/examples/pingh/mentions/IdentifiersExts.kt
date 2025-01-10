@@ -58,19 +58,19 @@ public fun KClass<UserMentionsId>.of(username: Username): UserMentionsId =
         .vBuild()
 
 /**
- * Converts a `GitHubClientId` into a readable string format for logging.
+ * Converts a `GitHubClientId` into a single-line string format for logging.
  */
 internal fun GitHubClientId.forLog(): String =
     "GitHubClientId{username=${username.value}}"
 
 /**
- * Converts a `MentionId` into a readable string format for logging.
+ * Converts a `MentionId` into a single-line string format for logging.
  */
 internal fun MentionId.forLog(): String =
     "MentionId{user=${user.value}, where=${where.value}}"
 
 /**
- * Converts a `UserMentionsId` into a readable string format for logging.
+ * Converts a `UserMentionsId` into a single-line string format for logging.
  */
 internal fun UserMentionsId.forLog(): String =
     "UserMentionsId{username=${username.value}}"

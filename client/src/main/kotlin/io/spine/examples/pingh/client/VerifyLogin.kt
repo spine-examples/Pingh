@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.client
 
-import com.google.common.flogger.FluentLogger
 import com.google.protobuf.Duration
 import io.spine.examples.pingh.client.ExponentialBackoffStrategy.ActionOutcome
 import io.spine.examples.pingh.github.UserCode
@@ -41,6 +40,7 @@ import io.spine.examples.pingh.sessions.of
 import io.spine.examples.pingh.sessions.rejection.Rejections.NotMemberOfPermittedOrgs
 import io.spine.examples.pingh.sessions.rejection.Rejections.UsernameMismatch
 import io.spine.examples.pingh.sessions.withSession
+import io.spine.logging.Logging
 import io.spine.net.Url
 import io.spine.protobuf.Durations2.minutes
 import io.spine.protobuf.Durations2.seconds
@@ -69,7 +69,7 @@ public class VerifyLogin internal constructor(
     private val establishSession: (SessionId) -> Unit,
     private val moveToNextStage: () -> Unit,
     event: UserCodeReceived
-) : LoginStage<String>() {
+) : LoginStage<String>(), Logging {
 
     /**
      * The code a user needs to enter on GitHub to confirm login to the app.
@@ -128,7 +128,7 @@ public class VerifyLogin internal constructor(
         isUserCodeExpired.value = false
         codeExpirationJob = invoke(expiresIn.value) {
             isUserCodeExpired.value = true
-            logger.atFine().log("User code expired.")
+            _debug().log("User code expired.")
         }
     }
 
@@ -217,9 +217,9 @@ public class VerifyLogin internal constructor(
             codeExpirationJob.cancel()
             watchForCodeExpiration()
             onSuccess(event)
-            logger.atFine().log("Verification code received.")
+            _debug().log("Verification code received.")
         }
-        logger.atFine().log("Requested a new verification code; awaiting the server receipt.")
+        _debug().log("Requested a new verification code; awaiting server receipt.")
     }
 
     /**
@@ -228,7 +228,7 @@ public class VerifyLogin internal constructor(
     internal fun close() {
         codeExpirationJob.cancel()
         retryStrategy?.stop()
-        logger.atFine().log("Closed verification login flow.")
+        _debug().log("Verification login flow closed.")
     }
 
     private companion object {
@@ -246,8 +246,6 @@ public class VerifyLogin internal constructor(
          * The maximum time to wait for a server response.
          */
         private val responseTimeout = seconds(5)
-
-        private val logger = FluentLogger.forEnclosingClass()
     }
 }
 

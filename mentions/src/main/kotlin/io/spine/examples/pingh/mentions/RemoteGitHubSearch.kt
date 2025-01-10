@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.mentions
 
-import com.google.common.flogger.FluentLogger
 import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Timestamps
 import io.ktor.client.HttpClient
@@ -50,6 +49,7 @@ import io.spine.examples.pingh.github.rest.IssueOrPullRequestFragment
 import io.spine.examples.pingh.github.rest.IssuesAndPullRequestsSearchResponse
 import io.spine.examples.pingh.github.rest.ReviewsResponse
 import io.spine.examples.pingh.github.tag
+import io.spine.logging.Logging
 import kotlin.jvm.Throws
 import kotlinx.coroutines.runBlocking
 
@@ -68,7 +68,7 @@ private const val perPage = 20
  *
  * @param engine The engine used to create the HTTP client.
  */
-public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
+public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch, Logging {
     /**
      * HTTP client on behalf of which requests is made.
      */
@@ -229,7 +229,7 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
 
             val json = response.body<String>()
             if (response.status != HttpStatusCode.OK) {
-                logger.atSevere().log(
+                _error().log(
                     "An error occurred while requesting mentions of ${target.tag}, " +
                             "and GitHub responded with: " +
                             "${json.replace("(\\r\\n|\\r|\\n)".toRegex(), "")}."
@@ -263,10 +263,6 @@ public class RemoteGitHubSearch(engine: HttpClientEngine) : GitHubSearch {
                 ?.let { mentions + it }
                 ?: mentions
         }.toSet()
-
-    private companion object {
-        private val logger = FluentLogger.forEnclosingClass()
-    }
 }
 
 /**
@@ -474,7 +470,7 @@ private class MentionsOnIssueOrPullRequestsBuilder(
     private val repo: Repo,
     private val number: Int,
     private val itemType: ItemType
-) {
+) : Logging {
     /**
      * The user or team that was mentioned on GitHub.
      */
@@ -619,9 +615,9 @@ private class MentionsOnIssueOrPullRequestsBuilder(
             }
             val json = response.body<String>()
             if (response.status != HttpStatusCode.OK) {
-                logger.atSevere().log(
+                _error().log(
                     "An error occurred while retrieving GitHub items, and GitHub responded " +
-                            "with: ${json.replace("(\\r\\n|\\r|\\n)".toRegex(), "")}"
+                            "with: ${json.replace("(\\r\\n|\\r|\\n)".toRegex(), "")}."
                 )
                 throw CannotObtainMentionsException(response.status.value)
             }
@@ -630,10 +626,6 @@ private class MentionsOnIssueOrPullRequestsBuilder(
             // is just the value of the `item` field.
             parser("{ item: $json }")
         }
-
-    private companion object {
-        private val logger = FluentLogger.forEnclosingClass()
-    }
 }
 
 /**

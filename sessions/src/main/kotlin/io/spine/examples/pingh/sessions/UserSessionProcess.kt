@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.sessions
 
-import com.google.common.flogger.FluentLogger
 import com.google.protobuf.Duration
 import com.google.protobuf.util.Durations
 import io.spine.base.Time.currentTime
@@ -50,6 +49,7 @@ import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.examples.pingh.sessions.rejection.NotMemberOfPermittedOrgs
 import io.spine.examples.pingh.sessions.rejection.Rejections
 import io.spine.examples.pingh.sessions.rejection.UsernameMismatch
+import io.spine.logging.Logging
 import io.spine.protobuf.Durations2.minutes
 import io.spine.server.command.Assign
 import io.spine.server.event.React
@@ -64,7 +64,7 @@ import kotlin.jvm.Throws
  */
 @Suppress("TooManyFunctions" /* Managing sessions requires numerous functions. */)
 internal class UserSessionProcess :
-    ProcessManager<SessionId, UserSession, UserSession.Builder>() {
+    ProcessManager<SessionId, UserSession, UserSession.Builder>(), Logging {
 
     /**
      * Service for generating access tokens via GitHub.
@@ -91,9 +91,9 @@ internal class UserSessionProcess :
      */
     @Assign
     internal fun handle(command: LogUserIn): UserCodeReceived {
-        logger.atFine().log("${command.id.forLog()}: Starting login process.")
+        _debug().log("${command.id.forLog()}: Starting login process.")
         val codes = auth.requestVerificationCodes()
-        logger.atFine().log("${command.id.forLog()}: Verification codes are obtained.")
+        _debug().log("${command.id.forLog()}: Verification codes received.")
         val loginTime = min(codes.expiresIn, maxLoginTime)
         with(builder()) {
             deviceCode = codes.deviceCode
@@ -124,24 +124,23 @@ internal class UserSessionProcess :
     internal fun handle(
         command: VerifyUserLoginToGitHub
     ): EitherOf2<UserLoggedIn, UserIsNotLoggedIntoGitHub> {
-        logger.atFine().log("${command.id.forLog()}: Trying to verify GitHub login.")
+        _debug().log("${command.id.forLog()}: Trying to verify GitHub login.")
         val tokens = try {
             auth.requestAccessToken(state().deviceCode)
         } catch (exception: CannotObtainAccessToken) {
-            logger.atFine().log(
+            _debug().log(
                 "${command.id.forLog()}: GitHub login verification failed. " +
-                        "GitHub responded with the message: \"${exception.errorName}\""
+                        "GitHub responded with the message: \"${exception.errorName}\"."
             )
             return EitherOf2.withB(UserIsNotLoggedIntoGitHub::class.withSession(command.id))
         }
-        logger.atFine().log(
-            "${command.id.forLog()}: Access token obtained. " +
+        _debug().log(
+            "${command.id.forLog()}: GitHub issued an access token. " +
                     "Checking if the user has permission to access the application."
         )
         ensureUsernameMatching(tokens.accessToken)
         ensureMembershipInPermittedOrgs(tokens.accessToken)
-        logger.atFine()
-            .log("${command.id.forLog()}: GitHub login verified and the login process finished.")
+        _debug().log("${command.id.forLog()}: GitHub login verified and login process finished.")
         with(builder()) {
             refreshToken = tokens.refreshToken
             whenExpires = currentTime().add(lifetime)
@@ -188,9 +187,9 @@ internal class UserSessionProcess :
      */
     @Assign
     internal fun handle(command: UpdateToken): TokenUpdated {
-        logger.atFine().log("${state().id.forLog()}: Refreshing the access token.")
+        _debug().log("${state().id.forLog()}: Refreshing the access token.")
         val tokens = auth.refreshAccessToken(state().refreshToken)
-        logger.atFine().log("${state().id.forLog()}: GitHub issued a new access token.")
+        _debug().log("${state().id.forLog()}: GitHub issued a new access token.")
         builder().setRefreshToken(tokens.refreshToken)
         return TokenUpdated::class.with(
             command.id, tokens.accessToken, tokens.whenExpires
@@ -203,8 +202,7 @@ internal class UserSessionProcess :
     @Assign
     internal fun handle(command: LogUserOut): UserLoggedOut {
         deleted = true
-        logger.atFine()
-            .log("${state().id.forLog()}: Session closed because the user logged out.")
+        _debug().log("${state().id.forLog()}: Session closed because the user logged out.")
         return UserLoggedOut::class.with(command.id)
     }
 
@@ -218,7 +216,7 @@ internal class UserSessionProcess :
     @React
     internal fun on(rejection: Rejections.UsernameMismatch): SessionClosed {
         deleted = true
-        logger.atFine().log(
+        _debug().log(
             "${state().id.forLog()}: Login failed and session closed because " +
                     "a token issued for \"${rejection.loggedInUser.value}\" account " +
                     "but \"${rejection.expectedUser.value}\" username was entered."
@@ -235,7 +233,7 @@ internal class UserSessionProcess :
      */
     @React
     internal fun on(rejection: Rejections.NotMemberOfPermittedOrgs): SessionClosed {
-        logger.atFine().log(
+        _debug().log(
             "${state().id.forLog()}: Login failed and session closed because " +
                     "user is not a member of an organization authorized to use the application."
         )
@@ -254,7 +252,7 @@ internal class UserSessionProcess :
         when {
             state().hasLoginDeadline() && state().loginDeadline <= event.time -> {
                 deleted = true
-                logger.atFine().log(
+                _debug().log(
                     "${state().id.forLog()}: Login failed and session closed " +
                             "because the time to complete login expired."
                 )
@@ -263,7 +261,7 @@ internal class UserSessionProcess :
 
             state().hasWhenExpires() && state().whenExpires <= event.time -> {
                 deleted = true
-                logger.atFine().log("${state().id.forLog()}: Session expired, so it closed.")
+                _debug().log("${state().id.forLog()}: Session expired, so it closed.")
                 EitherOf3.withB(SessionExpired::class.with(state().id))
             }
 
@@ -311,8 +309,6 @@ internal class UserSessionProcess :
          * The duration for which a session remains active after its creation.
          */
         internal val lifetime = Durations.fromDays(30)
-
-        private val logger = FluentLogger.forEnclosingClass()
     }
 }
 

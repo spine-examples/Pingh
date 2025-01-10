@@ -24,6 +24,10 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+# A sample configuration of Google Cloud Ops manager used in production.
+#
+# See: https://cloud.google.com/logging/docs/agent/ops-agent/configuration.
+
 logging:
   receivers:
     # Loads info logs from files in the project log folder.
@@ -44,7 +48,7 @@ logging:
       include_paths: [ /var/log/pingh/*-error.log ]
 
   processors:
-    # Identifies and parses the string corresponding to the informational log.
+    # Identifies and parses the string corresponding to the info log.
     #
     # Note that the regex keys correspond to the keys of the associated values
     # in the target `jsonPayload`.
@@ -57,7 +61,7 @@ logging:
       time_format: "%Y-%m-%dT%H:%M:%S.%L"
 
     # Identifies the error log containing the stack trace of the exception,
-    # combining multiple lines sent as separate log.
+    # combining multiple lines to separate log.
     #
     parse_java_exception:
       type: parse_multiline
@@ -72,8 +76,8 @@ logging:
     #
     extract_exception:
       type: parse_regex
-      field: message
       regex: "^\\[(?<severity>([a-zA-Z]*))\\] (?<time>([\\d-]*T[\\d:.]*)) (?<class>[^ :]*):\\s*?(?<line>[\\d]*) - (?<message>(.|\\n)*)$"
+      field: message
       time_key: time
       time_format: "%Y-%m-%dT%H:%M:%S.%L"
 
@@ -88,7 +92,7 @@ logging:
         severity:
           move_from: jsonPayload.severity
           # Replaces the WARN level used in Log4j
-          # with the WARNING level used in Google Cloud Logging.
+          # with the WARNING level used in Cloud Logging.
           map_values:
             'WARN': WARNING
 
