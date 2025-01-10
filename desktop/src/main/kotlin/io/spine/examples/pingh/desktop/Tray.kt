@@ -38,6 +38,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.window.Notification
+import com.google.common.flogger.FluentLogger
 import io.spine.example.pingh.desktop.generated.resources.Res
 import io.spine.example.pingh.desktop.generated.resources.tray
 import io.spine.examples.pingh.client.PinghApplication
@@ -61,6 +62,8 @@ import kotlin.math.round
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.jetbrains.compose.resources.painterResource
+
+private val logger = FluentLogger.forEnclosingClass()
 
 /**
  * Adds the application icon to the platform taskbar.
@@ -101,6 +104,7 @@ internal fun Tray(state: AppState) {
 
     DisposableEffect(Unit) {
         SystemTray.getSystemTray().add(tray)
+        logger.atFine().log("Added icon to the system tray.")
 
         state.tray
             .notificationFlow
@@ -109,6 +113,7 @@ internal fun Tray(state: AppState) {
 
         onDispose {
             SystemTray.getSystemTray().remove(tray)
+            logger.atFine().log("Removed icon from the system tray.")
         }
     }
 }

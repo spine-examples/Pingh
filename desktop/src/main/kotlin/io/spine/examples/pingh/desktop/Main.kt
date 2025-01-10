@@ -28,11 +28,21 @@ package io.spine.examples.pingh.desktop
 
 import androidx.compose.runtime.remember
 import androidx.compose.ui.window.application
+import com.google.common.flogger.FluentLogger
+
+private val logger = FluentLogger.forEnclosingClass()
 
 /**
  * Entry point of the desktop application.
  */
 public fun main() {
+    logger.atInfo().log(
+        "Launching the Pingh app.${System.lineSeparator()}" +
+                "Runtime environment: ${System.getProperty("java.vendor")} version " +
+                "${System.getProperty("java.version")}.${System.lineSeparator()}" +
+                "JVM : ${System.getProperty("java.vm.vendor")} version " +
+                "${System.getProperty("java.vm.version")}."
+    )
     val serverEndpoint = ServerEndpoint.load()
     application {
         Theme {
