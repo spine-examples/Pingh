@@ -55,10 +55,10 @@ logging:
     #
     parse_info_line:
       type: parse_regex
-      regex: "^\\[(?<severity>([a-zA-Z]*))\\] (?<time>([\\d-]*T[\\d:.]*)) (?<class>([^ ]*)) - (?<message>[^\\n]*)$"
+      regex: "^\\[(?<severity>([a-zA-Z]*))\\] (?<time>([\\d-]*T[\\d:.Z]*)) (?<class>([^ ]*)) - (?<message>[^\\n]*)$"
       field: message
       time_key: time
-      time_format: "%Y-%m-%dT%H:%M:%S.%L"
+      time_format: "%Y-%m-%dT%H:%M:%S.%LZ"
 
     # Identifies the error log containing the stack trace of the exception,
     # combining multiple lines to separate log.
@@ -76,10 +76,10 @@ logging:
     #
     extract_exception:
       type: parse_regex
-      regex: "^\\[(?<severity>([a-zA-Z]*))\\] (?<time>([\\d-]*T[\\d:.]*)) (?<class>[^ :]*):\\s*?(?<line>[\\d]*) - (?<message>(.|\\n)*)$"
+      regex: "^\\[(?<severity>([a-zA-Z]*))\\] (?<time>([\\d-]*T[\\d:.Z]*)) (?<class>[^ :]*):\\s*?(?<line>[\\d]*) - (?<message>(.|\\n)*)$"
       field: message
       time_key: time
-      time_format: "%Y-%m-%dT%H:%M:%S.%L"
+      time_format: "%Y-%m-%dT%H:%M:%S.%LZ"
 
     # Specifies the log's severity level.
     #
