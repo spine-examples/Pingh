@@ -24,7 +24,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.Flogger
 import io.spine.internal.gradle.publishing.publishToMavenLocal
 
 plugins {
@@ -63,14 +62,11 @@ subprojects {
     // Adds and configures the Detekt Plugin for analysis code.
     apply<DetektCodeAnalysisPlugin>()
 
+    // Adds logging library.
+    apply<LoggingConfigurationPlugin>()
+
     // Adds dependencies for testing and configure test-running tasks.
     apply<TestsConfigurationPlugin>()
-
-    // Adds logging library.
-    dependencies {
-        implementation(Flogger.api)
-        runtimeOnly(Flogger.backend)
-    }
 }
 
 /**
