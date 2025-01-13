@@ -141,6 +141,10 @@ Replace `client_id` and `client_secret` with the values obtained from GitHub.
 property.log.dir=/path/to/your/custom/directory
 ```
 
+If the specified directory does not exist, the application will attempt to create it, 
+provided it has the necessary permissions. If the application lacks the required permissions, 
+the logs will not be saved, but this will not impact the server's performance.
+
 This step can be skipped. If skipped, the server will attempt to write logs 
 to the `/USER_HOME/.pingh/logs` directory.
 
