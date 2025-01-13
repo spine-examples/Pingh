@@ -109,9 +109,7 @@ message RequestMentionsFromGitHubFailed {
 
     // The HTTP status code of the response received from GitHub when trying to fetch mentions.
     //
-    // The HTTP status code ranges from 100 to 599.
-    //
     // If unexpected error occurred while retrieving the mentions, the field is empty.
     //
-    int32 response_status_code = 2 [(min).value = "100", (max).value = "599"];
+    int32 response_status_code = 2;
 }
