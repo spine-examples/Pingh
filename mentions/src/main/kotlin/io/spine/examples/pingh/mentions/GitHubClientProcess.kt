@@ -269,7 +269,7 @@ internal class GitHubClientProcess :
         } else {
             _error().withCause(exception).log(
                 "${state().id.forLog()}: An unexpected error occurred " +
-                        "while fetching mentions from GitHub."
+                        "while fetching mentions from GitHub. The process was interrupted."
             )
             RequestMentionsFromGitHubFailed::class.with(id)
         }

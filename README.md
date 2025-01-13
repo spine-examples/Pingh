@@ -141,7 +141,7 @@ Replace `client_id` and `client_secret` with the values obtained from GitHub.
 property.log.dir=/path/to/your/custom/directory
 ```
 
-If the specified directory does not exist, the application will attempt to create it, 
+If the specified directory does not exist, the application will create it, 
 provided it has the necessary permissions. If the application lacks the required permissions, 
 the logs will not be saved, but this will not impact the server's performance.
 
