@@ -24,10 +24,10 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-# A sample configuration of Google Cloud Ops manager used in production.
+# A sample configuration of Google Cloud Ops Agent used in production.
 #
 # See: https://cloud.google.com/logging/docs/agent/ops-agent/configuration.
-
+#
 logging:
   receivers:
     # Loads info logs from files in the project log folder.
@@ -91,10 +91,13 @@ logging:
       fields:
         severity:
           move_from: jsonPayload.severity
-          # Replaces the WARN level used in Log4j
-          # with the WARNING level used in Cloud Logging.
           map_values:
+            # Replaces the WARN level used in Log4j
+            # with the WARNING level used in Cloud Logging.
             'WARN': WARNING
+            # Replaces the TRACE level used in Log4j
+            # with the DEFAULT level used in Cloud Logging.
+            'TRACE': DEFAULT
 
   service:
     pipelines:

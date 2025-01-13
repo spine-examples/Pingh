@@ -164,8 +164,8 @@ internal class GitHubClientProcess :
     internal fun handle(command: UpdateMentionsFromGitHub): MentionsUpdateFromGitHubRequested {
         if (state().hasWhenStarted()) {
             _debug().log(
-                "${state().id.forLog()}: The request to receive mentions is rejected " +
-                        "because the previous fetching has not yet completed."
+                "${state().id.forLog()}: The request to receive mentions was rejected " +
+                        "because the previous fetching had not yet completed."
             )
             throw MentionsUpdateIsAlreadyInProgress::class.buildBy(command.id)
         }

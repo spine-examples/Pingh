@@ -255,12 +255,12 @@ To configure the agent, follow these steps:
 2. Grant the `Logs Writer` and `Monitoring Metric Writer` roles 
   to the Compute Engine instance's service account, 
   and ensure that the `cloud-platform` OAuth scope is enabled.
-  This is required to enable the Ops agent to write data to Cloud Logging.
+  This is required to enable the Ops Agent to write data to Cloud Logging.
 
 3. [Configure][gcloud-ops-agent-configuration] the agent. The configuration can be found 
   in `server/src/main/resources/logging/config.yaml` file.
 
-The Ops agent also allows sending virtual machine metrics to Cloud Monitoring, 
+The Ops Agent also allows sending virtual machine metrics to Cloud Monitoring, 
 but this feature is disabled in the configuration file.
 
 ## Testing

@@ -146,8 +146,8 @@ internal class Application {
      * Starts the Pingh server and clock.
      */
     internal fun start() {
-        clock.start()
         server.start()
+        clock.start()
     }
 
     /**
