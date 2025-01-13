@@ -36,7 +36,7 @@ logging:
     #
     info_file:
       type: files
-      include_paths: [ /var/log/pingh/*-info.log ]
+      include_paths: [ /home/.pingh/logs/*-info.log ]
 
     # Loads error logs from files in the project log folder.
     #
@@ -45,7 +45,7 @@ logging:
     #
     error_file:
       type: files
-      include_paths: [ /var/log/pingh/*-error.log ]
+      include_paths: [ /home/.pingh/logs/*-error.log ]
 
   processors:
     # Identifies and parses the string corresponding to the info log.

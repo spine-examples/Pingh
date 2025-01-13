@@ -142,8 +142,7 @@ property.log.dir=/path/to/your/custom/directory
 ```
 
 This step can be skipped. If skipped, the server will attempt to write logs 
-to the `/var/log/pingh` directory. If this directory does not exist or is inaccessible, 
-the logs will not be saved. However, this will not impact the server's performance.
+to the `/USER_HOME/.pingh/logs` directory.
 
 4. Start the Pingh server locally. The server always runs on port `50051`. 
   To launch it, run the following command in the root project directory:
