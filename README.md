@@ -241,8 +241,7 @@ The following secrets are configured for the Pingh app:
 
 ### Google Logging
 
-The Cloud [Logging][gcloud-logging] is a fully managed, real-time log management service 
-that provides storage, search, analysis, and alerting capabilities.
+The Cloud [Logging][gcloud-logging] is used for logging.
 
 The application server runs on a [Compute Engine instance](#compute-engine) 
 and writes logs to local files on the virtual machine. The [Ops Agent][gcloud-ops-agent] is used 
