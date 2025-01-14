@@ -26,7 +26,9 @@
 
 import io.spine.internal.dependency.Coil
 import io.spine.internal.dependency.Compose
+import io.spine.internal.dependency.Flogger
 import io.spine.internal.dependency.Guava
+import io.spine.internal.dependency.Log4j2
 import io.spine.internal.dependency.Pingh
 import io.spine.internal.gradle.AppVersion
 import io.spine.internal.gradle.allowBackgroundExecution
@@ -81,6 +83,17 @@ configurations.all {
     resolutionStrategy {
         force(Guava.lib)
     }
+
+    // By default, Flogger uses an outdated version of Log4j2 that contains bugs.
+    // Therefore, the Log4j2 library version is replaced with a newer one.
+    //
+    // See: https://github.com/apache/logging-log4j2/issues/2774.
+    //
+    resolutionStrategy.eachDependency {
+        if (requested.group == Log4j2.group) {
+            useVersion(Log4j2.version)
+        }
+    }
 }
 
 dependencies {
@@ -91,6 +104,8 @@ dependencies {
     implementation(Coil.compose)
     implementation(Coil.network)
     implementation(Pingh.client)
+    implementation(Flogger.api)
+    runtimeOnly(Flogger.backend)
 
     testImplementation(Pingh.testutilClient)
     testImplementation(kotlin("test"))

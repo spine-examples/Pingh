@@ -34,6 +34,6 @@ import io.spine.environment.Environment
 public fun main() {
     Environment.instance().register(Production::class.java)
     val app = Application()
-    app.server.start()
-    app.server.awaitTermination()
+    app.start()
+    app.awaitTermination()
 }

@@ -31,52 +31,71 @@ import io.ktor.server.application.Application
 import io.ktor.server.application.call
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.server.netty.NettyApplicationEngine
 import io.ktor.server.request.authorization
 import io.ktor.server.response.respond
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import io.spine.examples.pingh.clock.Clock
+import io.spine.logging.Logging
 
 /**
- * The port for listening to HTTP requests.
- */
-private const val heartbeatPort = 8080
-
-/**
- * Starts the server that handles periodic requests from external clocks or schedulers
+ * Handles requests from external clocks and schedulers
  * to notify the Pingh server of the current time.
- *
- * The server runs in the background on port [heartbeatPort].
  */
-internal fun startHeartbeatServer(clock: Clock) {
-    embeddedServer(
-        Netty,
-        port = heartbeatPort
-    ) {
-        configure(clock)
-    }.start(wait = false)
-}
+internal class HeartbeatServer : Clock(), Logging {
 
-/**
- * Configures HTTP request handlers.
- *
- * If the "Authorization" header is missing or does not match the Compute Engine
- * authentication token stored in Secret Manager, the request will be rejected
- * with a `401 Unauthorized` status code. Otherwise, upon receiving a request with valid
- * authentication token, the server will emit an event with the current time and
- * return a `200 OK` status code in response.
- */
-private fun Application.configure(clock: Clock) {
-    val token = Secret.named("auth_token")
-    routing {
-        post("/time") {
-            val currentToken = call.request.authorization()
-            if (currentToken == null || currentToken != token) {
-                call.respond(HttpStatusCode.Unauthorized)
-            } else {
-                clock.triggerTimePassed()
-                call.respond(HttpStatusCode.OK)
+    private val server: NettyApplicationEngine
+    init {
+        server = embeddedServer(
+            Netty,
+            port = port
+        ) {
+            configure()
+        }
+    }
+
+    /**
+     * Configures HTTP request handlers.
+     *
+     * If the "Authorization" header is missing or does not match the Compute Engine
+     * authentication token stored in Secret Manager, the request will be rejected
+     * with a `401 Unauthorized` status code. Otherwise, upon receiving a request with valid
+     * authentication token, the server will emit an event with the current time and
+     * return a `200 OK` status code in response.
+     */
+    private fun Application.configure() {
+        val token = Secret.named("auth_token")
+        routing {
+            post("/time") {
+                val currentToken = call.request.authorization()
+                if (currentToken == null || currentToken != token) {
+                    _warn().log("Received an unauthorized request and rejected it.")
+                    call.respond(HttpStatusCode.Unauthorized)
+                } else {
+                    triggerTimePassed()
+                    _trace().log("An event with the current time was emitted.")
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
+    }
+
+    /**
+     * Starts the server that handles periodic requests from external clocks or schedulers
+     * to notify the Pingh server of the current time.
+     *
+     * The server runs in the background on [port].
+     */
+    override fun start() {
+        server.start(wait = false)
+        _info().log("Heartbeat server started, listening to the port $port.")
+    }
+
+    private companion object {
+        /**
+         * The port for listening to HTTP requests.
+         */
+        private const val port = 8080
     }
 }

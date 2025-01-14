@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.sessions
 
+import com.google.protobuf.util.Timestamps
 import io.spine.core.External
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.sessions.command.UpdateToken
@@ -36,6 +37,7 @@ import io.spine.examples.pingh.sessions.event.TokenMonitoringStarted
 import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
+import io.spine.logging.Logging
 import io.spine.protobuf.Durations2.minutes
 import io.spine.server.command.Command
 import io.spine.server.event.React
@@ -48,17 +50,17 @@ import java.util.Optional
  * @see [TokenMonitor]
  */
 internal class TokenMonitorProcess :
-    ProcessManager<TokenMonitorId, TokenMonitor, TokenMonitor.Builder>() {
+    ProcessManager<TokenMonitorId, TokenMonitor, TokenMonitor.Builder>(), Logging {
 
     /**
      * Starts the process of monitoring token expiration.
      */
     @React
     internal fun on(event: UserLoggedIn): TokenMonitoringStarted {
+        val id = TokenMonitorId::class.of(event.id)
         builder().setWhenExpires(event.whenTokenExpires)
-        return TokenMonitoringStarted::class.with(
-            TokenMonitorId::class.of(event.id)
-        )
+        _debug().log("${id.forLog()}: Token monitor process started.")
+        return TokenMonitoringStarted::class.with(id)
     }
 
     /**
@@ -77,6 +79,12 @@ internal class TokenMonitorProcess :
             return Optional.empty()
         }
         builder().setWhenUpdateRequested(time)
+        _debug().log(
+            "${state().id.forLog()}: Requested an access token update " +
+                    "due to token expiration. The token's expiration time " +
+                    "is ${Timestamps.toString(state().whenExpires)}, " +
+                    "and the current time is ${Timestamps.toString(time)}."
+        )
         return Optional.of(UpdateToken::class.with(state().id.session, time))
     }
 
@@ -90,6 +98,11 @@ internal class TokenMonitorProcess :
             whenExpires = event.whenTokenExpires
             clearWhenUpdateRequested()
         }
+        _debug().log(
+            "${state().id.forLog()}: Set expiration time for the updated token. " +
+                    "The access token will expire " +
+                    "at ${Timestamps.toString(event.whenTokenExpires)}."
+        )
         return TokenExpirationTimeUpdated::class.with(state().id)
     }
 
@@ -99,6 +112,10 @@ internal class TokenMonitorProcess :
     @React
     internal fun on(event: UserLoggedOut): TokenMonitoringFinished {
         deleted = true
+        _debug().log(
+            "${state().id.forLog()}: Token monitoring process finished " +
+                    "because the user logged out."
+        )
         return TokenMonitoringFinished::class.with(
             TokenMonitorId::class.of(event.id)
         )
@@ -110,6 +127,10 @@ internal class TokenMonitorProcess :
     @React
     internal fun on(event: SessionExpired): TokenMonitoringFinished {
         deleted = true
+        _debug().log(
+            "${state().id.forLog()}: Token monitoring process finished  " +
+                    "due to session expiration."
+        )
         return TokenMonitoringFinished::class.with(
             TokenMonitorId::class.of(event.id)
         )

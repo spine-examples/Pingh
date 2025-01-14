@@ -1,0 +1,123 @@
+#
+# Copyright 2025, TeamDev. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# https://www.apache.org/licenses/LICENSE-2.0
+#
+# Redistribution and use in source and/or binary forms, with or without
+# modification, must retain the above copyright notice and the following
+# disclaimer.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+# A sample configuration of Google Cloud Ops Agent used in production.
+#
+# See: https://cloud.google.com/logging/docs/agent/ops-agent/configuration.
+#
+logging:
+  receivers:
+    # Loads info logs from files in the project log folder.
+    #
+    # Each info log consists of one line.
+    #
+    info_file:
+      type: files
+      include_paths: [ /home/.pingh/logs/*-info.log ]
+
+    # Loads error logs from files in the project log folder.
+    #
+    # Each error log includes general information like the timestamp, log level, and class,
+    # along with the stack trace of the error.
+    #
+    error_file:
+      type: files
+      include_paths: [ /home/.pingh/logs/*-error.log ]
+
+  processors:
+    # Identifies and parses the string corresponding to the info log.
+    #
+    # Note that the regex keys correspond to the keys of the associated values
+    # in the target `jsonPayload`.
+    #
+    parse_info_line:
+      type: parse_regex
+      regex: "^\\[(?<severity>([a-zA-Z]*))\\] (?<time>([\\d-]*T[\\d:.Z]*)) (?<class>([^ ]*)) - (?<message>[^\\n]*)$"
+      field: message
+      time_key: time
+      time_format: "%Y-%m-%dT%H:%M:%S.%LZ"
+
+    # Identifies the error log containing the stack trace of the exception,
+    # combining multiple lines to separate log.
+    #
+    parse_java_exception:
+      type: parse_multiline
+      match_any:
+        - type: language_exceptions
+          language: java
+
+    # Extracts details from a multi-line error log.
+    #
+    # Note that the regex keys correspond to the keys of the associated values
+    # in the target `jsonPayload`.
+    #
+    extract_exception:
+      type: parse_regex
+      regex: "^\\[(?<severity>([a-zA-Z]*))\\] (?<time>([\\d-]*T[\\d:.Z]*)) (?<class>[^ :]*):\\s*?(?<line>[\\d]*) - (?<message>(.|\\n)*)$"
+      field: message
+      time_key: time
+      time_format: "%Y-%m-%dT%H:%M:%S.%LZ"
+
+    # Specifies the log's severity level.
+    #
+    # The severity level should be determined in earlier steps
+    # and included in the `jsonPayload`.
+    #
+    move_severity:
+      type: modify_fields
+      fields:
+        severity:
+          move_from: jsonPayload.severity
+          map_values:
+            # Replaces the WARN level used in Log4j
+            # with the WARNING level used in Cloud Logging.
+            'WARN': WARNING
+            # Replaces the TRACE level used in Log4j
+            # with the DEFAULT level used in Cloud Logging.
+            'TRACE': DEFAULT
+
+  service:
+    pipelines:
+      # Sends info logs.
+      info_pipeline:
+        receivers: [ info_file ]
+        processors: [ parse_info_line, move_severity ]
+
+      # Sends error logs.
+      error_pipeline:
+        receivers: [ error_file ]
+        processors: [ parse_java_exception, extract_exception, move_severity ]
+
+      # Removes the sending of default logs.
+      default_pipeline:
+        receivers: []
+
+metrics:
+  service:
+    pipelines:
+      # Removes the sending of default metrics.
+      default_pipeline:
+        receivers: []

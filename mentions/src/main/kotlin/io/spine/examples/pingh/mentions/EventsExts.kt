@@ -113,12 +113,17 @@ public fun KClass<MentionUnsnoozed>.from(mention: io.spine.examples.pingh.mentio
  * Creates a new `RequestMentionsFromGitHubFailed` event with the specified `GitHubClientId`
  * and HTTP status code of the response from GitHub.
  */
-public fun KClass<RequestMentionsFromGitHubFailed>.buildBy(id: GitHubClientId, statusCode: Int):
-        RequestMentionsFromGitHubFailed =
-    RequestMentionsFromGitHubFailed.newBuilder()
-        .setId(id)
-        .setResponseStatusCode(statusCode)
-        .vBuild()
+public fun KClass<RequestMentionsFromGitHubFailed>.with(
+    id: GitHubClientId,
+    statusCode: Int? = null
+): RequestMentionsFromGitHubFailed =
+    with(RequestMentionsFromGitHubFailed.newBuilder()) {
+        this.id = id
+        if (statusCode != null) {
+            this.responseStatusCode = statusCode
+        }
+        vBuild()
+    }
 
 /**
  * Creates a new `UserMentioned` event with the name of the mentioned user

@@ -34,13 +34,14 @@ import io.spine.examples.pingh.mentions.event.MentionSnoozed
 import io.spine.examples.pingh.mentions.event.MentionUnpinned
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
+import io.spine.logging.Logging
 import io.spine.server.projection.Projection
 
 /**
  * The view of the mentions that have occurred.
  */
 internal class UserMentionsProjection :
-    Projection<UserMentionsId, UserMentions, UserMentions.Builder>() {
+    Projection<UserMentionsId, UserMentions, UserMentions.Builder>(), Logging {
 
     /**
      * Creates the view when a user is mentioned.
@@ -49,13 +50,20 @@ internal class UserMentionsProjection :
      */
     @Subscribe
     internal fun on(event: UserMentioned) {
+        val id = UserMentionsId::class.of(event.id.user)
         if (state().mentionList.any { it.id.equals(event.id) }) {
+            _warn().log(
+                "${id.forLog()}: A user mention occurred, but it was already saved. " +
+                        "Since duplicates are not allowed, this mention is ignored. " +
+                        "Mention ID: ${event.id.forLog()}."
+            )
             return
         }
         builder()
             .addMention(
                 MentionView::class.buildBy(event, MentionStatus.UNREAD)
             )
+        _debug().log("${id.forLog()}: Mention with ID ${event.id.forLog()} saved.")
     }
 
     /**
@@ -66,6 +74,7 @@ internal class UserMentionsProjection :
         modify(event.id) {
             status = MentionStatus.SNOOZED
         }
+        _debug().log("${state().id.forLog()}: Mention with ID ${event.id.forLog()} snoozed.")
     }
 
     /**
@@ -76,6 +85,7 @@ internal class UserMentionsProjection :
         modify(event.id) {
             status = MentionStatus.READ
         }
+        _debug().log("${state().id.forLog()}: Mention with ID ${event.id.forLog()} read.")
     }
 
     /**
@@ -87,6 +97,7 @@ internal class UserMentionsProjection :
         modify(event.id) {
             status = MentionStatus.UNREAD
         }
+        _debug().log("${state().id.forLog()}: Mention with ID ${event.id.forLog()} unsnoozed.")
     }
 
     /**
@@ -97,6 +108,7 @@ internal class UserMentionsProjection :
         modify(event.id) {
             pinned = true
         }
+        _debug().log("${state().id.forLog()}: Mention with ID ${event.id.forLog()} pinned.")
     }
 
     /**
@@ -107,6 +119,7 @@ internal class UserMentionsProjection :
         modify(event.id) {
             pinned = false
         }
+        _debug().log("${state().id.forLog()}: Mention with ID ${event.id.forLog()} unpinned.")
     }
 
     /**
@@ -133,11 +146,19 @@ internal class UserMentionsProjection :
     internal fun on(event: MentionArchived) {
         with(builder()) {
             val id = mentionList.indexOfFirst { it.id.equals(event.id) }
-            check(id != -1) {
-                "The mention is not in the user's list, but an attempt was made to remove it.\n" +
-                        "The ID of the mention that was attempted to be removed: `${event.id}`."
+            if (id == -1) {
+                _warn().log(
+                    "${state().id}: The mention was not in the user's list, " +
+                            "but an attempt was made to remove it. " +
+                            "Mention ID: ${event.id.forLog()}."
+                )
+                return
             }
             removeMention(id)
+            _debug().log(
+                "${state().id.forLog()}: Mention with ID ${event.id.forLog()} was deleted " +
+                        "from the projection because it is obsolete."
+            )
         }
     }
 }

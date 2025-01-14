@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.examples.pingh.clock
+
+import com.google.common.annotations.VisibleForTesting
+
 /**
- * The version of the `Pingh` to publish.
+ * Emits the `TimePassed` event that contains the current time.
+ *
+ * Use only for testing.
  */
-val pinghVersion: String by extra("1.0.1")
+@VisibleForTesting
+public fun emitTimePassedEvent() {
+    SingleTickClock.default().start()
+}
+
+/**
+ * A clock that, upon [starting][start],
+ * emits a single event with the current time and then stops.
+ *
+ * For testing purposes only.
+ */
+private class SingleTickClock : Clock() {
+    override fun start() {
+        triggerTimePassed()
+    }
+
+    companion object {
+        private var instance: SingleTickClock? = null
+
+        fun default(): SingleTickClock {
+            if (instance == null) {
+                instance = SingleTickClock()
+            }
+            return instance!!
+        }
+    }
+}

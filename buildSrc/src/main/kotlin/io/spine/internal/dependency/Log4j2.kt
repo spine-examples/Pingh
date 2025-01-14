@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,48 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.clock
+package io.spine.internal.dependency
 
-import java.lang.Thread.sleep
-import kotlin.time.Duration
-
-/**
- * A clock that continuously emits `TimePassed` events at the specified interval.
- *
- * @property pauseTime The time interval between emitting `TimePassed` events.
- */
-public class IntervalClock(private val pauseTime: Duration) {
-    /**
-     * Whether the clock is currently running.
-     *
-     * Used to control the [clockThread].
-     */
-    private var isRunning = false
-
-    /**
-     * The clock thread emits a `TimePassed` event after passing each time interval.
-     */
-    private lateinit var clockThread: Thread
-
-    /**
-     * Starts the clock.
-     */
-    public fun start() {
-        isRunning = true
-        clockThread = Thread {
-            while (isRunning) {
-                sleep(pauseTime.inWholeMilliseconds)
-                emitTimePassedEvent()
-            }
-        }
-        clockThread.start()
-    }
-
-    /**
-     * Stops the clock and waits until [clock thread][clockThread] is shut down.
-     */
-    public fun stop() {
-        isRunning = false
-        clockThread.join()
-    }
+// https://github.com/apache/logging-log4j2
+public object Log4j2 {
+    public const val group: String = "org.apache.logging.log4j"
+    public const val version: String = "2.24.3"
 }

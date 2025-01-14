@@ -29,6 +29,7 @@ package io.spine.examples.pingh.mentions
 import com.google.common.annotations.VisibleForTesting
 import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Durations
+import com.google.protobuf.util.Timestamps
 import io.spine.base.Time.currentTime
 import io.spine.core.External
 import io.spine.examples.pingh.clock.event.TimePassed
@@ -44,6 +45,7 @@ import io.spine.examples.pingh.mentions.event.MentionUnpinned
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
 import io.spine.examples.pingh.mentions.rejection.MentionIsAlreadyRead
+import io.spine.logging.Logging
 import io.spine.server.command.Assign
 import io.spine.server.event.React
 import io.spine.server.model.Nothing
@@ -55,7 +57,7 @@ import kotlin.jvm.Throws
  * Coordinates the lifecycle of the mention, namely snoozing and reading.
  */
 internal class MentionProcess :
-    ProcessManager<MentionId, Mention, Mention.Builder>() {
+    ProcessManager<MentionId, Mention, Mention.Builder>(), Logging {
 
     /**
      * Creates the process for the mention occurred.
@@ -75,6 +77,8 @@ internal class MentionProcess :
                 viaTeam = event.viaTeam
             }
         }
+        _debug()
+            .log("${event.id.forLog()}: The process of managing the mention lifecycle started.")
         return nothing()
     }
 
@@ -85,12 +89,20 @@ internal class MentionProcess :
     @Throws(MentionIsAlreadyRead::class)
     internal fun handle(command: SnoozeMention): MentionSnoozed {
         if (state().status == MentionStatus.READ) {
+            _warn().log(
+                "${command.id.forLog()}: " +
+                        "Attempting to snooze the mention that has already been read."
+            )
             throw MentionIsAlreadyRead::class.buildBy(command.id)
         }
         with(builder()) {
             status = MentionStatus.SNOOZED
             snoozeUntilWhen = command.untilWhen
         }
+        _debug().log(
+            "${command.id.forLog()}: Mention snoozed " +
+                    "until ${Timestamps.toString(command.untilWhen)}."
+        )
         return MentionSnoozed::class.buildBy(
             command.id,
             command.untilWhen
@@ -104,6 +116,10 @@ internal class MentionProcess :
     @Throws(MentionIsAlreadyRead::class)
     internal fun handle(command: MarkMentionAsRead): MentionRead {
         if (state().status == MentionStatus.READ) {
+            _warn().log(
+                "${command.id.forLog()}: " +
+                        "Attempting to read the mention that has already been read."
+            )
             throw MentionIsAlreadyRead::class.buildBy(command.id)
         }
         with(builder()) {
@@ -111,6 +127,7 @@ internal class MentionProcess :
             whenRead = currentTime()
             clearSnoozeUntilWhen()
         }
+        _debug().log("${command.id.forLog()}: Mention read.")
         return MentionRead::class.buildBy(command.id)
     }
 
@@ -120,6 +137,7 @@ internal class MentionProcess :
     @Assign
     internal fun handle(command: PinMention): MentionPinned {
         builder().pinned = true
+        _debug().log("${command.id.forLog()}: Mention pinned.")
         return MentionPinned::class.with(command.id)
     }
 
@@ -129,6 +147,7 @@ internal class MentionProcess :
     @Assign
     internal fun handle(command: UnpinMention): MentionUnpinned {
         builder().pinned = false
+        _debug().log("${command.id.forLog()}: Mention unpinned.")
         return MentionUnpinned::class.with(command.id)
     }
 
@@ -145,8 +164,18 @@ internal class MentionProcess :
         @External event: TimePassed
     ): EitherOf3<MentionUnsnoozed, MentionArchived, Nothing> =
         when {
-            isSnoozeTimePassed(event.time) -> EitherOf3.withA(unsnooze())
-            isObsolete(event.time) -> EitherOf3.withB(archive())
+            isSnoozeTimePassed(event.time) -> {
+                _debug().log(
+                    "${state().id.forLog()}: Mention unsnoozed due to expiration of snooze time."
+                )
+                EitherOf3.withA(unsnooze())
+            }
+
+            isObsolete(event.time) -> {
+                _debug().log("${state().id.forLog()}: Mention archived because it is obsolete.")
+                EitherOf3.withB(archive())
+            }
+
             else -> EitherOf3.withC(nothing())
         }
 

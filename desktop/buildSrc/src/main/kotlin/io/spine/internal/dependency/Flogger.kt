@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The version of the `Pingh` to publish.
- */
-val pinghVersion: String by extra("1.0.1")
+package io.spine.internal.dependency
+
+// https://github.com/google/flogger
+public object Flogger {
+    private const val group = "com.google.flogger"
+    private const val version = "0.8"
+
+    public const val api: String = "$group:flogger:$version"
+    public const val backend: String = "$group:flogger-log4j2-backend:$version"
+}

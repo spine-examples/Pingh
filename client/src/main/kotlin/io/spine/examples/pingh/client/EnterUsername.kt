@@ -32,6 +32,7 @@ import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.of
 import io.spine.examples.pingh.sessions.withSession
+import io.spine.logging.Logging
 
 /**
  * A stage of the login flow on which the user enters their GitHub username
@@ -43,7 +44,7 @@ import io.spine.examples.pingh.sessions.withSession
 public class EnterUsername internal constructor(
     private val client: DesktopClient,
     private val moveToNextStage: () -> Unit
-) : LoginStage<UserCodeReceived>() {
+) : LoginStage<UserCodeReceived>(), Logging {
 
     /**
      * Starts the GitHub login process and requests `UserCode`.
@@ -62,7 +63,9 @@ public class EnterUsername internal constructor(
             result = event
             moveToNextStage()
             onSuccess(event)
+            _debug().log("Verification code received.")
         }
         client.send(command)
+        _debug().log("Username sent to server; waiting for verification code.")
     }
 }

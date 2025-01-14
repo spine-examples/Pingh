@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The version of the `Pingh` to publish.
- */
-val pinghVersion: String by extra("1.0.1")
+package io.spine.internal.dependency
+
+// https://github.com/apache/logging-log4j2
+public object Log4j2 {
+    public const val group: String = "org.apache.logging.log4j"
+    public const val version: String = "2.24.3"
+}

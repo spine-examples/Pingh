@@ -35,6 +35,7 @@ import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.withSession
 import io.spine.examples.pingh.sessions.command.LogUserOut
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
+import io.spine.logging.Logging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -56,7 +57,7 @@ public class SettingsFlow internal constructor(
     private val session: Session,
     private val localSettings: Settings,
     private val closeSession: () -> Unit
-) {
+) : Logging {
     private val mutableSettings = localSettings.current.toBuilder()
 
     /**
@@ -80,8 +81,10 @@ public class SettingsFlow internal constructor(
         client.observeEvent(command.id, UserLoggedOut::class) { event ->
             closeSession()
             onSuccess(event)
+            _debug().log("User logged out.")
         }
         client.send(command)
+        _debug().log("Logout requested.")
     }
 
     /**
@@ -91,6 +94,7 @@ public class SettingsFlow internal constructor(
     public fun saveSettings() {
         val settings = mutableSettings.vBuild()
         localSettings.update(settings)
+        _debug().log("Settings changed.")
     }
 }
 

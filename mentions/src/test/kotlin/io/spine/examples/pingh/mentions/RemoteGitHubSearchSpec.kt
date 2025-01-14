@@ -79,7 +79,7 @@ internal class RemoteGitHubSearchSpec {
         val exception = shouldThrow<CannotObtainMentionsException> {
             service.searchMentions(username, token)
         }
-        exception.statusCode() shouldBe 422
+        exception.statusCode shouldBe 422
     }
 
     @Test

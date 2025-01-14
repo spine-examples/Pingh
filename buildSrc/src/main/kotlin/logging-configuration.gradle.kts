@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.dependency.Flogger
+import io.spine.internal.dependency.Log4j2
+
+plugins {
+    java
+}
+
+dependencies {
+    implementation(Flogger.api)
+    runtimeOnly(Flogger.backend)
+}
+
 /**
- * The version of the `Pingh` to publish.
+ * By default, Flogger uses an outdated version of Log4j2 that contains bugs.
+ * Therefore, the Log4j2 library version is replaced with a newer one.
+ *
+ * See: https://github.com/apache/logging-log4j2/issues/2774.
  */
-val pinghVersion: String by extra("1.0.1")
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == Log4j2.group) {
+            useVersion(Log4j2.version)
+        }
+    }
+}

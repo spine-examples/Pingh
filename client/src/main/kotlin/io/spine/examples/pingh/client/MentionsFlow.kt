@@ -45,6 +45,7 @@ import io.spine.examples.pingh.mentions.command.SnoozeMention
 import io.spine.examples.pingh.mentions.command.UnpinMention
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.with
+import io.spine.logging.Logging
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
@@ -66,7 +67,7 @@ public class MentionsFlow internal constructor(
     private val client: DesktopClient,
     private val session: Session,
     private val settings: Settings
-) {
+) : Logging {
     /**
      * User mentions.
      */
@@ -87,7 +88,9 @@ public class MentionsFlow internal constructor(
             mentions.value = entity.mentionList
                 .notIgnored()
                 .distinctBy { it.id }
+            _debug().log("Update to mentions on the server was made. The changes were applied.")
         }
+        _debug().log("Subscribed to mention updates.")
     }
 
     /**
@@ -103,6 +106,7 @@ public class MentionsFlow internal constructor(
             GitHubClientId::class.of(session.username)
         )
         client.send(command)
+        _debug().log("Requested an update for the mentions.")
     }
 
     /**
@@ -151,6 +155,7 @@ public class MentionsFlow internal constructor(
         ensureLoggedIn()
         val command = SnoozeMention::class.buildBy(id, currentTime().add(snoozeTime))
         client.send(command)
+        _debug().log("Requested to snooze the mention.")
     }
 
     /**
@@ -162,6 +167,7 @@ public class MentionsFlow internal constructor(
         ensureLoggedIn()
         val command = MarkMentionAsRead::class.buildBy(id)
         client.send(command)
+        _debug().log("Requested to mark the mention as read.")
     }
 
     /**
@@ -172,6 +178,7 @@ public class MentionsFlow internal constructor(
         mentions.value
             .filter { it.status != MentionStatus.READ }
             .forEach { markAsRead(it.id) }
+        _debug().log("Requested to mark all mention as read.")
     }
 
     /**
@@ -183,6 +190,7 @@ public class MentionsFlow internal constructor(
         ensureLoggedIn()
         val command = PinMention::class.with(id)
         client.send(command)
+        _debug().log("Requested to pin the mention.")
     }
 
     /**
@@ -194,6 +202,7 @@ public class MentionsFlow internal constructor(
         ensureLoggedIn()
         val command = UnpinMention::class.with(id)
         client.send(command)
+        _debug().log("Requested to unpin the mention.")
     }
 
     /**

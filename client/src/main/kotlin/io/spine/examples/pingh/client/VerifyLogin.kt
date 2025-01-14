@@ -40,6 +40,7 @@ import io.spine.examples.pingh.sessions.of
 import io.spine.examples.pingh.sessions.rejection.Rejections.NotMemberOfPermittedOrgs
 import io.spine.examples.pingh.sessions.rejection.Rejections.UsernameMismatch
 import io.spine.examples.pingh.sessions.withSession
+import io.spine.logging.Logging
 import io.spine.net.Url
 import io.spine.protobuf.Durations2.minutes
 import io.spine.protobuf.Durations2.seconds
@@ -68,7 +69,7 @@ public class VerifyLogin internal constructor(
     private val establishSession: (SessionId) -> Unit,
     private val moveToNextStage: () -> Unit,
     event: UserCodeReceived
-) : LoginStage<String>() {
+) : LoginStage<String>(), Logging {
 
     /**
      * The code a user needs to enter on GitHub to confirm login to the app.
@@ -127,6 +128,7 @@ public class VerifyLogin internal constructor(
         isUserCodeExpired.value = false
         codeExpirationJob = invoke(expiresIn.value) {
             isUserCodeExpired.value = true
+            _debug().log("User code expired.")
         }
     }
 
@@ -215,7 +217,9 @@ public class VerifyLogin internal constructor(
             codeExpirationJob.cancel()
             watchForCodeExpiration()
             onSuccess(event)
+            _debug().log("Verification code received.")
         }
+        _debug().log("Requested a new verification code; awaiting server receipt.")
     }
 
     /**
@@ -224,6 +228,7 @@ public class VerifyLogin internal constructor(
     internal fun close() {
         codeExpirationJob.cancel()
         retryStrategy?.stop()
+        _debug().log("Verification login flow closed.")
     }
 
     private companion object {

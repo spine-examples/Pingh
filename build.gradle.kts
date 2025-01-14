@@ -62,6 +62,9 @@ subprojects {
     // Adds and configures the Detekt Plugin for analysis code.
     apply<DetektCodeAnalysisPlugin>()
 
+    // Adds logging library.
+    apply<LoggingConfigurationPlugin>()
+
     // Adds dependencies for testing and configure test-running tasks.
     apply<TestsConfigurationPlugin>()
 }

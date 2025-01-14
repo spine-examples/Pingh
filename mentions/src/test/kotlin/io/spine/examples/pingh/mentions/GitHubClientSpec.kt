@@ -42,6 +42,8 @@ import io.spine.examples.pingh.github.Team
 import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
+import io.spine.examples.pingh.mentions.GitHubClientProcess.Companion.limitOnFirstLaunch
+import io.spine.examples.pingh.mentions.GitHubClientProcess.Companion.mentionsUpdateInterval
 import io.spine.examples.pingh.mentions.command.UpdateMentionsFromGitHub
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
 import io.spine.examples.pingh.mentions.event.MentionsUpdateFromGitHubCompleted
@@ -291,7 +293,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
                 Username::class.of(randomString())
             )
             emitUserLoggedInEvent()
-            val expected = RequestMentionsFromGitHubFailed::class.buildBy(
+            val expected = RequestMentionsFromGitHubFailed::class.with(
                 gitHubClientId,
                 responseStatusCode.value
             )

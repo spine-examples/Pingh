@@ -36,6 +36,7 @@ import io.spine.examples.pingh.sessions.event.SessionExpired
 import io.spine.examples.pingh.sessions.event.SessionVerificationFailed
 import io.spine.examples.pingh.sessions.event.SessionVerified
 import io.spine.examples.pingh.sessions.with
+import io.spine.logging.Logging
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -59,7 +60,7 @@ public class PinghApplication private constructor(
     notificationSender: NotificationSender,
     address: String,
     port: Int
-) {
+) : Logging {
     public companion object {
         /**
          * The default amount of seconds to wait
@@ -101,11 +102,14 @@ public class PinghApplication private constructor(
         val storage = UserDataStorage()
         session = Session(storage)
         settings = Settings(storage)
+        _debug().log("Loaded session and settings data from local storage.")
 
         // Resets a locally saved session if it is no longer active.
         if (session.isActive) {
+            _debug().log("A saved session was detected.")
             if (!client.verifySession(session.id)) {
                 session.resetToGuest()
+                _debug().log("The saved session expired, so a new guest session was created.")
             }
         }
 
@@ -176,6 +180,7 @@ public class PinghApplication private constructor(
         notificationsFlow.enableNotifications(client, id.username)
         subscribeToSessionExpiration(id)
         _loggedIn.value = true
+        _info().log("User session established with the server.")
     }
 
     /**
@@ -187,6 +192,9 @@ public class PinghApplication private constructor(
             notificationsFlow.send(
                 "Pingh",
                 "Your session has expired.${System.lineSeparator()}Please log in again."
+            )
+            _info().log(
+                "The current session expired. A new guest session was created and is now active."
             )
         }
     }
@@ -206,6 +214,7 @@ public class PinghApplication private constructor(
         _unreadMentionCount.value = null
         mentionsObserver?.cancel()
         settingsFlow = null
+        _info().log("The current session closed.")
     }
 
     /**
@@ -267,6 +276,7 @@ public class PinghApplication private constructor(
         client.close()
         channel.shutdown()
             .awaitTermination(defaultShutdownTimeout, TimeUnit.SECONDS)
+        _info().log("Application closed.")
     }
 
     /**

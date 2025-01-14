@@ -28,6 +28,7 @@ package io.spine.examples.pingh.client
 
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
+import io.spine.logging.Logging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -67,12 +68,15 @@ public abstract class LoginStage<T> {
 public class LoginFlow internal constructor(
     private val client: DesktopClient,
     private val establishSession: (SessionId) -> Unit,
-) {
+) : Logging {
     /**
      * Current stage of the GitHub login process.
      */
     private val stage: MutableStateFlow<LoginStage<*>> =
         MutableStateFlow(EnterUsername(client, ::moveToNextStage))
+    init {
+        _debug().log("Starting login flow. Current stage: \"${stage.value::class.simpleName}\".")
+    }
 
     /**
      * Returns the immutable state of the current login stage.
@@ -121,6 +125,7 @@ public class LoginFlow internal constructor(
                 stage.value = EnterUsername(client, ::moveToNextStage)
             }
         }
+        _debug().log("Login flow moved to the \"${stage.value::class.simpleName}\" stage.")
     }
 
     /**
@@ -130,6 +135,7 @@ public class LoginFlow internal constructor(
         when (val screenStage = stage.value) {
             is VerifyLogin -> screenStage.close()
         }
+        _debug().log("Login flow closed.")
     }
 }
 

@@ -32,15 +32,10 @@ package io.spine.examples.pingh.mentions
  * @property statusCode The HTTP status code of the response.
  */
 public class CannotObtainMentionsException(
-    private val statusCode: Int
+    public val statusCode: Int
 ) : Exception() {
 
     public companion object {
         private const val serialVersionUID: Long = 2363420196737905299L
     }
-
-    /**
-     * Returns the HTTP status code of the response.
-     */
-    public fun statusCode(): Int = statusCode
 }

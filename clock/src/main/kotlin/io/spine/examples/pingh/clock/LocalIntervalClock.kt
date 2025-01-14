@@ -24,39 +24,54 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.client
+package io.spine.examples.pingh.clock
 
 import io.spine.logging.Logging
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import java.lang.Thread.sleep
+import kotlin.time.Duration
 
 /**
- * A stage in the login flow that indicates a failure in the process.
+ * A clock that continuously emits `TimePassed` events at the specified interval.
  *
- * Possible reasons for failure include:
- *
- * 1. The user is not a member of an authorized organization.
- * 2. The username obtained in [EnterUsername] stage differs from the username
- * of the account used to complete [VerifyLogin] stage.
- *
- * @property moveToNextStage Switches the current stage to the [EnterUsername].
- * @param cause The reason for the login failure.
+ * @property pauseTime The time interval between emitting `TimePassed` events.
  */
-public class LoginFailed internal constructor(
-    private val moveToNextStage: () -> Unit,
-    cause: String
-) : LoginStage<Unit>(), Logging {
+public class LocalIntervalClock(private val pauseTime: Duration) : Clock(), Logging {
+    /**
+     * Whether the clock is currently running.
+     *
+     * Used to control the [clockThread].
+     */
+    private var isRunning = false
 
     /**
-     * The error message from the login process.
+     * The clock thread emits a `TimePassed` event after passing each time interval.
      */
-    public val errorMessage: StateFlow<String> = MutableStateFlow(cause)
+    private lateinit var clockThread: Thread
 
     /**
-     * Starts the login process from the beginning.
+     * Starts the clock.
      */
-    public fun restartLogin() {
-        moveToNextStage()
-        _debug().log("Restarting login process.")
+    public override fun start() {
+        isRunning = true
+        clockThread = Thread {
+            while (isRunning) {
+                sleep(pauseTime.inWholeMilliseconds)
+                triggerTimePassed()
+                _trace().log("An event with the current time was emitted.")
+            }
+        }
+        clockThread.start()
+        _info().log(
+            "Local clock started and is sending the current time at $pauseTime intervals."
+        )
+    }
+
+    /**
+     * Stops the clock and waits until [clock thread][clockThread] is shut down.
+     */
+    public fun stop() {
+        isRunning = false
+        clockThread.join()
+        _info().log("Local clock stopped.")
     }
 }
