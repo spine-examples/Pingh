@@ -148,7 +148,7 @@ internal class UserMentionsProjection :
             val id = mentionList.indexOfFirst { it.id.equals(event.id) }
             if (id == -1) {
                 _warn().log(
-                    "${state().id}: The mention was not in the user's list, " +
+                    "${state().id.forLog()}: The mention was not in the user's list, " +
                             "but an attempt was made to remove it. " +
                             "Mention ID: ${event.id.forLog()}."
                 )
