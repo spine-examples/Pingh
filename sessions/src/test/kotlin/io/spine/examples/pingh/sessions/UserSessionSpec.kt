@@ -297,6 +297,74 @@ internal class UserSessionSpec : ContextAwareTest() {
             assertThatNothingHappened()
         }
 
+        @Test
+        internal fun `do nothing if session is closed due to login deadline expiration`() {
+            val time = currentTime().add(minutes(20))
+            emitTimePassedEvent(time)
+            context().assertEntity(session, UserSessionProcess::class.java)
+                .deletedFlag()
+                .isTrue()
+            context().assertEvents()
+                .withType(SessionClosed::class.java)
+                .hasSize(1)
+            emitTimePassedEvent(time.add(seconds(1)))
+            context().assertEvents()
+                .withType(SessionClosed::class.java)
+                .hasSize(1)
+        }
+
+        @Test
+        internal fun `do nothing if session is closed due to a login rejection`() {
+            auth.enterUserCode()
+            users.username = Username::class.of("Wrong-Username")
+            context().receivesCommand(VerifyUserLoginToGitHub::class.withSession(session))
+            context().assertEntity(session, UserSessionProcess::class.java)
+                .deletedFlag()
+                .isTrue()
+            context().assertEvents()
+                .withType(SessionClosed::class.java)
+                .hasSize(1)
+            val time = currentTime().add(minutes(20))
+            emitTimePassedEvent(time)
+            context().assertEvents()
+                .withType(SessionClosed::class.java)
+                .hasSize(1)
+        }
+
+        @Test
+        internal fun `do nothing if session has expired`() {
+            finishLogin()
+            val time = currentTime().add(lifetime).add(seconds(1))
+            emitTimePassedEvent(time)
+            context().assertEntity(session, UserSessionProcess::class.java)
+                .deletedFlag()
+                .isTrue()
+            context().assertEvents()
+                .withType(SessionExpired::class.java)
+                .hasSize(1)
+            emitTimePassedEvent(time.add(seconds(1)))
+            context().assertEvents()
+                .withType(SessionExpired::class.java)
+                .hasSize(1)
+        }
+
+        @Test
+        internal fun `do nothing if user is logged out`() {
+            finishLogin()
+            context().receivesCommand(LogUserOut::class.withSession(session))
+            context().assertEntity(session, UserSessionProcess::class.java)
+                .deletedFlag()
+                .isTrue()
+            val time = currentTime().add(lifetime).add(seconds(1))
+            emitTimePassedEvent(time)
+            context().assertEntity(session, UserSessionProcess::class.java)
+                .deletedFlag()
+                .isTrue()
+            context().assertEvents()
+                .withType(SessionExpired::class.java)
+                .hasSize(0)
+        }
+
         private fun finishLogin() {
             auth.enterUserCode()
             users.username = session.username

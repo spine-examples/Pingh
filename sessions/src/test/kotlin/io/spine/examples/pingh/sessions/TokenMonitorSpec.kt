@@ -129,6 +129,26 @@ internal class TokenMonitorSpec : ContextAwareTest() {
                 .hasSize(1)
         }
 
+        @Test
+        internal fun `do nothing if user is logged out`() {
+            context().receivesEvent(UserLoggedOut::class.with(session))
+            val time = whenExpired.add(minutes(1))
+            emitTimePassedEvent(time)
+            context().assertCommands()
+                .withType(UpdateToken::class.java)
+                .hasSize(0)
+        }
+
+        @Test
+        internal fun `do nothing if session has expired`() {
+            context().receivesEvent(SessionExpired::class.with(session))
+            val time = whenExpired.add(minutes(1))
+            emitTimePassedEvent(time)
+            context().assertCommands()
+                .withType(UpdateToken::class.java)
+                .hasSize(0)
+        }
+
         private fun emitTimePassedEvent(time: Timestamp) {
             val clockContext = ThirdPartyContext.singleTenant("Clock")
             val event = TimePassed::class.buildBy(time)

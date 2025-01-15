@@ -75,7 +75,7 @@ internal class TokenMonitorProcess :
         val time = event.time
         val inProcess = state().hasWhenUpdateRequested() &&
                 state().whenUpdateRequested.add(updateRetryInterval) < time
-        if (time < state().whenExpires || inProcess) {
+        if (!isActive || time < state().whenExpires || inProcess) {
             return Optional.empty()
         }
         builder().setWhenUpdateRequested(time)
