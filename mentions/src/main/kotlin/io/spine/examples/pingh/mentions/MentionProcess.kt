@@ -164,14 +164,14 @@ internal class MentionProcess :
         @External event: TimePassed
     ): EitherOf3<MentionUnsnoozed, MentionArchived, Nothing> =
         when {
-            isSnoozeTimePassed(event.time) -> {
+            isActive && isSnoozeTimePassed(event.time) -> {
                 _debug().log(
                     "${state().id.forLog()}: Mention unsnoozed due to expiration of snooze time."
                 )
                 EitherOf3.withA(unsnooze())
             }
 
-            isObsolete(event.time) -> {
+            isActive && isObsolete(event.time) -> {
                 _debug().log("${state().id.forLog()}: Mention archived because it is obsolete.")
                 EitherOf3.withB(archive())
             }

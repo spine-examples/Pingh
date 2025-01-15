@@ -32,6 +32,7 @@ import io.spine.base.Time.currentTime
 import io.spine.core.UserId
 import io.spine.examples.pingh.clock.buildBy
 import io.spine.examples.pingh.clock.event.TimePassed
+import io.spine.examples.pingh.mentions.MentionProcess.Companion.lifetimeOfUnreadMention
 import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
 import io.spine.examples.pingh.mentions.command.PinMention
 import io.spine.examples.pingh.mentions.command.SnoozeMention
@@ -214,18 +215,14 @@ internal class MentionSpec : ContextAwareTest() {
 
             @Test
             internal fun `emit 'MentionArchived' event if mention is obsolete`() {
-                emitTimePassedEvent(
-                    currentTime().add(MentionProcess.lifetimeOfUnreadMention).add(seconds(1))
-                )
+                emitTimePassedEvent(currentTime().add(lifetimeOfUnreadMention).add(seconds(1)))
                 val expected = MentionArchived::class.with(id)
                 context().assertEvent(expected)
             }
 
             @Test
             internal fun `mark entity as archived if mention is obsolete`() {
-                emitTimePassedEvent(
-                    currentTime().add(MentionProcess.lifetimeOfUnreadMention).add(seconds(1))
-                )
+                emitTimePassedEvent(currentTime().add(lifetimeOfUnreadMention).add(seconds(1)))
                 context().assertEntity(id, MentionProcess::class.java)
                     .archivedFlag()
                     .isTrue()
@@ -302,6 +299,29 @@ internal class MentionSpec : ContextAwareTest() {
             internal fun `mark the target 'Mention' as unread`() {
                 val expected = Mention::class.buildBy(id, MentionStatus.UNREAD, userMentioned)
                 context().assertState(id, expected)
+            }
+        }
+
+        @Nested internal inner class
+        `If mention is archived,` {
+
+            @BeforeEach
+            internal fun archive() {
+                emitTimePassedEvent(currentTime().add(lifetimeOfUnreadMention).add(seconds(1)))
+                val expected = MentionArchived::class.with(id)
+                context().assertEvent(expected)
+                context().assertEntity(id, MentionProcess::class.java)
+                    .archivedFlag()
+                    .isTrue()
+            }
+
+            @Test
+            internal fun `do not archive mention again`() {
+                emitTimePassedEvent(currentTime().add(lifetimeOfUnreadMention).add(seconds(1)))
+                context().assertEvents()
+                    .withType(MentionArchived::class.java)
+                    // An event occurred when the mention was archived.
+                    .hasSize(1)
             }
         }
 
