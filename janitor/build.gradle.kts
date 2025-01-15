@@ -24,16 +24,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "Pingh"
-include(
-    "clock",
-    "github",
-    "sessions",
-    "mentions",
-    "janitor",
-    "testutil-mentions",
-    "testutil-sessions",
-    "testutil-client",
-    "server",
-    "client"
-)
+import io.spine.internal.dependency.JavaX
+
+plugins {
+    // Add the Gradle plugin for bootstrapping projects built with Spine.
+    // See: https://github.com/SpineEventEngine/bootstrap
+    id("io.spine.tools.gradle.bootstrap").version("1.9.0")
+}
+
+spine {
+    // Enable the code generation for the elements of the ubiquitous language,
+    // declared in Proto files.
+    assembleModel()
+    enableJava()
+
+    // Add and configure required dependencies for developing a Spine-based Java server.
+    // See: https://github.com/SpineEventEngine/bootstrap#java-projects
+    enableJava().server()
+    forceDependencies = true
+}
+
+dependencies {
+    implementation(JavaX.annotations)
+}
