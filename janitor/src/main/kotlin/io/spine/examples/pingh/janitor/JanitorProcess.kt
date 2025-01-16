@@ -26,7 +26,6 @@
 
 package io.spine.examples.pingh.janitor
 
-import com.google.protobuf.Timestamp
 import io.spine.base.EntityState
 import io.spine.core.External
 import io.spine.examples.pingh.clock.event.TimePassed
@@ -41,10 +40,12 @@ import java.util.Optional
  * Abstract base for process managers responsible
  * for deleting entity records marked as archived or deleted from storage.
  *
+ * Only one janitor is needed the bounded context.
+ * The identifier should be the name of the context,
+ * and the repositories containing the entities to be deleted must be provided.
+ *
  * @param S The type of the process manager state.
  * @param B The type of the builder of the process manager state.
- *
- * @see [Janitor]
  */
 public abstract class JanitorProcess<S : EntityState, B : ValidatingBuilder<S>> :
     ProcessManager<JanitorId, S, B>(), Logging {
@@ -58,30 +59,19 @@ public abstract class JanitorProcess<S : EntityState, B : ValidatingBuilder<S>> 
     private lateinit var purgeableRepos: List<Purgeable>
 
     /**
-     * Clears the storage based on a time-dependent [rule][shouldPurge].
+     * Clears the storage based on a time-dependent rule.
      *
      * If the storage is cleared, returns an `StoragePurged` event wrapped in `Optional`.
      * Otherwise, returns an empty `Optional`.
      */
     @React
-    public fun on(@External event: TimePassed): Optional<StoragePurged> =
-        if (shouldPurge(event.time)) {
-            purge()
-            Optional.of(StoragePurged::class.by(id()))
-        } else {
-            Optional.empty()
-        }
-
-    /**
-     * Returns `true` if the repository should be cleared of obsolete records.
-     */
-    protected abstract fun shouldPurge(current: Timestamp): Boolean
+    public abstract fun on(@External event: TimePassed): Optional<StoragePurged>
 
     /**
      * Deletes all entity records marked as archived or deleted
      * from the [repositories][purgeableRepos] that this Janitor is responsible for.
      */
-    private fun purge() {
+    protected fun purge() {
         _debug().log("${id().forLog()}: Deleting obsolete records...")
         purgeableRepos.forEach { it.purge() }
         _debug().log("${id().forLog()}: Obsolete records were successfully deleted..")
