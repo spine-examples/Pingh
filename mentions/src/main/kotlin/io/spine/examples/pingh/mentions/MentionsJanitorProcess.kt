@@ -31,8 +31,7 @@ import com.google.protobuf.util.Timestamps
 import io.spine.core.External
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.janitor.JanitorProcess
-import io.spine.examples.pingh.janitor.by
-import io.spine.examples.pingh.janitor.event.StoragePurged
+import io.spine.examples.pingh.mentions.event.StoragePurged
 import io.spine.protobuf.Durations2.hours
 import io.spine.server.event.React
 import java.util.Optional
@@ -52,7 +51,7 @@ internal class MentionsJanitorProcess
      * If no cleanup has occurred yet, it is performed immediately.
      */
     @React
-    override fun on(@External event: TimePassed): Optional<StoragePurged> {
+    internal fun on(@External event: TimePassed): Optional<StoragePurged> {
         if (state().hasWhenWasCleanup()) {
             val diff = Timestamps.between(state().whenWasCleanup, event.time)
             if (toNanos(cleanupInterval) <= toNanos(diff)) {
@@ -61,7 +60,10 @@ internal class MentionsJanitorProcess
         }
         purge()
         builder().whenWasCleanup = event.time
-        return Optional.of(StoragePurged::class.by(id()))
+        val purged = StoragePurged.newBuilder()
+            .setId(id())
+            .vBuild()
+        return Optional.of(purged)
     }
 
     private companion object {

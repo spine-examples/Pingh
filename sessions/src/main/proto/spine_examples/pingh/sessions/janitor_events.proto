@@ -24,17 +24,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.janitor
+syntax = "proto3";
 
-import io.spine.examples.pingh.janitor.event.StoragePurged
-import kotlin.reflect.KClass
+package spine_examples.pingh.sessions;
 
-/**
- * Creates a new `StoragePurged` event with the passed ID of the janitor
- * which removed obsolete data from the storage.
- */
-@Suppress("UnusedReceiverParameter" /* Class extensions don't use class as a parameter. */)
-public fun KClass<StoragePurged>.by(id: JanitorId): StoragePurged =
-    StoragePurged.newBuilder()
-        .setId(id)
-        .vBuild()
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.pingh.spine.io";
+option java_package = "io.spine.examples.pingh.sessions.event";
+option java_outer_classname = "JanitorEventsProto";
+option java_multiple_files = true;
+
+import "spine_examples/pingh/janitor/identifiers.proto";
+
+// The storage was cleared of obsolete data.
+//
+// Entities within the bounded context marked as deleted or archived were removed.
+//
+message StoragePurged {
+
+    // The ID of the janitor which removed obsolete data from the storage.
+    spine_examples.pingh.janitor.JanitorId id = 1;
+}

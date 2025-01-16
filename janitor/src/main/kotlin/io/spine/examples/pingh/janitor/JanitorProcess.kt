@@ -27,14 +27,9 @@
 package io.spine.examples.pingh.janitor
 
 import io.spine.base.EntityState
-import io.spine.core.External
-import io.spine.examples.pingh.clock.event.TimePassed
-import io.spine.examples.pingh.janitor.event.StoragePurged
 import io.spine.logging.Logging
 import io.spine.protobuf.ValidatingBuilder
-import io.spine.server.event.React
 import io.spine.server.procman.ProcessManager
-import java.util.Optional
 
 /**
  * Abstract base for process managers responsible
@@ -57,15 +52,6 @@ public abstract class JanitorProcess<S : EntityState, B : ValidatingBuilder<S>> 
      * right after the instance creation.
      */
     private lateinit var purgeableRepos: List<Purgeable>
-
-    /**
-     * Clears the storage based on a time-dependent rule.
-     *
-     * If the storage is cleared, returns an `StoragePurged` event wrapped in `Optional`.
-     * Otherwise, returns an empty `Optional`.
-     */
-    @React
-    public abstract fun on(@External event: TimePassed): Optional<StoragePurged>
 
     /**
      * Deletes all entity records marked as archived or deleted

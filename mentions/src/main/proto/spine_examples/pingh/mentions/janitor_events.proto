@@ -26,13 +26,13 @@
 
 syntax = "proto3";
 
-package spine_examples.pingh.janitor;
+package spine_examples.pingh.mentions;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.pingh.spine.io";
-option java_package = "io.spine.examples.pingh.janitor.event";
-option java_outer_classname = "EventsProto";
+option java_package = "io.spine.examples.pingh.mentions.event";
+option java_outer_classname = "JanitorEventsProto";
 option java_multiple_files = true;
 
 import "spine_examples/pingh/janitor/identifiers.proto";
@@ -44,5 +44,5 @@ import "spine_examples/pingh/janitor/identifiers.proto";
 message StoragePurged {
 
     // The ID of the janitor which removed obsolete data from the storage.
-    JanitorId id = 1;
+    spine_examples.pingh.janitor.JanitorId id = 1;
 }
