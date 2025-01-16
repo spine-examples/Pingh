@@ -24,17 +24,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.sessions
+syntax = "proto3";
 
-import io.spine.examples.pingh.janitor.JanitorRepository
-import io.spine.examples.pingh.janitor.Purgeable
+package spine_examples.pingh.mentions;
 
-/**
- * Manages instances of [SessionsJanitorProcess].
- *
- * @param purgeableRepos List of repositories that need to be cleared
- *   of archived and deleted entity records.
- */
-internal class SessionsJanitorRepository(
-    vararg purgeableRepos: Purgeable
-) : JanitorRepository<SessionsJanitorProcess, SessionsJanitor>(NAME, purgeableRepos.toList())
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.pingh.spine.io";
+option java_package = "io.spine.examples.pingh.mentions";
+option java_outer_classname = "MentionsJanitorProto";
+option java_multiple_files = true;
+
+import "spine_examples/pingh/janitor/identifiers.proto";
+import "google/protobuf/timestamp.proto";
+
+// A process that periodically removes entities
+// marked as deleted or archived from the storage.
+//
+message MentionsJanitor {
+    option (entity) = { kind: PROCESS_MANAGER };
+
+    // The ID of the janitor.
+    spine_examples.pingh.janitor.JanitorId id = 1;
+
+    // The last time marked as deleted and archived entities were removed from storage.
+    //
+    // If no removal has been performed, the field is empty.
+    //
+    google.protobuf.Timestamp when_was_cleanup = 2;
+}

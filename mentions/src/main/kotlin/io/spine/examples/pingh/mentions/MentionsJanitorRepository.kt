@@ -24,17 +24,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.sessions
+package io.spine.examples.pingh.mentions
 
 import io.spine.examples.pingh.janitor.JanitorRepository
 import io.spine.examples.pingh.janitor.Purgeable
 
 /**
- * Manages instances of [SessionsJanitorProcess].
+ * Manages instances of [MentionsJanitorProcess].
  *
  * @param purgeableRepos List of repositories that need to be cleared
  *   of archived and deleted entity records.
  */
-internal class SessionsJanitorRepository(
+internal class MentionsJanitorRepository(
     vararg purgeableRepos: Purgeable
-) : JanitorRepository<SessionsJanitorProcess, SessionsJanitor>(NAME, purgeableRepos.toList())
+) : JanitorRepository<MentionsJanitorProcess, MentionsJanitor>(NAME, purgeableRepos.toList())

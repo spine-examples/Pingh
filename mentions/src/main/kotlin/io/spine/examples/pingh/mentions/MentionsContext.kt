@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,11 +49,13 @@ public const val NAME: String = "Mentions"
  * @param search Allows to access GitHub Search API.
  * @param users Allows to retrieve user information using the GitHub API.
  */
-public fun newMentionsContext(
-    search: GitHubSearch,
-    users: GitHubUsers
-): BoundedContextBuilder =
-    BoundedContext.singleTenant(NAME)
-        .add(GitHubClientRepository(search, users))
-        .add(MentionRepository())
+public fun newMentionsContext(search: GitHubSearch, users: GitHubUsers): BoundedContextBuilder {
+    val mentionRepo = MentionRepository()
+    val gitHubClientRepo = GitHubClientRepository(search, users)
+    val janitor = MentionsJanitorRepository(mentionRepo, gitHubClientRepo)
+    return BoundedContext.singleTenant(NAME)
+        .add(gitHubClientRepo)
+        .add(mentionRepo)
         .add(UserMentionsRepository())
+        .add(janitor)
+}

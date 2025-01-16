@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.sessions
+package io.spine.examples.pingh.mentions
 
 import com.google.protobuf.util.Durations.toNanos
 import com.google.protobuf.util.Timestamps
@@ -39,12 +39,12 @@ import java.util.Optional
 
 /**
  * Removes entity records marked as archived or deleted
- * within the Sessions bounded context from the storage.
+ * within the Mentions bounded context from the storage.
  *
  * @see [JanitorProcess]
  */
-internal class SessionsJanitorProcess
-    : JanitorProcess<SessionsJanitor, SessionsJanitor.Builder>() {
+internal class MentionsJanitorProcess
+    : JanitorProcess<MentionsJanitor, MentionsJanitor.Builder>() {
 
     /**
      * Purges repositories if [sufficient][cleanupInterval] time has passed since the last cleanup.
