@@ -26,15 +26,15 @@
 
 package io.spine.examples.pingh.janitor
 
-import io.spine.examples.pingh.janitor.event.StorageCleaned
+import io.spine.examples.pingh.janitor.event.StoragePurged
 import kotlin.reflect.KClass
 
 /**
- * Creates a new `StorageCleaned` event with the passed ID of the janitor
+ * Creates a new `StoragePurged` event with the passed ID of the janitor
  * which removed obsolete data from the storage.
  */
 @Suppress("UnusedReceiverParameter" /* Class extensions don't use class as a parameter. */)
-public fun KClass<StorageCleaned>.by(id: JanitorId): StorageCleaned =
-    StorageCleaned.newBuilder()
+public fun KClass<StoragePurged>.by(id: JanitorId): StoragePurged =
+    StoragePurged.newBuilder()
         .setId(id)
         .vBuild()

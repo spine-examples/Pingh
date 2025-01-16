@@ -41,7 +41,7 @@ import "spine_examples/pingh/janitor/identifiers.proto";
 //
 // Entities within the bounded context marked as deleted or archived were removed.
 //
-message StorageCleaned {
+message StoragePurged {
 
     // The ID of the janitor which removed obsolete data from the storage.
     JanitorId id = 1;
