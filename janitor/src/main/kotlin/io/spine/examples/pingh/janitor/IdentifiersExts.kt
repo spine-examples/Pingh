@@ -37,3 +37,8 @@ public fun KClass<JanitorId>.forContext(name: String): JanitorId =
     JanitorId.newBuilder()
         .setContextName(name)
         .vBuild()
+
+/**
+ * Converts a `JanitorId` into a single-line string format for logging.
+ */
+public fun JanitorId.forLog(): String = "JanitorId{contextName='$contextName'}"
