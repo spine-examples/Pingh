@@ -66,9 +66,9 @@ public abstract class PurgeableProcessManagerRepository<I,
             .vBuild()
         val query = EntityQueries.from(targetFilter, storage)
 
-        val obsolete = storage.readAll(query)
+        val obsoleteRecords = storage.readAll(query)
         var deleted = 0
-        for (record in obsolete) {
+        for (record in obsoleteRecords) {
             @Suppress("UNCHECKED_CAST" /* Entity ID is defined in the class declaration. */)
             val id = AnyPacker.unpack(record.entityId) as I
             storage.delete(id!!)

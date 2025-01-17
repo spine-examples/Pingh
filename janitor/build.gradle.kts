@@ -27,18 +27,18 @@
 import io.spine.internal.dependency.JavaX
 
 plugins {
-    // Add the Gradle plugin for bootstrapping projects built with Spine.
+    // Adds the Gradle plugin for bootstrapping projects built with Spine.
     // See: https://github.com/SpineEventEngine/bootstrap.
     id("io.spine.tools.gradle.bootstrap").version("1.9.0")
 }
 
 spine {
-    // Enable the code generation for the elements of the ubiquitous language,
+    // Enables the code generation for the elements of the ubiquitous language,
     // declared in Proto files.
     assembleModel()
     enableJava()
 
-    // Add and configure required dependencies for developing a Spine-based Java server.
+    // Adds and configure required dependencies for developing a Spine-based Java server.
     // See: https://github.com/SpineEventEngine/bootstrap#java-projects.
     enableJava().server()
     forceDependencies = true

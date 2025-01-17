@@ -39,7 +39,7 @@ import "spine_examples/pingh/janitor/identifiers.proto";
 
 // The storage was cleared of obsolete data.
 //
-// Entities within the bounded context marked as deleted or archived were removed.
+// Entities within the bounded context marked as archived or deleted were removed.
 //
 message StoragePurged {
 
