@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.sessions
 
+import com.google.common.annotations.VisibleForTesting
 import com.google.protobuf.util.Durations.toNanos
 import com.google.protobuf.util.Timestamps
 import io.spine.core.External
@@ -54,7 +55,7 @@ internal class SessionsJanitorProcess
     internal fun on(@External event: TimePassed): Optional<StoragePurged> {
         if (state().hasWhenWasCleanup()) {
             val diff = Timestamps.between(state().whenWasCleanup, event.time)
-            if (toNanos(cleanupInterval) <= toNanos(diff)) {
+            if (toNanos(diff) <= toNanos(cleanupInterval)) {
                 return Optional.empty()
             }
         }
@@ -70,6 +71,7 @@ internal class SessionsJanitorProcess
         /**
          * The interval between cleanups of the storage.
          */
+        @VisibleForTesting
         internal val cleanupInterval = hours(1)
     }
 }

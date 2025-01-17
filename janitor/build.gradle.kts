@@ -28,7 +28,7 @@ import io.spine.internal.dependency.JavaX
 
 plugins {
     // Add the Gradle plugin for bootstrapping projects built with Spine.
-    // See: https://github.com/SpineEventEngine/bootstrap
+    // See: https://github.com/SpineEventEngine/bootstrap.
     id("io.spine.tools.gradle.bootstrap").version("1.9.0")
 }
 
@@ -39,7 +39,7 @@ spine {
     enableJava()
 
     // Add and configure required dependencies for developing a Spine-based Java server.
-    // See: https://github.com/SpineEventEngine/bootstrap#java-projects
+    // See: https://github.com/SpineEventEngine/bootstrap#java-projects.
     enableJava().server()
     forceDependencies = true
 }

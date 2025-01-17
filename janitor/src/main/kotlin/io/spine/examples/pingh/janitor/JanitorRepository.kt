@@ -37,7 +37,7 @@ import io.spine.server.route.EventRouting
  *
  * The repository must be added to the bounded context of the repositories it will clean.
  *
- * Each bounded context has a single janitor process,
+ * Each bounded context should have a single janitor process,
  * and all `TimePassed` events are always [routed][setupEventRouting] to it.
  *
  * @param P The type of janitor process managers.
@@ -60,6 +60,7 @@ public abstract class JanitorRepository<P : JanitorProcess<S, *>, S : EntityStat
         routing.unicast(TimePassed::class.java) { _ -> id }
     }
 
+    @OverridingMethodsMustInvokeSuper
     override fun configure(processManager: P) {
         super.configure(processManager)
         processManager.inject(purgeableRepos)

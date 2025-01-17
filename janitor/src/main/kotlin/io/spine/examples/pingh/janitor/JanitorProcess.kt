@@ -32,12 +32,11 @@ import io.spine.protobuf.ValidatingBuilder
 import io.spine.server.procman.ProcessManager
 
 /**
- * Abstract base for process managers responsible
- * for deleting entity records marked as archived or deleted from storage.
+ * Abstract base for process managers that
+ * delete entity records marked as archived or deleted from storage.
  *
  * Only one janitor is needed the bounded context.
- * The identifier should be the name of the context,
- * and the repositories containing the entities to be deleted must be provided.
+ * The repositories containing the entities to be deleted must be provided.
  *
  * @param S The type of the process manager state.
  * @param B The type of the builder of the process manager state.
@@ -55,12 +54,12 @@ public abstract class JanitorProcess<S : EntityState, B : ValidatingBuilder<S>> 
 
     /**
      * Deletes all entity records marked as archived or deleted
-     * from the [repositories][purgeableRepos] that this Janitor is responsible for.
+     * from the [repositories][purgeableRepos] that the janitor is responsible for.
      */
     protected fun purge() {
         _debug().log("${id().forLog()}: Deleting obsolete records...")
         purgeableRepos.forEach { it.purge() }
-        _debug().log("${id().forLog()}: Obsolete records were successfully deleted..")
+        _debug().log("${id().forLog()}: Obsolete records were successfully deleted.")
     }
 
     /**

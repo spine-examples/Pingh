@@ -41,4 +41,4 @@ public fun KClass<JanitorId>.forContext(name: String): JanitorId =
 /**
  * Converts a `JanitorId` into a single-line string format for logging.
  */
-public fun JanitorId.forLog(): String = "JanitorId{contextName='$contextName'}"
+internal fun JanitorId.forLog(): String = "JanitorId{contextName=$contextName}"

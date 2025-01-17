@@ -50,7 +50,7 @@ public class SessionsContext(
      * Whether to run a [janitor][SessionsJanitor] within the Sessions bounded context.
      *
      * When enabled, the janitor periodically removes entity records
-     * marked as archived or deleted from the repository.
+     * marked as archived or deleted from the storage.
      *
      * The janitor is disabled in the test environment
      * and enabled by default in all other environments.
@@ -66,12 +66,12 @@ public class SessionsContext(
      */
     public fun newBuilder(): BoundedContextBuilder {
         val sessionRepo = UserSessionRepository(auth, users)
-        val tokenRepo = TokenMonitorRepository()
+        val tokenMonitorRepo = TokenMonitorRepository()
         val contextBuilder = BoundedContext.singleTenant(name)
             .add(sessionRepo)
-            .add(tokenRepo)
+            .add(tokenMonitorRepo)
         if (janitorEnabled) {
-            val janitorRepo = SessionsJanitorRepository(sessionRepo, tokenRepo)
+            val janitorRepo = SessionsJanitorRepository(sessionRepo, tokenMonitorRepo)
             contextBuilder.add(janitorRepo)
         }
         return contextBuilder

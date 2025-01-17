@@ -54,7 +54,7 @@ internal class MentionsJanitorProcess
     internal fun on(@External event: TimePassed): Optional<StoragePurged> {
         if (state().hasWhenWasCleanup()) {
             val diff = Timestamps.between(state().whenWasCleanup, event.time)
-            if (toNanos(cleanupInterval) <= toNanos(diff)) {
+            if (toNanos(diff) <= toNanos(cleanupInterval)) {
                 return Optional.empty()
             }
         }

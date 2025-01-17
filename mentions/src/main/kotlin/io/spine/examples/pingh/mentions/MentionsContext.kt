@@ -52,7 +52,7 @@ public class MentionsContext(
      * Whether to run a [janitor][MentionsJanitor] within the Mentions bounded context.
      *
      * When enabled, the janitor periodically removes entity records
-     * marked as archived or deleted from the repository.
+     * marked as archived or deleted from the storage.
      *
      * The janitor is disabled in the test environment
      * and enabled by default in all other environments.
@@ -84,6 +84,7 @@ public class MentionsContext(
         /**
          * Name of the Mentions bounded context.
          */
+        @VisibleForTesting
         public const val name: String = "Mentions"
     }
 }
