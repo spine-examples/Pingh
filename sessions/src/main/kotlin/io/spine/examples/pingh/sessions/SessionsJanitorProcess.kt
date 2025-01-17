@@ -66,10 +66,10 @@ internal class SessionsJanitorProcess
         return Optional.of(purged)
     }
 
-    private companion object {
+    internal companion object {
         /**
          * The interval between cleanups of the storage.
          */
-        private val cleanupInterval = hours(1)
+        internal val cleanupInterval = hours(1)
     }
 }
