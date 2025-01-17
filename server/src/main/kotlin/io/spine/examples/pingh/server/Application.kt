@@ -35,12 +35,12 @@ import io.spine.examples.pingh.github.ClientId
 import io.spine.examples.pingh.github.ClientSecret
 import io.spine.examples.pingh.github.GitHubApp
 import io.spine.examples.pingh.github.of
+import io.spine.examples.pingh.mentions.MentionsContext
 import io.spine.examples.pingh.mentions.RemoteGitHubSearch
-import io.spine.examples.pingh.mentions.newMentionsContext
 import io.spine.examples.pingh.server.datastore.DatastoreStorageFactory
 import io.spine.examples.pingh.sessions.RemoteGitHubAuthentication
 import io.spine.examples.pingh.sessions.RemoteGitHubUsers
-import io.spine.examples.pingh.sessions.newSessionsContext
+import io.spine.examples.pingh.sessions.SessionsContext
 import io.spine.server.Server
 import io.spine.server.ServerEnvironment
 import io.spine.server.delivery.Delivery
@@ -124,21 +124,13 @@ internal class Application {
      */
     private fun createServer(): Server {
         val httpEngine = CIO.create()
+        val auth = RemoteGitHubAuthentication(gitHubApp(), httpEngine)
+        val search = RemoteGitHubSearch(httpEngine)
         val users = RemoteGitHubUsers(httpEngine)
         return Server
             .atPort(port)
-            .add(
-                newSessionsContext(
-                    RemoteGitHubAuthentication(gitHubApp(), httpEngine),
-                    users
-                )
-            )
-            .add(
-                newMentionsContext(
-                    RemoteGitHubSearch(httpEngine),
-                    users
-                )
-            )
+            .add(SessionsContext(auth, users).newBuilder())
+            .add(MentionsContext(search, users).newBuilder())
             .build()
     }
 

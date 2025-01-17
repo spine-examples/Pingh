@@ -34,7 +34,7 @@ import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.mentions.MentionsContext
 import io.spine.examples.pingh.server.datastore.DatastoreStorageFactory
-import io.spine.examples.pingh.sessions.newSessionsContext
+import io.spine.examples.pingh.sessions.SessionsContext
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubUsersResponses
@@ -86,7 +86,7 @@ public abstract class IntegrationTest {
          */
         private fun createServer(): Server =
             Server.atPort(port)
-                .add(newSessionsContext(auth, users))
+                .add(SessionsContext(auth, users).newBuilder())
                 .add(MentionsContext(search, users).newBuilder())
                 .build()
 

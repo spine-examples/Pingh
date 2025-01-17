@@ -27,9 +27,7 @@
 /**
  * Provides server-side code of the Sessions bounded context.
  */
-@BoundedContext(NAME)
+@BoundedContext(SessionsContext.name)
 package io.spine.examples.pingh.sessions;
 
 import io.spine.core.BoundedContext;
-
-import static io.spine.examples.pingh.sessions.SessionsContextKt.NAME;

@@ -56,9 +56,9 @@ import io.spine.examples.pingh.mentions.given.expectedUserMentionedSet
 import io.spine.examples.pingh.mentions.given.generate
 import io.spine.examples.pingh.mentions.rejection.GithubClientRejections.MentionsUpdateIsAlreadyInProgress
 import io.spine.examples.pingh.sessions.SessionId
+import io.spine.examples.pingh.sessions.SessionsContext
 import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
-import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.examples.pingh.sessions.of
 import io.spine.examples.pingh.sessions.with
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
@@ -97,10 +97,10 @@ internal class GitHubClientSpec : ContextAwareTest() {
         users.reset()
         sessionContext = BlackBoxContext
             .from(
-                newSessionsContext(
+                SessionsContext(
                     PredefinedGitHubAuthenticationResponses(),
                     PredefinedGitHubUsersResponses()
-                )
+                ).newBuilder()
             )
         val username = Username::class.of(randomString())
         gitHubClientId = GitHubClientId::class.of(username)

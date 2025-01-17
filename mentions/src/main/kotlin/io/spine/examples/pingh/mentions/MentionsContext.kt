@@ -34,7 +34,7 @@ import io.spine.server.BoundedContext
 import io.spine.server.BoundedContextBuilder
 
 /**
- * Mentions bounded context.
+ * Configures Mentions bounded context.
  *
  * It is expected that the business scenarios
  * of the created context require access to the GitHub API.
