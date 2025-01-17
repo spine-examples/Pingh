@@ -143,7 +143,9 @@ internal class GitHubClientProcess :
     internal fun on(@External event: TimePassed): Optional<UpdateMentionsFromGitHub> {
         val currentTime = event.time
         val difference = between(state().whenLastSuccessfullyUpdated, currentTime)
-        if (!isActive || state().hasWhenLastSuccessfullyUpdated() && difference < mentionsUpdateInterval) {
+        if (!isActive
+            || state().hasWhenLastSuccessfullyUpdated() && difference < mentionsUpdateInterval
+        ) {
             return Optional.empty()
         }
         _debug().log(
