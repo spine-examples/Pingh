@@ -32,7 +32,7 @@ import io.spine.examples.pingh.client.PinghApplication
 import io.spine.examples.pingh.client.clearAppDir
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
-import io.spine.examples.pingh.mentions.newMentionsContext
+import io.spine.examples.pingh.mentions.MentionsContext
 import io.spine.examples.pingh.server.datastore.DatastoreStorageFactory
 import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.examples.pingh.testing.mentions.given.PredefinedGitHubSearchResponses
@@ -87,7 +87,7 @@ public abstract class IntegrationTest {
         private fun createServer(): Server =
             Server.atPort(port)
                 .add(newSessionsContext(auth, users))
-                .add(newMentionsContext(search, users))
+                .add(MentionsContext(search, users).newBuilder())
                 .build()
 
         @AfterAll

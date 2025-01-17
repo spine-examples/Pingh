@@ -26,36 +26,64 @@
 
 package io.spine.examples.pingh.mentions
 
+import com.google.common.annotations.VisibleForTesting
+import io.spine.environment.Environment
+import io.spine.environment.Tests
 import io.spine.examples.pingh.sessions.GitHubUsers
 import io.spine.server.BoundedContext
 import io.spine.server.BoundedContextBuilder
 
 /**
- * Name of the Mentions bounded context.
- */
-public const val NAME: String = "Mentions"
-
-/**
- * Creates a new builder for the Mentions bounded context.
- *
- * The returned builder instance is already configured
- * to serve the entities which belong to this context.
+ * Mentions bounded context.
  *
  * It is expected that the business scenarios
  * of the created context require access to the GitHub API.
  * Therefore, an instance of GitHub client is required
  * as a parameter.
  *
- * @param search Allows to access GitHub Search API.
- * @param users Allows to retrieve user information using the GitHub API.
+ * @property search Allows to access GitHub Search API.
+ * @property users Allows to retrieve user information using the GitHub API.
  */
-public fun newMentionsContext(search: GitHubSearch, users: GitHubUsers): BoundedContextBuilder {
-    val mentionRepo = MentionRepository()
-    val gitHubClientRepo = GitHubClientRepository(search, users)
-    val janitor = MentionsJanitorRepository(mentionRepo, gitHubClientRepo)
-    return BoundedContext.singleTenant(NAME)
-        .add(gitHubClientRepo)
-        .add(mentionRepo)
-        .add(UserMentionsRepository())
-        .add(janitor)
+public class MentionsContext(
+    private val search: GitHubSearch,
+    private val users: GitHubUsers
+) {
+    /**
+     * Whether to run a [janitor][MentionsJanitor] within the Mentions bounded context.
+     *
+     * When enabled, the janitor periodically removes entity records
+     * marked as archived or deleted from the repository.
+     *
+     * The janitor is disabled in the test environment
+     * and enabled by default in all other environments.
+     */
+    @VisibleForTesting
+    internal var janitorEnabled = !Environment.instance().`is`(Tests::class.java)
+
+    /**
+     * Creates a new builder for the Mentions bounded context.
+     *
+     * The returned builder instance is already configured
+     * to serve the entities which belong to this context.
+     */
+    public fun newBuilder(): BoundedContextBuilder {
+        val mentionRepo = MentionRepository()
+        val gitHubClientRepo = GitHubClientRepository(search, users)
+        val contextBuilder = BoundedContext.singleTenant(name)
+            .add(gitHubClientRepo)
+            .add(mentionRepo)
+            .add(UserMentionsRepository())
+        if (janitorEnabled) {
+            val janitorRepo = MentionsJanitorRepository(mentionRepo, gitHubClientRepo)
+            contextBuilder.add(janitorRepo)
+        }
+        return contextBuilder
+    }
+
+    public companion object {
+        /**
+         * Name of the Mentions bounded context.
+         */
+        public const val name: String = "Mentions"
+    }
 }

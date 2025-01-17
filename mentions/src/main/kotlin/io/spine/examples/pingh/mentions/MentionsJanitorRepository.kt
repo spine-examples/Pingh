@@ -37,4 +37,7 @@ import io.spine.examples.pingh.janitor.Purgeable
  */
 internal class MentionsJanitorRepository(
     vararg purgeableRepos: Purgeable
-) : JanitorRepository<MentionsJanitorProcess, MentionsJanitor>(NAME, purgeableRepos.toList())
+) : JanitorRepository<MentionsJanitorProcess, MentionsJanitor>(
+    MentionsContext.name,
+    purgeableRepos.toList()
+)

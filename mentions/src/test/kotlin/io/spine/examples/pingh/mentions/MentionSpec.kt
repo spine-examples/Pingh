@@ -65,10 +65,10 @@ internal class MentionSpec : ContextAwareTest() {
     private lateinit var id: MentionId
     private lateinit var userMentioned: UserMentioned
 
-    override fun contextBuilder(): BoundedContextBuilder = newMentionsContext(
+    override fun contextBuilder(): BoundedContextBuilder = MentionsContext(
         PredefinedGitHubSearchResponses(),
         PredefinedGitHubUsersResponses()
-    )
+    ).newBuilder()
 
     @BeforeEach
     internal fun emitUserMentionedEvent() {

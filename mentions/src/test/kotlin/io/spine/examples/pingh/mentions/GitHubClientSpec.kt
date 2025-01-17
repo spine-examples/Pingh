@@ -89,7 +89,7 @@ internal class GitHubClientSpec : ContextAwareTest() {
     private lateinit var token: PersonalAccessToken
 
     override fun contextBuilder(): BoundedContextBuilder =
-        newMentionsContext(search, users)
+        MentionsContext(search, users).newBuilder()
 
     @BeforeEach
     internal fun prepareSessionsContextAndEmitEvent() {
