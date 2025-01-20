@@ -262,12 +262,10 @@ internal class UserSessionSpec : ContextAwareTest() {
         }
 
         @Test
-        internal fun `mark state as deleted if the login deadline has passed`() {
+        internal fun `delete session if the login deadline has passed`() {
             val time = currentTime().add(minutes(20))
             emitTimePassedEvent(time)
-            context().assertEntity(session, UserSessionProcess::class.java)
-                .deletedFlag()
-                .isTrue()
+            assertThatDeleted(session)
         }
 
         @Test
@@ -280,13 +278,11 @@ internal class UserSessionSpec : ContextAwareTest() {
         }
 
         @Test
-        internal fun `mark state as deleted if session has expired`() {
+        internal fun `delete session if it has expired`() {
             finishLogin()
             val time = currentTime().add(lifetime).add(seconds(1))
             emitTimePassedEvent(time)
-            context().assertEntity(session, UserSessionProcess::class.java)
-                .deletedFlag()
-                .isTrue()
+            assertThatDeleted(session)
         }
 
         @Test
@@ -301,9 +297,7 @@ internal class UserSessionSpec : ContextAwareTest() {
         internal fun `do nothing if session is closed due to login deadline expiration`() {
             val time = currentTime().add(minutes(20))
             emitTimePassedEvent(time)
-            context().assertEntity(session, UserSessionProcess::class.java)
-                .deletedFlag()
-                .isTrue()
+            assertThatDeleted(session)
             context().assertEvents()
                 .withType(SessionClosed::class.java)
                 .hasSize(1)
@@ -336,12 +330,10 @@ internal class UserSessionSpec : ContextAwareTest() {
             finishLogin()
             val time = currentTime().add(lifetime).add(seconds(1))
             emitTimePassedEvent(time)
-            context().assertEntity(session, UserSessionProcess::class.java)
-                .deletedFlag()
-                .isTrue()
             context().assertEvents()
                 .withType(SessionExpired::class.java)
                 .hasSize(1)
+            assertThatDeleted(session)
             emitTimePassedEvent(time.add(seconds(1)))
             context().assertEvents()
                 .withType(SessionExpired::class.java)
@@ -352,14 +344,9 @@ internal class UserSessionSpec : ContextAwareTest() {
         internal fun `do nothing if user is logged out`() {
             finishLogin()
             context().receivesCommand(LogUserOut::class.withSession(session))
-            context().assertEntity(session, UserSessionProcess::class.java)
-                .deletedFlag()
-                .isTrue()
+            assertThatDeleted(session)
             val time = currentTime().add(lifetime).add(seconds(1))
             emitTimePassedEvent(time)
-            context().assertEntity(session, UserSessionProcess::class.java)
-                .deletedFlag()
-                .isTrue()
             context().assertEvents()
                 .withType(SessionExpired::class.java)
                 .hasSize(0)
@@ -504,5 +491,19 @@ internal class UserSessionSpec : ContextAwareTest() {
         val event = TimePassed::class.buildBy(time)
         val actor = GivenUserId.generated()
         clockContext.emittedEvent(event, actor)
+    }
+
+    /**
+     * Asserts that a session with the specified ID does not exist or has been deleted.
+     *
+     * If an entity is marked as deleted, it may be physically removed immediately by the janitor,
+     * necessitating a check for the entity's existence.
+     */
+    private fun assertThatDeleted(id: SessionId) {
+        val subject = context().assertEntity(id, UserSessionProcess::class.java)
+        if (subject.actual() != null) {
+            subject.deletedFlag()
+                .isTrue()
+        }
     }
 }

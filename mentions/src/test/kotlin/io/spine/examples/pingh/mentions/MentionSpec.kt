@@ -221,11 +221,9 @@ internal class MentionSpec : ContextAwareTest() {
             }
 
             @Test
-            internal fun `mark entity as deleted if mention is obsolete`() {
+            internal fun `delete entity if mention is obsolete`() {
                 emitTimePassedEvent(currentTime().add(lifetimeOfUnreadMention).add(seconds(1)))
-                context().assertEntity(id, MentionProcess::class.java)
-                    .deletedFlag()
-                    .isTrue()
+                assertThatDeleted(id)
             }
         }
 
@@ -269,13 +267,11 @@ internal class MentionSpec : ContextAwareTest() {
             }
 
             @Test
-            internal fun `mark entity as deleted if mention is obsolete`() {
+            internal fun `delete entity if mention is obsolete`() {
                 emitTimePassedEvent(
                     currentTime().add(MentionProcess.lifetimeOfReadMention).add(seconds(1))
                 )
-                context().assertEntity(id, MentionProcess::class.java)
-                    .deletedFlag()
-                    .isTrue()
+                assertThatDeleted(id)
             }
         }
 
@@ -310,9 +306,7 @@ internal class MentionSpec : ContextAwareTest() {
                 emitTimePassedEvent(currentTime().add(lifetimeOfUnreadMention).add(seconds(1)))
                 val expected = MentionDeleted::class.with(id)
                 context().assertEvent(expected)
-                context().assertEntity(id, MentionProcess::class.java)
-                    .deletedFlag()
-                    .isTrue()
+                assertThatDeleted(id)
             }
 
             @Test
@@ -383,5 +377,19 @@ internal class MentionSpec : ContextAwareTest() {
             .receivesCommand(secondReadCommand)
         val expected = MentionIsAlreadyRead::class.buildBy(id)
         context().assertEvent(expected)
+    }
+
+    /**
+     * Asserts that a mention with the specified ID does not exist or has been deleted.
+     *
+     * If an entity is marked as deleted, it may be physically removed immediately by the janitor,
+     * necessitating a check for the entity's existence.
+     */
+    private fun assertThatDeleted(id: MentionId) {
+        val subject = context().assertEntity(id, MentionProcess::class.java)
+        if (subject.actual() != null) {
+            subject.deletedFlag()
+                .isTrue()
+        }
     }
 }
