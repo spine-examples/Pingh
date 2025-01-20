@@ -250,7 +250,9 @@ internal class UserSessionProcess :
         @External event: TimePassed
     ): EitherOf3<SessionClosed, SessionExpired, Nothing> =
         when {
-            isActive && state().hasLoginDeadline() && state().loginDeadline <= event.time -> {
+            !isActive -> EitherOf3.withC(nothing())
+
+            state().hasLoginDeadline() && state().loginDeadline <= event.time -> {
                 deleted = true
                 _debug().log(
                     "${state().id.forLog()}: Login failed and session closed " +
@@ -259,7 +261,7 @@ internal class UserSessionProcess :
                 EitherOf3.withA(SessionClosed::class.with(state().id))
             }
 
-            isActive && state().hasWhenExpires() && state().whenExpires <= event.time -> {
+            state().hasWhenExpires() && state().whenExpires <= event.time -> {
                 deleted = true
                 _debug().log("${state().id.forLog()}: Session expired, so it closed.")
                 EitherOf3.withB(SessionExpired::class.with(state().id))
