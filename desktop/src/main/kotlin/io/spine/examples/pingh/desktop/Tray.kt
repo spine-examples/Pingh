@@ -27,12 +27,11 @@
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.toAwtImage
@@ -59,8 +58,11 @@ import java.awt.event.MouseEvent
 import java.awt.image.BufferedImage
 import kotlin.math.min
 import kotlin.math.round
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
 private val logger = FluentLogger.forEnclosingClass()
@@ -86,7 +88,13 @@ internal fun Tray(state: AppState) {
     check(SystemTray.isSupported()) { "The platform does not support tray applications." }
 
     val icon = rememberIcon(state.app)
-    val menu = remember { Menu(state::close) }
+    val menu = remember(state) {
+        Menu {
+            CoroutineScope(Dispatchers.Default).launch {
+                state.close()
+            }
+        }
+    }
     val onClick by rememberUpdatedState(mouseEventHandler(state, menu))
 
     val tray = remember {
@@ -100,20 +108,17 @@ internal fun Tray(state: AppState) {
         if (tray.image != icon) tray.image = icon
     }
 
-    val coroutineScope = rememberCoroutineScope()
-
-    DisposableEffect(Unit) {
+    LaunchedEffect(state, tray) {
         SystemTray.getSystemTray().add(tray)
         logger.atFine().log("Icon added to the system tray.")
 
         state.tray
             .notificationFlow
             .onEach { tray.displayMessage(it) }
-            .launchIn(coroutineScope)
+            .launchIn(this)
 
-        onDispose {
+        state.onRemoveFromTray {
             SystemTray.getSystemTray().remove(tray)
-            logger.atFine().log("Icon removed from the system tray.")
         }
     }
 }

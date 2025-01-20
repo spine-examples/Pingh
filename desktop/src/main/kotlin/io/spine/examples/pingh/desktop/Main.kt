@@ -46,8 +46,7 @@ public fun main() {
     val serverEndpoint = ServerEndpoint.load()
     application {
         Theme {
-            val state = remember { AppState(serverEndpoint) }
-            state.addClosureAction { exitApplication() }
+            val state = remember { AppState(serverEndpoint, appScope = this) }
             Window(state)
             Tray(state)
         }

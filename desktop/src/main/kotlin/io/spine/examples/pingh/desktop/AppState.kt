@@ -26,8 +26,10 @@
 
 package io.spine.examples.pingh.desktop
 
+import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Notification
 import androidx.compose.ui.window.TrayState
+import com.google.common.flogger.FluentLogger
 import io.spine.examples.pingh.client.NotificationSender
 import io.spine.examples.pingh.client.PinghApplication
 
@@ -35,8 +37,12 @@ import io.spine.examples.pingh.client.PinghApplication
  * The top-level application state.
  *
  * @param serverEndpoint The connection details for the Pingh server.
+ * @property appScope The scope of the Compose application.
  */
-internal class AppState(serverEndpoint: ServerEndpoint) {
+internal class AppState(
+    serverEndpoint: ServerEndpoint,
+    private val appScope: ApplicationScope
+) {
     /**
      * State of the window.
      */
@@ -66,12 +72,12 @@ internal class AppState(serverEndpoint: ServerEndpoint) {
     }
 
     /**
-     * Actions that are performed when the application is [closed][close].
+     * The action that runs when the application [closes][close],
+     * responsible for removing the application icon from the system tray.
      */
-    internal val closureActions = mutableListOf<() -> Unit>()
-
-    init {
-        addClosureAction(app::close)
+    private var removeFromTray: () -> Unit = {
+        logger.atWarning()
+            .log("The action of removing an application from the tray is not specified.")
     }
 
     /**
@@ -82,24 +88,39 @@ internal class AppState(serverEndpoint: ServerEndpoint) {
     }
 
     /**
-     * Adds an action to be executed upon application closure,
-     * following the order in which actions were added.
+     * Sets the action of removing an application from the system tray.
      */
-    internal fun addClosureAction(onClose: () -> Unit) {
-        closureActions.add(onClose)
+    internal fun onRemoveFromTray(block: () -> Unit) {
+        removeFromTray = block
     }
 
     /**
      * Closes the application.
      *
-     * When the application is closed, all actions added
-     * using [addClosureAction()][addClosureAction] method are executed sequentially.
+     * During the closing process the following actions are performed:
      *
-     * By default, the client connection to
-     * the Pingh server is [closed][PinghApplication.close] first.
+     * 1. The application is removed from the system tray.
+     * 2. The connection to the Pingh server is shutdown.
+     * 3. All loaded effects are stopped.
+     * 4. Windows created within the [application scope][appScope] are closed.
+     *
+     * Closing the application may take several seconds.
+     *
+     * To give the user the impression of an instantaneous closure,
+     * the application window is hidden prior to closing.
      */
     internal fun close() {
-        closureActions.forEach { it() }
+        window.hide()
+        removeFromTray()
+        logger.atFine().log("Icon removed from the system tray.")
+        app.close()
+        logger.atFine().log("The application successfully disconnected from the Pingh server.")
+        appScope.exitApplication()
+        logger.atFine().log("Window closed; launched effects were canceled.")
+    }
+
+    private companion object {
+        private val logger = FluentLogger.forEnclosingClass()
     }
 }
 
