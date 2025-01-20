@@ -27,7 +27,9 @@
 /**
  * Provides server-side code of the Mentions bounded context.
  */
-@BoundedContext(MentionsContext.name)
+@BoundedContext(NAME)
 package io.spine.examples.pingh.mentions;
 
 import io.spine.core.BoundedContext;
+
+import static io.spine.examples.pingh.mentions.MentionsContextKt.NAME;

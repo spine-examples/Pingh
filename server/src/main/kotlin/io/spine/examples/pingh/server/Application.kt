@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,12 @@ import io.spine.examples.pingh.github.ClientId
 import io.spine.examples.pingh.github.ClientSecret
 import io.spine.examples.pingh.github.GitHubApp
 import io.spine.examples.pingh.github.of
-import io.spine.examples.pingh.mentions.MentionsContext
 import io.spine.examples.pingh.mentions.RemoteGitHubSearch
+import io.spine.examples.pingh.mentions.newMentionsContext
 import io.spine.examples.pingh.server.datastore.DatastoreStorageFactory
 import io.spine.examples.pingh.sessions.RemoteGitHubAuthentication
 import io.spine.examples.pingh.sessions.RemoteGitHubUsers
-import io.spine.examples.pingh.sessions.SessionsContext
+import io.spine.examples.pingh.sessions.newSessionsContext
 import io.spine.server.Server
 import io.spine.server.ServerEnvironment
 import io.spine.server.delivery.Delivery
@@ -129,8 +129,8 @@ internal class Application {
         val users = RemoteGitHubUsers(httpEngine)
         return Server
             .atPort(port)
-            .add(SessionsContext(auth, users).newBuilder())
-            .add(MentionsContext(search, users).newBuilder())
+            .add(newSessionsContext(auth, users))
+            .add(newMentionsContext(search, users))
             .build()
     }
 
