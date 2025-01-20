@@ -33,7 +33,9 @@ import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.VerificationCodesResponse
 import io.spine.examples.pingh.sessions.CannotObtainAccessToken
 import io.spine.examples.pingh.sessions.GitHubAuthentication
+import java.lang.Thread.sleep
 import kotlin.jvm.Throws
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Implementation of `GitHubAuthentication` that get responses
@@ -47,6 +49,14 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
      * Whether the user has entered their user code.
      */
     private var isUserCodeEntered = false
+
+    /**
+     * Whether to freeze the execution of the [refreshAccessToken()][refreshAccessToken] method.
+     *
+     * If `true`, the method will be executed indefinitely, if `false`,
+     * it will terminate without problems. The value can be changed during execution.
+     */
+    private var refreshingFrozen = false
 
     /**
      * The time when the personal access token issued by GitHub expires.
@@ -81,6 +91,9 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
     override fun refreshAccessToken(refreshToken: RefreshToken): AccessTokenResponse {
         val tokens = loadRefreshedAccessToken()
         whenReceivedAccessTokenExpires = tokens.whenExpires
+        while (refreshingFrozen) {
+            sleep(timeBetweenExecutionAttempts.inWholeMilliseconds)
+        }
         return tokens
     }
 
@@ -94,6 +107,23 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
     }
 
     /**
+     * Marks the update process as frozen.
+     *
+     * The token update process will remain incomplete until the service is unfrozen
+     * by invoking the [unfreezeRefreshing()][unfreezeRefreshing] method.
+     */
+    public fun freezeRefreshing() {
+        refreshingFrozen = true
+    }
+
+    /**
+     * Unfreezes the token update process, allowing it to be completed.
+     */
+    public fun unfreezeRefreshing() {
+        refreshingFrozen = false
+    }
+
+    /**
      * Resets the instance to its initial state.
      *
      * Once the instance is reset, the authentication process is also reset.
@@ -103,5 +133,13 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
     public fun reset() {
         isUserCodeEntered = false
         whenReceivedAccessTokenExpires = null
+        unfreezeRefreshing()
+    }
+
+    private companion object {
+        /**
+         * The time after which the process will try to run again if it is frozen.
+         */
+        private val timeBetweenExecutionAttempts = 100.milliseconds
     }
 }

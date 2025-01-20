@@ -64,3 +64,14 @@ message NotMemberOfPermittedOrgs {
     // The ID of the session.
     SessionId id = 1 [(required) = true];
 }
+
+// Attempted to update a closed session.
+//
+// Occurs when a request is made to update the access token
+// for a session that has already been closed.
+//
+message SessionAlreadyClosed {
+
+    // The ID of the session.
+    SessionId id = 1 [(required) = true];
+}

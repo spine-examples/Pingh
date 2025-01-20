@@ -48,6 +48,7 @@ import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.examples.pingh.sessions.rejection.NotMemberOfPermittedOrgs
 import io.spine.examples.pingh.sessions.rejection.Rejections
+import io.spine.examples.pingh.sessions.rejection.SessionAlreadyClosed
 import io.spine.examples.pingh.sessions.rejection.UsernameMismatch
 import io.spine.logging.Logging
 import io.spine.protobuf.Durations2.minutes
@@ -184,9 +185,20 @@ internal class UserSessionProcess :
 
     /**
      * Renews GitHub access tokens using the refresh token.
+     *
+     * @throws SessionAlreadyClosed if current session was already closed.
      */
     @Assign
+    @Throws(SessionAlreadyClosed::class)
     internal fun handle(command: UpdateToken): TokenUpdated {
+        if (!isActive || !state().hasRefreshToken()) {
+            _warn().log(
+                "${id().forLog()}: Token update was requested, " +
+                        "but the session is already closed, " +
+                        "resulting in the update being rejected."
+            )
+            throw SessionAlreadyClosed.newBuilder().setId(command.id).build()
+        }
         _debug().log("${state().id.forLog()}: Refreshing the access token.")
         val tokens = auth.refreshAccessToken(state().refreshToken)
         _debug().log("${state().id.forLog()}: GitHub issued a new access token.")
