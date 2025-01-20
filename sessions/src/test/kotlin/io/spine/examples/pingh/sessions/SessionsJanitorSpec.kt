@@ -56,7 +56,7 @@ internal class SessionsJanitorSpec : ContextAwareTest() {
     )
 
     @Test
-    internal fun `delete session marked as deleted`() {
+    internal fun `physically removes session marked as deleted`() {
         val id = SessionId::class.generate()
         val command = LogUserIn::class.withSession(id)
         context().receivesCommand(command)
@@ -72,7 +72,7 @@ internal class SessionsJanitorSpec : ContextAwareTest() {
     }
 
     @Test
-    internal fun `delete token monitor process marked as deleted`() {
+    internal fun `physically removes token monitor process marked as deleted`() {
         val id = TokenMonitorId::class.of(SessionId::class.generate())
         val loggedIn = UserLoggedIn::class.with(
             id.session, PersonalAccessToken::class.generate(), currentTime()

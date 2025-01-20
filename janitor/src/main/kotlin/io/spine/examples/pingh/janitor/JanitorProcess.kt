@@ -41,8 +41,8 @@ import io.spine.server.procman.ProcessManager
  * @param S The type of the process manager state.
  * @param B The type of the builder of the process manager state.
  */
-public abstract class JanitorProcess<S : EntityState, B : ValidatingBuilder<S>> :
-    ProcessManager<JanitorId, S, B>(), Logging {
+public abstract class JanitorProcess<S : EntityState, B : ValidatingBuilder<S>>
+    : ProcessManager<JanitorId, S, B>(), Logging {
 
     /**
      * List of repositories that need to be cleared of archived and deleted entity records.

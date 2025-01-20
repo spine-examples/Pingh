@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ package io.spine.examples.pingh.sessions
 
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.rejection.NotMemberOfPermittedOrgs
+import io.spine.examples.pingh.sessions.rejection.SessionAlreadyClosed
 import io.spine.examples.pingh.sessions.rejection.UsernameMismatch
 import kotlin.reflect.KClass
 
@@ -54,5 +55,13 @@ internal fun KClass<UsernameMismatch>.with(
  */
 internal fun KClass<NotMemberOfPermittedOrgs>.with(id: SessionId): NotMemberOfPermittedOrgs =
     NotMemberOfPermittedOrgs.newBuilder()
+        .setId(id)
+        .build()
+
+/**
+ * Creates a new `SessionAlreadyClosed` rejection with the passed ID of the session.
+ */
+internal fun KClass<SessionAlreadyClosed>.with(id: SessionId): SessionAlreadyClosed =
+    SessionAlreadyClosed.newBuilder()
         .setId(id)
         .build()

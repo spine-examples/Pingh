@@ -52,7 +52,7 @@ public abstract class PurgeableProcessManagerRepository<I,
     : ProcessManagerRepository<I, P, S>(), Purgeable, Logging {
 
     /**
-     * Deletes entity records marked as archived or deleted from the storage.
+     * Physically removes entity records marked as archived or deleted from the storage.
      */
     public override fun purge() {
         val storage = recordStorage()
