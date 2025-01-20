@@ -61,10 +61,10 @@ internal class TokenMonitorSpec : ContextAwareTest() {
     private lateinit var id: TokenMonitorId
     private lateinit var whenExpired: Timestamp
 
-    override fun contextBuilder(): BoundedContextBuilder = SessionsContext(
+    override fun contextBuilder(): BoundedContextBuilder = newSessionsContext(
         PredefinedGitHubAuthenticationResponses(),
         PredefinedGitHubUsersResponses()
-    ).newBuilder()
+    )
 
     @BeforeEach
     internal fun startProcess() {

@@ -50,14 +50,10 @@ internal class MentionsJanitorSpec : ContextAwareTest() {
 
     private lateinit var mentionId: MentionId
 
-    override fun contextBuilder(): BoundedContextBuilder =
-        MentionsContext(
-            PredefinedGitHubSearchResponses(),
-            PredefinedGitHubUsersResponses()
-        ).run {
-            janitorEnabled = true
-            newBuilder()
-        }
+    override fun contextBuilder(): BoundedContextBuilder = newMentionsContext(
+        PredefinedGitHubSearchResponses(),
+        PredefinedGitHubUsersResponses()
+    )
 
     @BeforeEach
     internal fun createMention() {

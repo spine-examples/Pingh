@@ -26,61 +26,36 @@
 
 package io.spine.examples.pingh.sessions
 
-import com.google.common.annotations.VisibleForTesting
-import io.spine.environment.Environment
-import io.spine.environment.Tests
 import io.spine.server.BoundedContext
 import io.spine.server.BoundedContextBuilder
 
 /**
- * Configures Sessions bounded context.
+ * Name of the Sessions [BoundedContext].
+ */
+public const val NAME: String = "Sessions"
+
+/**
+ * Configures Sessions [BoundedContext] with repositories.
+ *
+ * The returned builder instance is already configured to serve the entities which belong
+ * to this context.
  *
  * It is expected that the business scenarios of the created context require access
  * to the GitHub REST API. Therefore, an instance of GitHub authentication server is required
  * as a parameter.
  *
- * @property auth The service that allows to access GitHub authentication API.
- * @property users The service that allows to retrieve user information using the GitHub API.
+ * @param auth The service that allows to access GitHub authentication API.
+ * @param users The service that allows to retrieve user information using the GitHub API.
  */
-public class SessionsContext(
-    private val auth: GitHubAuthentication,
-    private val users: GitHubUsers
-) {
-    /**
-     * Whether to run a [janitor][SessionsJanitor] within the Sessions bounded context.
-     *
-     * When enabled, the janitor periodically removes entity records
-     * marked as archived or deleted from the storage.
-     *
-     * The janitor is disabled in the test environment
-     * and enabled by default in all other environments.
-     */
-    @VisibleForTesting
-    internal var janitorEnabled = !Environment.instance().`is`(Tests::class.java)
-
-    /**
-     * Creates a new builder for the Sessions bounded context.
-     *
-     * The returned builder instance is already configured
-     * to serve the entities which belong to this context.
-     */
-    public fun newBuilder(): BoundedContextBuilder {
-        val sessionRepo = UserSessionRepository(auth, users)
-        val tokenMonitorRepo = TokenMonitorRepository()
-        val contextBuilder = BoundedContext.singleTenant(name)
-            .add(sessionRepo)
-            .add(tokenMonitorRepo)
-        if (janitorEnabled) {
-            val janitorRepo = SessionsJanitorRepository(sessionRepo, tokenMonitorRepo)
-            contextBuilder.add(janitorRepo)
-        }
-        return contextBuilder
-    }
-
-    public companion object {
-        /**
-         * Name of the Sessions bounded context.
-         */
-        public const val name: String = "Sessions"
-    }
+public fun newSessionsContext(
+    auth: GitHubAuthentication,
+    users: GitHubUsers
+): BoundedContextBuilder {
+    val sessionRepo = UserSessionRepository(auth, users)
+    val tokenMonitorRepo = TokenMonitorRepository()
+    val janitorRepo = SessionsJanitorRepository(sessionRepo, tokenMonitorRepo)
+    return BoundedContext.singleTenant(NAME)
+        .add(sessionRepo)
+        .add(tokenMonitorRepo)
+        .add(janitorRepo)
 }

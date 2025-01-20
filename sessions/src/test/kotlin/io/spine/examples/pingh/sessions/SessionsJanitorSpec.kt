@@ -50,14 +50,10 @@ import org.junit.jupiter.api.Test
 @DisplayName("`SessionsJanitor` should")
 internal class SessionsJanitorSpec : ContextAwareTest() {
 
-    override fun contextBuilder(): BoundedContextBuilder =
-        SessionsContext(
-            PredefinedGitHubAuthenticationResponses(),
-            PredefinedGitHubUsersResponses()
-        ).run {
-            janitorEnabled = true
-            newBuilder()
-        }
+    override fun contextBuilder(): BoundedContextBuilder = newSessionsContext(
+        PredefinedGitHubAuthenticationResponses(),
+        PredefinedGitHubUsersResponses()
+    )
 
     @Test
     internal fun `delete session marked as deleted`() {
