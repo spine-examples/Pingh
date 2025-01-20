@@ -37,7 +37,7 @@ import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
 import io.spine.examples.pingh.mentions.command.PinMention
 import io.spine.examples.pingh.mentions.command.SnoozeMention
 import io.spine.examples.pingh.mentions.command.UnpinMention
-import io.spine.examples.pingh.mentions.event.MentionArchived
+import io.spine.examples.pingh.mentions.event.MentionDeleted
 import io.spine.examples.pingh.mentions.event.MentionPinned
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
@@ -196,7 +196,7 @@ internal class MentionSpec : ContextAwareTest() {
             internal fun `do nothing if mention is not obsolete`() {
                 emitTimePassedEvent()
                 context().assertEvents()
-                    .withType(MentionArchived::class.java)
+                    .withType(MentionDeleted::class.java)
                     .hasSize(0)
                 val expected = Mention::class.buildBy(id, MentionStatus.UNREAD, userMentioned)
                 context().assertState(id, expected)
@@ -207,24 +207,24 @@ internal class MentionSpec : ContextAwareTest() {
                 context().receivesCommand(PinMention::class.with(id))
                 emitTimePassedEvent()
                 context().assertEvents()
-                    .withType(MentionArchived::class.java)
+                    .withType(MentionDeleted::class.java)
                     .hasSize(0)
                 val expected = Mention::class.buildBy(id, MentionStatus.UNREAD, userMentioned)
                 context().assertState(id, expected)
             }
 
             @Test
-            internal fun `emit 'MentionArchived' event if mention is obsolete`() {
+            internal fun `emit 'MentionDeleted' event if mention is obsolete`() {
                 emitTimePassedEvent(currentTime().add(lifetimeOfUnreadMention).add(seconds(1)))
-                val expected = MentionArchived::class.with(id)
+                val expected = MentionDeleted::class.with(id)
                 context().assertEvent(expected)
             }
 
             @Test
-            internal fun `mark entity as archived if mention is obsolete`() {
+            internal fun `mark entity as deleted if mention is obsolete`() {
                 emitTimePassedEvent(currentTime().add(lifetimeOfUnreadMention).add(seconds(1)))
                 context().assertEntity(id, MentionProcess::class.java)
-                    .archivedFlag()
+                    .deletedFlag()
                     .isTrue()
             }
         }
@@ -242,7 +242,7 @@ internal class MentionSpec : ContextAwareTest() {
             internal fun `do nothing if mention is not obsolete`() {
                 emitTimePassedEvent()
                 context().assertEvents()
-                    .withType(MentionArchived::class.java)
+                    .withType(MentionDeleted::class.java)
                     .hasSize(0)
                 val expected = Mention::class.buildBy(id, MentionStatus.READ, userMentioned)
                 context().assertState(id, expected)
@@ -253,28 +253,28 @@ internal class MentionSpec : ContextAwareTest() {
                 context().receivesCommand(PinMention::class.with(id))
                 emitTimePassedEvent()
                 context().assertEvents()
-                    .withType(MentionArchived::class.java)
+                    .withType(MentionDeleted::class.java)
                     .hasSize(0)
                 val expected = Mention::class.buildBy(id, MentionStatus.READ, userMentioned)
                 context().assertState(id, expected)
             }
 
             @Test
-            internal fun `emit 'MentionArchived' event if mention is obsolete`() {
+            internal fun `emit 'MentionDeleted' event if mention is obsolete`() {
                 emitTimePassedEvent(
                     currentTime().add(MentionProcess.lifetimeOfReadMention).add(seconds(1))
                 )
-                val expected = MentionArchived::class.with(id)
+                val expected = MentionDeleted::class.with(id)
                 context().assertEvent(expected)
             }
 
             @Test
-            internal fun `mark entity as archived if mention is obsolete`() {
+            internal fun `mark entity as deleted if mention is obsolete`() {
                 emitTimePassedEvent(
                     currentTime().add(MentionProcess.lifetimeOfReadMention).add(seconds(1))
                 )
                 context().assertEntity(id, MentionProcess::class.java)
-                    .archivedFlag()
+                    .deletedFlag()
                     .isTrue()
             }
         }
@@ -303,24 +303,24 @@ internal class MentionSpec : ContextAwareTest() {
         }
 
         @Nested internal inner class
-        `If mention is archived,` {
+        `If mention is deleted,` {
 
             @BeforeEach
-            internal fun archive() {
+            internal fun delete() {
                 emitTimePassedEvent(currentTime().add(lifetimeOfUnreadMention).add(seconds(1)))
-                val expected = MentionArchived::class.with(id)
+                val expected = MentionDeleted::class.with(id)
                 context().assertEvent(expected)
                 context().assertEntity(id, MentionProcess::class.java)
-                    .archivedFlag()
+                    .deletedFlag()
                     .isTrue()
             }
 
             @Test
-            internal fun `do not archive mention again`() {
+            internal fun `do not delete mention again`() {
                 emitTimePassedEvent(currentTime().add(lifetimeOfUnreadMention).add(seconds(1)))
                 context().assertEvents()
-                    .withType(MentionArchived::class.java)
-                    // An event occurred when the mention was archived.
+                    .withType(MentionDeleted::class.java)
+                    // An event occurred when the mention was deleted.
                     .hasSize(1)
             }
         }

@@ -94,8 +94,8 @@ message MentionUnpinned {
     MentionId id = 1;
 }
 
-// The mention was archived because it was deemed obsolete.
-message MentionArchived {
+// The mention was deleted because it was deemed obsolete.
+message MentionDeleted {
 
     // The ID of the mention.
     MentionId id = 1;

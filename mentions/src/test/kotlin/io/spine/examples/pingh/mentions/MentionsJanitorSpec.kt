@@ -69,9 +69,9 @@ internal class MentionsJanitorSpec : ContextAwareTest() {
     }
 
     @Test
-    internal fun `delete archived mention`() {
+    internal fun `physically removes mention marked as deleted`() {
         var time = currentTime().add(lifetimeOfUnreadMention).add(seconds(1))
-        emitTimePassedEvent(time) // Archives obsolete mention.
+        emitTimePassedEvent(time) // Deletes obsolete mention.
         time = time.add(MentionsJanitorProcess.cleanupInterval).add(seconds(1))
         emitTimePassedEvent(time) // Starts janitor.
         context().assertEntity(mentionId, MentionProcess::class.java)

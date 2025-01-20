@@ -37,7 +37,7 @@ import io.spine.examples.pingh.mentions.command.MarkMentionAsRead
 import io.spine.examples.pingh.mentions.command.PinMention
 import io.spine.examples.pingh.mentions.command.SnoozeMention
 import io.spine.examples.pingh.mentions.command.UnpinMention
-import io.spine.examples.pingh.mentions.event.MentionArchived
+import io.spine.examples.pingh.mentions.event.MentionDeleted
 import io.spine.examples.pingh.mentions.event.MentionPinned
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
@@ -157,12 +157,12 @@ internal class MentionProcess :
      * 1. If the mention is snoozed and the snooze time has [expired][isSnoozeTimePassed],
      *   it [exits][unsnooze] the snooze state.
      *
-     * 2. If the mention is [obsolete][isObsolete], it is [archived][archive].
+     * 2. If the mention is [obsolete][isObsolete], it is [deleted][delete].
      */
     @React
     internal fun on(
         @External event: TimePassed
-    ): EitherOf3<MentionUnsnoozed, MentionArchived, Nothing> =
+    ): EitherOf3<MentionUnsnoozed, MentionDeleted, Nothing> =
         when {
             isActive && isSnoozeTimePassed(event.time) -> {
                 _debug().log(
@@ -172,8 +172,8 @@ internal class MentionProcess :
             }
 
             isActive && isObsolete(event.time) -> {
-                _debug().log("${state().id.forLog()}: Mention archived because it is obsolete.")
-                EitherOf3.withB(archive())
+                _debug().log("${state().id.forLog()}: Mention deleted because it is obsolete.")
+                EitherOf3.withB(delete())
             }
 
             else -> EitherOf3.withC(nothing())
@@ -225,11 +225,11 @@ internal class MentionProcess :
     }
 
     /**
-     * Archives this mention.
+     * Deletes this mention.
      */
-    private fun archive(): MentionArchived {
-        archived = true
-        return MentionArchived::class.with(state().id)
+    private fun delete(): MentionDeleted {
+        deleted = true
+        return MentionDeleted::class.with(state().id)
     }
 
     internal companion object {

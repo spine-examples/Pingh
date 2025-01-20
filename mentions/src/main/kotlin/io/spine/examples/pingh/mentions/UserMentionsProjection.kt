@@ -27,7 +27,7 @@
 package io.spine.examples.pingh.mentions
 
 import io.spine.core.Subscribe
-import io.spine.examples.pingh.mentions.event.MentionArchived
+import io.spine.examples.pingh.mentions.event.MentionDeleted
 import io.spine.examples.pingh.mentions.event.MentionPinned
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
@@ -140,10 +140,10 @@ internal class UserMentionsProjection :
     }
 
     /**
-     * Removes a mention from the user's mentions list once it has been archived.
+     * Removes a mention from the user's mentions list once it has been deleted.
      */
     @Subscribe
-    internal fun on(event: MentionArchived) {
+    internal fun on(event: MentionDeleted) {
         with(builder()) {
             val id = mentionList.indexOfFirst { it.id.equals(event.id) }
             if (id == -1) {

@@ -33,7 +33,7 @@ import io.spine.examples.pingh.github.Mention
 import io.spine.examples.pingh.github.PersonalAccessToken
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.mentions.event.GitHubTokenUpdated
-import io.spine.examples.pingh.mentions.event.MentionArchived
+import io.spine.examples.pingh.mentions.event.MentionDeleted
 import io.spine.examples.pingh.mentions.event.MentionPinned
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
@@ -161,9 +161,9 @@ public fun KClass<MentionUnpinned>.with(id: MentionId): MentionUnpinned =
         .vBuild()
 
 /**
- * Creates a new `MentionArchived` event with the passed ID of the archived mention.
+ * Creates a new `MentionDeleted` event with the passed ID of the deleted mention.
  */
-public fun KClass<MentionArchived>.with(id: MentionId): MentionArchived =
-    MentionArchived.newBuilder()
+public fun KClass<MentionDeleted>.with(id: MentionId): MentionDeleted =
+    MentionDeleted.newBuilder()
         .setId(id)
         .vBuild()
