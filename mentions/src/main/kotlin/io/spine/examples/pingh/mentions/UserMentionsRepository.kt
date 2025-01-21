@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@
 package io.spine.examples.pingh.mentions
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
-import io.spine.examples.pingh.mentions.event.MentionArchived
+import io.spine.examples.pingh.mentions.event.MentionDeleted
 import io.spine.examples.pingh.mentions.event.MentionPinned
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
@@ -53,7 +53,7 @@ internal class UserMentionsRepository :
             .route(MentionUnsnoozed::class.java) { event, _ -> toUserMentions(event.id) }
             .route(MentionPinned::class.java) { event, _ -> toUserMentions(event.id) }
             .route(MentionUnpinned::class.java) { event, _ -> toUserMentions(event.id) }
-            .route(MentionArchived::class.java) { event, _ -> toUserMentions(event.id) }
+            .route(MentionDeleted::class.java) { event, _ -> toUserMentions(event.id) }
     }
 
     /**

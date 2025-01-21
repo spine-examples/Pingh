@@ -97,6 +97,23 @@ message TokenUpdated {
     google.protobuf.Timestamp when_token_expires = 3 [(required) = true];
 }
 
+// The access token update was refused because the session was already closed
+// or the login process was not yet complete.
+//
+// Note that the command to update the token is sent by the `TokenMonitor` process,
+// which starts after the login process is finished,
+// but a session with an incomplete login can still handle this command.
+// This situation may occur when a session is closed and deleted by the `SessionJanitor`
+// before the `TokenMonitor` process has fully terminated.
+// In such cases, the session should be deleted,
+// as it was created to handle a command from a completed process.
+//
+message TokenUpdateRefused {
+
+    // The ID of the user session.
+    SessionId id = 1;
+}
+
 // The user logged out.
 message UserLoggedOut {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,8 +94,8 @@ message MentionUnpinned {
     MentionId id = 1;
 }
 
-// The mention was archived because it was deemed obsolete.
-message MentionArchived {
+// The mention was deleted because it was deemed obsolete.
+message MentionDeleted {
 
     // The ID of the mention.
     MentionId id = 1;

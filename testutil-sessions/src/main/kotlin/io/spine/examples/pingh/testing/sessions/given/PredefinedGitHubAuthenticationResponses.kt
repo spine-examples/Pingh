@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,9 @@ import io.spine.examples.pingh.github.rest.AccessTokenResponse
 import io.spine.examples.pingh.github.rest.VerificationCodesResponse
 import io.spine.examples.pingh.sessions.CannotObtainAccessToken
 import io.spine.examples.pingh.sessions.GitHubAuthentication
+import java.lang.Thread.sleep
 import kotlin.jvm.Throws
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Implementation of `GitHubAuthentication` that get responses
@@ -47,6 +49,14 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
      * Whether the user has entered their user code.
      */
     private var isUserCodeEntered = false
+
+    /**
+     * Whether to pause the execution of the [refreshAccessToken()][refreshAccessToken] method.
+     *
+     * If `true`, the method will be executed indefinitely, if `false`,
+     * it will terminate without problems. The value can be changed during execution.
+     */
+    private var refreshPaused = false
 
     /**
      * The time when the personal access token issued by GitHub expires.
@@ -81,6 +91,9 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
     override fun refreshAccessToken(refreshToken: RefreshToken): AccessTokenResponse {
         val tokens = loadRefreshedAccessToken()
         whenReceivedAccessTokenExpires = tokens.whenExpires
+        while (refreshPaused) {
+            sleep(timeBetweenExecutionAttempts.inWholeMilliseconds)
+        }
         return tokens
     }
 
@@ -94,6 +107,23 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
     }
 
     /**
+     * Pauses the token update process.
+     *
+     * The token update process will remain incomplete until the service is resumed
+     * by invoking the [resumeRefresh()][resumeRefresh] method.
+     */
+    public fun pauseRefresh() {
+        refreshPaused = true
+    }
+
+    /**
+     * Resumes the token update process, enabling its completion.
+     */
+    public fun resumeRefresh() {
+        refreshPaused = false
+    }
+
+    /**
      * Resets the instance to its initial state.
      *
      * Once the instance is reset, the authentication process is also reset.
@@ -103,5 +133,13 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
     public fun reset() {
         isUserCodeEntered = false
         whenReceivedAccessTokenExpires = null
+        refreshPaused = false
+    }
+
+    private companion object {
+        /**
+         * The time after which the process will try to run again if it is frozen.
+         */
+        private val timeBetweenExecutionAttempts = 100.milliseconds
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -262,12 +262,10 @@ internal class UserSessionSpec : ContextAwareTest() {
         }
 
         @Test
-        internal fun `mark state as deleted if the login deadline has passed`() {
+        internal fun `delete session if the login deadline has passed`() {
             val time = currentTime().add(minutes(20))
             emitTimePassedEvent(time)
-            context().assertEntity(session, UserSessionProcess::class.java)
-                .deletedFlag()
-                .isTrue()
+            assertDoesNotExistOrDeleted(session)
         }
 
         @Test
@@ -280,13 +278,11 @@ internal class UserSessionSpec : ContextAwareTest() {
         }
 
         @Test
-        internal fun `mark state as deleted if session has expired`() {
+        internal fun `delete session if it has expired`() {
             finishLogin()
             val time = currentTime().add(lifetime).add(seconds(1))
             emitTimePassedEvent(time)
-            context().assertEntity(session, UserSessionProcess::class.java)
-                .deletedFlag()
-                .isTrue()
+            assertDoesNotExistOrDeleted(session)
         }
 
         @Test
@@ -295,6 +291,65 @@ internal class UserSessionSpec : ContextAwareTest() {
             val time = currentTime().add(lifetime).add(seconds(-1))
             emitTimePassedEvent(time)
             assertThatNothingHappened()
+        }
+
+        @Test
+        internal fun `do nothing if session is closed due to login deadline expiration`() {
+            val time = currentTime().add(minutes(20))
+            emitTimePassedEvent(time)
+            assertDoesNotExistOrDeleted(session)
+            context().assertEvents()
+                .withType(SessionClosed::class.java)
+                .hasSize(1)
+            emitTimePassedEvent(time.add(seconds(1)))
+            context().assertEvents()
+                .withType(SessionClosed::class.java)
+                .hasSize(1)
+        }
+
+        @Test
+        internal fun `do nothing if session is closed due to a login rejection`() {
+            auth.enterUserCode()
+            users.username = Username::class.of("Wrong-Username")
+            context().receivesCommand(VerifyUserLoginToGitHub::class.withSession(session))
+            context().assertEntity(session, UserSessionProcess::class.java)
+                .deletedFlag()
+                .isTrue()
+            context().assertEvents()
+                .withType(SessionClosed::class.java)
+                .hasSize(1)
+            val time = currentTime().add(minutes(20))
+            emitTimePassedEvent(time)
+            context().assertEvents()
+                .withType(SessionClosed::class.java)
+                .hasSize(1)
+        }
+
+        @Test
+        internal fun `do nothing if session has expired`() {
+            finishLogin()
+            val time = currentTime().add(lifetime).add(seconds(1))
+            emitTimePassedEvent(time)
+            context().assertEvents()
+                .withType(SessionExpired::class.java)
+                .hasSize(1)
+            assertDoesNotExistOrDeleted(session)
+            emitTimePassedEvent(time.add(seconds(1)))
+            context().assertEvents()
+                .withType(SessionExpired::class.java)
+                .hasSize(1)
+        }
+
+        @Test
+        internal fun `do nothing if user is logged out`() {
+            finishLogin()
+            context().receivesCommand(LogUserOut::class.withSession(session))
+            assertDoesNotExistOrDeleted(session)
+            val time = currentTime().add(lifetime).add(seconds(1))
+            emitTimePassedEvent(time)
+            context().assertEvents()
+                .withType(SessionExpired::class.java)
+                .hasSize(0)
         }
 
         private fun finishLogin() {
@@ -436,5 +491,20 @@ internal class UserSessionSpec : ContextAwareTest() {
         val event = TimePassed::class.buildBy(time)
         val actor = GivenUserId.generated()
         clockContext.emittedEvent(event, actor)
+    }
+
+    /**
+     * Asserts that a session with the specified ID does not exist or has been deleted.
+     *
+     * If an entity is marked as deleted, it may be physically removed by the janitor,
+     * requiring a check for its existence. The existence of the entity is first verified,
+     * and if it exists, it is asserted that it is marked as deleted.
+     */
+    private fun assertDoesNotExistOrDeleted(id: SessionId) {
+        val subject = context().assertEntity(id, UserSessionProcess::class.java)
+        if (subject.actual() != null) {
+            subject.deletedFlag()
+                .isTrue()
+        }
     }
 }

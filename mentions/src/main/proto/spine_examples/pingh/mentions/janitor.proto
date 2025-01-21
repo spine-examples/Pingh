@@ -24,41 +24,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.mentions
+syntax = "proto3";
 
-import io.spine.examples.pingh.sessions.GitHubUsers
-import io.spine.server.BoundedContext
-import io.spine.server.BoundedContextBuilder
+package spine_examples.pingh.mentions;
 
-/**
- * Name of the Mentions bounded context.
- */
-public const val NAME: String = "Mentions"
+import "spine/options.proto";
 
-/**
- * Creates a new builder for the Mentions bounded context.
- *
- * The returned builder instance is already configured
- * to serve the entities which belong to this context.
- *
- * It is expected that the business scenarios
- * of the created context require access to the GitHub API.
- * Therefore, an instance of GitHub client is required
- * as a parameter.
- *
- * @param search Allows to access GitHub Search API.
- * @param users Allows to retrieve user information using the GitHub API.
- */
-public fun newMentionsContext(
-    search: GitHubSearch,
-    users: GitHubUsers
-): BoundedContextBuilder {
-    val gitHubClientRepo = GitHubClientRepository(search, users)
-    val mentionRepo = MentionRepository()
-    val janitorRepo = MentionsJanitorRepository(gitHubClientRepo, mentionRepo)
-    return BoundedContext.singleTenant(NAME)
-        .add(gitHubClientRepo)
-        .add(mentionRepo)
-        .add(UserMentionsRepository())
-        .add(janitorRepo)
+option (type_url_prefix) = "type.pingh.spine.io";
+option java_package = "io.spine.examples.pingh.mentions";
+option java_outer_classname = "MentionsJanitorProto";
+option java_multiple_files = true;
+
+import "spine_examples/pingh/janitor/identifiers.proto";
+import "google/protobuf/timestamp.proto";
+
+// A process that periodically removes entity records marked as archived or deleted
+// within the Mentions bounded context from the storage.
+message MentionsJanitor {
+    option (entity) = { kind: PROCESS_MANAGER };
+
+    // The ID of the janitor.
+    spine_examples.pingh.janitor.JanitorId id = 1;
+
+    // When the the clean up process was performed for the last time.
+    //
+    // In case there were no cleanups yet, this field is not set.
+    //
+    google.protobuf.Timestamp last_launch_time = 2;
 }

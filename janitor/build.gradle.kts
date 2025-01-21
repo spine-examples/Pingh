@@ -24,41 +24,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.mentions
+import io.spine.internal.dependency.JavaX
 
-import io.spine.examples.pingh.sessions.GitHubUsers
-import io.spine.server.BoundedContext
-import io.spine.server.BoundedContextBuilder
+plugins {
+    // Adds the Gradle plugin for bootstrapping projects built with Spine.
+    // See: https://github.com/SpineEventEngine/bootstrap.
+    id("io.spine.tools.gradle.bootstrap").version("1.9.0")
+}
 
-/**
- * Name of the Mentions bounded context.
- */
-public const val NAME: String = "Mentions"
+spine {
+    // Enables the code generation for the elements of the ubiquitous language,
+    // declared in Proto files.
+    assembleModel()
+    enableJava()
 
-/**
- * Creates a new builder for the Mentions bounded context.
- *
- * The returned builder instance is already configured
- * to serve the entities which belong to this context.
- *
- * It is expected that the business scenarios
- * of the created context require access to the GitHub API.
- * Therefore, an instance of GitHub client is required
- * as a parameter.
- *
- * @param search Allows to access GitHub Search API.
- * @param users Allows to retrieve user information using the GitHub API.
- */
-public fun newMentionsContext(
-    search: GitHubSearch,
-    users: GitHubUsers
-): BoundedContextBuilder {
-    val gitHubClientRepo = GitHubClientRepository(search, users)
-    val mentionRepo = MentionRepository()
-    val janitorRepo = MentionsJanitorRepository(gitHubClientRepo, mentionRepo)
-    return BoundedContext.singleTenant(NAME)
-        .add(gitHubClientRepo)
-        .add(mentionRepo)
-        .add(UserMentionsRepository())
-        .add(janitorRepo)
+    // Adds and configure required dependencies for developing a Spine-based Java server.
+    // See: https://github.com/SpineEventEngine/bootstrap#java-projects.
+    enableJava().server()
+    forceDependencies = true
+}
+
+dependencies {
+    implementation(project(":clock"))
+    implementation(JavaX.annotations)
 }

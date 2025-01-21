@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,12 @@ public const val NAME: String = "Sessions"
 public fun newSessionsContext(
     auth: GitHubAuthentication,
     users: GitHubUsers
-): BoundedContextBuilder =
-    BoundedContext.singleTenant(NAME)
-        .add(UserSessionRepository(auth, users))
-        .add(TokenMonitorRepository())
+): BoundedContextBuilder {
+    val sessionRepo = UserSessionRepository(auth, users)
+    val tokenMonitorRepo = TokenMonitorRepository()
+    val janitorRepo = SessionsJanitorRepository(sessionRepo, tokenMonitorRepo)
+    return BoundedContext.singleTenant(NAME)
+        .add(sessionRepo)
+        .add(tokenMonitorRepo)
+        .add(janitorRepo)
+}

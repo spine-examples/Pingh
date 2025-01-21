@@ -39,6 +39,7 @@ import io.spine.examples.pingh.sessions.event.SessionVerified
 import io.spine.examples.pingh.sessions.event.TokenExpirationTimeUpdated
 import io.spine.examples.pingh.sessions.event.TokenMonitoringFinished
 import io.spine.examples.pingh.sessions.event.TokenMonitoringStarted
+import io.spine.examples.pingh.sessions.event.TokenUpdateRefused
 import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
@@ -109,6 +110,14 @@ public fun KClass<TokenUpdated>.with(
         .setId(id)
         .setToken(token)
         .setWhenTokenExpires(whenTokenExpires)
+        .vBuild()
+
+/**
+ * Creates a new `TokenUpdateRefused` event with the passed ID of the session.
+ */
+public fun KClass<TokenUpdateRefused>.bySession(id: SessionId): TokenUpdateRefused =
+    TokenUpdateRefused.newBuilder()
+        .setId(id)
         .vBuild()
 
 /**
