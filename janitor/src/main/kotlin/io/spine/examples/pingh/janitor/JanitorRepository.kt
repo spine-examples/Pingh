@@ -47,7 +47,7 @@ import io.spine.server.route.EventRouting
  *   of archived and deleted entity records.
  */
 public abstract class JanitorRepository<P : JanitorProcess<S, *>, S : EntityState>(
-    private val purgeableRepos: Set<Purgeable>
+    private val purgeableRepos: Set<PurgeableRepository>
 ) : ProcessManagerRepository<JanitorId, P, S>() {
 
     @OverridingMethodsMustInvokeSuper

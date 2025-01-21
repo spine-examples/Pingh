@@ -142,16 +142,16 @@ internal class GitHubClientProcess :
     @Command
     internal fun on(@External event: TimePassed): Optional<UpdateMentionsFromGitHub> {
         val currentTime = event.time
-        val difference = between(state().whenLastSuccessfullyUpdated, currentTime)
-        if (!isActive
-            || state().hasWhenLastSuccessfullyUpdated() && difference < mentionsUpdateInterval
-        ) {
-            return Optional.empty()
+        val hasUpdates = state().hasWhenLastSuccessfullyUpdated()
+        val diff = between(state().whenLastSuccessfullyUpdated, currentTime)
+        val mentionsOutdated = diff >= mentionsUpdateInterval
+        if (isActive && (!hasUpdates || mentionsOutdated)) {
+            _debug().log(
+                "${state().id.forLog()}: Process of fetching mentions from GitHub was requested."
+            )
+            return Optional.of(UpdateMentionsFromGitHub::class.buildBy(state().id, currentTime))
         }
-        _debug().log(
-            "${state().id.forLog()}: Process of fetching mentions from GitHub was requested."
-        )
-        return Optional.of(UpdateMentionsFromGitHub::class.buildBy(state().id, currentTime))
+        return Optional.empty()
     }
 
     /**

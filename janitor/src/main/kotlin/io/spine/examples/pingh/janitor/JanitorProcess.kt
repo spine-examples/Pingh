@@ -50,7 +50,7 @@ public abstract class JanitorProcess<S : EntityState, B : ValidatingBuilder<S>>
      * It is expected this field is set by calling [inject()][inject]
      * right after the instance creation.
      */
-    private lateinit var purgeableRepos: Set<Purgeable>
+    private lateinit var purgeableRepos: Set<PurgeableRepository>
 
     /**
      * Deletes all entity records marked as archived or deleted
@@ -69,7 +69,7 @@ public abstract class JanitorProcess<S : EntityState, B : ValidatingBuilder<S>>
      * It is expected this method is called right after the creation of the process instance.
      * Otherwise, the process will not be able to function properly.
      */
-    public fun inject(repos: Set<Purgeable>) {
+    public fun inject(repos: Set<PurgeableRepository>) {
         purgeableRepos = repos
     }
 }

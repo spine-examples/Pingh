@@ -52,14 +52,14 @@ internal class MentionsJanitorProcess
      */
     @React
     internal fun on(@External event: TimePassed): Optional<StoragePurged> {
-        if (state().hasWhenWasCleanup()) {
-            val diff = Timestamps.between(state().whenWasCleanup, event.time)
+        if (state().hasLastLaunchTime()) {
+            val diff = Timestamps.between(state().lastLaunchTime, event.time)
             if (toNanos(diff) <= toNanos(cleanupInterval)) {
                 return Optional.empty()
             }
         }
         purge()
-        builder().whenWasCleanup = event.time
+        builder().lastLaunchTime = event.time
         val purged = StoragePurged.newBuilder()
             .setId(id())
             .vBuild()

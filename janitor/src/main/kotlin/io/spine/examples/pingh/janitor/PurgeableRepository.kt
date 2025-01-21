@@ -29,10 +29,10 @@ package io.spine.examples.pingh.janitor
 /**
  * Purges the repository of entities marked as archived or deleted.
  */
-public interface Purgeable {
+public interface PurgeableRepository {
 
     /**
-     * Deletes entity records marked as archived or deleted from the storage.
+     * Removes entity records marked as archived or deleted from the storage.
      */
     public fun purge()
 }

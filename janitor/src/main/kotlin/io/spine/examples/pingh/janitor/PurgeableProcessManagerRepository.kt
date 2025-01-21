@@ -49,7 +49,7 @@ import io.spine.server.procman.ProcessManagerRepository
 public abstract class PurgeableProcessManagerRepository<I,
         P : ProcessManager<I, S, *>,
         S : EntityState>
-    : ProcessManagerRepository<I, P, S>(), Purgeable, Logging {
+    : ProcessManagerRepository<I, P, S>(), PurgeableRepository, Logging {
 
     /**
      * Physically removes entity records marked as archived or deleted from the storage.

@@ -51,12 +51,12 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
     private var isUserCodeEntered = false
 
     /**
-     * Whether to freeze the execution of the [refreshAccessToken()][refreshAccessToken] method.
+     * Whether to pause the execution of the [refreshAccessToken()][refreshAccessToken] method.
      *
      * If `true`, the method will be executed indefinitely, if `false`,
      * it will terminate without problems. The value can be changed during execution.
      */
-    private var refreshingFrozen = false
+    private var refreshPaused = false
 
     /**
      * The time when the personal access token issued by GitHub expires.
@@ -91,7 +91,7 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
     override fun refreshAccessToken(refreshToken: RefreshToken): AccessTokenResponse {
         val tokens = loadRefreshedAccessToken()
         whenReceivedAccessTokenExpires = tokens.whenExpires
-        while (refreshingFrozen) {
+        while (refreshPaused) {
             sleep(timeBetweenExecutionAttempts.inWholeMilliseconds)
         }
         return tokens
@@ -107,20 +107,20 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
     }
 
     /**
-     * Marks the update process as frozen.
+     * Pauses the token update process.
      *
-     * The token update process will remain incomplete until the service is unfrozen
-     * by invoking the [unfreezeRefreshing()][unfreezeRefreshing] method.
+     * The token update process will remain incomplete until the service is resumed
+     * by invoking the [resumeRefresh()][resumeRefresh] method.
      */
-    public fun freezeRefreshing() {
-        refreshingFrozen = true
+    public fun pauseRefresh() {
+        refreshPaused = true
     }
 
     /**
-     * Unfreezes the token update process, allowing it to be completed.
+     * Resumes the token update process, enabling its completion.
      */
-    public fun unfreezeRefreshing() {
-        refreshingFrozen = false
+    public fun resumeRefresh() {
+        refreshPaused = false
     }
 
     /**
@@ -133,7 +133,7 @@ public class PredefinedGitHubAuthenticationResponses : GitHubAuthentication {
     public fun reset() {
         isUserCodeEntered = false
         whenReceivedAccessTokenExpires = null
-        unfreezeRefreshing()
+        refreshPaused = false
     }
 
     private companion object {

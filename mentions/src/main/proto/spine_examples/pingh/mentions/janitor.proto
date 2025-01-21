@@ -50,5 +50,5 @@ message MentionsJanitor {
     //
     // In case there were no clean-ups yet, this field is not set.
     //
-    google.protobuf.Timestamp when_was_cleanup = 2;
+    google.protobuf.Timestamp last_launch_time = 2;
 }

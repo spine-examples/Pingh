@@ -132,7 +132,7 @@ internal class TokenMonitorSpec : ContextAwareTest() {
 
         @Test
         internal fun `do nothing if update process is in progress`() {
-            auth.freezeRefreshing()
+            auth.pauseRefresh()
             val time = whenExpired.add(minutes(1))
             val firstUpdate = Thread {
                 emitTimePassedEvent(time)
@@ -146,7 +146,7 @@ internal class TokenMonitorSpec : ContextAwareTest() {
             context().assertCommands()
                 .withType(UpdateToken::class.java)
                 .hasSize(1)
-            auth.unfreezeRefreshing()
+            auth.resumeRefresh()
             firstUpdate.join()
         }
 

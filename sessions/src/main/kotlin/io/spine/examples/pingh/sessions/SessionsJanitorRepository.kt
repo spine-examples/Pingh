@@ -27,7 +27,7 @@
 package io.spine.examples.pingh.sessions
 
 import io.spine.examples.pingh.janitor.JanitorRepository
-import io.spine.examples.pingh.janitor.Purgeable
+import io.spine.examples.pingh.janitor.PurgeableRepository
 
 /**
  * Manages instances of [SessionsJanitorProcess].
@@ -36,5 +36,5 @@ import io.spine.examples.pingh.janitor.Purgeable
  *   of archived and deleted entity records.
  */
 internal class SessionsJanitorRepository(
-    vararg purgeableRepos: Purgeable
+    vararg purgeableRepos: PurgeableRepository
 ) : JanitorRepository<SessionsJanitorProcess, SessionsJanitor>(purgeableRepos.toSet())
