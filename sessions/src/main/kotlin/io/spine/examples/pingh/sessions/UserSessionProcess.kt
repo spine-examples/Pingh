@@ -41,6 +41,7 @@ import io.spine.examples.pingh.sessions.event.SessionClosed
 import io.spine.examples.pingh.sessions.event.SessionExpired
 import io.spine.examples.pingh.sessions.event.SessionVerificationFailed
 import io.spine.examples.pingh.sessions.event.SessionVerified
+import io.spine.examples.pingh.sessions.event.TokenUpdateRefused
 import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
@@ -48,7 +49,6 @@ import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.event.UserLoggedOut
 import io.spine.examples.pingh.sessions.rejection.NotMemberOfPermittedOrgs
 import io.spine.examples.pingh.sessions.rejection.Rejections
-import io.spine.examples.pingh.sessions.rejection.SessionAlreadyClosed
 import io.spine.examples.pingh.sessions.rejection.UsernameMismatch
 import io.spine.logging.Logging
 import io.spine.protobuf.Durations2.minutes
@@ -186,25 +186,28 @@ internal class UserSessionProcess :
     /**
      * Renews GitHub access tokens using the refresh token.
      *
-     * @throws SessionAlreadyClosed if current session was already closed.
+     * If the session is already closed or the login process is incomplete,
+     * the token update is refused.
      */
     @Assign
-    @Throws(SessionAlreadyClosed::class)
-    internal fun handle(command: UpdateToken): TokenUpdated {
+    internal fun handle(command: UpdateToken): EitherOf2<TokenUpdated, TokenUpdateRefused> {
         if (!isActive || !state().hasRefreshToken()) {
+            deleted = true
             _warn().log(
                 "${id().forLog()}: Token update was requested, " +
                         "but the session is already closed, " +
-                        "resulting in the update being rejected."
+                        "resulting in the update being refused."
             )
-            throw SessionAlreadyClosed::class.with(command.id)
+            return EitherOf2.withB(TokenUpdateRefused::class.bySession(command.id))
         }
         _debug().log("${state().id.forLog()}: Refreshing the access token.")
         val tokens = auth.refreshAccessToken(state().refreshToken)
         _debug().log("${state().id.forLog()}: GitHub issued a new access token.")
         builder().setRefreshToken(tokens.refreshToken)
-        return TokenUpdated::class.with(
-            command.id, tokens.accessToken, tokens.whenExpires
+        return EitherOf2.withA(
+            TokenUpdated::class.with(
+                command.id, tokens.accessToken, tokens.whenExpires
+            )
         )
     }
 
