@@ -38,8 +38,8 @@ option java_multiple_files = true;
 import "spine_examples/pingh/janitor/identifiers.proto";
 import "google/protobuf/timestamp.proto";
 
-// A process that periodically removes entities within the Mentions bounded context,
-// marked as archived or deleted, from the storage.
+// A process that periodically removes entity records marked as archived or deleted
+// within the Mentions bounded context from the storage.
 message MentionsJanitor {
     option (entity) = { kind: PROCESS_MANAGER };
 
@@ -48,7 +48,7 @@ message MentionsJanitor {
 
     // When the the clean up process was performed for the last time.
     //
-    // In case there were no clean-ups yet, this field is not set.
+    // In case there were no cleanups yet, this field is not set.
     //
     google.protobuf.Timestamp last_launch_time = 2;
 }

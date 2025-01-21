@@ -34,6 +34,8 @@ import io.spine.examples.pingh.janitor.PurgeableRepository
  *
  * @param purgeableRepos Repositories that need to be cleared
  *   of archived and deleted entity records.
+ *
+ * @see [JanitorRepository]
  */
 internal class SessionsJanitorRepository(
     vararg purgeableRepos: PurgeableRepository

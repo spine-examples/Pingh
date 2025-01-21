@@ -28,7 +28,7 @@ package io.spine.examples.pingh.sessions
 
 import com.google.common.annotations.VisibleForTesting
 import com.google.protobuf.util.Durations.toNanos
-import com.google.protobuf.util.Timestamps
+import com.google.protobuf.util.Timestamps.between
 import io.spine.core.External
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.janitor.JanitorProcess
@@ -54,7 +54,7 @@ internal class SessionsJanitorProcess
     @React
     internal fun on(@External event: TimePassed): Optional<StoragePurged> {
         if (state().hasLastLaunchTime()) {
-            val diff = Timestamps.between(state().lastLaunchTime, event.time)
+            val diff = between(state().lastLaunchTime, event.time)
             if (toNanos(diff) <= toNanos(cleanupInterval)) {
                 return Optional.empty()
             }

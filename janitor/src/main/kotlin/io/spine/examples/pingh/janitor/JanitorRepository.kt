@@ -69,5 +69,5 @@ public abstract class JanitorRepository<P : JanitorProcess<S, *>, S : EntityStat
      * has been registered with the bounded context.
      */
     private fun id(): JanitorId =
-        JanitorId::class.forContext(context().name().value())
+        JanitorId::class.forContext(context().name().value)
 }
