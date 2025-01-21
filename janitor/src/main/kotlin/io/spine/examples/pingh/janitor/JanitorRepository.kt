@@ -67,7 +67,14 @@ public abstract class JanitorRepository<P : JanitorProcess<S, *>, S : EntityStat
      *
      * This method must be invoked only after the repository
      * has been registered with the bounded context.
+     *
+     * @throws IllegalStateException if the repository has no context assigned.
      */
-    private fun id(): JanitorId =
-        JanitorId::class.forContext(context().name().value)
+    private fun id(): JanitorId {
+        check(hasContext()) {
+            "The repository (class: `${javaClass.name}`) " +
+                    "is not registered with a `BoundedContext`."
+        }
+        return JanitorId::class.forContext(context().name().value)
+    }
 }
