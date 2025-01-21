@@ -43,21 +43,17 @@ import io.spine.server.route.EventRouting
  * @param P The type of janitor process managers.
  * @param S The type of janitor process manager state messages.
  *
- * @param contextName The name of the bounded context in which the janitor operates.
  * @property purgeableRepos List of repositories that need to be cleared
  *   of archived and deleted entity records.
  */
 public abstract class JanitorRepository<P : JanitorProcess<S, *>, S : EntityState>(
-    contextName: String,
     private val purgeableRepos: List<Purgeable>
 ) : ProcessManagerRepository<JanitorId, P, S>() {
-
-    private val id = JanitorId::class.forContext(contextName)
 
     @OverridingMethodsMustInvokeSuper
     override fun setupEventRouting(routing: EventRouting<JanitorId>) {
         super.setupEventRouting(routing)
-        routing.unicast(TimePassed::class.java) { _ -> id }
+        routing.unicast(TimePassed::class.java) { _ -> id() }
     }
 
     @OverridingMethodsMustInvokeSuper
@@ -65,4 +61,13 @@ public abstract class JanitorRepository<P : JanitorProcess<S, *>, S : EntityStat
         super.configure(processManager)
         processManager.inject(purgeableRepos)
     }
+
+    /**
+     * Returns the identifier of the unique janitor for this context.
+     *
+     * This method must be invoked only after the repository
+     * has been registered with the bounded context.
+     */
+    private fun id(): JanitorId =
+        JanitorId::class.forContext(context().name().value())
 }
