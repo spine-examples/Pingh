@@ -43,11 +43,11 @@ import io.spine.server.route.EventRouting
  * @param P The type of janitor process managers.
  * @param S The type of janitor process manager state messages.
  *
- * @property purgeableRepos List of repositories that need to be cleared
+ * @property purgeableRepos Set of repositories that need to be cleared
  *   of archived and deleted entity records.
  */
 public abstract class JanitorRepository<P : JanitorProcess<S, *>, S : EntityState>(
-    private val purgeableRepos: List<Purgeable>
+    private val purgeableRepos: Set<Purgeable>
 ) : ProcessManagerRepository<JanitorId, P, S>() {
 
     @OverridingMethodsMustInvokeSuper

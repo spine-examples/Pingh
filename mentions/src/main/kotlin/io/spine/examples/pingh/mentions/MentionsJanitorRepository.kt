@@ -32,9 +32,9 @@ import io.spine.examples.pingh.janitor.Purgeable
 /**
  * Manages instances of [MentionsJanitorProcess].
  *
- * @param purgeableRepos List of repositories that need to be cleared
+ * @param purgeableRepos Repositories that need to be cleared
  *   of archived and deleted entity records.
  */
 internal class MentionsJanitorRepository(
     vararg purgeableRepos: Purgeable
-) : JanitorRepository<MentionsJanitorProcess, MentionsJanitor>(purgeableRepos.toList())
+) : JanitorRepository<MentionsJanitorProcess, MentionsJanitor>(purgeableRepos.toSet())

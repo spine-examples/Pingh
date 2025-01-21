@@ -45,12 +45,12 @@ public abstract class JanitorProcess<S : EntityState, B : ValidatingBuilder<S>>
     : ProcessManager<JanitorId, S, B>(), Logging {
 
     /**
-     * List of repositories that need to be cleared of archived and deleted entity records.
+     * Set of repositories that need to be cleared of archived and deleted entity records.
      *
      * It is expected this field is set by calling [inject()][inject]
      * right after the instance creation.
      */
-    private lateinit var purgeableRepos: List<Purgeable>
+    private lateinit var purgeableRepos: Set<Purgeable>
 
     /**
      * Deletes all entity records marked as archived or deleted
@@ -63,13 +63,13 @@ public abstract class JanitorProcess<S : EntityState, B : ValidatingBuilder<S>>
     }
 
     /**
-     * Supplies this instance with list of repositories that need
+     * Supplies this instance with set of repositories that need
      * to be cleared of archived and deleted entity records.
      *
      * It is expected this method is called right after the creation of the process instance.
      * Otherwise, the process will not be able to function properly.
      */
-    public fun inject(repos: List<Purgeable>) {
+    public fun inject(repos: Set<Purgeable>) {
         purgeableRepos = repos
     }
 }
