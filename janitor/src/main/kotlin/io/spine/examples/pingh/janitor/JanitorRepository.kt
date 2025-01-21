@@ -41,7 +41,7 @@ import io.spine.server.route.EventRouting
  * and all `TimePassed` events are always [routed][setupEventRouting] to it.
  *
  * @param P The type of janitor process managers.
- * @param S The type of janitor process manager state messages.
+ * @param S The type of janitor process manager state.
  *
  * @property purgeableRepos Set of repositories that need to be cleared
  *   of archived and deleted entity records.

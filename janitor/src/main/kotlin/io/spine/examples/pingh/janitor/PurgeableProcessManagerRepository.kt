@@ -44,7 +44,7 @@ import io.spine.server.procman.ProcessManagerRepository
  *
  * @param I The type of IDs of process managers.
  * @param P The type of process managers.
- * @param S The type of process manager state messages.
+ * @param S The type of process manager state.
  */
 public abstract class PurgeableProcessManagerRepository<I,
         P : ProcessManager<I, S, *>,

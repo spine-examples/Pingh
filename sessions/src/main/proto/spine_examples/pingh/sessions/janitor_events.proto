@@ -37,10 +37,7 @@ option java_multiple_files = true;
 
 import "spine_examples/pingh/janitor/identifiers.proto";
 
-// The storage was cleared of obsolete data.
-//
-// Entities within the bounded context marked as archived or deleted were removed.
-//
+// The records corresponding to archived and deleted entities were removed from the storage.
 message StoragePurged {
 
     // The ID of the janitor which removed obsolete data from the storage.

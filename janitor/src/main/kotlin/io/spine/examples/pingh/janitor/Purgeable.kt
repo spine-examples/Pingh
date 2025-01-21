@@ -32,7 +32,7 @@ package io.spine.examples.pingh.janitor
 public interface Purgeable {
 
     /**
-     * Deletes entity records from the storage that are marked as archived or deleted.
+     * Deletes entity records marked as archived or deleted from the storage.
      */
     public fun purge()
 }
