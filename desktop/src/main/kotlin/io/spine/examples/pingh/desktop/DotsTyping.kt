@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.ZERO
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -66,7 +67,7 @@ import kotlin.time.Duration.Companion.milliseconds
  * @param duration The animation duration.
  */
 @Composable
-@Suppress("MagicNumber" /* Numbers are used to define the key frames of the animation. */)
+@Suppress("MagicNumber" /* Numbers are used to define the keyframes of the animation. */)
 internal fun DotsTyping(
     color: Color,
     dotSize: Dp = 7.dp,
@@ -75,12 +76,11 @@ internal fun DotsTyping(
     duration: Duration = 1000.milliseconds
 ) {
     val infiniteTransition = rememberInfiniteTransition()
-    val frameTime = duration.inWholeMilliseconds.toInt() / 4
+    val frame = duration / 4
 
-    val offset1 by infiniteTransition.animateDotOffset(0, duration, frameTime, maxOffset)
-    val offset2 by infiniteTransition.animateDotOffset(frameTime, duration, frameTime, maxOffset)
-    val offset3 by infiniteTransition
-        .animateDotOffset(frameTime * 2, duration, frameTime, maxOffset)
+    val offset1 by infiniteTransition.animateDotOffset(ZERO, duration, frame, maxOffset)
+    val offset2 by infiniteTransition.animateDotOffset(frame, duration, frame, maxOffset)
+    val offset3 by infiniteTransition.animateDotOffset(frame * 2, duration, frame, maxOffset)
 
     Row(
         modifier = Modifier.padding(top = maxOffset.dp),
@@ -98,9 +98,9 @@ internal fun DotsTyping(
  */
 @Composable
 private fun InfiniteTransition.animateDotOffset(
-    delay: Int,
+    delay: Duration,
     duration: Duration,
-    frameTime: Int,
+    frame: Duration,
     maxOffset: Float
 ): State<Float> =
     animateFloat(
@@ -108,13 +108,19 @@ private fun InfiniteTransition.animateDotOffset(
         targetValue = 0f,
         animationSpec = infiniteRepeatable(
             animation = keyframes {
-                durationMillis = duration.inWholeMilliseconds.toInt()
-                0f at delay using LinearEasing
-                maxOffset at delay + frameTime using LinearEasing
-                0f at delay + frameTime * 2
+                durationMillis = duration.intMillis
+                0f at delay.intMillis using LinearEasing
+                maxOffset at (delay + frame).intMillis using LinearEasing
+                0f at (delay + frame * 2).intMillis
             }
         )
     )
+
+/**
+ * The value of this duration expressed as a `Int` number of milliseconds.
+ */
+private val Duration.intMillis
+    get() = inWholeMilliseconds.toInt()
 
 /**
  * Displays a dot.
