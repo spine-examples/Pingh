@@ -32,6 +32,7 @@ import androidx.compose.ui.window.TrayState
 import com.google.common.flogger.FluentLogger
 import io.spine.examples.pingh.client.NotificationSender
 import io.spine.examples.pingh.client.PinghApplication
+import java.awt.SystemTray
 
 /**
  * The top-level application state.
@@ -72,26 +73,10 @@ internal class AppState(
     }
 
     /**
-     * The action that runs when the application [closes][close],
-     * responsible for removing the application icon from the system tray.
-     */
-    private var removeFromTray: () -> Unit = {
-        logger.atWarning()
-            .log("The action of removing an application from the tray is not specified.")
-    }
-
-    /**
      * Switches the window visibility.
      */
     internal fun toggleWindowVisibility() {
         window.isShown = !window.isShown
-    }
-
-    /**
-     * Sets the action of removing an application from the system tray.
-     */
-    internal fun onRemoveFromTray(block: () -> Unit) {
-        removeFromTray = block
     }
 
     /**
@@ -117,6 +102,17 @@ internal class AppState(
         logger.atFine().log("The application successfully disconnected from the Pingh server.")
         appScope.exitApplication()
         logger.atFine().log("Window closed; launched effects were canceled.")
+    }
+
+    /**
+     * Removes all icons added by the application from the system tray.
+     */
+    private fun removeFromTray() {
+        SystemTray.getSystemTray().apply {
+            trayIcons.forEach {
+                remove(it)
+            }
+        }
     }
 
     private companion object {

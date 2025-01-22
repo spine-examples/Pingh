@@ -116,10 +116,6 @@ internal fun Tray(state: AppState) {
             .notificationFlow
             .onEach { tray.displayMessage(it) }
             .launchIn(this)
-
-        state.onRemoveFromTray {
-            SystemTray.getSystemTray().remove(tray)
-        }
     }
 }
 

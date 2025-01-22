@@ -239,7 +239,7 @@ private fun ApplicationInfo() {
  * @param onEnterPressed Called when this input is focused and the "Enter" key is pressed.
  * @param isError Indicates if the input's current value is in error.
  * @param enabled Controls the enabled state of this text field.
- *   If `false`, the filed value can not be modified.
+ *   If `false`, the filed value cannot be modified.
  */
 @Composable
 private fun UsernameInput(
