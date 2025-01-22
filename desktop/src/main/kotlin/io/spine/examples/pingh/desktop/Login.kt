@@ -408,32 +408,36 @@ private fun LoginButton(
     onClick: () -> Unit,
     triggered: MutableState<Boolean>
 ) {
-    val clicked = remember { mutableStateOf(false) }
+    var clicked by remember { mutableStateOf(false) }
     if (triggered.value) {
-        clicked.value = true
+        clicked = true
         triggered.value = false
         onClick()
     }
     Button(
         onClick = {
-            clicked.value = true
+            clicked = true
             onClick()
         },
         modifier = Modifier
             .width(240.dp)
             .height(45.dp)
             .testTag("login-button"),
-        enabled = if (clicked.value) false else enabled,
+        enabled = if (clicked) false else enabled,
         shape = MaterialTheme.shapes.medium,
         colors = buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
         )
     ) {
-        Text(
-            text = "Login",
-            style = MaterialTheme.typography.displayMedium
-        )
+        if (clicked) {
+            DotsTyping(color = MaterialTheme.colorScheme.onPrimary)
+        } else {
+            Text(
+                text = "Login",
+                style = MaterialTheme.typography.displayMedium
+            )
+        }
     }
 }
 
