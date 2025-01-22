@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import io.spine.examples.pingh.sessions.event.SessionClosed
 import io.spine.examples.pingh.sessions.event.SessionExpired
 import io.spine.examples.pingh.sessions.event.SessionVerificationFailed
 import io.spine.examples.pingh.sessions.event.SessionVerified
+import io.spine.examples.pingh.sessions.event.TokenUpdateRefused
 import io.spine.examples.pingh.sessions.event.TokenUpdated
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
@@ -184,15 +185,29 @@ internal class UserSessionProcess :
 
     /**
      * Renews GitHub access tokens using the refresh token.
+     *
+     * If the session is already closed or the login process is incomplete,
+     * the token update is refused.
      */
     @Assign
-    internal fun handle(command: UpdateToken): TokenUpdated {
+    internal fun handle(command: UpdateToken): EitherOf2<TokenUpdated, TokenUpdateRefused> {
+        if (!isActive || !state().hasRefreshToken()) {
+            deleted = true
+            _warn().log(
+                "${id().forLog()}: Token update was requested, " +
+                        "but the session is already closed, " +
+                        "resulting in the update being refused."
+            )
+            return EitherOf2.withB(TokenUpdateRefused::class.bySession(command.id))
+        }
         _debug().log("${state().id.forLog()}: Refreshing the access token.")
         val tokens = auth.refreshAccessToken(state().refreshToken)
         _debug().log("${state().id.forLog()}: GitHub issued a new access token.")
         builder().setRefreshToken(tokens.refreshToken)
-        return TokenUpdated::class.with(
-            command.id, tokens.accessToken, tokens.whenExpires
+        return EitherOf2.withA(
+            TokenUpdated::class.with(
+                command.id, tokens.accessToken, tokens.whenExpires
+            )
         )
     }
 
@@ -250,6 +265,8 @@ internal class UserSessionProcess :
         @External event: TimePassed
     ): EitherOf3<SessionClosed, SessionExpired, Nothing> =
         when {
+            !isActive -> EitherOf3.withC(nothing())
+
             state().hasLoginDeadline() && state().loginDeadline <= event.time -> {
                 deleted = true
                 _debug().log(

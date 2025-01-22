@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@
 package io.spine.examples.pingh.mentions
 
 import io.spine.core.Subscribe
-import io.spine.examples.pingh.mentions.event.MentionArchived
+import io.spine.examples.pingh.mentions.event.MentionDeleted
 import io.spine.examples.pingh.mentions.event.MentionPinned
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
@@ -140,15 +140,15 @@ internal class UserMentionsProjection :
     }
 
     /**
-     * Removes a mention from the user's mentions list once it has been archived.
+     * Removes a mention from the user's mentions list once it has been deleted.
      */
     @Subscribe
-    internal fun on(event: MentionArchived) {
+    internal fun on(event: MentionDeleted) {
         with(builder()) {
             val id = mentionList.indexOfFirst { it.id.equals(event.id) }
             if (id == -1) {
                 _warn().log(
-                    "${state().id}: The mention was not in the user's list, " +
+                    "${state().id.forLog()}: The mention was not in the user's list, " +
                             "but an attempt was made to remove it. " +
                             "Mention ID: ${event.id.forLog()}."
                 )

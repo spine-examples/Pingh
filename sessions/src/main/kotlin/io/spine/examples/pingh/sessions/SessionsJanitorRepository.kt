@@ -24,41 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.mentions
+package io.spine.examples.pingh.sessions
 
-import io.spine.examples.pingh.sessions.GitHubUsers
-import io.spine.server.BoundedContext
-import io.spine.server.BoundedContextBuilder
-
-/**
- * Name of the Mentions bounded context.
- */
-public const val NAME: String = "Mentions"
+import io.spine.examples.pingh.janitor.JanitorRepository
+import io.spine.examples.pingh.janitor.PurgeableRepository
 
 /**
- * Creates a new builder for the Mentions bounded context.
+ * Manages instances of [SessionsJanitorProcess].
  *
- * The returned builder instance is already configured
- * to serve the entities which belong to this context.
+ * @param purgeableRepos Repositories that need to be cleared
+ *   of archived and deleted entity records.
  *
- * It is expected that the business scenarios
- * of the created context require access to the GitHub API.
- * Therefore, an instance of GitHub client is required
- * as a parameter.
- *
- * @param search Allows to access GitHub Search API.
- * @param users Allows to retrieve user information using the GitHub API.
+ * @see [JanitorRepository]
  */
-public fun newMentionsContext(
-    search: GitHubSearch,
-    users: GitHubUsers
-): BoundedContextBuilder {
-    val gitHubClientRepo = GitHubClientRepository(search, users)
-    val mentionRepo = MentionRepository()
-    val janitorRepo = MentionsJanitorRepository(gitHubClientRepo, mentionRepo)
-    return BoundedContext.singleTenant(NAME)
-        .add(gitHubClientRepo)
-        .add(mentionRepo)
-        .add(UserMentionsRepository())
-        .add(janitorRepo)
-}
+internal class SessionsJanitorRepository(
+    vararg purgeableRepos: PurgeableRepository
+) : JanitorRepository<SessionsJanitorProcess, SessionsJanitor>(purgeableRepos.toSet())

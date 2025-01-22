@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ package io.spine.examples.pingh.mentions
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
 import io.spine.examples.pingh.clock.event.TimePassed
+import io.spine.examples.pingh.janitor.PurgeableProcessManagerRepository
 import io.spine.examples.pingh.mentions.event.UserMentioned
-import io.spine.server.procman.ProcessManagerRepository
 import io.spine.server.route.EventRoute.withId
 import io.spine.server.route.EventRouting
 
@@ -37,7 +37,7 @@ import io.spine.server.route.EventRouting
  * Manages instances of [MentionProcess].
  */
 internal class MentionRepository :
-    ProcessManagerRepository<MentionId, MentionProcess, Mention>() {
+    PurgeableProcessManagerRepository<MentionId, MentionProcess, Mention>() {
 
     @OverridingMethodsMustInvokeSuper
     override fun setupEventRouting(routing: EventRouting<MentionId>) {

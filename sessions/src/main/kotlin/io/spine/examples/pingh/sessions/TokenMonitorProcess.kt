@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ internal class TokenMonitorProcess :
         val time = event.time
         val inProcess = state().hasWhenUpdateRequested() &&
                 state().whenUpdateRequested.add(updateRetryInterval) < time
-        if (time < state().whenExpires || inProcess) {
+        if (!isActive || time < state().whenExpires || inProcess) {
             return Optional.empty()
         }
         builder().setWhenUpdateRequested(time)

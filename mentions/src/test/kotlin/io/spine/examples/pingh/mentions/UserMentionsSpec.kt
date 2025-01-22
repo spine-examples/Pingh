@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ package io.spine.examples.pingh.mentions
 
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
-import io.spine.examples.pingh.mentions.event.MentionArchived
+import io.spine.examples.pingh.mentions.event.MentionDeleted
 import io.spine.examples.pingh.mentions.event.MentionPinned
 import io.spine.examples.pingh.mentions.event.MentionRead
 import io.spine.examples.pingh.mentions.event.MentionSnoozed
@@ -131,12 +131,12 @@ internal class UserMentionsSpec : ContextAwareTest() {
     }
 
     @Test
-    internal fun `react on 'MentionArchived' event, and remove obsolete mention`() {
+    internal fun `react on 'MentionDeleted' event, and remove obsolete mention`() {
         val newMention = UserMentioned::class.generateWith(id.username).run {
             context().receivesEvent(this)
             MentionView::class.buildBy(this, MentionStatus.UNREAD)
         }
-        val event = MentionArchived::class.with(userMentioned.id)
+        val event = MentionDeleted::class.with(userMentioned.id)
         context().receivesEvent(event)
         val expected = UserMentions::class.buildBy(id, newMention)
         context().assertState(id, expected)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,12 @@
 package io.spine.examples.pingh.sessions
 
 import com.google.protobuf.Timestamp
-import io.spine.base.Time.currentTime
 import io.spine.examples.pingh.clock.buildBy
 import io.spine.examples.pingh.clock.event.TimePassed
 import io.spine.examples.pingh.github.PersonalAccessToken
+import io.spine.examples.pingh.sessions.command.LogUserIn
 import io.spine.examples.pingh.sessions.command.UpdateToken
+import io.spine.examples.pingh.sessions.command.VerifyUserLoginToGitHub
 import io.spine.examples.pingh.sessions.event.SessionExpired
 import io.spine.examples.pingh.sessions.event.TokenExpirationTimeUpdated
 import io.spine.examples.pingh.sessions.event.TokenMonitoringFinished
@@ -43,12 +44,15 @@ import io.spine.examples.pingh.sessions.given.generate
 import io.spine.examples.pingh.sessions.given.with
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubAuthenticationResponses
 import io.spine.examples.pingh.testing.sessions.given.PredefinedGitHubUsersResponses
+import io.spine.protobuf.AnyPacker.unpack
 import io.spine.protobuf.Durations2.minutes
 import io.spine.protobuf.Durations2.seconds
 import io.spine.server.BoundedContextBuilder
 import io.spine.server.integration.ThirdPartyContext
 import io.spine.testing.core.given.GivenUserId
 import io.spine.testing.server.blackbox.ContextAwareTest
+import java.lang.Thread.sleep
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -57,24 +61,34 @@ import org.junit.jupiter.api.Test
 @DisplayName("`TokenMonitor` should")
 internal class TokenMonitorSpec : ContextAwareTest() {
 
+    private val auth = PredefinedGitHubAuthenticationResponses()
+    private val users = PredefinedGitHubUsersResponses()
+
     private lateinit var session: SessionId
     private lateinit var id: TokenMonitorId
     private lateinit var whenExpired: Timestamp
 
-    override fun contextBuilder(): BoundedContextBuilder = newSessionsContext(
-        PredefinedGitHubAuthenticationResponses(),
-        PredefinedGitHubUsersResponses()
-    )
+    override fun contextBuilder(): BoundedContextBuilder = newSessionsContext(auth, users)
 
     @BeforeEach
     internal fun startProcess() {
         session = SessionId::class.generate()
+        context().receivesCommand(LogUserIn::class.withSession(session))
+        auth.enterUserCode()
+        users.username = session.username
+        context().receivesCommand(VerifyUserLoginToGitHub::class.withSession(session))
+        val loggedInSubject = context().assertEvents()
+            .withType(UserLoggedIn::class.java)
+        loggedInSubject.hasSize(1)
+        val loggedIn = unpack(loggedInSubject.actual()[0].message, UserLoggedIn::class.java)
         id = TokenMonitorId::class.of(session)
-        whenExpired = currentTime()
-        val event = UserLoggedIn::class.with(
-            session, PersonalAccessToken::class.generate(), whenExpired
-        )
-        context().receivesEvent(event)
+        whenExpired = loggedIn.whenTokenExpires
+    }
+
+    @AfterEach
+    internal fun reset() {
+        auth.reset()
+        users.reset()
     }
 
     @Nested internal inner class
@@ -118,8 +132,13 @@ internal class TokenMonitorSpec : ContextAwareTest() {
 
         @Test
         internal fun `do nothing if update process is in progress`() {
+            auth.pauseRefresh()
             val time = whenExpired.add(minutes(1))
-            emitTimePassedEvent(time)
+            val firstUpdate = Thread {
+                emitTimePassedEvent(time)
+            }
+            firstUpdate.start()
+            sleep(1000)
             context().assertCommands()
                 .withType(UpdateToken::class.java)
                 .hasSize(1)
@@ -127,6 +146,28 @@ internal class TokenMonitorSpec : ContextAwareTest() {
             context().assertCommands()
                 .withType(UpdateToken::class.java)
                 .hasSize(1)
+            auth.resumeRefresh()
+            firstUpdate.join()
+        }
+
+        @Test
+        internal fun `do nothing if user is logged out`() {
+            context().receivesEvent(UserLoggedOut::class.with(session))
+            val time = whenExpired.add(minutes(1))
+            emitTimePassedEvent(time)
+            context().assertCommands()
+                .withType(UpdateToken::class.java)
+                .hasSize(0)
+        }
+
+        @Test
+        internal fun `do nothing if session has expired`() {
+            context().receivesEvent(SessionExpired::class.with(session))
+            val time = whenExpired.add(minutes(1))
+            emitTimePassedEvent(time)
+            context().assertCommands()
+                .withType(UpdateToken::class.java)
+                .hasSize(0)
         }
 
         private fun emitTimePassedEvent(time: Timestamp) {

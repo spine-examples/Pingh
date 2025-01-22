@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,21 +124,13 @@ internal class Application {
      */
     private fun createServer(): Server {
         val httpEngine = CIO.create()
+        val auth = RemoteGitHubAuthentication(gitHubApp(), httpEngine)
+        val search = RemoteGitHubSearch(httpEngine)
         val users = RemoteGitHubUsers(httpEngine)
         return Server
             .atPort(port)
-            .add(
-                newSessionsContext(
-                    RemoteGitHubAuthentication(gitHubApp(), httpEngine),
-                    users
-                )
-            )
-            .add(
-                newMentionsContext(
-                    RemoteGitHubSearch(httpEngine),
-                    users
-                )
-            )
+            .add(newSessionsContext(auth, users))
+            .add(newMentionsContext(search, users))
             .build()
     }
 
