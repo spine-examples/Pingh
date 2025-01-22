@@ -28,7 +28,7 @@ package io.spine.internal.dependency
 
 // https://github.com/spine-examples/Pingh
 public object Pingh {
-    private const val version = "1.0.2"
+    private const val version = "1.0.3"
     private const val group = "io.spine.examples.pingh"
 
     public const val client: String = "$group:client:$version"
