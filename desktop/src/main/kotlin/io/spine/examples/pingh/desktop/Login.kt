@@ -149,7 +149,7 @@ private fun UsernameEnteringPage(
     var username by remember { mutableStateOf("") }
     val buttonTriggered = remember { mutableStateOf(false) }
     var wasChanged by remember { mutableStateOf(false) }
-    var codesRequested by remember { mutableStateOf(false) }
+    var codeRequested by remember { mutableStateOf(false) }
     val isError = remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
@@ -172,13 +172,13 @@ private fun UsernameEnteringPage(
                 }
             },
             isError = isError,
-            enabled = !codesRequested
+            enabled = !codeRequested
         )
         Spacer(Modifier.height(15.dp))
         LoginButton(
             enabled = wasChanged && !isError.value,
             onClick = {
-                codesRequested = true
+                codeRequested = true
                 CoroutineScope(Dispatchers.Default).launch {
                     val name = Username::class.of(username)
                     flow.requestUserCode(name)
