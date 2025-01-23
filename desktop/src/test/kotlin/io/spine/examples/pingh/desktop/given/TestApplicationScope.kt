@@ -34,8 +34,8 @@ import androidx.compose.ui.window.application
  * for testing individual components independently of the [application].
  */
 internal class TestApplicationScope : ApplicationScope {
-    /**
-     * Does nothing.
-     */
-    override fun exitApplication() {}
+
+    override fun exitApplication() {
+        // Does nothing.
+    }
 }
