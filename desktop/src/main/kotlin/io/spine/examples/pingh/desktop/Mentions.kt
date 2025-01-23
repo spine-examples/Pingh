@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("TooManyFunctions" /* Using Compose requires many functions to render the UI. */)
+
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.animation.core.Spring.DampingRatioMediumBouncy
@@ -36,6 +38,7 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -52,6 +55,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Divider
+import androidx.compose.material.Surface
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults.cardColors
 import androidx.compose.material3.Icon
@@ -63,6 +67,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment.Companion.Center
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -74,6 +79,7 @@ import androidx.compose.ui.input.pointer.PointerIcon.Companion.Hand
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -253,16 +259,57 @@ private fun MentionCards(
 ) {
     val mentions by flow.mentions.collectAsState()
     val list = remember(mentions) { mentions.sorted() }
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(10.dp)
-            .background(MaterialTheme.colorScheme.background)
-            .testTag("mention-cards"),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+    if (list.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Center
+        ) {
+            NoMentionsCard()
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(10.dp)
+                .background(MaterialTheme.colorScheme.background)
+                .testTag("mention-cards"),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            items(list.size, key = { index -> list[index].id }) { index ->
+                MentionCard(flow, list[index])
+            }
+        }
+    }
+}
+
+/**
+ * Displays a text card indicating that the user currently has no mentions.
+ */
+@Composable
+private fun NoMentionsCard() {
+    Surface(
+        modifier = Modifier.width(200.dp).height(70.dp),
+        shape = MaterialTheme.shapes.small,
+        color = MaterialTheme.colorScheme.secondary,
+        elevation = 5.dp
     ) {
-        items(list.size, key = { index -> list[index].id }) { index ->
-            MentionCard(flow, list[index])
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(5.dp, CenterVertically),
+            horizontalAlignment = CenterHorizontally
+        ) {
+            Text(
+                text = "No mentions yet.",
+                color = MaterialTheme.colorScheme.onSecondary,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = "Any new mentions will be displayed here as they appear.",
+                color = MaterialTheme.colorScheme.onSecondary,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }
