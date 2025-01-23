@@ -32,7 +32,6 @@ import androidx.compose.ui.window.TrayState
 import com.google.common.flogger.FluentLogger
 import io.spine.examples.pingh.client.NotificationSender
 import io.spine.examples.pingh.client.PinghApplication
-import java.awt.SystemTray
 
 /**
  * The top-level application state.
@@ -88,31 +87,10 @@ internal class AppState(
      * 2. The connection to the Pingh server is shutdown.
      * 3. All loaded effects are stopped.
      * 4. Windows created within the [application scope][appScope] are closed.
-     *
-     * Closing the application may take several seconds.
-     *
-     * To give the user the impression of an instantaneous closure,
-     * the application window is hidden prior to closing.
      */
     internal fun close() {
-        window.hide()
-        removeFromTray()
-        logger.atFine().log("Icon removed from the system tray.")
-        app.close()
-        logger.atFine().log("The application successfully disconnected from the Pingh server.")
         appScope.exitApplication()
         logger.atFine().log("Window closed; launched effects were canceled.")
-    }
-
-    /**
-     * Removes all icons added by the application from the system tray.
-     */
-    private fun removeFromTray() {
-        SystemTray.getSystemTray().apply {
-            trayIcons.forEach {
-                remove(it)
-            }
-        }
     }
 
     private companion object {

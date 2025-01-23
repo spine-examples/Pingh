@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.desktop
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
@@ -109,13 +110,20 @@ internal fun Tray(state: AppState) {
     }
 
     LaunchedEffect(state, tray) {
-        SystemTray.getSystemTray().add(tray)
-        logger.atFine().log("Icon added to the system tray.")
-
         state.tray
             .notificationFlow
             .onEach { tray.displayMessage(it) }
             .launchIn(this)
+    }
+
+    DisposableEffect(state, tray) {
+        SystemTray.getSystemTray().add(tray)
+        logger.atFine().log("Icon added to the system tray.")
+
+        onDispose {
+            SystemTray.getSystemTray().remove(tray)
+            logger.atFine().log("Icon removed from the system tray.")
+        }
     }
 }
 
