@@ -30,6 +30,7 @@ import io.spine.internal.dependency.Flogger
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.Log4j2
 import io.spine.internal.dependency.Pingh
+import io.spine.internal.dependency.ProGuard
 import io.spine.internal.gradle.AppVersion
 import io.spine.internal.gradle.allowBackgroundExecution
 import io.spine.internal.gradle.extractSemanticVersion
@@ -133,6 +134,9 @@ compose.desktop {
                     allowBackgroundExecution()
                 }
             }
+        }
+        buildTypes.release.proguard {
+            version = ProGuard.version
         }
     }
 }
