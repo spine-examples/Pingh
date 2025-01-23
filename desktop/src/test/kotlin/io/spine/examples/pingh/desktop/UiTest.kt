@@ -38,6 +38,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.runDesktopComposeUiTest
 import io.spine.examples.pingh.desktop.given.DelayedFactAssertion.Companion.awaitFact
 import io.spine.examples.pingh.desktop.given.MemoizingUriHandler
+import io.spine.examples.pingh.desktop.given.TestApplicationScope
 import io.spine.examples.pingh.testing.client.IntegrationTest
 import org.junit.jupiter.api.AfterEach
 
@@ -69,7 +70,7 @@ internal abstract class UiTest : IntegrationTest() {
             val serverEndpoint = ServerEndpoint(address, port)
             setContent {
                 Theme {
-                    state = remember { AppState(serverEndpoint) }
+                    state = remember { AppState(serverEndpoint, TestApplicationScope()) }
                     CompositionLocalProvider(LocalUriHandler provides uriHandler) {
                         CurrentPage(state!!.app, state!!::close)
                     }
