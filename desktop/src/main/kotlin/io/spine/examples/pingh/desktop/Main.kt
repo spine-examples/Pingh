@@ -44,7 +44,7 @@ public fun main() {
                 "${System.getProperty("java.vm.version")}."
     )
     val serverEndpoint = ServerEndpoint.load()
-    application {
+    application(exitProcessOnExit = false) {
         Theme {
             val state = remember { AppState(serverEndpoint, appScope = this) }
             Window(state)

@@ -92,7 +92,7 @@ internal fun Tray(state: AppState) {
     val menu = remember(state) {
         Menu {
             CoroutineScope(Dispatchers.Default).launch {
-                state.close()
+                state.closeAndExit()
             }
         }
     }
