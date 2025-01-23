@@ -26,6 +26,7 @@
 
 package io.spine.examples.pingh.desktop.given
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
 
@@ -35,6 +36,14 @@ import androidx.compose.ui.window.application
  */
 internal class TestApplicationScope : ApplicationScope {
 
+    /**
+     * Closes the test application.
+     *
+     * No action is necessary to close the test application.
+     * As there are no windows open for testing purposes, it is unnecessary to close them.
+     * All [LaunchedEffect]s are finalized during the decomposition process
+     * conducted by the test framework.
+     */
     override fun exitApplication() {
         // Does nothing.
     }
