@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,31 +24,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.desktop
+package io.spine.examples.pingh.desktop.given
 
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
-import com.google.common.flogger.FluentLogger
-
-private val logger = FluentLogger.forEnclosingClass()
 
 /**
- * Entry point of the desktop application.
+ * The Compose application scope
+ * for testing individual components independently of the [application].
  */
-public fun main() {
-    logger.atInfo().log(
-        "Launching the Pingh app.${System.lineSeparator()}" +
-                "Runtime environment: ${System.getProperty("java.vendor")} version " +
-                "${System.getProperty("java.version")}.${System.lineSeparator()}" +
-                "JVM : ${System.getProperty("java.vm.vendor")} version " +
-                "${System.getProperty("java.vm.version")}."
-    )
-    val serverEndpoint = ServerEndpoint.load()
-    application(exitProcessOnExit = false) {
-        Theme {
-            val state = remember { AppState(serverEndpoint, appScope = this) }
-            Window(state)
-            Tray(state)
-        }
+internal class TestApplicationScope : ApplicationScope {
+
+    /**
+     * Closes the test application.
+     *
+     * No action is necessary to close the test application.
+     * As there are no windows open for testing purposes, it is unnecessary to close them.
+     * All [LaunchedEffect]s are finalized during the decomposition process
+     * conducted by the test framework.
+     */
+    override fun exitApplication() {
+        // Does nothing.
     }
 }

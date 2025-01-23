@@ -26,17 +26,29 @@
 
 package io.spine.examples.pingh.desktop
 
+import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Notification
 import androidx.compose.ui.window.TrayState
+import androidx.compose.ui.window.application
+import com.google.common.flogger.FluentLogger
 import io.spine.examples.pingh.client.NotificationSender
 import io.spine.examples.pingh.client.PinghApplication
+import kotlin.system.exitProcess
 
 /**
  * The top-level application state.
  *
  * @param serverEndpoint The connection details for the Pingh server.
+ * @property appScope The scope of the Compose application.
+ *   When using the [application], ensure that the current process continues running
+ *   after the `application` is terminated. After decomposing elements,
+ *   additional tasks such as canceling subscriptions
+ *   and disconnecting from the Pingh server are performed to complete the app's closure.
  */
-internal class AppState(serverEndpoint: ServerEndpoint) {
+internal class AppState(
+    serverEndpoint: ServerEndpoint,
+    private val appScope: ApplicationScope
+) {
     /**
      * State of the window.
      */
@@ -66,15 +78,6 @@ internal class AppState(serverEndpoint: ServerEndpoint) {
     }
 
     /**
-     * Actions that are performed when the application is [closed][close].
-     */
-    internal val closureActions = mutableListOf<() -> Unit>()
-
-    init {
-        addClosureAction(app::close)
-    }
-
-    /**
      * Switches the window visibility.
      */
     internal fun toggleWindowVisibility() {
@@ -82,24 +85,26 @@ internal class AppState(serverEndpoint: ServerEndpoint) {
     }
 
     /**
-     * Adds an action to be executed upon application closure,
-     * following the order in which actions were added.
+     * Closes the application and terminates the currently running process.
+     *
+     * During the closing process the following actions are performed:
+     *
+     * 1. The application is removed from the system tray.
+     * 2. All loaded effects are stopped.
+     * 3. Windows created within the [application scope][appScope] are closed.
+     * 4. The connection to the Pingh server is shutdown.
+     * 5. The currently running process is terminated with an 0 status code.
      */
-    internal fun addClosureAction(onClose: () -> Unit) {
-        closureActions.add(onClose)
+    internal fun closeAndExit() {
+        appScope.exitApplication()
+        logger.atFine().log("Window closed; launched effects were canceled.")
+        app.close()
+        logger.atFine().log("The application successfully disconnected from the Pingh server.")
+        exitProcess(0)
     }
 
-    /**
-     * Closes the application.
-     *
-     * When the application is closed, all actions added
-     * using [addClosureAction()][addClosureAction] method are executed sequentially.
-     *
-     * By default, the client connection to
-     * the Pingh server is [closed][PinghApplication.close] first.
-     */
-    internal fun close() {
-        closureActions.forEach { it() }
+    private companion object {
+        private val logger = FluentLogger.forEnclosingClass()
     }
 }
 

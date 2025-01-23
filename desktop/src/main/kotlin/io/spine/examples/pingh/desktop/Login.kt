@@ -95,6 +95,9 @@ import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.github.of
 import io.spine.examples.pingh.github.isValidUsername
 import io.spine.net.Url
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
 /**
@@ -144,12 +147,10 @@ private fun UsernameEnteringPage(
     flow: EnterUsername
 ) {
     var username by remember { mutableStateOf("") }
+    val buttonTriggered = remember { mutableStateOf(false) }
     var wasChanged by remember { mutableStateOf(false) }
+    var codeRequested by remember { mutableStateOf(false) }
     val isError = remember { mutableStateOf(false) }
-    val requestUserCode = {
-        val name = Username::class.of(username)
-        flow.requestUserCode(name)
-    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -167,15 +168,23 @@ private fun UsernameEnteringPage(
             },
             onEnterPressed = {
                 if (wasChanged && !isError.value) {
-                    requestUserCode()
+                    buttonTriggered.value = true
                 }
             },
-            isError = isError
+            isError = isError,
+            enabled = !codeRequested
         )
         Spacer(Modifier.height(15.dp))
         LoginButton(
             enabled = wasChanged && !isError.value,
-            onClick = requestUserCode
+            onClick = {
+                codeRequested = true
+                CoroutineScope(Dispatchers.Default).launch {
+                    val name = Username::class.of(username)
+                    flow.requestUserCode(name)
+                }
+            },
+            triggered = buttonTriggered
         )
     }
 }
@@ -229,13 +238,16 @@ private fun ApplicationInfo() {
  * @param onChange Called when input value is changed.
  * @param onEnterPressed Called when this input is focused and the "Enter" key is pressed.
  * @param isError Indicates if the input's current value is in error.
+ * @param enabled Controls the enabled state of this text field.
+ *   If `false`, the filed value cannot be modified.
  */
 @Composable
 private fun UsernameInput(
     value: String,
     onChange: (String) -> Unit,
     onEnterPressed: () -> Unit,
-    isError: MutableState<Boolean>
+    isError: MutableState<Boolean>,
+    enabled: Boolean
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -263,6 +275,7 @@ private fun UsernameInput(
                 }
             }
             .testTag("username-input"),
+        enabled = enabled,
         textStyle = MaterialTheme.typography.bodyLarge.copy(
             color = MaterialTheme.colorScheme.onSecondary
         ),
@@ -387,29 +400,44 @@ private fun ErrorMessage(isShown: Boolean) {
  * @param enabled Controls the enabled state of this button.
  *   If `false`, the button cannot be pressed.
  * @param onClick Called when this button is clicked.
+ * @param triggered Whether the button press is triggered externally.
  */
 @Composable
 private fun LoginButton(
     enabled: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    triggered: MutableState<Boolean>
 ) {
+    var clicked by remember { mutableStateOf(false) }
+    if (triggered.value) {
+        clicked = true
+        triggered.value = false
+        onClick()
+    }
     Button(
-        onClick = onClick,
+        onClick = {
+            clicked = true
+            onClick()
+        },
         modifier = Modifier
             .width(240.dp)
             .height(45.dp)
             .testTag("login-button"),
-        enabled = enabled,
+        enabled = if (clicked) false else enabled,
         shape = MaterialTheme.shapes.medium,
         colors = buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
         )
     ) {
-        Text(
-            text = "Login",
-            style = MaterialTheme.typography.displayMedium
-        )
+        if (clicked) {
+            DotsTyping(color = MaterialTheme.colorScheme.onPrimary)
+        } else {
+            Text(
+                text = "Login",
+                style = MaterialTheme.typography.displayMedium
+            )
+        }
     }
 }
 

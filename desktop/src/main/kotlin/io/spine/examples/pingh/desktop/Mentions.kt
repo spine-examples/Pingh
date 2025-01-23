@@ -94,6 +94,9 @@ import io.spine.examples.pingh.client.sorted
 import io.spine.examples.pingh.github.tag
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.mentions.MentionView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
 /**
@@ -227,7 +230,11 @@ private fun Menu(
             text = "Quit",
             leadingIcon = painterResource(Res.drawable.quit),
             modifier = Modifier.testTag("quit-button"),
-            onClick = exitApp
+            onClick = {
+                CoroutineScope(Dispatchers.Default).launch {
+                    exitApp()
+                }
+            }
         )
     }
 }

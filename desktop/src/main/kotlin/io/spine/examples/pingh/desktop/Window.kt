@@ -47,7 +47,6 @@ import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.Window as ComposeWindow
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
-import io.spine.examples.pingh.client.PinghApplication
 import java.awt.Desktop
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
@@ -160,7 +159,7 @@ private fun WindowContent(state: AppState) {
                 )
                 .clip(MaterialTheme.shapes.small)
         ) {
-            CurrentPage(state.app, state::close)
+            CurrentPage(state.app, state::closeAndExit)
         }
     }
 }
