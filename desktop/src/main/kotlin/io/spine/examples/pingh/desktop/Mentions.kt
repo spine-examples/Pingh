@@ -67,7 +67,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment.Companion.Center
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -288,24 +287,17 @@ private fun MentionCards(
 @Composable
 private fun NoMentionsCard() {
     Surface(
-        modifier = Modifier.width(200.dp).height(70.dp),
+        modifier = Modifier.width(180.dp).height(50.dp),
         shape = MaterialTheme.shapes.small,
         color = MaterialTheme.colorScheme.secondary,
         elevation = 5.dp
     ) {
-        Column(
+        Box(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(5.dp, CenterVertically),
-            horizontalAlignment = CenterHorizontally
+            contentAlignment = Center
         ) {
             Text(
-                text = "No mentions yet.",
-                color = MaterialTheme.colorScheme.onSecondary,
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                text = "Any new mentions will be displayed here as they appear.",
+                text = "No recent mentions yet.",
                 color = MaterialTheme.colorScheme.onSecondary,
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyMedium
