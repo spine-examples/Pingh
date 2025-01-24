@@ -137,6 +137,10 @@ compose.desktop {
         }
         buildTypes.release.proguard {
             version = ProGuard.version
+            isEnabled = true
+            joinOutputJars = true
+
+            configurationFiles.from(file("pingh-desktop.pro"))
         }
     }
 }
