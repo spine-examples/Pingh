@@ -48,9 +48,9 @@ spine {
 forceGrpcDependencies(configurations)
 
 dependencies {
-    // To work with `PinghApplication`, it is necessary to use value objects and IDs declared
-    // in different bounded contexts. All necessary classes are collected in the `server` module.
-    api(project(":server"))
+    api(project(":github"))
+    api(project(":sessions"))
+    api(project(":mentions"))
 
     implementation(Guava.lib)
     implementation(Grpc.netty)

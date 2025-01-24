@@ -29,6 +29,7 @@ import io.spine.internal.dependency.Kotest
 import io.spine.internal.dependency.Spine
 
 dependencies {
+    api(project(":server"))
     implementation(project(":client"))
     implementation(project(":testutil-mentions"))
     implementation(project(":testutil-sessions"))
