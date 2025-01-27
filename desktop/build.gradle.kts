@@ -36,6 +36,7 @@ import io.spine.internal.gradle.allowBackgroundExecution
 import io.spine.internal.gradle.extractSemanticVersion
 import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.compose.desktop.application.tasks.AbstractProguardTask
 
 plugins {
     kotlin("jvm")
@@ -139,8 +140,40 @@ compose.desktop {
             version = ProGuard.version
             isEnabled = true
             joinOutputJars = true
-
             configurationFiles.from(file("pingh-desktop.pro"))
+        }
+    }
+}
+
+/**
+ * Applies proguard files contained in jar libraries and keeps service classes.
+ */
+tasks.withType<AbstractProguardTask> {
+    val proguardFile = File.createTempFile("tmp", ".pro", temporaryDir)
+    proguardFile.deleteOnExit()
+
+    compose.desktop.application.buildTypes.release.proguard {
+        configurationFiles.from(proguardFile)
+    }
+
+    doFirst {
+        proguardFile.bufferedWriter().use { proguardFileWriter ->
+            sourceSets.main.get().runtimeClasspath
+                .filter { file -> file.extension == "jar" }
+                .forEach { jar ->
+                    val zip = zipTree(jar)
+                    zip.matching { include("META-INF/**/proguard/*.pro") }.forEach {
+                        proguardFileWriter.appendLine(it.readText())
+                    }
+                    zip.matching { include("META-INF/services/*") }.forEach {
+                        it.readLines()
+                            .filter { line -> !line.contains("#") }
+                            .forEach { clazz ->
+                                val rule = "-keep class $clazz"
+                                proguardFileWriter.appendLine(rule)
+                            }
+                    }
+                }
         }
     }
 }
