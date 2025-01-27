@@ -170,7 +170,7 @@ server.port=50051
 
 ```shell
 cd ./desktop
-./gradlew runDistributable
+./gradlew runReleaseDistributable
 ```
 
 This will generate a runnable distribution and start it automatically.
@@ -179,7 +179,7 @@ To create a distribution of the client application without launching it,
 use the following command:
 
 ```shell
-./gradlew createDistributable
+./gradlew createReleaseDistributable
 ```
 
 ## Google Cloud deployment
