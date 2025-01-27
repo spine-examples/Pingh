@@ -38,8 +38,10 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.named
 
 /**
- * Merges files matching the specified patterns from all runtime libraries
+ * Merges files matching the specified ANT path patterns from all runtime libraries
  * and saves them to the project's main resources build directory.
+ *
+ * Only unique lines from each file are saved in random order.
  */
 public open class MergeServiceFiles : DefaultTask() {
 
@@ -118,7 +120,6 @@ public open class MergeServiceFiles : DefaultTask() {
             file.deleteOnExit()
             file.writeText(content.joinToString(System.lineSeparator()))
         }
-
     }
 }
 

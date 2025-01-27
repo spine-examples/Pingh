@@ -164,7 +164,7 @@ val mergeFileSources = tasks.register<MergeServiceFiles>("mergeFileSources") {
 }
 
 /**
- * Applies proguard files contained in jar libraries and keeps service classes.
+ * Applies ProGuard files contained in JAR libraries and keeps service classes.
  */
 tasks.withType<AbstractProguardTask> {
     dependsOn(mergeFileSources)
