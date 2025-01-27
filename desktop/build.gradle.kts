@@ -32,6 +32,7 @@ import io.spine.internal.dependency.Log4j2
 import io.spine.internal.dependency.Pingh
 import io.spine.internal.dependency.ProGuard
 import io.spine.internal.gradle.AppVersion
+import io.spine.internal.gradle.MergeServiceFiles
 import io.spine.internal.gradle.allowBackgroundExecution
 import io.spine.internal.gradle.extractSemanticVersion
 import org.jetbrains.compose.ExperimentalComposeLibrary
@@ -146,9 +147,28 @@ compose.desktop {
 }
 
 /**
+ * Merges service files required for application configuration.
+ *
+ * When ProGuard merges JAR files, it ignores files that are already included.
+ * The configuration for some libraries is stored in separate archives,
+ * such as gRPC server configuration.
+ *
+ * This task must be completed before ProGuard tasks
+ * to merge the necessary configuration files for third-party libraries.
+ */
+val mergeFileSources = tasks.register<MergeServiceFiles>("mergeFileSources") {
+    filePatterns = setOf(
+        "desc.ref",
+        "META-INF/services/io.grpc.*"
+    )
+}
+
+/**
  * Applies proguard files contained in jar libraries and keeps service classes.
  */
 tasks.withType<AbstractProguardTask> {
+    dependsOn(mergeFileSources)
+
     val proguardFile = File.createTempFile("tmp", ".pro", temporaryDir)
     proguardFile.deleteOnExit()
 
