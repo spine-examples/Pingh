@@ -24,6 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import io.spine.internal.dependency.AppDirs
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Guava
@@ -34,6 +35,8 @@ plugins {
     // Add the Gradle plugin for bootstrapping projects built with Spine.
     // See: https://github.com/SpineEventEngine/bootstrap
     id("io.spine.tools.gradle.bootstrap").version("1.9.0")
+    id("com.github.johnrengelman.shadow")
+    `maven-publish`
 }
 
 spine {
@@ -65,4 +68,31 @@ dependencies {
     testImplementation(Spine.server)
     testImplementation(Spine.GCloud.datastore)
     testImplementation(Spine.GCloud.testutil)
+}
+
+tasks.withType<ShadowJar> {
+    mergeServiceFiles()
+    mergeServiceFiles("desc.ref")
+    exclude(
+        // Protobuf files.
+        "google/**",
+        "spine/**",
+        "spine_examples/**"
+    )
+}
+
+publishing {
+    publications {
+        create("fatClientJar", MavenPublication::class) {
+            groupId = project.group.toString()
+            artifactId = "pingh-client"
+            version = project.version.toString()
+            description = "Pingh app client."
+
+            artifact(tasks.shadowJar) {
+                // Avoid `-all` suffix in the published artifact.
+                classifier = ""
+            }
+        }
+    }
 }

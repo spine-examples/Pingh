@@ -31,6 +31,6 @@ public object Pingh {
     private const val version = "1.0.5"
     private const val group = "io.spine.examples.pingh"
 
-    public const val client: String = "$group:client:$version"
+    public const val client: String = "$group:pingh-client:$version"
     public const val testutilClient: String = "$group:testutil-client:$version"
 }
