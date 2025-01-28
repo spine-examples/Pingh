@@ -51,9 +51,9 @@ spine {
 forceGrpcDependencies(configurations)
 
 dependencies {
-    api(project(":github"))
-    api(project(":sessions"))
-    api(project(":mentions"))
+    implementation(project(":github"))
+    implementation(project(":sessions"))
+    implementation(project(":mentions"))
 
     implementation(Guava.lib)
     implementation(Grpc.netty)
