@@ -83,9 +83,13 @@ configurations.all {
 
 dependencies {
     implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:$detektVersion")
-    implementation("com.github.jengelman.gradle.plugins:shadow:$shadowVersion")
     implementation("org.jetbrains.dokka:dokka-base:$dokkaVersion")
     implementation("org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion")
+
+    // The ShadowJar plugin ID has been updated to `com.gradleup.shadow`.
+    // However, version 6.1.0, which is required, is unavailable under this ID.
+    // As a result, the older ShadowJar plugin ID is used instead.
+    implementation("com.github.jengelman.gradle.plugins:shadow:$shadowVersion")
 
     // Kotlin plugin, which is used to run Dokka, and is also added to Gradle classpath,
     // from where it is used in other modules. For Dokka to work correctly above 1.4 version,

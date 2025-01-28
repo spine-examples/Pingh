@@ -33,9 +33,13 @@ import io.spine.internal.dependency.Spine
 
 plugins {
     // Add the Gradle plugin for bootstrapping projects built with Spine.
-    // See: https://github.com/SpineEventEngine/bootstrap
+    // See: https://github.com/SpineEventEngine/bootstrap.
     id("io.spine.tools.gradle.bootstrap").version("1.9.0")
+
+    // The ShadowJar plugin ID has been updated to `com.gradleup.shadow`, but since
+    // the required version is unavailable under this ID, the older plugin ID is used instead.
     id("com.github.johnrengelman.shadow")
+
     `maven-publish`
 }
 
