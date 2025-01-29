@@ -39,8 +39,9 @@ plugins {
     // See: https://github.com/SpineEventEngine/bootstrap.
     id("io.spine.tools.gradle.bootstrap").version("1.9.0")
 
-    // The ShadowJar plugin ID has been updated to `com.gradleup.shadow`, but since
-    // the required version is unavailable under this ID, the older plugin ID is used instead.
+    // The ShadowJar plugin ID has been updated to `com.gradleup.shadow`,
+    // but only versions from 8.3.0 onward are available.
+    // Since version 6.1.0 is required, the old plugin ID is used.
     id("com.github.johnrengelman.shadow")
 
     application
