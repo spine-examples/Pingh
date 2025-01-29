@@ -101,8 +101,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.spine.example.pingh.desktop.generated.resources.Res
 import io.spine.example.pingh.desktop.generated.resources.add
+import io.spine.example.pingh.desktop.generated.resources.add_ignored_button
+import io.spine.example.pingh.desktop.generated.resources.add_ignored_tooltip
+import io.spine.example.pingh.desktop.generated.resources.all_repos_label
+import io.spine.example.pingh.desktop.generated.resources.all_repos_suffix
 import io.spine.example.pingh.desktop.generated.resources.back
+import io.spine.example.pingh.desktop.generated.resources.cancel_button
+import io.spine.example.pingh.desktop.generated.resources.dnd_option_desc
+import io.spine.example.pingh.desktop.generated.resources.dnd_option_title
+import io.spine.example.pingh.desktop.generated.resources.ignored_repos_option_desc
+import io.spine.example.pingh.desktop.generated.resources.ignored_repos_option_title
+import io.spine.example.pingh.desktop.generated.resources.logout_button
+import io.spine.example.pingh.desktop.generated.resources.org_input_label
 import io.spine.example.pingh.desktop.generated.resources.remove
+import io.spine.example.pingh.desktop.generated.resources.remove_ignored_tooltip
+import io.spine.example.pingh.desktop.generated.resources.repos_input_label
+import io.spine.example.pingh.desktop.generated.resources.settings_page_title
+import io.spine.example.pingh.desktop.generated.resources.snooze_time_option_desc
+import io.spine.example.pingh.desktop.generated.resources.snooze_time_option_title
 import io.spine.examples.pingh.client.SettingsFlow
 import io.spine.examples.pingh.client.SettingsState
 import io.spine.examples.pingh.client.settings.IgnoredSource
@@ -116,6 +132,7 @@ import io.spine.examples.pingh.github.isValidOrganization
 import io.spine.examples.pingh.github.isValidRepoName
 import io.spine.examples.pingh.github.of
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Displays an application settings.
@@ -178,7 +195,7 @@ private fun SettingsHeader(
         )
         Spacer(Modifier.width(10.dp))
         Text(
-            text = "Settings",
+            text = stringResource(Res.string.settings_page_title),
             modifier = Modifier.width(140.dp),
             color = MaterialTheme.colorScheme.onSecondary,
             style = MaterialTheme.typography.displayLarge
@@ -293,7 +310,7 @@ private fun LogOutButton(
 ) {
     SettingsButton(
         onClick = onClick,
-        text = "Log out",
+        text = stringResource(Res.string.logout_button),
         modifier = Modifier.height(22.dp).testTag("logout-button")
     )
 }
@@ -361,8 +378,8 @@ private fun SettingsButton(
 @Composable
 private fun SnoozeTimeOption(state: SettingsState) {
     Option(
-        title = "Snooze time",
-        description = "Time after which the notification is repeated.",
+        title = stringResource(Res.string.snooze_time_option_title),
+        description = stringResource(Res.string.snooze_time_option_desc),
         titleWight = 150.dp
     ) {
         SnoozeTimeSegmentedButtonRow(state)
@@ -382,8 +399,8 @@ private fun DndOption(
 ) {
     val dndEnabled by state.dndEnabled.collectAsState()
     Option(
-        title = "Do not disturb",
-        description = "Turn off notifications for new mentions or snooze expirations.",
+        title = stringResource(Res.string.dnd_option_title),
+        description = stringResource(Res.string.dnd_option_desc),
         titleWight = 324.dp
     ) {
         Switch(
@@ -546,8 +563,8 @@ private fun IgnoredSourcesOption(state: SettingsState) {
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Option(
-            title = "Ignored repositories",
-            description = "Mentions from the following sources will be ignored.",
+            title = stringResource(Res.string.ignored_repos_option_title),
+            description = stringResource(Res.string.ignored_repos_option_desc),
             titleWight = 360.dp
         ) {}
         IgnoredSourceList(
@@ -644,7 +661,7 @@ private fun IgnoredSourcesControl(
             icon = painterResource(Res.drawable.add),
             onClick = onAdd,
             modifier = Modifier.testTag("add-button"),
-            tooltip = "Add new to ignored"
+            tooltip = stringResource(Res.string.add_ignored_tooltip)
         )
         SettingsIconButton(
             icon = painterResource(Res.drawable.remove),
@@ -653,7 +670,7 @@ private fun IgnoredSourcesControl(
                 sourceSelected.value = null
             },
             modifier = Modifier.testTag("remove-button"),
-            tooltip = "Remove selected from ignored",
+            tooltip = stringResource(Res.string.remove_ignored_tooltip),
             enabled = sourceSelected.value != null,
         )
     }
@@ -741,7 +758,7 @@ private fun IgnoredSourceItem(
                     }
                 )
             ) {
-                append(" [All repos]")
+                append(stringResource(Res.string.all_repos_suffix))
             }
         }
     }
@@ -795,7 +812,7 @@ private fun AddIgnoredSourceDialog(state: SettingsState, onExit: () -> Unit) {
                     isOrgValid = isValidOrganization(value)
                     org = value
                 },
-                label = "Organization:",
+                label = stringResource(Res.string.org_input_label),
                 modifier = Modifier.testTag("org-field"),
                 isError = !isOrgValid,
                 onEnterPressed = { if (isAddButtonEnabled) isAddButtonTriggered.value = true }
@@ -808,7 +825,7 @@ private fun AddIgnoredSourceDialog(state: SettingsState, onExit: () -> Unit) {
                         .all { isValidRepoName(it) }
                     repos = value
                 },
-                label = "or specified repositories (comma-separated):",
+                label = stringResource(Res.string.repos_input_label),
                 modifier = Modifier.testTag("repos-field"),
                 enabled = !allRepos.value,
                 isError = !isReposValid,
@@ -977,7 +994,7 @@ private fun AllReposSwitch(
             )
         )
         Text(
-            text = "All within organization",
+            text = stringResource(Res.string.all_repos_label),
             style = MaterialTheme.typography.bodyMedium
         )
     }
@@ -1029,12 +1046,12 @@ private fun DialogControl(
     ) {
         SettingsButton(
             onClick = onCancel,
-            text = "Cancel",
+            text = stringResource(Res.string.cancel_button),
             modifier = Modifier.fillMaxHeight().testTag("cancel-button-in-dialog")
         )
         SettingsButton(
             onClick = onAdd,
-            text = "Add to ignored",
+            text = stringResource(Res.string.add_ignored_button),
             modifier = Modifier.fillMaxHeight().testTag("add-button-in-dialog"),
             enabled = addEnabled,
             contentPadding = PaddingValues(horizontal = 7.dp, vertical = 0.dp),

@@ -84,7 +84,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.protobuf.Duration
 import io.spine.example.pingh.desktop.generated.resources.Res
-import io.spine.example.pingh.desktop.generated.resources.app_description
+import io.spine.example.pingh.desktop.generated.resources.app_desc
 import io.spine.example.pingh.desktop.generated.resources.code_expired_clickable_part
 import io.spine.example.pingh.desktop.generated.resources.code_expired_error
 import io.spine.example.pingh.desktop.generated.resources.copy
@@ -93,7 +93,7 @@ import io.spine.example.pingh.desktop.generated.resources.login_button
 import io.spine.example.pingh.desktop.generated.resources.login_restart_button
 import io.spine.example.pingh.desktop.generated.resources.pingh
 import io.spine.example.pingh.desktop.generated.resources.username_input_label
-import io.spine.example.pingh.desktop.generated.resources.verification_description
+import io.spine.example.pingh.desktop.generated.resources.verification_page_desc
 import io.spine.example.pingh.desktop.generated.resources.verification_page_title
 import io.spine.examples.pingh.client.LoginFlow
 import io.spine.examples.pingh.client.EnterUsername
@@ -231,7 +231,7 @@ private fun ApplicationInfo() {
         }
         Spacer(Modifier.height(20.dp))
         Text(
-            text = stringResource(Res.string.app_description),
+            text = stringResource(Res.string.app_desc),
             modifier = Modifier.width(240.dp),
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             textAlign = TextAlign.Center,
@@ -638,7 +638,7 @@ private fun VerifyLoginSection(
 @Composable
 private fun VerificationText(url: Url) {
     val annotatedString = buildAnnotatedString {
-        append(stringResource(Res.string.verification_description))
+        append(stringResource(Res.string.verification_page_desc))
         appendLine()
         withLink(
             LinkAnnotation.Url(

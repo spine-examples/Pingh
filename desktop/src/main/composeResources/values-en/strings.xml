@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- The Login page. -->
-    <string name="app-description">Pingh is a GitHub app that looks up mentions on behalf of the user. It requires authentication via GitHub.</string>
+    <string name="app-desc">Pingh is a GitHub app that looks up mentions on behalf of the user. It requires authentication via GitHub.</string>
     <string name="username-input-label">GitHub username</string>
     <string name="invalid-username-error">Enter a valid GitHub username.</string>
     <string name="login-button">Login</string>
     <string name="verification-page-title">Verify your login</string>
-    <string name="verification-description">Enter this code at</string>
+    <string name="verification-page-desc">Enter this code at</string>
     <string name="code-expired-error">The code has expired, please start over.</string>
     <string name="code-expired-clickable-part">start over</string>
     <string name="login-restart-button">Try to log in again</string>
@@ -19,10 +19,28 @@
     <string name="settings-menu-item">Settings</string>
     <string name="quit-menu-item">Quit</string>
     <string name="no-mentions">No recent mentions yet.</string>
-    <string name="mention-info-format">%s, by %s%s</string>
-    <string name="team-format">, via %s</string>
+    <string name="mention-info-format">%1$s, by %2$s%3$s</string>
+    <string name="team-suffix-format">, via %1$s</string>
     <string name="snooze-tooltip">Snooze the mention</string>
     <string name="snoozed">Snoozed</string>
     <string name="pin-tooltip">Pin the mention</string>
     <string name="unpin-tooltip">Unpin the mention</string>
+
+    <!-- The Settings page. -->
+    <string name="settings-page-title">Settings</string>
+    <string name="logout-button">Log out</string>
+    <string name="snooze-time-option-title">Snooze time</string>
+    <string name="snooze-time-option-desc">Time after which the notification is repeated.</string>
+    <string name="dnd-option-title">Do not disturb</string>
+    <string name="dnd-option-desc">Turn off notifications for new mentions or snooze expirations.</string>
+    <string name="ignored-repos-option-title">Ignored repositories</string>
+    <string name="ignored-repos-option-desc">Mentions from the following sources will be ignored.</string>
+    <string name="add-ignored-tooltip">Add new to ignored</string>
+    <string name="remove-ignored-tooltip">Remove selected from ignored</string>
+    <string name="all-repos-suffix"> [All repos]</string>
+    <string name="org-input-label">Organization:</string>
+    <string name="repos-input-label">or specified repositories (comma-separated):</string>
+    <string name="all-repos-label">All within organization</string>
+    <string name="cancel-button">Cancel</string>
+    <string name="add-ignored-button">Add to ignored</string>
 </resources>

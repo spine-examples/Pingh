@@ -104,7 +104,7 @@ import io.spine.example.pingh.desktop.generated.resources.settings_menu_item
 import io.spine.example.pingh.desktop.generated.resources.snooze
 import io.spine.example.pingh.desktop.generated.resources.snooze_tooltip
 import io.spine.example.pingh.desktop.generated.resources.snoozed
-import io.spine.example.pingh.desktop.generated.resources.team_format
+import io.spine.example.pingh.desktop.generated.resources.team_suffix_format
 import io.spine.example.pingh.desktop.generated.resources.unpin_tooltip
 import io.spine.examples.pingh.client.MentionsFlow
 import io.spine.examples.pingh.client.howMuchTimeHasPassed
@@ -408,7 +408,7 @@ private fun RowScope.MentionCardText(
         if (isParentHovered) toDatetime() else howMuchTimeHasPassed()
     }
     val team = if (mention.hasViaTeam()) {
-        stringResource(Res.string.team_format, mention.viaTeam.tag)
+        stringResource(Res.string.team_suffix_format, mention.viaTeam.tag)
     } else ""
     Column(
         modifier = Modifier.fillMaxHeight().weight(1f),
