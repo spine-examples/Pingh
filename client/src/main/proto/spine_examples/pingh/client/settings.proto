@@ -53,6 +53,9 @@ message UserSettings {
     // Mentions from these sources are ignored.
     //
     repeated IgnoredSource ignored = 3;
+
+    // The language used for displaying text in the UI.
+    Language language = 4 [(required) = true];
 }
 
 // Time after which the notification about the new mention is repeated.
@@ -89,4 +92,13 @@ message IgnoredSource {
         //
         spine_examples.pingh.github.Repo repository = 2;
     }
+}
+
+// The language used for displaying text in the UI.
+enum Language {
+    LANGUAGE_NOT_SPECIFIED = 0;
+    ENGLISH = 1;
+    RUSSIAN = 2;
+    UKRAINIAN = 3;
+    GERMAN = 4;
 }
