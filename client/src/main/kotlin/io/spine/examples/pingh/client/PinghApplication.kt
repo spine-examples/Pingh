@@ -176,6 +176,7 @@ public class PinghApplication private constructor(
     private fun establishSession(id: SessionId) {
         client.close()
         session.establish(id)
+        settings.apply()
         client = DesktopClient(channel, id.asUserId())
         notificationsFlow.enableNotifications(client, id.username)
         subscribeToSessionExpiration(id)
@@ -209,6 +210,7 @@ public class PinghApplication private constructor(
         _loggedIn.value = false
         client.close()
         session.resetToGuest()
+        settings.apply()
         client = DesktopClient(channel)
         mentionsFlow = null
         _unreadMentionCount.value = null

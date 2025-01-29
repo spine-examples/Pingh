@@ -144,6 +144,14 @@ internal class Settings(
         storage.modifyData {
             this.settings = settings
         }
+        apply()
+    }
+
+    /**
+     * Applies the current settings to the application.
+     */
+    internal fun apply() {
+        Locale.setDefault(current.language.toLocale())
     }
 }
 
