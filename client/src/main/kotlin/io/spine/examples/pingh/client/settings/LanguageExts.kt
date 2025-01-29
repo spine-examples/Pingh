@@ -30,27 +30,42 @@ import java.util.Locale
 import kotlin.reflect.KClass
 
 /**
- * Returns a language name in its native form.
+ * A language name in its native form.
  */
-public fun Language.nativeName(): String =
-    options[this]?.nativeName
-        ?: throw IllegalStateException("Language `${this}` is not currently supported by the app.")
-
-/**
- * Returns a `Locale` representing a specific `Language`.
- */
-internal fun Language.toLocale(): Locale {
-    val code = options[this]?.code
-        ?: throw IllegalStateException("Language `${this}` is not currently supported by the app.")
-    return Locale(code)
-}
+public val Language.nativeName: String
+    get() = options[this]?.nativeName ?: "English"
 
 /**
  * The list of languages currently supported by the app.
  */
 @Suppress("UnusedReceiverParameter" /* Associated with the class but doesn't use its data. */)
 public val KClass<Language>.supported: List<Language>
-    get() = options.keys.toList().sortedBy { it.nativeName() }
+    get() = options.keys.toList().sortedBy { it.nativeName }
+
+/**
+ * An ISO-639 alpha-2 or alpha-3 language code.
+ */
+internal val Language.code: String
+    get() = options[this]?.code ?: "en"
+
+/**
+ * Returns a `Locale` representing a specific `Language`.
+ */
+internal fun Language.toLocale(): Locale = Locale(code)
+
+/**
+ * Creates a new `Language` by the passed `Locale`.
+ *
+ * If the `Locale` specifies an unsupported language, `null` is returned.
+ */
+internal fun KClass<Language>.by(locale: Locale): Language? {
+    supported.forEach { language ->
+        if (locale.language.equals(Locale(language.code))) {
+            return language
+        }
+    }
+    return null
+}
 
 private val options = mapOf(
     Language.ENGLISH to LanguageOption("English", "en"),

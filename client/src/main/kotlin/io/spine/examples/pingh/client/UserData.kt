@@ -29,10 +29,15 @@
 package io.spine.examples.pingh.client
 
 import io.spine.examples.pingh.client.FileLocation.Companion.inAppDir
+import io.spine.examples.pingh.client.settings.Language
 import io.spine.examples.pingh.client.settings.SnoozeTime
 import io.spine.examples.pingh.client.settings.UserSettings
+import io.spine.examples.pingh.client.settings.by
+import io.spine.examples.pingh.client.settings.toLocale
 import io.spine.examples.pingh.github.Username
 import io.spine.examples.pingh.sessions.SessionId
+import io.spine.validate.Validate
+import java.util.Locale
 import kotlin.reflect.KClass
 
 /**
@@ -86,6 +91,7 @@ internal class Session(
             .findOrNull { it.user.equals(session.username) }
             ?.toBuilder()
             ?.setSession(session)
+            ?.setDefaultSettingsIfInvalid()
             ?.vBuild()
             ?: userDataFor(session)
         storage.save()
@@ -165,7 +171,11 @@ internal class UserDataStorage {
     /**
      * A local data specific to a user, stored on the device.
      */
-    var data: UserData = findOrNull { it.hasSession() } ?: Guest.data
+    var data: UserData = findOrNull { it.hasSession() }
+        ?.toBuilder()
+        ?.setDefaultSettingsIfInvalid()
+        ?.vBuild()
+        ?: Guest.data
 
     /**
      * Returns the first element matching the given [predicate],
@@ -238,6 +248,22 @@ private object Guest {
 }
 
 /**
+ * Resets the settings to their default values if they are invalid.
+ *
+ * When the application is updated, settings may change.
+ * To prevent errors, outdated user settings are reset if they are no longer valid.
+ *
+ * Use this method when loading user settings from local files.
+ */
+private fun UserData.Builder.setDefaultSettingsIfInvalid(): UserData.Builder {
+    val violations = Validate.violationsOf(settings)
+    if (violations.isNotEmpty()) {
+        settings = UserSettings::class.default()
+    }
+    return this
+}
+
+/**
  * Creates a new `LocalDataRegistry` with an empty data list.
  */
 private fun KClass<UserDataRegistry>.empty(): UserDataRegistry =
@@ -250,4 +276,5 @@ private fun KClass<UserSettings>.default(): UserSettings =
     UserSettings.newBuilder()
         .setDndEnabled(false)
         .setSnoozeTime(SnoozeTime.TWO_HOURS)
+        .setLanguage(Language::class.by(Locale.getDefault()) ?: Language.ENGLISH)
         .vBuild()
