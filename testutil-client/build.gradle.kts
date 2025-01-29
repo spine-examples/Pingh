@@ -29,11 +29,8 @@ import io.spine.internal.dependency.Kotest
 import io.spine.internal.dependency.Spine
 
 dependencies {
-    // Testing the client may require additional server configuration.
-    // The necessary classes are stored in the `server` module.
-    api(project(":server"))
-
     implementation(project(":client"))
+    implementation(project(":server"))
     implementation(project(":testutil-mentions"))
     implementation(project(":testutil-sessions"))
     implementation(Spine.server)
