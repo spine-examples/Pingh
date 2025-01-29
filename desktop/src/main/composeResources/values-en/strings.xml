@@ -43,4 +43,7 @@
     <string name="all-repos-label">All within organization</string>
     <string name="cancel-button">Cancel</string>
     <string name="add-ignored-button">Add to ignored</string>
+
+    <!-- The tray menu. -->
+    <string name="quit-tray-menu-item">Quit Pingh app</string>
 </resources>

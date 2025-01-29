@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.window.Notification
 import com.google.common.flogger.FluentLogger
 import io.spine.example.pingh.desktop.generated.resources.Res
+import io.spine.example.pingh.desktop.generated.resources.quit_tray_menu_item
 import io.spine.example.pingh.desktop.generated.resources.tray
 import io.spine.examples.pingh.client.PinghApplication
 import java.awt.Color
@@ -65,6 +66,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 private val logger = FluentLogger.forEnclosingClass()
 
@@ -89,8 +91,9 @@ internal fun Tray(state: AppState) {
     check(SystemTray.isSupported()) { "The platform does not support tray applications." }
 
     val icon = rememberIcon(state.app)
+    val exitLabel = stringResource(Res.string.quit_tray_menu_item)
     val menu = remember(state) {
-        Menu {
+        Menu(exitLabel) {
             CoroutineScope(Dispatchers.Default).launch {
                 state.closeAndExit()
             }
@@ -211,9 +214,10 @@ private fun Graphics.drawBadgeContent(text: String, style: TrayStyle) {
  *
  * When the menu is open, clicking anywhere outside of it will close the menu.
  *
+ * @param exitLabel The text displayed on the option to exit the application.
  * @param onExit Called when the “Quit” button is pressed.
  */
-private class Menu(onExit: () -> Unit) {
+private class Menu(exitLabel: String, onExit: () -> Unit) {
     /**
      * Utility window on which the application menu will be displayed.
      */
@@ -225,7 +229,7 @@ private class Menu(onExit: () -> Unit) {
     private val popup = PopupMenu()
 
     init {
-        val exitItem = MenuItem("Quit Pingh app")
+        val exitItem = MenuItem(exitLabel)
         exitItem.addActionListener {
             onExit()
         }
