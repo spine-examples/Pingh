@@ -64,8 +64,9 @@ val dokkaVersion = "1.9.20"
 /**
  * The ShadowJar Gradle plugin.
  *
- * The plugin has migrated to `com.gradleup.shadow`, requiring Gradle 8.x or higher.
- * Since the project uses Gradle 6.x, the old plugin remains in use.
+ * The plugin is now published under the ID `com.gradleup.shadow`
+ * and requires Gradle 8.x or higher.
+ * Since the project uses Gradle 6.x, the old plugin ID remains in use.
  *
  * The plugin will be updated after upgrading Gradle.
  *
