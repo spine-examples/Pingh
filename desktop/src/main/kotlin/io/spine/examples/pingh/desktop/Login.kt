@@ -84,8 +84,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.protobuf.Duration
 import io.spine.example.pingh.desktop.generated.resources.Res
+import io.spine.example.pingh.desktop.generated.resources.app_description
+import io.spine.example.pingh.desktop.generated.resources.code_expired_clickable_part
+import io.spine.example.pingh.desktop.generated.resources.code_expired_error
 import io.spine.example.pingh.desktop.generated.resources.copy
+import io.spine.example.pingh.desktop.generated.resources.invalid_username_error
+import io.spine.example.pingh.desktop.generated.resources.login_button
+import io.spine.example.pingh.desktop.generated.resources.login_restart_button
 import io.spine.example.pingh.desktop.generated.resources.pingh
+import io.spine.example.pingh.desktop.generated.resources.username_input_label
+import io.spine.example.pingh.desktop.generated.resources.verification_description
+import io.spine.example.pingh.desktop.generated.resources.verification_page_title
 import io.spine.examples.pingh.client.LoginFlow
 import io.spine.examples.pingh.client.EnterUsername
 import io.spine.examples.pingh.client.LoginFailed
@@ -99,6 +108,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Displays the page with the current login stage.
@@ -221,8 +231,7 @@ private fun ApplicationInfo() {
         }
         Spacer(Modifier.height(20.dp))
         Text(
-            text = "Pingh is a GitHub app that looks up mentions on behalf of the user. " +
-                    "It requires authentication via GitHub.",
+            text = stringResource(Res.string.app_description),
             modifier = Modifier.width(240.dp),
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             textAlign = TextAlign.Center,
@@ -347,7 +356,7 @@ private fun Label(color: Color) {
             .absoluteOffset(x = 12.dp, y = (-6).dp)
     ) {
         Text(
-            text = "GitHub username",
+            text = stringResource(Res.string.username_input_label),
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.secondary),
@@ -383,7 +392,7 @@ private fun Placeholder(isShown: Boolean) {
 private fun ErrorMessage(isShown: Boolean) {
     if (isShown) {
         Text(
-            text = "Enter a valid GitHub username.",
+            text = stringResource(Res.string.invalid_username_error),
             modifier = Modifier
                 .width(155.dp)
                 .height(30.dp)
@@ -434,7 +443,7 @@ private fun LoginButton(
             DotsTyping(color = MaterialTheme.colorScheme.onPrimary)
         } else {
             Text(
-                text = "Login",
+                text = stringResource(Res.string.login_button),
                 style = MaterialTheme.typography.displayMedium
             )
         }
@@ -498,7 +507,7 @@ private fun VerificationPage(
 @Composable
 private fun VerificationTitle() {
     Text(
-        text = "Verify your login",
+        text = stringResource(Res.string.verification_page_title),
         fontSize = 20.sp,
         style = MaterialTheme.typography.displayLarge
     )
@@ -588,8 +597,8 @@ private fun CopyToClipboardIcon(
 @Composable
 private fun CodeExpiredErrorMessage(flow: VerifyLogin) {
     ClickableErrorMessage(
-        text = "The code has expired, please start over.",
-        clickablePartOfText = "start over",
+        text = stringResource(Res.string.code_expired_error),
+        clickablePartOfText = stringResource(Res.string.code_expired_clickable_part),
         onClick = flow::requestNewUserCode
     )
 }
@@ -629,7 +638,7 @@ private fun VerifyLoginSection(
 @Composable
 private fun VerificationText(url: Url) {
     val annotatedString = buildAnnotatedString {
-        append("Enter this code at")
+        append(stringResource(Res.string.verification_description))
         appendLine()
         withLink(
             LinkAnnotation.Url(
@@ -755,7 +764,7 @@ private fun RestartButton(flow: LoginFailed) {
         )
     ) {
         Text(
-            text = "Try to log in again",
+            text = stringResource(Res.string.login_restart_button),
             style = MaterialTheme.typography.displayMedium
         )
     }

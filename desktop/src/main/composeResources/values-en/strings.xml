@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The Login page. -->
+    <string name="app-description">Pingh is a GitHub app that looks up mentions on behalf of the user. It requires authentication via GitHub.</string>
+    <string name="username-input-label">GitHub username</string>
+    <string name="invalid-username-error">Enter a valid GitHub username.</string>
+    <string name="login-button">Login</string>
+    <string name="verification-page-title">Verify your login</string>
+    <string name="verification-description">Enter this code at</string>
+    <string name="code-expired-error">The code has expired, please start over.</string>
+    <string name="code-expired-clickable-part">start over</string>
+    <string name="login-restart-button">Try to log in again</string>
+</resources>
