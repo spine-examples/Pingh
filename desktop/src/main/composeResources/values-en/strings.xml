@@ -10,4 +10,19 @@
     <string name="code-expired-error">The code has expired, please start over.</string>
     <string name="code-expired-clickable-part">start over</string>
     <string name="login-restart-button">Try to log in again</string>
+
+    <!-- The Mentions page. -->
+    <string name="mentions-page-title">Recent mentions</string>
+    <string name="refresh-tooltip">Refresh</string>
+    <string name="menu-tooltip">More</string>
+    <string name="mark-all-as-read-menu-item">Mark all as read</string>
+    <string name="settings-menu-item">Settings</string>
+    <string name="quit-menu-item">Quit</string>
+    <string name="no-mentions">No recent mentions yet.</string>
+    <string name="mention-info-format">%s, by %s%s</string>
+    <string name="team-format">, via %s</string>
+    <string name="snooze-tooltip">Snooze the mention</string>
+    <string name="snoozed">Snoozed</string>
+    <string name="pin-tooltip">Pin the mention</string>
+    <string name="unpin-tooltip">Unpin the mention</string>
 </resources>
