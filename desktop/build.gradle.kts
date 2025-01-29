@@ -93,14 +93,13 @@ configurations.all {
 
 dependencies {
     implementation(Pingh.client)
-    implementation(Flogger.api)
-    runtimeOnly(Flogger.backend)
-
     implementation(compose.desktop.currentOs)
     implementation(compose.components.resources)
     implementation(Compose.Material3.lib)
     implementation(Coil.compose)
     implementation(Coil.network)
+    implementation(Flogger.api)
+    runtimeOnly(Flogger.backend)
 
     testImplementation(Pingh.testutilClient)
     testImplementation(kotlin("test"))

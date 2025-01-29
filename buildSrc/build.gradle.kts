@@ -62,13 +62,23 @@ val detektVersion = "1.15.0"
 val dokkaVersion = "1.9.20"
 
 /**
- * The version of the Shadow Plugin.
+ * The ShadowJar Gradle plugin.
  *
- * The `6.1.0` version is the last version compatible with Gradle 6.x.
+ * The plugin has migrated to `com.gradleup.shadow`, requiring Gradle 8.x or higher.
+ * Since the project uses Gradle 6.x, the old plugin remains in use.
+ *
+ * The plugin will be updated after upgrading Gradle.
  *
  * @see <a href="https://github.com/GradleUp/shadow/releases">Shadow Plugin Releases</a>
  */
-val shadowVersion = "6.1.0"
+object ShadowJarPlugin {
+    /**
+     * The 6.1.0 version is the last version compatible with Gradle 6.x.
+     */
+    private const val version = "6.1.0"
+    private const val group = "com.github.jengelman.gradle.plugins"
+    const val lib: String = "$group:shadow:$version"
+}
 
 configurations.all {
     resolutionStrategy {
@@ -82,14 +92,10 @@ configurations.all {
 }
 
 dependencies {
+    implementation(ShadowJarPlugin.lib)
     implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:$detektVersion")
     implementation("org.jetbrains.dokka:dokka-base:$dokkaVersion")
     implementation("org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion")
-
-    // The ShadowJar plugin ID has been updated to `com.gradleup.shadow`.
-    // However, version 6.1.0, which is required, is unavailable under this ID.
-    // As a result, the older ShadowJar plugin ID is used instead.
-    implementation("com.github.jengelman.gradle.plugins:shadow:$shadowVersion")
 
     // Kotlin plugin, which is used to run Dokka, and is also added to Gradle classpath,
     // from where it is used in other modules. For Dokka to work correctly above 1.4 version,
