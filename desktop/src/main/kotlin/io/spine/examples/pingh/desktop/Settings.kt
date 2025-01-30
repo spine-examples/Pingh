@@ -111,6 +111,8 @@ import io.spine.example.pingh.desktop.generated.resources.dnd_option_desc
 import io.spine.example.pingh.desktop.generated.resources.dnd_option_title
 import io.spine.example.pingh.desktop.generated.resources.ignored_repos_option_desc
 import io.spine.example.pingh.desktop.generated.resources.ignored_repos_option_title
+import io.spine.example.pingh.desktop.generated.resources.language_option_desc
+import io.spine.example.pingh.desktop.generated.resources.language_option_title
 import io.spine.example.pingh.desktop.generated.resources.logout_button
 import io.spine.example.pingh.desktop.generated.resources.org_input_label
 import io.spine.example.pingh.desktop.generated.resources.remove
@@ -122,8 +124,10 @@ import io.spine.example.pingh.desktop.generated.resources.snooze_time_option_tit
 import io.spine.examples.pingh.client.SettingsFlow
 import io.spine.examples.pingh.client.SettingsState
 import io.spine.examples.pingh.client.settings.IgnoredSource
+import io.spine.examples.pingh.client.settings.Language
 import io.spine.examples.pingh.client.settings.SnoozeTime
 import io.spine.examples.pingh.client.settings.label
+import io.spine.examples.pingh.client.settings.nativeName
 import io.spine.examples.pingh.client.settings.supported
 import io.spine.examples.pingh.github.OrganizationLogin
 import io.spine.examples.pingh.github.Repo
@@ -162,6 +166,7 @@ internal fun SettingsPage(
             Profile(flow, toLoginPage)
             SnoozeTimeOption(flow.settings)
             DndOption(flow.settings)
+            LanguageOption(flow.settings)
             IgnoredSourcesOption(flow.settings)
         }
     }
@@ -547,6 +552,30 @@ private fun SegmentedButton(
                 label()
             }
         }
+    }
+}
+
+/**
+ * Displays the language selection option.
+ *
+ * @param state The state of the application settings.
+ */
+@Composable
+private fun LanguageOption(state: SettingsState) {
+    val language by state.language.collectAsState()
+    val items = remember { Language::class.supported.map { DropDownMenuItem(it.nativeName, it) } }
+    Option(
+        title = stringResource(Res.string.language_option_title),
+        description = stringResource(Res.string.language_option_desc),
+        titleWight = 260.dp
+    ) {
+        DropDownMenu(
+            selected = language,
+            onChangeValue = { value -> state.setLanguage(value) },
+            width = 100.dp,
+            modifier = Modifier.height(20.dp),
+            items = items
+        )
     }
 }
 

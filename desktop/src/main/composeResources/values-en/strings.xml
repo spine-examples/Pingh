@@ -33,6 +33,8 @@
     <string name="snooze-time-option-desc">Time after which the notification is repeated.</string>
     <string name="dnd-option-title">Do not disturb</string>
     <string name="dnd-option-desc">Turn off notifications for new mentions or snooze expirations.</string>
+    <string name="language-option-title">Language</string>
+    <string name="language-option-desc">Specify the language for displaying text in the application.</string>
     <string name="ignored-repos-option-title">Ignored repositories</string>
     <string name="ignored-repos-option-desc">Mentions from the following sources will be ignored.</string>
     <string name="add-ignored-tooltip">Add new to ignored</string>
