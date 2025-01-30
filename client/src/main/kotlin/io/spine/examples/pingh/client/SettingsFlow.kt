@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.client
 
 import io.spine.examples.pingh.client.settings.IgnoredSource
+import io.spine.examples.pingh.client.settings.Language
 import io.spine.examples.pingh.client.settings.SnoozeTime
 import io.spine.examples.pingh.client.settings.UserSettings
 import io.spine.examples.pingh.github.OrganizationLogin
@@ -106,6 +107,7 @@ public class SettingsState internal constructor(
 ) {
     private val _dndEnabled = MutableStateFlow(data.dndEnabled)
     private val _snoozeTime = MutableStateFlow(data.snoozeTime)
+    private val _language = MutableStateFlow(data.language)
     private val _ignored = MutableStateFlow(data.ignoredList.filteredAndSorted())
 
     /**
@@ -118,6 +120,11 @@ public class SettingsState internal constructor(
      * The interval after which the new mention notification is repeated.
      */
     public val snoozeTime: StateFlow<SnoozeTime> = _snoozeTime
+
+    /**
+     * The language used for displaying text in the UI.
+     */
+    public val language: StateFlow<Language> = _language
 
     /**
      * List of ignored organizations and repositories.
@@ -141,6 +148,14 @@ public class SettingsState internal constructor(
     public fun setSnoozeTime(snoozeTime: SnoozeTime) {
         _snoozeTime.value = snoozeTime
         data.snoozeTime = snoozeTime
+    }
+
+    /**
+     * Sets the language used for displaying text in the UI.
+     */
+    public fun setLanguage(language: Language) {
+        _language.value = language
+        data.language = language
     }
 
     /**
