@@ -30,6 +30,7 @@ import io.spine.internal.dependency.Spine
 
 dependencies {
     implementation(project(":client"))
+    implementation(project(":server"))
     implementation(project(":testutil-mentions"))
     implementation(project(":testutil-sessions"))
     implementation(Spine.server)
