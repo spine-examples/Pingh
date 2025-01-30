@@ -116,6 +116,8 @@ public class PinghApplication private constructor(
         if (session.isActive) {
             client = DesktopClient(channel, session.id.asUserId())
         }
+
+        settings.apply()
     }
 
     /**
