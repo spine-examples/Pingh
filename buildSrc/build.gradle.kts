@@ -62,13 +62,24 @@ val detektVersion = "1.15.0"
 val dokkaVersion = "1.9.20"
 
 /**
- * The version of the Shadow Plugin.
+ * The ShadowJar Gradle plugin.
  *
- * The `6.1.0` version is the last version compatible with Gradle 6.x.
+ * The plugin is now published under the ID `com.gradleup.shadow`
+ * and requires Gradle 8.x or higher.
+ * Since the project uses Gradle 6.x, the old plugin ID remains in use.
+ *
+ * The plugin will be updated after upgrading Gradle.
  *
  * @see <a href="https://github.com/GradleUp/shadow/releases">Shadow Plugin Releases</a>
  */
-val shadowVersion = "6.1.0"
+object ShadowJarPlugin {
+    /**
+     * The 6.1.0 version is the last version compatible with Gradle 6.x.
+     */
+    private const val version = "6.1.0"
+    private const val group = "com.github.jengelman.gradle.plugins"
+    const val lib: String = "$group:shadow:$version"
+}
 
 configurations.all {
     resolutionStrategy {
@@ -82,8 +93,8 @@ configurations.all {
 }
 
 dependencies {
+    implementation(ShadowJarPlugin.lib)
     implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:$detektVersion")
-    implementation("com.github.jengelman.gradle.plugins:shadow:$shadowVersion")
     implementation("org.jetbrains.dokka:dokka-base:$dokkaVersion")
     implementation("org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion")
 

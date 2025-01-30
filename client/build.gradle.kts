@@ -24,6 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import io.spine.internal.dependency.AppDirs
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Guava
@@ -32,8 +33,13 @@ import io.spine.internal.dependency.Spine
 
 plugins {
     // Add the Gradle plugin for bootstrapping projects built with Spine.
-    // See: https://github.com/SpineEventEngine/bootstrap
+    // See: https://github.com/SpineEventEngine/bootstrap.
     id("io.spine.tools.gradle.bootstrap").version("1.9.0")
+
+    // See: `ShadowJarPlugin` in `buildSrc/build.gradle.kts` file.
+    id("com.github.johnrengelman.shadow")
+
+    `maven-publish`
 }
 
 spine {
@@ -48,9 +54,9 @@ spine {
 forceGrpcDependencies(configurations)
 
 dependencies {
-    // To work with `PinghApplication`, it is necessary to use value objects and IDs declared
-    // in different bounded contexts. All necessary classes are collected in the `server` module.
-    api(project(":server"))
+    implementation(project(":github"))
+    implementation(project(":sessions"))
+    implementation(project(":mentions"))
 
     implementation(Guava.lib)
     implementation(Grpc.netty)
@@ -65,4 +71,31 @@ dependencies {
     testImplementation(Spine.server)
     testImplementation(Spine.GCloud.datastore)
     testImplementation(Spine.GCloud.testutil)
+}
+
+tasks.withType<ShadowJar> {
+    mergeServiceFiles()
+    mergeServiceFiles("desc.ref")
+    exclude(
+        // Protobuf files.
+        "google/**",
+        "spine/**",
+        "spine_examples/**"
+    )
+}
+
+publishing {
+    publications {
+        create("fatClientJar", MavenPublication::class) {
+            groupId = project.group.toString()
+            artifactId = "pingh-client"
+            version = project.version.toString()
+            description = "Pingh app client."
+
+            artifact(tasks.shadowJar) {
+                // Avoid `-all` suffix in the published artifact.
+                classifier = ""
+            }
+        }
+    }
 }
