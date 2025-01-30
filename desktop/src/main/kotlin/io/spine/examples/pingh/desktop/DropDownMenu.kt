@@ -73,6 +73,19 @@ import io.spine.example.pingh.desktop.generated.resources.check
 import io.spine.example.pingh.desktop.generated.resources.drop_down_arrow
 import org.jetbrains.compose.resources.painterResource
 
+/**
+ * Displays a drop-down menu with the selected item at the top,
+ * followed by all other items in the given order.
+ *
+ * @param T The type of value to be selected by the menu.
+ *
+ * @param selected The currently selected item, which must be included in the list of all [items].
+ * @param onChangeValue Called when an item is selected,
+ *   with the selected value passed as a parameter.
+ * @param width The width of the menu.
+ * @param modifier The modifier to be applied to this menu.
+ * @param items The list of all items that can be selected.
+ */
 @Composable
 internal fun <T> DropDownMenu(
     selected: T,
@@ -104,11 +117,22 @@ internal fun <T> DropDownMenu(
     }
 }
 
+/**
+ * Information about the item in the drop-down menu.
+ *
+ * @param T The type of value to be selected by the menu.
+ *
+ * @property text A test describing the item.
+ * @property value The value of the item.
+ */
 internal class DropDownMenuItem<T>(
     internal val text: String,
     internal val value: T
 )
 
+/**
+ * Displays the currently selected item.
+ */
 @Composable
 private fun <T> MenuLabel(
     selectedItem: DropDownMenuItem<T>,
@@ -159,6 +183,10 @@ private fun <T> MenuLabel(
     }
 }
 
+/**
+ * Displays the popup content of a drop-down menu,
+ * with the selected item at the top, followed by the remaining items in the given order.
+ */
 @Composable
 private fun <T> DropDownMenuContent(
     selectedItem: DropDownMenuItem<T>,
@@ -193,6 +221,11 @@ private fun <T> DropDownMenuContent(
     }
 }
 
+/**
+ * Displays the option in the drop-down menu.
+ *
+ * If [selected], an icon appears to its left.
+ */
 @Composable
 private fun DropDownMenuOption(
     selected: Boolean,
@@ -239,6 +272,12 @@ private fun DropDownMenuOption(
     }
 }
 
+/**
+ * Creates a `PopupPositionProvider` to calculate the menu's coordinates
+ * based on the anchor data.
+ *
+ * The menu is placed in the upper left corner of the anchor with a [left offset][shiftLeft].
+ */
 @Composable
 private fun rememberPositionProvider(shiftLeft: Dp): PopupPositionProvider {
     val shiftLeftPx = with(LocalDensity.current) { shiftLeft.roundToPx() }
