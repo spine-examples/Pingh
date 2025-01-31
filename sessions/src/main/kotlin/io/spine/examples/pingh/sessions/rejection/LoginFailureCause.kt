@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,33 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.client
-
-import io.spine.examples.pingh.sessions.rejection.LoginFailureCause
-import io.spine.logging.Logging
+package io.spine.examples.pingh.sessions.rejection
 
 /**
- * A stage in the login flow that indicates a failure in the process.
+ * An error that caused the login process to fail.
  *
- * Possible reasons for failure include:
- *
- * 1. The user is not a member of an authorized organization.
- * 2. The username obtained in [EnterUsername] stage differs from the username
- * of the account used to complete [VerifyLogin] stage.
- *
- * @property moveToNextStage Switches the current stage to the [EnterUsername].
- * @property cause An error that caused the login process to fail.
+ * Possible causes for the failure include: [UsernameMismatch], [NotMemberOfPermittedOrgs].
  */
-public class LoginFailed internal constructor(
-    private val moveToNextStage: () -> Unit,
-    public val cause: LoginFailureCause
-) : LoginStage<Unit>(), Logging {
-
-    /**
-     * Starts the login process from the beginning.
-     */
-    public fun restartLogin() {
-        moveToNextStage()
-        _debug().log("Restarting login process.")
-    }
-}
+public interface LoginFailureCause

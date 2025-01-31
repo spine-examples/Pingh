@@ -31,7 +31,12 @@ import io.spine.example.pingh.desktop.generated.resources.Res
 import io.spine.example.pingh.desktop.generated.resources.day
 import io.spine.example.pingh.desktop.generated.resources.hours
 import io.spine.example.pingh.desktop.generated.resources.minutes
+import io.spine.example.pingh.desktop.generated.resources.not_member_of_permitted_orgs
+import io.spine.example.pingh.desktop.generated.resources.username_mismatch_format
 import io.spine.examples.pingh.client.settings.SnoozeTime
+import io.spine.examples.pingh.sessions.rejection.LoginFailureCause
+import io.spine.examples.pingh.sessions.rejection.Rejections.NotMemberOfPermittedOrgs
+import io.spine.examples.pingh.sessions.rejection.Rejections.UsernameMismatch
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -39,9 +44,26 @@ import org.jetbrains.compose.resources.stringResource
  */
 @Composable
 internal fun stringResource(snoozeTime: SnoozeTime): String =
-    when(snoozeTime) {
+    when (snoozeTime) {
         SnoozeTime.THIRTY_MINUTES -> "30 ${stringResource(Res.string.minutes)}"
         SnoozeTime.TWO_HOURS -> "2 ${stringResource(Res.string.hours)}"
         SnoozeTime.ONE_DAY -> "1 ${stringResource(Res.string.day)}"
+        else -> ""
+    }
+
+/**
+ * Returns the text corresponding to the [cause][loginFailureCause] of the login failure.
+ */
+@Composable
+internal fun stringResource(loginFailureCause: LoginFailureCause): String =
+    when (loginFailureCause) {
+        is UsernameMismatch -> stringResource(
+            Res.string.username_mismatch_format,
+            loginFailureCause.expectedUser.value,
+            loginFailureCause.loggedInUser.value
+        )
+
+        is NotMemberOfPermittedOrgs -> stringResource(Res.string.not_member_of_permitted_orgs)
+
         else -> ""
     }

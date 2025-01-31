@@ -735,7 +735,7 @@ private fun FailedPage(flow: LoginFailed) {
         horizontalAlignment = CenterHorizontally
     ) {
         Text(
-            text = flow.errorMessage.value,
+            text = stringResource(flow.cause),
             modifier = Modifier.width(240.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyLarge

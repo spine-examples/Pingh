@@ -10,6 +10,9 @@
     <string name="code-expired-error">The code has expired, please start over.</string>
     <string name="code-expired-clickable-part">start over</string>
     <string name="login-restart-button">Try to log in again</string>
+    <!-- 1 - expected username, 2 - actual name of logged-in user. -->
+    <string name="username-mismatch-format">You entered "%1$s" as the username but used the code issued for "%2$s" account. You must authenticate with the account matching the username you initially provided.</string>
+    <string name="not-member-of-permitted-orgs">You are not a member of an organization authorized to use the application.</string>
 
     <!-- The Mentions page. -->
     <string name="mentions-page-title">Recent mentions</string>

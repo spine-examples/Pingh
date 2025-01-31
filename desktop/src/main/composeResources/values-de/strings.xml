@@ -10,6 +10,9 @@
     <string name="code-expired-error">Der Code ist abgelaufen, bitte beginnen Sie von vorne.</string>
     <string name="code-expired-clickable-part">von vorne</string>
     <string name="login-restart-button">Erneut anmelden</string>
+    <!-- 1 - expected username, 2 - actual name of logged-in user. -->
+    <string name="username-mismatch-format">Sie haben '%1$s' als Benutzernamen eingegeben, aber den Code für das Konto '%2$s' verwendet. Sie müssen sich mit dem Konto authentifizieren, das dem ursprünglich angegebenen Benutzernamen entspricht.</string>
+    <string name="not-member-of-permitted-orgs">Sie sind kein Mitglied einer Organisation, die berechtigt ist, die Anwendung zu verwenden.</string>
 
     <!-- The Mentions page. -->
     <string name="mentions-page-title">Aktuelle Erwähnungen</string>
