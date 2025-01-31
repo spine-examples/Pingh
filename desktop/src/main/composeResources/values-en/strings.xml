@@ -19,7 +19,9 @@
     <string name="settings-menu-item">Settings</string>
     <string name="quit-menu-item">Quit</string>
     <string name="no-mentions">No recent mentions yet.</string>
+    <!-- 1 - time when mentioned, 2 - author of the mention, 3 - team suffix (optional). -->
     <string name="mention-info-format">%1$s, by %2$s%3$s</string>
+    <!-- 1- team's tag. -->
     <string name="team-suffix-format">, via %1$s</string>
     <string name="snooze-tooltip">Snooze the mention</string>
     <string name="snoozed">Snoozed</string>
@@ -34,7 +36,7 @@
     <string name="dnd-option-title">Do not disturb</string>
     <string name="dnd-option-desc">Turn off notifications for new mentions or snooze expirations.</string>
     <string name="language-option-title">Language</string>
-    <string name="language-option-desc">Specify the language for displaying text in the application.</string>
+    <string name="language-option-desc">Language for displaying text in the application.</string>
     <string name="ignored-repos-option-title">Ignored repositories</string>
     <string name="ignored-repos-option-desc">Mentions from the following sources will be ignored.</string>
     <string name="add-ignored-tooltip">Add new to ignored</string>
