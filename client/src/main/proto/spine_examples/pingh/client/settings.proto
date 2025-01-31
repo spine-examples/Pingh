@@ -98,7 +98,6 @@ message IgnoredSource {
 enum Language {
     LANGUAGE_NOT_SPECIFIED = 0;
     ENGLISH = 1;
-    RUSSIAN = 2;
-    UKRAINIAN = 3;
-    GERMAN = 4;
+    GERMAN = 2;
+    SPANISH = 3;
 }

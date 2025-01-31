@@ -212,7 +212,6 @@ public class PinghApplication private constructor(
         _loggedIn.value = false
         client.close()
         session.resetToGuest()
-        settings.apply()
         client = DesktopClient(channel)
         mentionsFlow = null
         _unreadMentionCount.value = null

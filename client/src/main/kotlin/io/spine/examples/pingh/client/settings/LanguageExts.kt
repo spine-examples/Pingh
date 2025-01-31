@@ -69,9 +69,8 @@ internal fun KClass<Language>.by(locale: Locale): Language? {
 
 private val options = mapOf(
     Language.ENGLISH to LanguageOption("English", "en"),
-    Language.UKRAINIAN to LanguageOption("Українська", "ua"),
-    Language.RUSSIAN to LanguageOption("Русский", "ru"),
-    Language.GERMAN to LanguageOption("Deutsch", "de")
+    Language.GERMAN to LanguageOption("Deutsch", "de"),
+    Language.SPANISH to LanguageOption("Español", "es")
 )
 
 /**
