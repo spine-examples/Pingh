@@ -153,8 +153,8 @@ internal fun SettingsPage(
     toMentionsPage: () -> Unit,
     toLoginPage: () -> Unit
 ) {
-    val language = flow.settings.language.collectAsState()
-    Localized(language.value) {
+    val language by flow.settings.language.collectAsState()
+    Localized(language) {
         Column(
             Modifier
                 .fillMaxSize()

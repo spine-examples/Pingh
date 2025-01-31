@@ -43,6 +43,7 @@ import io.spine.example.pingh.desktop.generated.resources.Res
 import io.spine.example.pingh.desktop.generated.resources.quit_tray_menu_item
 import io.spine.example.pingh.desktop.generated.resources.tray
 import io.spine.examples.pingh.client.PinghApplication
+import io.spine.examples.pingh.client.settings.Language
 import java.awt.Color
 import java.awt.Font
 import java.awt.Frame
@@ -91,9 +92,8 @@ internal fun Tray(state: AppState) {
     check(SystemTray.isSupported()) { "The platform does not support tray applications." }
 
     val icon = rememberIcon(state.app)
-    val exitLabel = stringResource(Res.string.quit_tray_menu_item)
-    val menu = remember(state) {
-        Menu(exitLabel) {
+    val menu = remember {
+        Menu {
             CoroutineScope(Dispatchers.Default).launch {
                 state.closeAndExit()
             }
@@ -107,6 +107,10 @@ internal fun Tray(state: AppState) {
             addMouseListener(onClick)
         }
     }
+
+    val settings = remember { state.app.startSettingsFlow().settings }
+    val language by settings.language.collectAsState()
+    LocalizeMenu(language, menu)
 
     SideEffect {
         if (tray.image != icon) tray.image = icon
@@ -214,10 +218,9 @@ private fun Graphics.drawBadgeContent(text: String, style: TrayStyle) {
  *
  * When the menu is open, clicking anywhere outside of it will close the menu.
  *
- * @param exitLabel The text displayed on the option to exit the application.
  * @param onExit Called when the “Quit” button is pressed.
  */
-private class Menu(exitLabel: String, onExit: () -> Unit) {
+private class Menu(onExit: () -> Unit) {
     /**
      * Utility window on which the application menu will be displayed.
      */
@@ -228,8 +231,12 @@ private class Menu(exitLabel: String, onExit: () -> Unit) {
      */
     private val popup = PopupMenu()
 
+    /**
+     * The menu item to exit the application.
+     */
+    private val exitItem: MenuItem = MenuItem()
+
     init {
-        val exitItem = MenuItem(exitLabel)
         exitItem.addActionListener {
             onExit()
         }
@@ -240,6 +247,13 @@ private class Menu(exitLabel: String, onExit: () -> Unit) {
             add(popup)
             isVisible = true
         }
+    }
+
+    /**
+     * Sets the label of the menu item to exit the application.
+     */
+    fun setExitLabel(text: String) {
+        exitItem.label = text
     }
 
     /**
@@ -266,6 +280,18 @@ private fun mouseEventHandler(state: AppState, menu: Menu) =
             }
         }
     }
+
+/**
+ * Updates tray menu labels upon language changes.
+ */
+@Composable
+private fun LocalizeMenu(
+    @Suppress("UNUSED_PARAMETER" /* Tracks language changes for recomposition. */)
+    language: Language,
+    menu: Menu
+) {
+    menu.setExitLabel(stringResource(Res.string.quit_tray_menu_item))
+}
 
 /**
  * Default data for styling the tray icon.
