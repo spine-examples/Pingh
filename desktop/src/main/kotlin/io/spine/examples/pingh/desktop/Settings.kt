@@ -153,23 +153,39 @@ internal fun SettingsPage(
     toMentionsPage: () -> Unit,
     toLoginPage: () -> Unit
 ) {
-    Column(
-        Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-    ) {
-        SettingsHeader {
-            flow.saveSettings()
-            toMentionsPage()
-        }
-        SettingsBox {
-            Profile(flow, toLoginPage)
-            SnoozeTimeOption(flow.settings)
-            DndOption(flow.settings)
-            LanguageOption(flow.settings)
-            IgnoredSourcesOption(flow.settings)
+    val language = flow.settings.language.collectAsState()
+    Localized(language.value) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+        ) {
+            SettingsHeader {
+                flow.saveSettings()
+                toMentionsPage()
+            }
+            SettingsBox {
+                Profile(flow, toLoginPage)
+                SnoozeTimeOption(flow.settings)
+                DndOption(flow.settings)
+                LanguageOption(flow)
+                IgnoredSourcesOption(flow.settings)
+            }
         }
     }
+}
+
+/**
+ * A settings page wrapper that recomposes whenever the [language] changes,
+ * ensuring text updates immediately rather than only when the page reloads.
+ */
+@Composable
+private fun Localized(
+    @Suppress("UNUSED_PARAMETER" /* Tracks language changes for recomposition. */)
+    language: Language,
+    content: @Composable () -> Unit
+) {
+    content()
 }
 
 /**
@@ -558,11 +574,11 @@ private fun SegmentedButton(
 /**
  * Displays the language selection option.
  *
- * @param state The state of the application settings.
+ * @param flow The application settings control flow.
  */
 @Composable
-private fun LanguageOption(state: SettingsState) {
-    val language by state.language.collectAsState()
+private fun LanguageOption(flow: SettingsFlow) {
+    val language by flow.settings.language.collectAsState()
     val items = remember { Language::class.supported.map { DropDownMenuItem(it.nativeName, it) } }
     Option(
         title = stringResource(Res.string.language_option_title),
@@ -571,7 +587,10 @@ private fun LanguageOption(state: SettingsState) {
     ) {
         DropDownMenu(
             selected = language,
-            onChangeValue = { value -> state.setLanguage(value) },
+            onChangeValue = { value ->
+                flow.settings.setLanguage(value)
+                flow.saveSettings()
+            },
             width = 100.dp,
             modifier = Modifier.height(20.dp),
             items = items
