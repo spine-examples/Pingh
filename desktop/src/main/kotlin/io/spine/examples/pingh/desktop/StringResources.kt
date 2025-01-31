@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,30 +24,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.client.settings
+package io.spine.examples.pingh.desktop
 
-import com.google.protobuf.Duration
-import com.google.protobuf.util.Durations
-import io.spine.protobuf.Durations2.hours
-import io.spine.protobuf.Durations2.minutes
-import kotlin.reflect.KClass
-
-/**
- * The duration corresponding to this interval.
- */
-internal val SnoozeTime.value: Duration
-    get() = snoozeOptions[this] ?: Durations.ZERO
+import androidx.compose.runtime.Composable
+import io.spine.example.pingh.desktop.generated.resources.Res
+import io.spine.example.pingh.desktop.generated.resources.day
+import io.spine.example.pingh.desktop.generated.resources.hours
+import io.spine.example.pingh.desktop.generated.resources.minutes
+import io.spine.examples.pingh.client.settings.SnoozeTime
+import org.jetbrains.compose.resources.stringResource
 
 /**
- * The list of snooze intervals currently supported by the app.
+ * Returns the text corresponding to the [snooze time][snoozeTime] interval.
  */
-@Suppress("UnusedReceiverParameter" /* Associated with the class but doesn't use its data. */)
-public val KClass<SnoozeTime>.supported: List<SnoozeTime>
-    get() = snoozeOptions.keys.toList()
-
-@Suppress("MagicNumber" /* The durations are specified using numbers. */)
-private val snoozeOptions = mapOf(
-    SnoozeTime.THIRTY_MINUTES to minutes(30),
-    SnoozeTime.TWO_HOURS to hours(2),
-    SnoozeTime.ONE_DAY to hours(24)
-)
+@Composable
+internal fun stringResource(snoozeTime: SnoozeTime): String =
+    when(snoozeTime) {
+        SnoozeTime.THIRTY_MINUTES -> "30 ${stringResource(Res.string.minutes)}"
+        SnoozeTime.TWO_HOURS -> "2 ${stringResource(Res.string.hours)}"
+        SnoozeTime.ONE_DAY -> "1 ${stringResource(Res.string.day)}"
+        else -> ""
+    }

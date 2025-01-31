@@ -126,7 +126,6 @@ import io.spine.examples.pingh.client.SettingsState
 import io.spine.examples.pingh.client.settings.IgnoredSource
 import io.spine.examples.pingh.client.settings.Language
 import io.spine.examples.pingh.client.settings.SnoozeTime
-import io.spine.examples.pingh.client.settings.label
 import io.spine.examples.pingh.client.settings.nativeName
 import io.spine.examples.pingh.client.settings.supported
 import io.spine.examples.pingh.github.OrganizationLogin
@@ -508,7 +507,7 @@ private fun SnoozeTimeSegmentedButtonRow(state: SettingsState) {
                 shape = SegmentedButtonDefaults.itemShape(index, snoozeTimeOptions.size)
             ) {
                 Text(
-                    text = snoozeTime.label,
+                    text = stringResource(snoozeTime),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

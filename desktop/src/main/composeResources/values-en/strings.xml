@@ -33,6 +33,9 @@
     <string name="logout-button">Log out</string>
     <string name="snooze-time-option-title">Snooze time</string>
     <string name="snooze-time-option-desc">Time after which the notification is repeated.</string>
+    <string name="minutes">mins</string>
+    <string name="hours">hours</string>
+    <string name="day">day</string>
     <string name="dnd-option-title">Do not disturb</string>
     <string name="dnd-option-desc">Turn off notifications for new mentions or snooze expirations.</string>
     <string name="language-option-title">Language</string>
