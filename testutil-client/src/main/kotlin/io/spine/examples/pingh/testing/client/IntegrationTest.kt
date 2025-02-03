@@ -98,17 +98,17 @@ public abstract class IntegrationTest {
         }
     }
 
-    private lateinit var notificationSender: MemoizingNotificationSender
+    private lateinit var alert: MemoizingUserAlert
     private lateinit var application: PinghApplication
 
     @BeforeEach
     internal fun createApplication() {
         clearAppDir()
-        notificationSender = MemoizingNotificationSender()
+        alert = MemoizingUserAlert()
         application = PinghApplication.builder()
             .withAddress(address)
             .withPort(port)
-            .with(notificationSender)
+            .with(alert)
             .build()
     }
 
@@ -142,5 +142,5 @@ public abstract class IntegrationTest {
      * Obtains the subject for checking notifications.
      */
     protected fun assertNotifications(): DelayedNotificationAssertion =
-        DelayedNotificationAssertion(notificationSender)
+        DelayedNotificationAssertion(alert)
 }

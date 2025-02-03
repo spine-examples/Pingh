@@ -34,27 +34,44 @@ import io.spine.client.EventFilter.eq
 import io.spine.examples.pingh.client.settings.isIgnored
 import io.spine.examples.pingh.github.Repo
 import io.spine.examples.pingh.github.Team
-import io.spine.examples.pingh.github.User
 import io.spine.examples.pingh.github.Username
-import io.spine.examples.pingh.github.tag
 import io.spine.examples.pingh.mentions.event.MentionUnsnoozed
 import io.spine.examples.pingh.mentions.event.UserMentioned
-import io.spine.logging.Logging
 import kotlin.reflect.KClass
 
 /**
- * Allows to send notifications.
+ * Allows to send notifications to user.
  */
-public interface NotificationSender {
+public interface UserAlert {
 
     /**
-     * Creates and sends a notification with the given title and content.
-     *
-     * @param title The notification's title.
-     * @param content The notification's content.
+     * Creates and sends a session expiration notification.
      */
-    public fun send(title: String, content: String)
+    public fun notifySessionExpired()
+
+    /**
+     * Creates and sends a mention notification.
+     */
+    public fun notifyMention(mention: MentionDetails)
 }
+
+/**
+ * Information about a mention.
+ *
+ * @property title The title of the GitHub page in which the mention created.
+ * @property whenMentioned Time when the user was mentioned.
+ * @property whoMentioned The user who created the mention.
+ * @property whereMentioned The repository where the user was mentioned.
+ * @property viaTeam The team through which the user was mentioned due to their membership.
+ *   If the user was mentioned by username, this field is `null`.
+ */
+public data class MentionDetails(
+    public val title: String,
+    public val whenMentioned: Timestamp,
+    public val whoMentioned: Username,
+    public val whereMentioned: Repo,
+    public val viaTeam: Team? = null
+)
 
 /**
  * The flow that manages the sending of notifications within the app.
@@ -70,81 +87,45 @@ public interface NotificationSender {
  * Ensure the previous [client][DesktopClient] is properly [closed][DesktopClient.close]
  * before initiating notifications for a new `client`.
  *
- * @property sender Allows to send notifications.
+ * @property alert
  * @property settings Manages the application settings configured by a user.
  */
 internal class NotificationsFlow(
-    private val sender: NotificationSender,
+    private val alert: UserAlert,
     private val settings: Settings
-) : Logging {
+) {
     companion object {
         /**
-         * List of information about available notifications.
+         * List of information about available mention notifications.
          */
         private val notifications = listOf(
-            NotificationInfo(
-                UserMentioned::class,
-                "Pingh",
-                whereMentioned = { it.whereMentioned },
-                content = { event ->
-                    content(
-                        event.whenMentioned,
-                        event.whoMentioned,
-                        event.title,
-                        if (event.hasViaTeam()) event.viaTeam else null
+            MentionNotificationInfo(UserMentioned::class) { event ->
+                event.run {
+                    val team = if (hasViaTeam()) viaTeam else null
+                    MentionDetails(
+                        title, whenMentioned, whoMentioned.username, whereMentioned, team
                     )
                 }
-            ),
-            NotificationInfo(
-                MentionUnsnoozed::class,
-                "Pingh",
-                whereMentioned = { it.whereMentioned },
-                content = { event ->
-                    content(
-                        event.whenMentioned,
-                        event.whoMentioned,
-                        event.title,
-                        if (event.hasViaTeam()) event.viaTeam else null
+            },
+            MentionNotificationInfo(MentionUnsnoozed::class) { event ->
+                event.run {
+                    val team = if (hasViaTeam()) viaTeam else null
+                    MentionDetails(
+                        title, whenMentioned, whoMentioned.username, whereMentioned, team
                     )
                 }
-            )
+            }
         )
-
-        private fun content(
-            whenMentioned: Timestamp,
-            whoMentioned: User,
-            title: String,
-            viaTeam: Team? = null
-        ): String {
-            val teamDetails = if (viaTeam != null) {
-                " via ${viaTeam.tag}"
-            } else ""
-            return "${whenMentioned.howMuchTimeHasPassed().uppercase()} " +
-                    "${whoMentioned.username.value} mentioned you$teamDetails in '${title}'."
-        }
     }
 
     /**
-     * Sends a notification with the specified [title] and [content]
-     * if 'Do Not Disturb' mode is disabled.
-     */
-    internal fun send(title: String, content: String) {
-        if (!settings.current.dndEnabled) {
-            sender.send(title, content)
-            _debug().log(
-                "A notification was sent with the title \"$title\" " +
-                        "and the content \"$content\"."
-            )
-        }
-    }
-
-    /**
-     * Enables the sending of notifications for the provided client with the given username.
+     * Enables notifications for new and unsnoozed mentions
+     * for the provided client with the given username.
      *
      * @param client Enables subscription to events emitted by the Pingh server.
      * @param username The username for which mentions will be sent.
      */
-    internal fun enableNotifications(client: DesktopClient, username: Username) {
+    internal fun enableMentionNotifications(client: DesktopClient, username: Username) {
         notifications.forEach { notification ->
             enable(client, username, notification)
         }
@@ -157,22 +138,15 @@ internal class NotificationsFlow(
     private fun <E : EventMessage> enable(
         client: DesktopClient,
         username: Username,
-        notification: NotificationInfo<E>
+        notification: MentionNotificationInfo<E>
     ) {
         client.observeEvent(
             notification.onEvent,
             eq(usernameField(), username)
         ) { event ->
-            if (settings.current.run {
-                    !dndEnabled && !isIgnored(notification.whereMentioned(event))
-                }
-            ) {
-                val content = notification.content(event)
-                sender.send(notification.title, content)
-                _debug().log(
-                    "A notification was sent with the title \"${notification.title}\" " +
-                            "and the content \"$content\"."
-                )
+            val details = notification.extractDetailsFrom(event)
+            if (settings.current.run { !dndEnabled && !isIgnored(details.whereMentioned) }) {
+                alert.notifyMention(details)
             }
         }
     }
@@ -184,19 +158,25 @@ internal class NotificationsFlow(
         EventMessageField(Field.named("id").nested("user"))
 
     /**
+     * Creates and sends a session expiration notification
+     * if 'Do Not Disturb' mode is disabled.
+     */
+    internal fun notifySessionExpired() {
+        if (!settings.current.dndEnabled) {
+            alert.notifySessionExpired()
+        }
+    }
+
+    /**
      * Information about available notification.
      *
      * @param E The type of the event that triggers the sending of a notification.
      *
      * @property onEvent The event that triggers the sending of a notification.
-     * @property title The notification's title.
-     * @property whereMentioned Returns the repository where the user was mentioned.
-     * @property content The notification's content.
+     * @property extractDetailsFrom Retrieves mention details from the mention event.
      */
-    private data class NotificationInfo<E : EventMessage>(
+    private data class MentionNotificationInfo<E : EventMessage>(
         val onEvent: KClass<E>,
-        val title: String,
-        val whereMentioned: (event: E) -> Repo,
-        val content: (event: E) -> String
+        val extractDetailsFrom: (E) -> MentionDetails
     )
 }

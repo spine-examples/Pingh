@@ -52,12 +52,12 @@ import kotlinx.coroutines.launch
  *
  * Stores application states and allows to create different process flows.
  *
- * @param notificationSender Allows to send notifications.
+ * @param alert Allows to send notifications.
  * @param address The address of the Pingh server.
  * @param port The port on which the Pingh server is running.
  */
 public class PinghApplication private constructor(
-    notificationSender: NotificationSender,
+    alert: UserAlert,
     address: String,
     port: Int
 ) : Logging {
@@ -161,11 +161,11 @@ public class PinghApplication private constructor(
     /**
      * Flow that manages the sending of notifications within the app.
      */
-    private val notificationsFlow = NotificationsFlow(notificationSender, settings)
+    private val notificationsFlow = NotificationsFlow(alert, settings)
 
     init {
         if (session.isActive) {
-            notificationsFlow.enableNotifications(client, session.username)
+            notificationsFlow.enableMentionNotifications(client, session.username)
         }
     }
 
@@ -180,7 +180,7 @@ public class PinghApplication private constructor(
         session.establish(id)
         settings.apply()
         client = DesktopClient(channel, id.asUserId())
-        notificationsFlow.enableNotifications(client, id.username)
+        notificationsFlow.enableMentionNotifications(client, id.username)
         subscribeToSessionExpiration(id)
         _loggedIn.value = true
         _info().log("User session established with the server.")
@@ -192,10 +192,7 @@ public class PinghApplication private constructor(
     private fun subscribeToSessionExpiration(id: SessionId) {
         client.observeEvent(id, SessionExpired::class) {
             closeSession()
-            notificationsFlow.send(
-                "Pingh",
-                "Your session has expired.${System.lineSeparator()}Please log in again."
-            )
+            notificationsFlow.notifySessionExpired()
             _info().log(
                 "The current session expired. A new guest session was created and is now active."
             )
@@ -299,7 +296,7 @@ public class PinghApplication private constructor(
         /**
          * Allows to send notifications.
          */
-        private var notificationSender: NotificationSender? = null
+        private var alert: UserAlert? = null
 
         /**
          * Sets the address of the Pingh server.
@@ -318,10 +315,10 @@ public class PinghApplication private constructor(
         }
 
         /**
-         * Sets sender for notifications.
+         * Sets the user alert service to enable notifications.
          */
-        public fun with(notificationSender: NotificationSender): Builder {
-            this.notificationSender = notificationSender
+        public fun with(alert: UserAlert): Builder {
+            this.alert = alert
             return this
         }
 
@@ -331,10 +328,10 @@ public class PinghApplication private constructor(
          * @throws IllegalStateException if some application data is missing.
          */
         public fun build(): PinghApplication {
-            checkNotNull(notificationSender) { "Notification sender must be specified." }
+            checkNotNull(alert) { "User alert service must be specified." }
             checkNotNull(address) { "Address must be specified." }
             checkNotNull(port) { "Port must be specified." }
-            return PinghApplication(notificationSender!!, address!!, port!!)
+            return PinghApplication(alert!!, address!!, port!!)
         }
     }
 }

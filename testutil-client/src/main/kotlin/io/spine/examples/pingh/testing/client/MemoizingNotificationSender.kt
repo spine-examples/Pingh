@@ -28,7 +28,8 @@ package io.spine.examples.pingh.testing.client
 
 import com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly
 import io.kotest.matchers.shouldBe
-import io.spine.examples.pingh.client.NotificationSender
+import io.spine.examples.pingh.client.MentionDetails
+import io.spine.examples.pingh.client.UserAlert
 import java.lang.AssertionError
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
@@ -41,7 +42,7 @@ import kotlin.time.Duration.Companion.seconds
  *
  * Does not send any notifications. Use only for tests.
  */
-internal class MemoizingNotificationSender : NotificationSender {
+internal class MemoizingUserAlert : UserAlert {
 
     /**
      * The number of notifications that should be sent.
@@ -51,7 +52,14 @@ internal class MemoizingNotificationSender : NotificationSender {
     /**
      * Adds a notification to [total number][notificationsCount] that should be sent.
      */
-    override fun send(title: String, content: String) {
+    override fun notifySessionExpired() {
+        notificationsCount++
+    }
+
+    /**
+     * Adds a notification to [total number][notificationsCount] that should be sent.
+     */
+    override fun notifyMention(mention: MentionDetails) {
         notificationsCount++
     }
 
@@ -62,15 +70,14 @@ internal class MemoizingNotificationSender : NotificationSender {
 }
 
 /**
- * Checks for notifications sent by the `MemoizingNotificationSender`.
+ * Checks for notifications sent by the `UserAlert`.
  *
  * The server may not send the notification immediately,
  * so the check will be repeated at intervals until it succeeds.
  */
 public class DelayedNotificationAssertion internal constructor(
-    private val sender: MemoizingNotificationSender
+    private val alert: MemoizingUserAlert
 ) {
-
     private companion object {
         /**
          * The waiting period before performing the next check after an unsuccessful attempt.
@@ -87,7 +94,7 @@ public class DelayedNotificationAssertion internal constructor(
      * Fails if the notification count does not match the specified size.
      */
     public fun hasSize(expected: Int) {
-        awaitFact { sender.notificationsCount() shouldBe expected }
+        awaitFact { alert.notificationsCount() shouldBe expected }
     }
 
     private fun awaitFact(assertion: () -> Unit) {

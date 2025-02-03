@@ -24,7 +24,7 @@
     <string name="no-mentions">Noch keine aktuellen Erwähnungen.</string>
     <!-- 1 - time when mentioned, 2 - author of the mention, 3 - team suffix (optional). -->
     <string name="mention-info-format">%1$s, von %2$s%3$s</string>
-    <!-- 1- team's tag. -->
+    <!-- 1 - team's tag. -->
     <string name="team-suffix-format">, über %1$s</string>
     <string name="snooze-tooltip">Die Erwähnung auf später verschieben</string>
     <string name="snoozed">Aufgeschoben</string>
@@ -56,4 +56,13 @@
 
     <!-- The tray menu. -->
     <string name="quit-tray-menu-item">Beenden Sie die Pingh-App</string>
+
+    <!-- Notifications. -->
+    <!-- 1 - time when mentioned, 2 - author of the mention,
+         3 - title of mention, 4 - team details (optional). -->
+    <string name="mention-notification-format">%1$s hat %2$s Sie%4$s in '%3$s' erwähnt.</string>
+    <!-- 1 - team's tag. -->
+    <string name="team-details-format"> über %1$s</string>
+    <string name="session-expiration-notification">Ihre Sitzung ist abgelaufen.
+Bitte melden Sie sich erneut an.</string>
 </resources>
