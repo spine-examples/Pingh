@@ -65,4 +65,14 @@
     <string name="team-details-format"> via %1$s</string>
     <string name="session-expiration-notification">Your session has expired.
 Please log in again.</string>
+
+    <!-- Time. -->
+    <string name="just-now">just now</string>
+    <string name="minute-ago">a minute ago</string>
+    <!-- 1 - number of minutes. -->
+    <string name="minutes-ago-format">%1$d minutes ago</string>
+    <string name="hour-ago">an hour ago</string>
+    <!-- 1 - number of hours. -->
+    <string name="hours-ago-format">%1$d hours ago</string>
+    <string name="yesterday">yesterday</string>
 </resources>

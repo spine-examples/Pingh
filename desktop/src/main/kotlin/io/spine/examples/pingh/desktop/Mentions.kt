@@ -107,7 +107,6 @@ import io.spine.example.pingh.desktop.generated.resources.snoozed
 import io.spine.example.pingh.desktop.generated.resources.team_suffix_format
 import io.spine.example.pingh.desktop.generated.resources.unpin_tooltip
 import io.spine.examples.pingh.client.MentionsFlow
-import io.spine.examples.pingh.client.howMuchTimeHasPassed
 import io.spine.examples.pingh.client.sorted
 import io.spine.examples.pingh.github.tag
 import io.spine.examples.pingh.mentions.MentionStatus

@@ -65,4 +65,14 @@
     <string name="team-details-format"> über %1$s</string>
     <string name="session-expiration-notification">Ihre Sitzung ist abgelaufen.
 Bitte melden Sie sich erneut an.</string>
+
+    <!-- Time. -->
+    <string name="just-now">gerade eben</string>
+    <string name="minute-ago">vor einer Minute</string>
+    <!-- 1 - number of minutes. -->
+    <string name="minutes-ago-format">vor %1$d Minuten</string>
+    <string name="hour-ago">vor einer Stunde</string>
+    <!-- 1 - number of hours. -->
+    <string name="hours-ago-format">vor %1$d Stunden</string>
+    <string name="yesterday">gestern</string>
 </resources>
