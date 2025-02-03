@@ -118,6 +118,7 @@ compose.desktop {
     application {
         mainClass = "io.spine.examples.pingh.desktop.MainKt"
         nativeDistributions {
+            modules("jdk.localedata") // Provides the locale data for locales other than US locale.
             packageName = "Pingh"
             targetFormats(TargetFormat.Dmg)
             packageVersion = pinghVersion.extractSemanticVersion().value
