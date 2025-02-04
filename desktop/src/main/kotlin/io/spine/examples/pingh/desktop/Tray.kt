@@ -108,8 +108,7 @@ internal fun Tray(state: AppState) {
         }
     }
 
-    val settings = remember { state.app.startSettingsFlow().settings }
-    val language by settings.language.collectAsState()
+    val language by state.app.language.collectAsState()
     LocalizeMenu(language, menu)
 
     SideEffect {

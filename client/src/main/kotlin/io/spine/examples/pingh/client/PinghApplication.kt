@@ -29,6 +29,7 @@ package io.spine.examples.pingh.client
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import io.spine.core.UserId
+import io.spine.examples.pingh.client.settings.Language
 import io.spine.examples.pingh.mentions.MentionStatus
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.command.VerifySession
@@ -147,6 +148,13 @@ public class PinghApplication private constructor(
      */
     public val loggedIn: StateFlow<Boolean> = _loggedIn
 
+    private val _language = MutableStateFlow(settings.current.language)
+
+    /**
+     * The language used for displaying text in the UI.
+     */
+    public val language: StateFlow<Language> = _language
+
     /**
      * A job that updates the unread mention count
      * whenever the state of a user's mentions changes.
@@ -183,6 +191,7 @@ public class PinghApplication private constructor(
         notificationsFlow.enableMentionNotifications(client, id.username)
         subscribeToSessionExpiration(id)
         _loggedIn.value = true
+        _language.value = settings.current.language
         _info().log("User session established with the server.")
     }
 
@@ -256,14 +265,11 @@ public class PinghApplication private constructor(
 
     /**
      * Initiates the settings flow.
-     *
-     * If the settings flow does not already exist, it is initialized.
      */
     public fun startSettingsFlow(): SettingsFlow {
-        if (settingsFlow == null) {
-            settingsFlow = SettingsFlow(client, session, settings, ::closeSession)
-        }
-        return settingsFlow!!
+        val flow = SettingsFlow(client, session, settings, _language, ::closeSession)
+        settingsFlow = flow
+        return flow
     }
 
     /**

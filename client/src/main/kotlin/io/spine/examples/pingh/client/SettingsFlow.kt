@@ -51,12 +51,14 @@ import kotlinx.coroutines.flow.StateFlow
  * @property client Enables interaction with the Pingh server.
  * @property session Manages the session with Pingh server.
  * @property localSettings Manages the application settings configured by a user.
+ * @property language The language used for displaying text in the UI.
  * @property closeSession Updates the application state when a session is closed.
  */
 public class SettingsFlow internal constructor(
     private val client: DesktopClient,
     private val session: Session,
     private val localSettings: Settings,
+    private val language: MutableStateFlow<Language>,
     private val closeSession: () -> Unit
 ) : Logging {
     private val mutableSettings = localSettings.current.toBuilder()
@@ -95,6 +97,7 @@ public class SettingsFlow internal constructor(
     public fun saveSettings() {
         val settings = mutableSettings.vBuild()
         localSettings.update(settings)
+        language.value = settings.language
         _debug().log("Settings changed.")
     }
 }
