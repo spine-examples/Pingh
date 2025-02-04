@@ -11,6 +11,7 @@ It also runs as a system tray application on macOS.
 - Notifies upon receiving new mentions or when the snooze time for a mention has expired.
 - Supports Do Not Disturb mode.
 - Ignores mentions from the specified repositories and organizations.
+- Supports English, Spanish, and German languages.
 
 The application stores the current settings and session data in the application folder 
 within the user data directory. The app settings are linked to the user who configured them, 
