@@ -9,7 +9,7 @@
     <string name="verification-page-desc">Introduce este código en</string>
     <string name="code-expired-error">El código ha expirado, por favor comienza de nuevo.</string>
     <string name="code-expired-clickable-part">comienza de nuevo</string>
-    <string name="login-restart-button">Intenta iniciar sesión nuevamente</string>
+    <string name="login-restart-button">Iniciar sesión nuevamente</string>
     <!-- 1 - expected username, 2 - actual name of logged-in user. -->
     <string name="username-mismatch-format">Introdujiste '%1$s' como el nombre de usuario, pero usaste el código emitido para la cuenta '%2$s'. Debes autenticarte con la cuenta que coincide con el nombre de usuario que proporcionaste inicialmente.</string>
     <string name="not-member-of-permitted-orgs">No eres miembro de una organización autorizada para usar la aplicación.</string>

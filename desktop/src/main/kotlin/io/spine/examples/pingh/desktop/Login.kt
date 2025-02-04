@@ -46,6 +46,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
@@ -184,7 +185,7 @@ private fun UsernameEnteringPage(
             isError = isError,
             enabled = !codeRequested
         )
-        Spacer(Modifier.height(15.dp))
+        Spacer(Modifier.height(17.dp))
         LoginButton(
             enabled = wasChanged && !isError.value,
             onClick = {
@@ -351,15 +352,13 @@ private fun InputContainer(
 private fun Label(color: Color) {
     Box(
         modifier = Modifier
-            .width(110.dp)
             .height(12.dp)
-            .absoluteOffset(x = 12.dp, y = (-6).dp)
+            .absoluteOffset(x = 10.dp, y = (-6).dp)
+            .background(MaterialTheme.colorScheme.secondary)
+            .padding(horizontal = 4.dp)
     ) {
         Text(
             text = stringResource(Res.string.username_input_label),
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.secondary),
             color = color,
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyMedium
@@ -755,8 +754,9 @@ private fun RestartButton(flow: LoginFailed) {
     Button(
         onClick = flow::restartLogin,
         modifier = Modifier
-            .width(240.dp)
-            .height(40.dp),
+            .widthIn(min = 240.dp)
+            .height(40.dp)
+            .padding(horizontal = 10.dp),
         shape = MaterialTheme.shapes.medium,
         colors = buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
