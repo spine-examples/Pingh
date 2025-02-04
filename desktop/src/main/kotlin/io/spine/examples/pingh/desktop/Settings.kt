@@ -42,7 +42,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -94,9 +93,9 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.spine.example.pingh.desktop.generated.resources.Res
@@ -331,7 +330,8 @@ private fun LogOutButton(
     SettingsButton(
         onClick = onClick,
         text = stringResource(Res.string.logout_button),
-        modifier = Modifier.height(22.dp).testTag("logout-button")
+        modifier = Modifier.height(22.dp).testTag("logout-button"),
+        contentPadding = PaddingValues(horizontal = 7.dp)
     )
 }
 
@@ -385,6 +385,7 @@ private fun SettingsButton(
     ) {
         Text(
             text = text,
+            textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyMedium
         )
     }
@@ -399,8 +400,7 @@ private fun SettingsButton(
 private fun SnoozeTimeOption(state: SettingsState) {
     Option(
         title = stringResource(Res.string.snooze_time_option_title),
-        description = stringResource(Res.string.snooze_time_option_desc),
-        titleWight = 150.dp
+        description = stringResource(Res.string.snooze_time_option_desc)
     ) {
         SnoozeTimeSegmentedButtonRow(state)
     }
@@ -420,8 +420,7 @@ private fun DndOption(
     val dndEnabled by state.dndEnabled.collectAsState()
     Option(
         title = stringResource(Res.string.dnd_option_title),
-        description = stringResource(Res.string.dnd_option_desc),
-        titleWight = 324.dp
+        description = stringResource(Res.string.dnd_option_desc)
     ) {
         Switch(
             checked = dndEnabled,
@@ -450,14 +449,12 @@ private fun DndOption(
  *
  * @param title The string with the name of the option.
  * @param description The string with the description of the option.
- * @param titleWight The width that the title occupies.
  * @param control The composable function that displays control element of this option.
  */
 @Composable
 private fun Option(
     title: String,
     description: String,
-    titleWight: Dp,
     control: @Composable () -> Unit
 ) {
     Column(
@@ -469,7 +466,8 @@ private fun Option(
         ) {
             Text(
                 text = title,
-                modifier = Modifier.width(titleWight),
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
                 style = MaterialTheme.typography.bodyLarge
             )
             control()
@@ -546,7 +544,7 @@ private fun SegmentedButton(
     )
     Box(
         modifier = Modifier
-            .width(70.dp)
+            .width(65.dp)
             .height(20.dp)
             .background(containerColor, shape)
             .border(border, shape)
@@ -581,8 +579,7 @@ private fun LanguageOption(flow: SettingsFlow) {
     val items = remember { Language::class.supported.map { DropDownMenuItem(it.nativeName, it) } }
     Option(
         title = stringResource(Res.string.language_option_title),
-        description = stringResource(Res.string.language_option_desc),
-        titleWight = 260.dp
+        description = stringResource(Res.string.language_option_desc)
     ) {
         DropDownMenu(
             selected = language,
@@ -611,8 +608,7 @@ private fun IgnoredSourcesOption(state: SettingsState) {
     ) {
         Option(
             title = stringResource(Res.string.ignored_repos_option_title),
-            description = stringResource(Res.string.ignored_repos_option_desc),
-            titleWight = 360.dp
+            description = stringResource(Res.string.ignored_repos_option_desc)
         ) {}
         IgnoredSourceList(
             state = state,
@@ -820,6 +816,7 @@ private fun IgnoredSourceItem(
     ) {
         Text(
             text = annotationString,
+            maxLines = 1,
             style = MaterialTheme.typography.bodyMedium
         )
     }
@@ -844,14 +841,13 @@ private fun AddIgnoredSourceDialog(state: SettingsState, onExit: () -> Unit) {
         Column(
             modifier = Modifier
                 .width(320.dp)
-                .height(240.dp)
                 .background(
                     color = MaterialTheme.colorScheme.secondary,
                     shape = MaterialTheme.shapes.medium
                 )
-                .padding(horizontal = 30.dp),
+                .padding(horizontal = 30.dp, vertical = 20.dp),
             horizontalAlignment = CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(15.dp, CenterVertically)
+            verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
             OutlinedTextField(
                 value = org,
@@ -1094,14 +1090,15 @@ private fun DialogControl(
         SettingsButton(
             onClick = onCancel,
             text = stringResource(Res.string.cancel_button),
-            modifier = Modifier.fillMaxHeight().testTag("cancel-button-in-dialog")
+            modifier = Modifier.testTag("cancel-button-in-dialog"),
+            contentPadding = PaddingValues(horizontal = 7.dp)
         )
         SettingsButton(
             onClick = onAdd,
             text = stringResource(Res.string.add_ignored_button),
-            modifier = Modifier.fillMaxHeight().testTag("add-button-in-dialog"),
+            modifier = Modifier.testTag("add-button-in-dialog"),
             enabled = addEnabled,
-            contentPadding = PaddingValues(horizontal = 7.dp, vertical = 0.dp),
+            contentPadding = PaddingValues(horizontal = 7.dp),
             usePrimaryColors = true
         )
     }

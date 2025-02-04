@@ -36,8 +36,8 @@
     <string name="logout-button">Abmelden</string>
     <string name="snooze-time-option-title">Snooze-Zeit</string>
     <string name="snooze-time-option-desc">Zeit, nach der die Benachrichtigung wiederholt wird.</string>
-    <string name="minutes">Minuten</string>
-    <string name="hours">Stunden</string>
+    <string name="minutes">Min</string>
+    <string name="hours">Std</string>
     <string name="day">Tag</string>
     <string name="dnd-option-title">Nicht stören</string>
     <string name="dnd-option-desc">Benachrichtigungen für neue Erwähnungen oder Ablauf der Snooze-Funktion ausschalten.</string>
