@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The Login page. -->
+    <string name="app-desc">Pingh es una aplicación de GitHub que busca menciones en nombre del usuario. Requiere autenticación a través de GitHub.</string>
+    <string name="username-input-label">Nombre de usuario de GitHub</string>
+    <string name="invalid-username-error">Introduce un nombre de usuario de GitHub válido.</string>
+    <string name="login-button">Iniciar sesión</string>
+    <string name="verification-page-title">Verifica tu inicio de sesión</string>
+    <string name="verification-page-desc">Introduce este código en</string>
+    <string name="code-expired-error">El código ha expirado, por favor comienza de nuevo.</string>
+    <string name="code-expired-clickable-part">comienza de nuevo</string>
+    <string name="login-restart-button">Intenta iniciar sesión nuevamente</string>
+    <!-- 1 - expected username, 2 - actual name of logged-in user. -->
+    <string name="username-mismatch-format">Introdujiste '%1$s' como el nombre de usuario, pero usaste el código emitido para la cuenta '%2$s'. Debes autenticarte con la cuenta que coincide con el nombre de usuario que proporcionaste inicialmente.</string>
+    <string name="not-member-of-permitted-orgs">No eres miembro de una organización autorizada para usar la aplicación.</string>
+
+    <!-- The Mentions page. -->
+    <string name="mentions-page-title">Menciones recientes</string>
+    <string name="refresh-tooltip">Actualizar</string>
+    <string name="menu-tooltip">Más</string>
+    <string name="mark-all-as-read-menu-item">Marcar todo como leído</string>
+    <string name="settings-menu-item">Configuración</string>
+    <string name="quit-menu-item">Salir</string>
+    <string name="no-mentions">Aún no hay menciones recientes.</string>
+    <!-- 1 - time when mentioned, 2 - author of the mention, 3 - team suffix (optional). -->
+    <string name="mention-info-format">%1$s, por %2$s%3$s</string>
+    <!-- 1 - team's tag. -->
+    <string name="team-suffix-format">, a través de %1$s</string>
+    <string name="snooze-tooltip">Posponer la mención</string>
+    <string name="snoozed">Pospuesto</string>
+    <string name="pin-tooltip">Fijar la mención</string>
+    <string name="unpin-tooltip">Desfijar la mención</string>
+
+    <!-- The Settings page. -->
+    <string name="settings-page-title">Configuración</string>
+    <string name="logout-button">Cerrar sesión</string>
+    <string name="snooze-time-option-title">Tiempo de posposición</string>
+    <string name="snooze-time-option-desc">Tiempo después del cual se repite la notificación.</string>
+    <string name="minutes">min</string>
+    <string name="hours">horas</string>
+    <string name="day">día</string>
+    <string name="dnd-option-title">No molestar</string>
+    <string name="dnd-option-desc">Desactivar las notificaciones para nuevas menciones o vencimientos de posposición.</string>
+    <string name="language-option-title">Idioma</string>
+    <string name="language-option-desc">Idioma para mostrar el texto en la aplicación.</string>
+    <string name="ignored-repos-option-title">Repositorios ignorados</string>
+    <string name="ignored-repos-option-desc">Las menciones de las siguientes fuentes serán ignoradas.</string>
+    <string name="add-ignored-tooltip">Agregar nuevo a los ignorados</string>
+    <string name="remove-ignored-tooltip">Eliminar los seleccionados de los ignorados</string>
+    <string name="all-repos-suffix"> [Todos los repositorios]</string>
+    <string name="org-input-label">Organización:</string>
+    <string name="repos-input-label">o repositorios especificados (separados por comas):</string>
+    <string name="all-repos-label">Todos dentro de la organización</string>
+    <string name="cancel-button">Cancelar</string>
+    <string name="add-ignored-button">Agregar a los ignorados</string>
+
+    <!-- The tray menu. -->
+    <string name="quit-tray-menu-item">Salir de la aplicación Pingh</string>
+
+    <!-- Notifications. -->
+    <!-- 1 - time when mentioned, 2 - author of the mention,
+         3 - title of mention, 4 - team details (optional). -->
+    <string name="mention-notification-format">%1$s %2$s te mencionó%4$s en '%3$s'.</string>
+    <!-- 1 - team's tag. -->
+    <string name="team-details-format"> a través de %1$s</string>
+    <string name="session-expiration-notification">Tu sesión ha expirado.
+Por favor, inicia sesión nuevamente.</string>
+
+    <!-- Time. -->
+    <string name="just-now">hace un momento</string>
+    <string name="minute-ago">hace un minuto</string>
+    <!-- 1 - number of minutes. -->
+    <string name="minutes-ago-format">hace %1$d minutos</string>
+    <string name="hour-ago">hace una hora</string>
+    <!-- 1 - number of hours. -->
+    <string name="hours-ago-format">hace %1$d horas</string>
+    <string name="yesterday">ayer</string>
+</resources>
