@@ -97,7 +97,6 @@ public class SettingsFlow internal constructor(
     public fun saveSettings() {
         val settings = mutableSettings.vBuild()
         localSettings.update(settings)
-        language.value = settings.language
         _debug().log("Settings changed.")
     }
 }
@@ -110,7 +109,6 @@ public class SettingsState internal constructor(
 ) {
     private val _dndEnabled = MutableStateFlow(data.dndEnabled)
     private val _snoozeTime = MutableStateFlow(data.snoozeTime)
-    private val _language = MutableStateFlow(data.language)
     private val _ignored = MutableStateFlow(data.ignoredList.filteredAndSorted())
 
     /**
@@ -123,11 +121,6 @@ public class SettingsState internal constructor(
      * The interval after which the new mention notification is repeated.
      */
     public val snoozeTime: StateFlow<SnoozeTime> = _snoozeTime
-
-    /**
-     * The language used for displaying text in the UI.
-     */
-    public val language: StateFlow<Language> = _language
 
     /**
      * List of ignored organizations and repositories.
@@ -151,14 +144,6 @@ public class SettingsState internal constructor(
     public fun setSnoozeTime(snoozeTime: SnoozeTime) {
         _snoozeTime.value = snoozeTime
         data.snoozeTime = snoozeTime
-    }
-
-    /**
-     * Sets the language used for displaying text in the UI.
-     */
-    public fun setLanguage(language: Language) {
-        _language.value = language
-        data.language = language
     }
 
     /**
