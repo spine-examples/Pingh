@@ -27,6 +27,7 @@
 package io.spine.examples.pingh.client
 
 import io.spine.examples.pingh.client.settings.IgnoredSource
+import io.spine.examples.pingh.client.settings.Language
 import io.spine.examples.pingh.client.settings.SnoozeTime
 import io.spine.examples.pingh.client.settings.UserSettings
 import io.spine.examples.pingh.github.OrganizationLogin
@@ -50,12 +51,14 @@ import kotlinx.coroutines.flow.StateFlow
  * @property client Enables interaction with the Pingh server.
  * @property session Manages the session with Pingh server.
  * @property localSettings Manages the application settings configured by a user.
+ * @property appLanguage Manages languages used by app.
  * @property closeSession Updates the application state when a session is closed.
  */
 public class SettingsFlow internal constructor(
     private val client: DesktopClient,
     private val session: Session,
     private val localSettings: Settings,
+    private val appLanguage: AppLanguage,
     private val closeSession: () -> Unit
 ) : Logging {
     private val mutableSettings = localSettings.current.toBuilder()
@@ -70,6 +73,11 @@ public class SettingsFlow internal constructor(
      */
     public val username: Username
         get() = session.username
+
+    /**
+     * The current language used by the app.
+     */
+    public val language: StateFlow<Language> = appLanguage.state
 
     /**
      * Logs the user out, cancels all subscriptions and clears the session ID.
@@ -95,6 +103,14 @@ public class SettingsFlow internal constructor(
         val settings = mutableSettings.vBuild()
         localSettings.update(settings)
         _debug().log("Settings changed.")
+    }
+
+    /**
+     * Updates the current language.
+     */
+    public fun update(language: Language) {
+        appLanguage.update(language)
+        _debug().log("Language updated to `$language`.")
     }
 }
 

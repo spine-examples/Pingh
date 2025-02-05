@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.examples.pingh.client
-
-import com.google.protobuf.Timestamp
-import com.google.protobuf.util.Timestamps
+package io.spine.examples.pingh.sessions.rejection
 
 /**
- * Adds a duration to this timestamp.
+ * An error that caused the login process to fail.
+ *
+ * Possible causes for the failure include: [UsernameMismatch], [NotMemberOfPermittedOrgs].
  */
-internal fun Timestamp.add(duration: com.google.protobuf.Duration): Timestamp =
-    Timestamps.add(this, duration)
+public interface LoginFailureCause

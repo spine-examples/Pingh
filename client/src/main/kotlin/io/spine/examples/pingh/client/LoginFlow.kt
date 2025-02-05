@@ -28,6 +28,7 @@ package io.spine.examples.pingh.client
 
 import io.spine.examples.pingh.sessions.SessionId
 import io.spine.examples.pingh.sessions.event.UserCodeReceived
+import io.spine.examples.pingh.sessions.rejection.LoginFailureCause
 import io.spine.logging.Logging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -117,7 +118,8 @@ public class LoginFlow internal constructor(
                 if (stage.value.result == null) {
                     stage.value = LoginCompleted()
                 } else {
-                    stage.value = LoginFailed(::moveToNextStage, stage.value.result as String)
+                    stage.value =
+                        LoginFailed(::moveToNextStage, stage.value.result as LoginFailureCause)
                 }
             }
 

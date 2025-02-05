@@ -31,9 +31,18 @@ import androidx.compose.ui.window.Notification
 import androidx.compose.ui.window.TrayState
 import androidx.compose.ui.window.application
 import com.google.common.flogger.FluentLogger
-import io.spine.examples.pingh.client.NotificationSender
+import io.spine.example.pingh.desktop.generated.resources.Res
+import io.spine.example.pingh.desktop.generated.resources.mention_notification_format
+import io.spine.example.pingh.desktop.generated.resources.session_expiration_notification
+import io.spine.example.pingh.desktop.generated.resources.team_details_format
+import io.spine.examples.pingh.client.MentionDetails
 import io.spine.examples.pingh.client.PinghApplication
+import io.spine.examples.pingh.client.UserAlert
+import io.spine.examples.pingh.github.tag
+import io.spine.logging.Logging
 import kotlin.system.exitProcess
+import kotlinx.coroutines.runBlocking
+import org.jetbrains.compose.resources.getString
 
 /**
  * The top-level application state.
@@ -69,11 +78,11 @@ internal class AppState(
     internal val app: PinghApplication
 
     init {
-        val notificationSender = TrayNotificationSender(tray) { !window.isShown }
+        val alert = TrayUserAlert(tray) { !window.isShown }
         app = PinghApplication.builder()
             .withAddress(serverEndpoint.address)
             .withPort(serverEndpoint.port)
-            .with(notificationSender)
+            .with(alert)
             .build()
     }
 
@@ -117,10 +126,37 @@ internal class AppState(
  * @property isWindowHidden Returns `true` if the [window][AppState.window] is hidden;
  *   returns `false` otherwise.
  */
-private class TrayNotificationSender(
+private class TrayUserAlert(
     private val tray: TrayState,
     private val isWindowHidden: () -> Boolean
-) : NotificationSender {
+) : UserAlert, Logging {
+
+    /**
+     * Sends a session expiration notification.
+     */
+    override fun notifyMention(mention: MentionDetails) {
+        val content = runBlocking {
+            val team = if (mention.viaTeam != null) {
+                getString(Res.string.team_details_format, mention.viaTeam!!.tag)
+            } else ""
+            getString(
+                Res.string.mention_notification_format,
+                mention.whenMentioned.toDatetime().uppercase(),
+                mention.whoMentioned.value,
+                mention.title,
+                team
+            )
+        }
+        send("Pingh", content)
+    }
+
+    /**
+     * Sends a mention notification.
+     */
+    override fun notifySessionExpired() {
+        val content = runBlocking { getString(Res.string.session_expiration_notification) }
+        send("Pingh", content)
+    }
 
     /**
      * Sends the information [Notification] to the system tray.
@@ -128,10 +164,14 @@ private class TrayNotificationSender(
      * @param title The notification's title.
      * @param content The notification's content.
      */
-    override fun send(title: String, content: String) {
+    private fun send(title: String, content: String) {
         if (isWindowHidden()) {
             val notification = Notification(title, content, Notification.Type.Info)
             tray.sendNotification(notification)
+            _debug().log(
+                "A notification was sent with the title \"$title\" " +
+                        "and the content \"$content\"."
+            )
         }
     }
 }

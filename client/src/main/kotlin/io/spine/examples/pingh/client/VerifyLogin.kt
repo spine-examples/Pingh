@@ -37,6 +37,7 @@ import io.spine.examples.pingh.sessions.event.UserCodeReceived
 import io.spine.examples.pingh.sessions.event.UserIsNotLoggedIntoGitHub
 import io.spine.examples.pingh.sessions.event.UserLoggedIn
 import io.spine.examples.pingh.sessions.of
+import io.spine.examples.pingh.sessions.rejection.LoginFailureCause
 import io.spine.examples.pingh.sessions.rejection.Rejections.NotMemberOfPermittedOrgs
 import io.spine.examples.pingh.sessions.rejection.Rejections.UsernameMismatch
 import io.spine.examples.pingh.sessions.withSession
@@ -69,7 +70,7 @@ public class VerifyLogin internal constructor(
     private val establishSession: (SessionId) -> Unit,
     private val moveToNextStage: () -> Unit,
     event: UserCodeReceived
-) : LoginStage<String>(), Logging {
+) : LoginStage<LoginFailureCause>(), Logging {
 
     /**
      * The code a user needs to enter on GitHub to confirm login to the app.
@@ -181,13 +182,13 @@ public class VerifyLogin internal constructor(
             EventObserver(command.id, UsernameMismatch::class) { rejection ->
                 codeExpirationJob.cancel()
                 future.complete(ActionOutcome.Rejection)
-                result = rejection.cause
+                result = rejection
                 moveToNextStage()
             },
             EventObserver(command.id, NotMemberOfPermittedOrgs::class) { rejection ->
                 codeExpirationJob.cancel()
                 future.complete(ActionOutcome.Rejection)
-                result = rejection.cause
+                result = rejection
                 moveToNextStage()
             }
         )
@@ -271,18 +272,3 @@ private fun invoke(delay: Duration, action: () -> Unit): Job =
         delay(delay.inWholeMilliseconds)
         action()
     }
-
-/**
- * An error message explaining the cause of `UsernameMismatch` rejection.
- */
-private val UsernameMismatch.cause: String
-    get() = "You entered \"${expectedUser.value}\" as the username but used the code " +
-            "issued for \"${loggedInUser.value}\" account. You must authenticate with " +
-            "the account matching the username you initially provided."
-
-/**
- * An error message explaining the cause of `NotMemberOfPermittedOrgs` rejection.
- */
-@Suppress("UnusedReceiverParameter" /* Associated with the rejection but doesn't use its data. */)
-private val NotMemberOfPermittedOrgs.cause: String
-    get() = "You are not a member of an organization authorized to use the application."

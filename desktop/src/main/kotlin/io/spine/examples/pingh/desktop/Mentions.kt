@@ -85,16 +85,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.spine.example.pingh.desktop.generated.resources.Res
 import io.spine.example.pingh.desktop.generated.resources.mark_all_as_read
+import io.spine.example.pingh.desktop.generated.resources.mark_all_as_read_menu_item
+import io.spine.example.pingh.desktop.generated.resources.mention_info_format
+import io.spine.example.pingh.desktop.generated.resources.mentions_page_title
+import io.spine.example.pingh.desktop.generated.resources.menu_tooltip
 import io.spine.example.pingh.desktop.generated.resources.more
+import io.spine.example.pingh.desktop.generated.resources.no_mentions
 import io.spine.example.pingh.desktop.generated.resources.pin
+import io.spine.example.pingh.desktop.generated.resources.pin_tooltip
 import io.spine.example.pingh.desktop.generated.resources.pingh
 import io.spine.example.pingh.desktop.generated.resources.pinned
 import io.spine.example.pingh.desktop.generated.resources.quit
+import io.spine.example.pingh.desktop.generated.resources.quit_menu_item
 import io.spine.example.pingh.desktop.generated.resources.refresh
+import io.spine.example.pingh.desktop.generated.resources.refresh_tooltip
 import io.spine.example.pingh.desktop.generated.resources.settings
+import io.spine.example.pingh.desktop.generated.resources.settings_menu_item
 import io.spine.example.pingh.desktop.generated.resources.snooze
+import io.spine.example.pingh.desktop.generated.resources.snooze_tooltip
+import io.spine.example.pingh.desktop.generated.resources.snoozed
+import io.spine.example.pingh.desktop.generated.resources.team_suffix_format
+import io.spine.example.pingh.desktop.generated.resources.unpin_tooltip
 import io.spine.examples.pingh.client.MentionsFlow
-import io.spine.examples.pingh.client.howMuchTimeHasPassed
 import io.spine.examples.pingh.client.sorted
 import io.spine.examples.pingh.github.tag
 import io.spine.examples.pingh.mentions.MentionStatus
@@ -103,6 +115,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Displays the `Mentions` page in the application.
@@ -174,7 +187,7 @@ private fun ToolBar(
         )
         Spacer(Modifier.width(10.dp))
         Text(
-            text = "Recent mentions",
+            text = stringResource(Res.string.mentions_page_title),
             modifier = Modifier.weight(1f),
             fontSize = 20.sp,
             color = contentColor,
@@ -189,7 +202,7 @@ private fun ToolBar(
             colors = iconButtonColors(
                 contentColor = contentColor
             ),
-            tooltip = "Refresh",
+            tooltip = stringResource(Res.string.refresh_tooltip),
             sizeFraction = iconSizeFraction
         )
         Menu(
@@ -216,23 +229,23 @@ private fun Menu(
     Menu(
         icon = painterResource(Res.drawable.more),
         modifier = Modifier.size(30.dp).testTag("menu-button"),
-        tooltip = "More"
+        tooltip = stringResource(Res.string.menu_tooltip)
     ) {
         MenuItem(
-            text = "Mark all as read",
+            text = stringResource(Res.string.mark_all_as_read_menu_item),
             leadingIcon = painterResource(Res.drawable.mark_all_as_read),
             modifier = Modifier.testTag("mark-all-as-read-button"),
             onClick = flow::markAllAsRead
         )
         MenuItem(
-            text = "Settings",
+            text = stringResource(Res.string.settings_menu_item),
             leadingIcon = painterResource(Res.drawable.settings),
             modifier = Modifier.testTag("settings-button"),
             onClick = toSettingsPage
         )
         Divider(color = MaterialTheme.colorScheme.background)
         MenuItem(
-            text = "Quit",
+            text = stringResource(Res.string.quit_menu_item),
             leadingIcon = painterResource(Res.drawable.quit),
             modifier = Modifier.testTag("quit-button"),
             onClick = {
@@ -297,7 +310,7 @@ private fun NoMentionsCard() {
             contentAlignment = Center
         ) {
             Text(
-                text = "No recent mentions yet.",
+                text = stringResource(Res.string.no_mentions),
                 color = MaterialTheme.colorScheme.onSecondary,
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyMedium
@@ -393,14 +406,19 @@ private fun RowScope.MentionCardText(
     val time = mention.whenMentioned.run {
         if (isParentHovered) toDatetime() else howMuchTimeHasPassed()
     }
-    val team = if (mention.hasViaTeam()) ", via ${mention.viaTeam.tag}" else ""
+    val team = if (mention.hasViaTeam()) {
+        stringResource(Res.string.team_suffix_format, mention.viaTeam.tag)
+    } else ""
     Column(
         modifier = Modifier.fillMaxHeight().weight(1f),
         verticalArrangement = Arrangement.spacedBy(4.dp, CenterVertically)
     ) {
         MentionTitle(flow, mention, isParentHovered)
         Text(
-            text = "$time, by ${mention.whoMentioned.username.value}$team",
+            text = stringResource(
+                Res.string.mention_info_format,
+                time, mention.whoMentioned.username.value, team
+            ),
             overflow = Ellipsis,
             maxLines = 1,
             style = MaterialTheme.typography.bodySmall
@@ -493,12 +511,12 @@ private fun SnoozeButton(
                 icon = painterResource(Res.drawable.snooze),
                 onClick = { flow.snooze(mention.id) },
                 modifier = Modifier.testTag("snooze-button"),
-                tooltip = "Snooze the mention"
+                tooltip = stringResource(Res.string.snooze_tooltip)
             )
 
         mention.status == MentionStatus.SNOOZED ->
             Text(
-                text = "Snoozed",
+                text = stringResource(Res.string.snoozed),
                 modifier = Modifier.size(50.dp).wrapContentSize(Center),
                 style = MaterialTheme.typography.bodySmall
             )
@@ -527,7 +545,7 @@ private fun PinButton(
                 icon = painterResource(Res.drawable.pin),
                 onClick = { flow.pin(mention.id) },
                 modifier = Modifier.testTag(tag),
-                tooltip = "Pin the mention"
+                tooltip = stringResource(Res.string.pin_tooltip)
             )
         }
 
@@ -536,7 +554,7 @@ private fun PinButton(
                 icon = painterResource(Res.drawable.pinned),
                 onClick = { flow.unpin(mention.id) },
                 modifier = Modifier.testTag(tag),
-                tooltip = "Unpin the mention"
+                tooltip = stringResource(Res.string.unpin_tooltip)
             )
         }
     }

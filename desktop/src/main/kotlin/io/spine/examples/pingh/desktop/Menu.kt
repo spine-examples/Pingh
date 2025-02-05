@@ -34,8 +34,8 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -141,7 +141,7 @@ private fun MenuContent(scope: MenuScope, items: @Composable MenuScope.() -> Uni
         shape = shape
     ) {
         Column(
-            modifier = Modifier.padding(5.dp).width(150.dp),
+            modifier = Modifier.padding(5.dp).width(IntrinsicSize.Max),
             verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
             items(scope)
@@ -191,19 +191,12 @@ private class MenuScopeImpl : MenuScope {
     ) {
         val interactionSource = remember { MutableInteractionSource() }
         val isHovered by interactionSource.collectIsHoveredAsState()
-        val contentColor = if (isHovered) {
-            MaterialTheme.colorScheme.onPrimary
-        } else {
-            MaterialTheme.colorScheme.onSecondary
-        }
-        val containerColor = if (isHovered) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.secondary
-        }
+        val contentColor =
+            MaterialTheme.colorScheme.run { if (isHovered) onPrimary else onSecondary }
+        val containerColor = MaterialTheme.colorScheme.run { if (isHovered) primary else secondary }
         val shape = MaterialTheme.shapes.small
         Row(
-            modifier = modifier.fillMaxWidth()
+            modifier = modifier
                 .background(
                     color = containerColor,
                     shape = shape
@@ -218,7 +211,7 @@ private class MenuScopeImpl : MenuScope {
                     }
                 )
                 .pointerHoverIcon(Hand)
-                .padding(5.dp),
+                .padding(start = 5.dp, top = 5.dp, end = 8.dp, bottom = 5.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = CenterVertically
         ) {
@@ -230,6 +223,7 @@ private class MenuScopeImpl : MenuScope {
             )
             Text(
                 text = text,
+                modifier = Modifier.weight(1f),
                 color = contentColor,
                 style = MaterialTheme.typography.bodyMedium
             )

@@ -42,7 +42,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -94,20 +93,39 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.spine.example.pingh.desktop.generated.resources.Res
 import io.spine.example.pingh.desktop.generated.resources.add
+import io.spine.example.pingh.desktop.generated.resources.add_ignored_button
+import io.spine.example.pingh.desktop.generated.resources.add_ignored_tooltip
+import io.spine.example.pingh.desktop.generated.resources.all_repos_label
+import io.spine.example.pingh.desktop.generated.resources.all_repos_suffix
 import io.spine.example.pingh.desktop.generated.resources.back
+import io.spine.example.pingh.desktop.generated.resources.cancel_button
+import io.spine.example.pingh.desktop.generated.resources.dnd_option_desc
+import io.spine.example.pingh.desktop.generated.resources.dnd_option_title
+import io.spine.example.pingh.desktop.generated.resources.ignored_repos_option_desc
+import io.spine.example.pingh.desktop.generated.resources.ignored_repos_option_title
+import io.spine.example.pingh.desktop.generated.resources.language_option_desc
+import io.spine.example.pingh.desktop.generated.resources.language_option_title
+import io.spine.example.pingh.desktop.generated.resources.logout_button
+import io.spine.example.pingh.desktop.generated.resources.org_input_label
 import io.spine.example.pingh.desktop.generated.resources.remove
+import io.spine.example.pingh.desktop.generated.resources.remove_ignored_tooltip
+import io.spine.example.pingh.desktop.generated.resources.repos_input_label
+import io.spine.example.pingh.desktop.generated.resources.settings_page_title
+import io.spine.example.pingh.desktop.generated.resources.snooze_time_option_desc
+import io.spine.example.pingh.desktop.generated.resources.snooze_time_option_title
 import io.spine.examples.pingh.client.SettingsFlow
 import io.spine.examples.pingh.client.SettingsState
 import io.spine.examples.pingh.client.settings.IgnoredSource
+import io.spine.examples.pingh.client.settings.Language
 import io.spine.examples.pingh.client.settings.SnoozeTime
-import io.spine.examples.pingh.client.settings.label
+import io.spine.examples.pingh.client.settings.nativeName
 import io.spine.examples.pingh.client.settings.supported
 import io.spine.examples.pingh.github.OrganizationLogin
 import io.spine.examples.pingh.github.Repo
@@ -116,11 +134,14 @@ import io.spine.examples.pingh.github.isValidOrganization
 import io.spine.examples.pingh.github.isValidRepoName
 import io.spine.examples.pingh.github.of
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Displays an application settings.
  *
  * All changes are saved automatically and applied immediately.
+ *
+ * When the language changes, the page is recomposed.
  *
  * @param flow The application settings control flow.
  * @param toMentionsPage The navigation to the 'Mentions' page.
@@ -132,22 +153,39 @@ internal fun SettingsPage(
     toMentionsPage: () -> Unit,
     toLoginPage: () -> Unit
 ) {
-    Column(
-        Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-    ) {
-        SettingsHeader {
-            flow.saveSettings()
-            toMentionsPage()
-        }
-        SettingsBox {
-            Profile(flow, toLoginPage)
-            SnoozeTimeOption(flow.settings)
-            DndOption(flow.settings)
-            IgnoredSourcesOption(flow.settings)
+    val language by flow.language.collectAsState()
+    Localized(language) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+        ) {
+            SettingsHeader {
+                flow.saveSettings()
+                toMentionsPage()
+            }
+            SettingsBox {
+                Profile(flow, toLoginPage)
+                SnoozeTimeOption(flow.settings)
+                DndOption(flow.settings)
+                LanguageOption(flow)
+                IgnoredSourcesOption(flow.settings)
+            }
         }
     }
+}
+
+/**
+ * A settings page wrapper that recomposes whenever the [language] changes,
+ * ensuring text updates immediately rather than only when the page reloads.
+ */
+@Composable
+private fun Localized(
+    @Suppress("UNUSED_PARAMETER" /* Tracks language changes for recomposition. */)
+    language: Language,
+    content: @Composable () -> Unit
+) {
+    content()
 }
 
 /**
@@ -178,7 +216,7 @@ private fun SettingsHeader(
         )
         Spacer(Modifier.width(10.dp))
         Text(
-            text = "Settings",
+            text = stringResource(Res.string.settings_page_title),
             modifier = Modifier.width(140.dp),
             color = MaterialTheme.colorScheme.onSecondary,
             style = MaterialTheme.typography.displayLarge
@@ -293,8 +331,9 @@ private fun LogOutButton(
 ) {
     SettingsButton(
         onClick = onClick,
-        text = "Log out",
-        modifier = Modifier.height(22.dp).testTag("logout-button")
+        text = stringResource(Res.string.logout_button),
+        modifier = Modifier.height(22.dp).testTag("logout-button"),
+        contentPadding = PaddingValues(horizontal = 7.dp)
     )
 }
 
@@ -348,6 +387,7 @@ private fun SettingsButton(
     ) {
         Text(
             text = text,
+            textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyMedium
         )
     }
@@ -361,9 +401,8 @@ private fun SettingsButton(
 @Composable
 private fun SnoozeTimeOption(state: SettingsState) {
     Option(
-        title = "Snooze time",
-        description = "Time after which the notification is repeated.",
-        titleWight = 150.dp
+        title = stringResource(Res.string.snooze_time_option_title),
+        description = stringResource(Res.string.snooze_time_option_desc)
     ) {
         SnoozeTimeSegmentedButtonRow(state)
     }
@@ -382,9 +421,8 @@ private fun DndOption(
 ) {
     val dndEnabled by state.dndEnabled.collectAsState()
     Option(
-        title = "Do not disturb",
-        description = "Turn off notifications for new mentions or snooze expirations.",
-        titleWight = 324.dp
+        title = stringResource(Res.string.dnd_option_title),
+        description = stringResource(Res.string.dnd_option_desc)
     ) {
         Switch(
             checked = dndEnabled,
@@ -413,14 +451,12 @@ private fun DndOption(
  *
  * @param title The string with the name of the option.
  * @param description The string with the description of the option.
- * @param titleWight The width that the title occupies.
  * @param control The composable function that displays control element of this option.
  */
 @Composable
 private fun Option(
     title: String,
     description: String,
-    titleWight: Dp,
     control: @Composable () -> Unit
 ) {
     Column(
@@ -432,7 +468,8 @@ private fun Option(
         ) {
             Text(
                 text = title,
-                modifier = Modifier.width(titleWight),
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
                 style = MaterialTheme.typography.bodyLarge
             )
             control()
@@ -470,7 +507,7 @@ private fun SnoozeTimeSegmentedButtonRow(state: SettingsState) {
                 shape = SegmentedButtonDefaults.itemShape(index, snoozeTimeOptions.size)
             ) {
                 Text(
-                    text = snoozeTime.label,
+                    text = stringResource(snoozeTime),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -509,7 +546,7 @@ private fun SegmentedButton(
     )
     Box(
         modifier = Modifier
-            .width(70.dp)
+            .width(65.dp)
             .height(20.dp)
             .background(containerColor, shape)
             .border(border, shape)
@@ -534,6 +571,31 @@ private fun SegmentedButton(
 }
 
 /**
+ * Displays the language selection option.
+ *
+ * @param flow The application settings control flow.
+ */
+@Composable
+private fun LanguageOption(flow: SettingsFlow) {
+    val language by flow.language.collectAsState()
+    val items = remember { Language::class.supported.map { DropDownMenuItem(it.nativeName, it) } }
+    Option(
+        title = stringResource(Res.string.language_option_title),
+        description = stringResource(Res.string.language_option_desc)
+    ) {
+        DropDownMenu(
+            selected = language,
+            onChangeValue = { newLanguage ->
+                flow.update(newLanguage)
+            },
+            width = 100.dp,
+            modifier = Modifier.height(20.dp),
+            items = items
+        )
+    }
+}
+
+/**
  * Displays a setting option for adding and removing ignored sources.
  *
  * @param state The state of the application settings.
@@ -546,9 +608,8 @@ private fun IgnoredSourcesOption(state: SettingsState) {
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Option(
-            title = "Ignored repositories",
-            description = "Mentions from the following sources will be ignored.",
-            titleWight = 360.dp
+            title = stringResource(Res.string.ignored_repos_option_title),
+            description = stringResource(Res.string.ignored_repos_option_desc)
         ) {}
         IgnoredSourceList(
             state = state,
@@ -644,7 +705,7 @@ private fun IgnoredSourcesControl(
             icon = painterResource(Res.drawable.add),
             onClick = onAdd,
             modifier = Modifier.testTag("add-button"),
-            tooltip = "Add new to ignored"
+            tooltip = stringResource(Res.string.add_ignored_tooltip)
         )
         SettingsIconButton(
             icon = painterResource(Res.drawable.remove),
@@ -653,7 +714,7 @@ private fun IgnoredSourcesControl(
                 sourceSelected.value = null
             },
             modifier = Modifier.testTag("remove-button"),
-            tooltip = "Remove selected from ignored",
+            tooltip = stringResource(Res.string.remove_ignored_tooltip),
             enabled = sourceSelected.value != null,
         )
     }
@@ -741,7 +802,7 @@ private fun IgnoredSourceItem(
                     }
                 )
             ) {
-                append(" [All repos]")
+                append(stringResource(Res.string.all_repos_suffix))
             }
         }
     }
@@ -756,6 +817,7 @@ private fun IgnoredSourceItem(
     ) {
         Text(
             text = annotationString,
+            maxLines = 1,
             style = MaterialTheme.typography.bodyMedium
         )
     }
@@ -780,14 +842,13 @@ private fun AddIgnoredSourceDialog(state: SettingsState, onExit: () -> Unit) {
         Column(
             modifier = Modifier
                 .width(320.dp)
-                .height(240.dp)
                 .background(
                     color = MaterialTheme.colorScheme.secondary,
                     shape = MaterialTheme.shapes.medium
                 )
-                .padding(horizontal = 30.dp),
+                .padding(horizontal = 30.dp, vertical = 20.dp),
             horizontalAlignment = CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(15.dp, CenterVertically)
+            verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
             OutlinedTextField(
                 value = org,
@@ -795,7 +856,7 @@ private fun AddIgnoredSourceDialog(state: SettingsState, onExit: () -> Unit) {
                     isOrgValid = isValidOrganization(value)
                     org = value
                 },
-                label = "Organization:",
+                label = stringResource(Res.string.org_input_label),
                 modifier = Modifier.testTag("org-field"),
                 isError = !isOrgValid,
                 onEnterPressed = { if (isAddButtonEnabled) isAddButtonTriggered.value = true }
@@ -808,7 +869,7 @@ private fun AddIgnoredSourceDialog(state: SettingsState, onExit: () -> Unit) {
                         .all { isValidRepoName(it) }
                     repos = value
                 },
-                label = "or specified repositories (comma-separated):",
+                label = stringResource(Res.string.repos_input_label),
                 modifier = Modifier.testTag("repos-field"),
                 enabled = !allRepos.value,
                 isError = !isReposValid,
@@ -977,7 +1038,7 @@ private fun AllReposSwitch(
             )
         )
         Text(
-            text = "All within organization",
+            text = stringResource(Res.string.all_repos_label),
             style = MaterialTheme.typography.bodyMedium
         )
     }
@@ -1029,15 +1090,16 @@ private fun DialogControl(
     ) {
         SettingsButton(
             onClick = onCancel,
-            text = "Cancel",
-            modifier = Modifier.fillMaxHeight().testTag("cancel-button-in-dialog")
+            text = stringResource(Res.string.cancel_button),
+            modifier = Modifier.testTag("cancel-button-in-dialog"),
+            contentPadding = PaddingValues(horizontal = 7.dp)
         )
         SettingsButton(
             onClick = onAdd,
-            text = "Add to ignored",
-            modifier = Modifier.fillMaxHeight().testTag("add-button-in-dialog"),
+            text = stringResource(Res.string.add_ignored_button),
+            modifier = Modifier.testTag("add-button-in-dialog"),
             enabled = addEnabled,
-            contentPadding = PaddingValues(horizontal = 7.dp, vertical = 0.dp),
+            contentPadding = PaddingValues(horizontal = 7.dp),
             usePrimaryColors = true
         )
     }

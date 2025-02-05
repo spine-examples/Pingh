@@ -90,3 +90,18 @@ message IgnoredSource {
         spine_examples.pingh.github.Repo repository = 2;
     }
 }
+
+// The locale settings of the application.
+message Locale {
+
+    // The current language used for displaying text in the UI.
+    Language language = 1 [(required) = true];
+}
+
+// The language used for displaying text in the UI.
+enum Language {
+    LANGUAGE_NOT_SPECIFIED = 0;
+    ENGLISH = 1;
+    GERMAN = 2;
+    SPANISH = 3;
+}

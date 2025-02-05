@@ -46,6 +46,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
@@ -84,8 +85,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.protobuf.Duration
 import io.spine.example.pingh.desktop.generated.resources.Res
+import io.spine.example.pingh.desktop.generated.resources.app_desc
+import io.spine.example.pingh.desktop.generated.resources.code_expired_clickable_part
+import io.spine.example.pingh.desktop.generated.resources.code_expired_error
 import io.spine.example.pingh.desktop.generated.resources.copy
+import io.spine.example.pingh.desktop.generated.resources.invalid_username_error
+import io.spine.example.pingh.desktop.generated.resources.login_button
+import io.spine.example.pingh.desktop.generated.resources.login_restart_button
 import io.spine.example.pingh.desktop.generated.resources.pingh
+import io.spine.example.pingh.desktop.generated.resources.username_input_label
+import io.spine.example.pingh.desktop.generated.resources.verification_page_desc
+import io.spine.example.pingh.desktop.generated.resources.verification_page_title
 import io.spine.examples.pingh.client.LoginFlow
 import io.spine.examples.pingh.client.EnterUsername
 import io.spine.examples.pingh.client.LoginFailed
@@ -99,6 +109,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Displays the page with the current login stage.
@@ -174,7 +185,7 @@ private fun UsernameEnteringPage(
             isError = isError,
             enabled = !codeRequested
         )
-        Spacer(Modifier.height(15.dp))
+        Spacer(Modifier.height(17.dp))
         LoginButton(
             enabled = wasChanged && !isError.value,
             onClick = {
@@ -221,8 +232,7 @@ private fun ApplicationInfo() {
         }
         Spacer(Modifier.height(20.dp))
         Text(
-            text = "Pingh is a GitHub app that looks up mentions on behalf of the user. " +
-                    "It requires authentication via GitHub.",
+            text = stringResource(Res.string.app_desc),
             modifier = Modifier.width(240.dp),
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             textAlign = TextAlign.Center,
@@ -342,15 +352,13 @@ private fun InputContainer(
 private fun Label(color: Color) {
     Box(
         modifier = Modifier
-            .width(110.dp)
             .height(12.dp)
-            .absoluteOffset(x = 12.dp, y = (-6).dp)
+            .absoluteOffset(x = 10.dp, y = (-6).dp)
+            .background(MaterialTheme.colorScheme.secondary)
+            .padding(horizontal = 4.dp)
     ) {
         Text(
-            text = "GitHub username",
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.secondary),
+            text = stringResource(Res.string.username_input_label),
             color = color,
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyMedium
@@ -383,7 +391,7 @@ private fun Placeholder(isShown: Boolean) {
 private fun ErrorMessage(isShown: Boolean) {
     if (isShown) {
         Text(
-            text = "Enter a valid GitHub username.",
+            text = stringResource(Res.string.invalid_username_error),
             modifier = Modifier
                 .width(155.dp)
                 .height(30.dp)
@@ -434,7 +442,7 @@ private fun LoginButton(
             DotsTyping(color = MaterialTheme.colorScheme.onPrimary)
         } else {
             Text(
-                text = "Login",
+                text = stringResource(Res.string.login_button),
                 style = MaterialTheme.typography.displayMedium
             )
         }
@@ -498,7 +506,7 @@ private fun VerificationPage(
 @Composable
 private fun VerificationTitle() {
     Text(
-        text = "Verify your login",
+        text = stringResource(Res.string.verification_page_title),
         fontSize = 20.sp,
         style = MaterialTheme.typography.displayLarge
     )
@@ -588,8 +596,8 @@ private fun CopyToClipboardIcon(
 @Composable
 private fun CodeExpiredErrorMessage(flow: VerifyLogin) {
     ClickableErrorMessage(
-        text = "The code has expired, please start over.",
-        clickablePartOfText = "start over",
+        text = stringResource(Res.string.code_expired_error),
+        clickablePartOfText = stringResource(Res.string.code_expired_clickable_part),
         onClick = flow::requestNewUserCode
     )
 }
@@ -629,7 +637,7 @@ private fun VerifyLoginSection(
 @Composable
 private fun VerificationText(url: Url) {
     val annotatedString = buildAnnotatedString {
-        append("Enter this code at")
+        append(stringResource(Res.string.verification_page_desc))
         appendLine()
         withLink(
             LinkAnnotation.Url(
@@ -726,7 +734,7 @@ private fun FailedPage(flow: LoginFailed) {
         horizontalAlignment = CenterHorizontally
     ) {
         Text(
-            text = flow.errorMessage.value,
+            text = stringResource(flow.cause),
             modifier = Modifier.width(240.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyLarge
@@ -746,8 +754,9 @@ private fun RestartButton(flow: LoginFailed) {
     Button(
         onClick = flow::restartLogin,
         modifier = Modifier
-            .width(240.dp)
-            .height(40.dp),
+            .widthIn(min = 240.dp)
+            .height(40.dp)
+            .padding(horizontal = 10.dp),
         shape = MaterialTheme.shapes.medium,
         colors = buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
@@ -755,7 +764,7 @@ private fun RestartButton(flow: LoginFailed) {
         )
     ) {
         Text(
-            text = "Try to log in again",
+            text = stringResource(Res.string.login_restart_button),
             style = MaterialTheme.typography.displayMedium
         )
     }

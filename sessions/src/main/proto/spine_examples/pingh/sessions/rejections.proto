@@ -41,6 +41,7 @@ import "spine_examples/pingh/github/values.proto";
 // the one entered at the start of the authentication process.
 //
 message UsernameMismatch {
+    option (is).java_type = "io.spine.examples.pingh.sessions.rejection.LoginFailureCause";
 
     // The ID of the session.
     SessionId id = 1 [(required) = true];
@@ -60,6 +61,7 @@ message UsernameMismatch {
 // See: https://github.com/apps/pingh-tracker-of-github-mentions.
 //
 message NotMemberOfPermittedOrgs {
+    option (is).java_type = "io.spine.examples.pingh.sessions.rejection.LoginFailureCause";
 
     // The ID of the session.
     SessionId id = 1 [(required) = true];

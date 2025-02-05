@@ -26,9 +26,8 @@
 
 package io.spine.examples.pingh.client
 
+import io.spine.examples.pingh.sessions.rejection.LoginFailureCause
 import io.spine.logging.Logging
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 /**
  * A stage in the login flow that indicates a failure in the process.
@@ -40,17 +39,12 @@ import kotlinx.coroutines.flow.StateFlow
  * of the account used to complete [VerifyLogin] stage.
  *
  * @property moveToNextStage Switches the current stage to the [EnterUsername].
- * @param cause The reason for the login failure.
+ * @property cause An error that caused the login process to fail.
  */
 public class LoginFailed internal constructor(
     private val moveToNextStage: () -> Unit,
-    cause: String
+    public val cause: LoginFailureCause
 ) : LoginStage<Unit>(), Logging {
-
-    /**
-     * The error message from the login process.
-     */
-    public val errorMessage: StateFlow<String> = MutableStateFlow(cause)
 
     /**
      * Starts the login process from the beginning.

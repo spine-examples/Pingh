@@ -40,8 +40,10 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.window.Notification
 import com.google.common.flogger.FluentLogger
 import io.spine.example.pingh.desktop.generated.resources.Res
+import io.spine.example.pingh.desktop.generated.resources.quit_tray_menu_item
 import io.spine.example.pingh.desktop.generated.resources.tray
 import io.spine.examples.pingh.client.PinghApplication
+import io.spine.examples.pingh.client.settings.Language
 import java.awt.Color
 import java.awt.Font
 import java.awt.Frame
@@ -65,6 +67,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 private val logger = FluentLogger.forEnclosingClass()
 
@@ -89,7 +92,7 @@ internal fun Tray(state: AppState) {
     check(SystemTray.isSupported()) { "The platform does not support tray applications." }
 
     val icon = rememberIcon(state.app)
-    val menu = remember(state) {
+    val menu = remember {
         Menu {
             CoroutineScope(Dispatchers.Default).launch {
                 state.closeAndExit()
@@ -104,6 +107,9 @@ internal fun Tray(state: AppState) {
             addMouseListener(onClick)
         }
     }
+
+    val language by state.app.language.collectAsState()
+    LocalizeMenu(language, menu)
 
     SideEffect {
         if (tray.image != icon) tray.image = icon
@@ -224,8 +230,12 @@ private class Menu(onExit: () -> Unit) {
      */
     private val popup = PopupMenu()
 
+    /**
+     * The menu item to exit the application.
+     */
+    private val exitItem: MenuItem = MenuItem()
+
     init {
-        val exitItem = MenuItem("Quit Pingh app")
         exitItem.addActionListener {
             onExit()
         }
@@ -236,6 +246,13 @@ private class Menu(onExit: () -> Unit) {
             add(popup)
             isVisible = true
         }
+    }
+
+    /**
+     * Sets the label of the menu item to exit the application.
+     */
+    fun setExitLabel(text: String) {
+        exitItem.label = text
     }
 
     /**
@@ -262,6 +279,18 @@ private fun mouseEventHandler(state: AppState, menu: Menu) =
             }
         }
     }
+
+/**
+ * Updates tray menu labels upon language changes.
+ */
+@Composable
+private fun LocalizeMenu(
+    @Suppress("UNUSED_PARAMETER" /* Tracks language changes for recomposition. */)
+    language: Language,
+    menu: Menu
+) {
+    menu.setExitLabel(stringResource(Res.string.quit_tray_menu_item))
+}
 
 /**
  * Default data for styling the tray icon.
