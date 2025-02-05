@@ -96,7 +96,7 @@ internal fun <T> DropDownMenu(
 ) {
     check(items.count { it.value == selected } == 1) {
         "The selected item was missing from the menu list but must have been included. " +
-                "Selected item: \"$selected\", all items: $items"
+                "Selected item: \"$selected\", all items: $items."
     }
     var shown by remember { mutableStateOf(false) }
     val selectedItem = remember(selected) { items.find { it.value == selected }!! }
@@ -122,7 +122,7 @@ internal fun <T> DropDownMenu(
  *
  * @param T The type of value to be selected by the menu.
  *
- * @property text A test describing the item.
+ * @property text The test describing the item.
  * @property value The value of the item.
  */
 internal class DropDownMenuItem<T>(
@@ -144,8 +144,7 @@ private fun <T> MenuLabel(
         1.dp,
         MaterialTheme.colorScheme.run { if (hovered) secondaryContainer else secondary }
     )
-    val iconColor = MaterialTheme.colorScheme
-        .run { if (hovered) secondary else background }
+    val iconColor = MaterialTheme.colorScheme.run { if (hovered) secondary else background }
     val iconBorder = BorderStroke(
         0.5.dp,
         MaterialTheme.colorScheme.run { if (hovered) secondary else onBackground }
@@ -209,14 +208,16 @@ private fun <T> DropDownMenuContent(
             verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
             DropDownMenuOption(true, selectedItem.text) { onChangeValue(selectedItem.value) }
-            Divider(
-                Modifier.fillMaxWidth().padding(horizontal = 10.dp),
-                MaterialTheme.colorScheme.background
-            )
-            items.filter { it.value != selectedItem.value }
-                .forEach { item ->
-                    DropDownMenuOption(false, item.text) { onChangeValue(item.value) }
-                }
+            if (items.size > 1) {
+                Divider(
+                    Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+                    MaterialTheme.colorScheme.background
+                )
+                items.filter { it.value != selectedItem.value }
+                    .forEach { item ->
+                        DropDownMenuOption(false, item.text) { onChangeValue(item.value) }
+                    }
+            }
         }
     }
 }
@@ -276,19 +277,20 @@ private fun DropDownMenuOption(
  * Creates a `PopupPositionProvider` to calculate the menu's coordinates
  * based on the anchor data.
  *
- * The menu is placed in the upper left corner of the anchor with a [left offset][shiftLeft].
+ * The menu is placed in the upper left corner of the anchor with a [left offset][leftOffset].
  */
 @Composable
-private fun rememberPositionProvider(shiftLeft: Dp): PopupPositionProvider {
-    val shiftLeftPx = with(LocalDensity.current) { shiftLeft.roundToPx() }
-    return remember(shiftLeftPx) {
+private fun rememberPositionProvider(leftOffset: Dp): PopupPositionProvider {
+    val leftOffsetPx = with(LocalDensity.current) { leftOffset.roundToPx() }
+    return remember(leftOffsetPx) {
         object : PopupPositionProvider {
             override fun calculatePosition(
                 anchorBounds: IntRect,
                 windowSize: IntSize,
                 layoutDirection: LayoutDirection,
                 popupContentSize: IntSize
-            ): IntOffset = IntOffset(anchorBounds.left - shiftLeftPx, anchorBounds.top)
+            ): IntOffset =
+                IntOffset(anchorBounds.left - leftOffsetPx, anchorBounds.top)
         }
     }
 }

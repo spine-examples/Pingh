@@ -36,17 +36,17 @@ import kotlin.reflect.KClass
  * The duration corresponding to this interval.
  */
 internal val SnoozeTime.value: Duration
-    get() = snoozeOptions[this] ?: Durations.ZERO
+    get() = durations[this] ?: Durations.ZERO
 
 /**
  * The list of snooze intervals currently supported by the app.
  */
 @Suppress("UnusedReceiverParameter" /* Associated with the class but doesn't use its data. */)
 public val KClass<SnoozeTime>.supported: List<SnoozeTime>
-    get() = snoozeOptions.keys.toList()
+    get() = durations.keys.toList()
 
 @Suppress("MagicNumber" /* The durations are specified using numbers. */)
-private val snoozeOptions = mapOf(
+private val durations = mapOf(
     SnoozeTime.THIRTY_MINUTES to minutes(30),
     SnoozeTime.TWO_HOURS to hours(2),
     SnoozeTime.ONE_DAY to hours(24)

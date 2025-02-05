@@ -141,6 +141,8 @@ import org.jetbrains.compose.resources.stringResource
  *
  * All changes are saved automatically and applied immediately.
  *
+ * When the language changes, the page is recomposed.
+ *
  * @param flow The application settings control flow.
  * @param toMentionsPage The navigation to the 'Mentions' page.
  * @param toLoginPage The navigation to the 'Login' page.

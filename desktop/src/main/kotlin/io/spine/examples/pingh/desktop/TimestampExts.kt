@@ -76,7 +76,7 @@ private val datetimeFormat = DateTimeFormatter.ofPattern("dd MMM HH:mm")
 internal fun Timestamp.toDatetime(timeZone: ZoneId = ZoneId.systemDefault()): String =
     datetimeFormat
         .localizedBy(Locale.current.platformLocale)
-        .format(this.asLocalDateTime(timeZone))
+        .format(this.toLocalDateTime(timeZone))
 
 /**
  * Converts a `Timestamp` to a localized string based on the time difference between
@@ -88,11 +88,13 @@ internal fun Timestamp.toDatetime(timeZone: ZoneId = ZoneId.systemDefault()): St
  * - If the difference is exactly one day, returns the string `"yesterday"`;
  * - In all other cases, returns the day and month.
  *
+ * The resulting string is displayed in the current locale.
+ *
  * @receiver The timestamp represents a time in the past.
  * @throws IllegalArgumentException if the `Timestamp` is not from the past.
  */
 internal fun Timestamp.howMuchTimeHasPassed(): String {
-    val thisDatetime = this.asLocalDateTime()
+    val thisDatetime = this.toLocalDateTime()
     val now = LocalDateTime.now()
     val difference = Duration.between(thisDatetime, now)
     require(difference > Duration.ZERO) {
@@ -128,7 +130,7 @@ internal fun Timestamp.howMuchTimeHasPassed(): String {
  *
  * The default time zone is set to the [ZoneId.systemDefault()][ZoneId.systemDefault] zone.
  */
-private fun Timestamp.asLocalDateTime(timeZone: ZoneId = ZoneId.systemDefault()): LocalDateTime {
+private fun Timestamp.toLocalDateTime(timeZone: ZoneId = ZoneId.systemDefault()): LocalDateTime {
     val instant = InstantConverter.reversed()
         .convert(this)
     return LocalDateTime.ofInstant(instant, timeZone)
