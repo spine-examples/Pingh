@@ -87,7 +87,7 @@ public data class MentionDetails(
  * Ensure the previous [client][DesktopClient] is properly [closed][DesktopClient.close]
  * before initiating notifications for a new `client`.
  *
- * @property alert
+ * @property alert Allows to send notifications to user.
  * @property settings Manages the application settings configured by a user.
  */
 internal class NotificationsFlow(

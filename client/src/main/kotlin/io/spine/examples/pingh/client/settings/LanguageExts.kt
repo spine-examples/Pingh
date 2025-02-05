@@ -60,7 +60,7 @@ internal fun Language.toLocale(): Locale = Locale(code)
  */
 internal fun KClass<Language>.by(locale: Locale): Language? {
     supported.forEach { language ->
-        if (locale.language.equals(Locale(language.code))) {
+        if (locale.language.equals(Locale(language.code).language)) {
             return language
         }
     }
