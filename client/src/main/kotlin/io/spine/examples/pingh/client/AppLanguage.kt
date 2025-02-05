@@ -29,6 +29,7 @@ package io.spine.examples.pingh.client
 import io.spine.examples.pingh.client.settings.Language
 import io.spine.examples.pingh.client.settings.Locale
 import io.spine.examples.pingh.client.settings.by
+import io.spine.examples.pingh.client.settings.toLocale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.Locale as PlatformLocale
@@ -71,6 +72,7 @@ internal class AppLanguage {
      * Updates the current language to the specified [value].
      */
     internal fun update(value: Language) {
+        PlatformLocale.setDefault(value.toLocale())
         language.value = value
         storage.save(localeBy(value))
     }
