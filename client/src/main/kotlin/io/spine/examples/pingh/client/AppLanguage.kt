@@ -54,6 +54,7 @@ internal class AppLanguage {
     init {
         val message = storage.loadOrDefault(Locale::parseFrom) { default() }
         language = MutableStateFlow(message.language)
+        apply()
     }
 
     /**
@@ -72,9 +73,16 @@ internal class AppLanguage {
      * Updates the current language to the specified [value].
      */
     internal fun update(value: Language) {
-        PlatformLocale.setDefault(value.toLocale())
         language.value = value
+        apply()
         storage.save(localeBy(value))
+    }
+
+    /**
+     * Applies the app's current language.
+     */
+    private fun apply() {
+        PlatformLocale.setDefault(language.value.toLocale())
     }
 
     /**
