@@ -117,8 +117,6 @@ public class PinghApplication private constructor(
         if (session.isActive) {
             client = DesktopClient(channel, session.id.asUserId())
         }
-
-        settings.apply()
     }
 
     /**
@@ -148,12 +146,12 @@ public class PinghApplication private constructor(
      */
     public val loggedIn: StateFlow<Boolean> = _loggedIn
 
-    private val _language = MutableStateFlow(settings.current.language)
+    private val _language = AppLanguage()
 
     /**
      * The language used for displaying text in the UI.
      */
-    public val language: StateFlow<Language> = _language
+    public val language: StateFlow<Language> = _language.state
 
     /**
      * A job that updates the unread mention count
@@ -186,12 +184,10 @@ public class PinghApplication private constructor(
     private fun establishSession(id: SessionId) {
         client.close()
         session.establish(id)
-        settings.apply()
         client = DesktopClient(channel, id.asUserId())
         notificationsFlow.enableMentionNotifications(client, id.username)
         subscribeToSessionExpiration(id)
         _loggedIn.value = true
-        _language.value = settings.current.language
         _info().log("User session established with the server.")
     }
 
