@@ -151,7 +151,7 @@ internal fun SettingsPage(
     toMentionsPage: () -> Unit,
     toLoginPage: () -> Unit
 ) {
-    val language by flow.settings.language.collectAsState()
+    val language by flow.language.collectAsState()
     Localized(language) {
         Column(
             Modifier
@@ -575,7 +575,7 @@ private fun SegmentedButton(
  */
 @Composable
 private fun LanguageOption(flow: SettingsFlow) {
-    val language by flow.settings.language.collectAsState()
+    val language by flow.language.collectAsState()
     val items = remember { Language::class.supported.map { DropDownMenuItem(it.nativeName, it) } }
     Option(
         title = stringResource(Res.string.language_option_title),
@@ -583,9 +583,8 @@ private fun LanguageOption(flow: SettingsFlow) {
     ) {
         DropDownMenu(
             selected = language,
-            onChangeValue = { value ->
-                flow.settings.setLanguage(value)
-                flow.saveSettings()
+            onChangeValue = { newLanguage ->
+                flow.update(newLanguage)
             },
             width = 100.dp,
             modifier = Modifier.height(20.dp),
