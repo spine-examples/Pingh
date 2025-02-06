@@ -118,12 +118,15 @@ compose.resources {
 compose.desktop {
     application {
         mainClass = "io.spine.examples.pingh.desktop.MainKt"
+
         nativeDistributions {
-            copyright = ProjectDetails.copyright
-            modules("jdk.localedata") // Provides the locale data for locales other than US locale.
             packageName = "Pingh"
-            targetFormats(TargetFormat.Dmg)
             packageVersion = pinghVersion.extractSemanticVersion().value
+            copyright = ProjectDetails.copyright
+
+            modules("jdk.localedata") // Provides the locale data for locales other than US locale.
+            targetFormats(TargetFormat.Dmg)
+
             macOS {
                 iconFile = iconForMacOs()
                 infoPlist {
