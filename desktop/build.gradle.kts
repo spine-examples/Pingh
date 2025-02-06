@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.ProjectDetails
 import io.spine.internal.dependency.Coil
 import io.spine.internal.dependency.Compose
 import io.spine.internal.dependency.Flogger
@@ -118,6 +119,7 @@ compose.desktop {
     application {
         mainClass = "io.spine.examples.pingh.desktop.MainKt"
         nativeDistributions {
+            copyright = ProjectDetails.copyright
             modules("jdk.localedata") // Provides the locale data for locales other than US locale.
             packageName = "Pingh"
             targetFormats(TargetFormat.Dmg)
