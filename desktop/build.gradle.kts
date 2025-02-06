@@ -24,7 +24,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.ProjectDetails
 import io.spine.internal.dependency.Coil
 import io.spine.internal.dependency.Compose
 import io.spine.internal.dependency.Flogger
@@ -122,7 +121,7 @@ compose.desktop {
         nativeDistributions {
             packageName = "Pingh"
             packageVersion = pinghVersion.extractSemanticVersion().value
-            copyright = ProjectDetails.copyright
+            copyright = "Copyright 2025, TeamDev."
 
             modules("jdk.localedata") // Provides the locale data for locales other than US locale.
             targetFormats(TargetFormat.Dmg)
